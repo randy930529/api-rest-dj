@@ -1,6 +1,7 @@
-import { Entity, Column, OneToMany, Index } from "typeorm";
+import { Entity, Column, OneToMany, Index, OneToOne } from "typeorm";
 import { RefreshToken } from "./RefreshToken";
 import Model from "./Base";
+import { Profile } from "./Profile";
 
 export enum UserRole {
   ADMIN = "admin",
@@ -35,10 +36,15 @@ export class User extends Model {
   })
   role: UserRole;
 
-  @OneToMany((type) => RefreshToken, (refreshTokens) => refreshTokens.user, {
+  @OneToMany(() => RefreshToken, (refreshTokens) => refreshTokens.user, {
     onDelete: "CASCADE",
   })
   refresh_tokens: RefreshToken;
+
+  @OneToOne(() => Profile, (profile) => profile.user, {
+    onDelete: "CASCADE",
+  })
+  profile: Profile;
 
   toJSON() {
     return { ...this, password: undefined, active: undefined };
