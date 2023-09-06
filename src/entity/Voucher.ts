@@ -10,7 +10,7 @@ export class Voucher extends Model {
   @Column()
   date: Date;
 
-  @Column()
+  @Column({ nullable: true })
   description: string;
 
   @OneToOne(() => SupportDocument)

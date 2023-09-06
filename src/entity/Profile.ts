@@ -13,10 +13,10 @@ export class Profile extends Model {
   @Column({ type: "varchar", length: 11 })
   ci: string;
 
-  @Column({ type: "varchar", length: 20 })
+  @Column({ type: "varchar", length: 20, nullable: true })
   nit: string;
 
-  @Column()
+  @Column({ nullable: true })
   address: string;
 
   @OneToOne(() => User, (user) => user.profile, {

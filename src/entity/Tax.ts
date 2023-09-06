@@ -6,7 +6,7 @@ export class Tax extends Model {
   @Column({ type: "varchar", length: 255 })
   description: string;
 
-  @Column()
+  @Column({ nullable: true })
   code: string;
 
   @Column({ default: false })

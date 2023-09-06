@@ -16,7 +16,7 @@ export class ExpenseElement extends Model {
   @Column({ default: false })
   is_general: boolean;
 
-  @OneToOne(() => Profile)
+  @OneToOne(() => Profile, { nullable: true })
   @JoinColumn()
   profile: Profile;
 }
