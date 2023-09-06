@@ -38,7 +38,6 @@ AppDataSource.initialize()
 
     // setup express app here
     const port = ENV.apiPort || 4000;
-    app.use(authMiddleware);
 
     // start express server
     app.listen(port);
