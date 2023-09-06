@@ -1,5 +1,6 @@
-import { Entity, Column } from "typeorm";
+import { Entity, Column, OneToMany } from "typeorm";
 import Model from "./Base";
+import { LicenseUser } from "./LicenseUser";
 
 @Entity()
 export class License extends Model {
@@ -14,4 +15,7 @@ export class License extends Model {
 
   @Column()
   import: number;
+
+  @OneToMany(() => LicenseUser, (licenseUser) => licenseUser.license)
+  licenseUser: LicenseUser[];
 }

@@ -1,4 +1,4 @@
-import { Entity, Column, OneToOne, JoinColumn } from "typeorm";
+import { Entity, Column, OneToOne, JoinColumn, ManyToOne } from "typeorm";
 import Model from "./Base";
 import { Account } from "./Account";
 import { Voucher } from "./Voucher";
@@ -11,7 +11,7 @@ export class VoucherDetail extends Model {
   @Column({ type: "numeric", precision: 19, scale: 0 })
   haber: number;
 
-  @OneToOne(() => Voucher)
+  @ManyToOne(() => Voucher)
   @JoinColumn()
   voucher: Voucher;
 

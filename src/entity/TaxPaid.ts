@@ -1,4 +1,4 @@
-import { Entity, Column, OneToOne, JoinColumn } from "typeorm";
+import { Entity, Column, JoinColumn, ManyToOne } from "typeorm";
 import Model from "./Base";
 import { Profile } from "./Profile";
 import { Tax } from "./Tax";
@@ -11,11 +11,11 @@ export class TaxPaid extends Model {
   @Column()
   date: Date;
 
-  @OneToOne(() => Profile)
+  @ManyToOne(() => Profile)
   @JoinColumn()
   profile: Profile;
 
-  @OneToOne(() => Tax)
+  @ManyToOne(() => Tax)
   @JoinColumn()
   tax: Tax;
 }

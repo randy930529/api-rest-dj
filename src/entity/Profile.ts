@@ -1,6 +1,7 @@
-import { Entity, Column, OneToOne, JoinColumn } from "typeorm";
+import { Entity, Column, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import Model from "./Base";
 import { User } from "./User";
+import { ProfileHiredPerson } from "./ProfileHiredPerson";
 
 @Entity()
 export class Profile extends Model {
@@ -19,9 +20,15 @@ export class Profile extends Model {
   @Column({ nullable: true })
   address: string;
 
-  @OneToOne(() => User, (user) => user.profile, {
+  @ManyToOne(() => User, {
     onDelete: "CASCADE",
   })
   @JoinColumn()
   user: User;
+
+  @OneToMany(
+    () => ProfileHiredPerson,
+    (profileHiredPerson) => profileHiredPerson.profile
+  )
+  profileHiredPerson: ProfileHiredPerson[];
 }

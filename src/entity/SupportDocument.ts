@@ -1,4 +1,4 @@
-import { Entity, Column, OneToOne, JoinColumn } from "typeorm";
+import { Entity, Column, JoinColumn, ManyToOne } from "typeorm";
 import Model from "./Base";
 import { ExpenseElement } from "./ExpenseElement";
 import { FiscalYear } from "./FiscalYear";
@@ -23,11 +23,11 @@ export class SupportDocument extends Model {
   @Column({ default: false })
   is_bank: boolean;
 
-  @OneToOne(() => ExpenseElement)
+  @ManyToOne(() => ExpenseElement)
   @JoinColumn()
   expenseElement: ExpenseElement;
 
-  @OneToOne(() => FiscalYear)
+  @ManyToOne(() => FiscalYear)
   @JoinColumn()
   fiscalYear: FiscalYear;
 }

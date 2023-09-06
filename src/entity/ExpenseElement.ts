@@ -1,4 +1,4 @@
-import { Entity, Column, OneToOne, JoinColumn } from "typeorm";
+import { Entity, Column, JoinColumn, ManyToOne } from "typeorm";
 import Model from "./Base";
 import { Profile } from "./Profile";
 
@@ -16,7 +16,7 @@ export class ExpenseElement extends Model {
   @Column({ default: false })
   is_general: boolean;
 
-  @OneToOne(() => Profile, { nullable: true })
+  @ManyToOne(() => Profile, { nullable: true })
   @JoinColumn()
   profile: Profile;
 }

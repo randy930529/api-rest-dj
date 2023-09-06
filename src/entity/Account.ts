@@ -1,4 +1,4 @@
-import { Entity, Column, OneToOne, JoinColumn } from "typeorm";
+import { Entity, Column, OneToOne, JoinColumn, ManyToOne } from "typeorm";
 import Model from "./Base";
 import { Profile } from "./Profile";
 
@@ -16,7 +16,7 @@ export class Account extends Model {
   @Column({ default: false })
   acreedor: boolean;
 
-  @OneToOne(() => Profile)
+  @ManyToOne(() => Profile)
   @JoinColumn()
   profile: Profile;
 }

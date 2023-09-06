@@ -1,4 +1,4 @@
-import { Entity, Column, OneToOne, JoinColumn } from "typeorm";
+import { Entity, Column, JoinColumn, ManyToOne } from "typeorm";
 import Model from "./Base";
 import { Profile } from "./Profile";
 
@@ -10,7 +10,7 @@ export class FiscalYear extends Model {
   @Column({ default: false })
   general_scheme: boolean;
 
-  @OneToOne(() => Profile)
+  @ManyToOne(() => Profile)
   @JoinColumn()
   profile: Profile;
 }
