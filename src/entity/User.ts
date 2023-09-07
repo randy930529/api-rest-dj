@@ -47,6 +47,12 @@ export class User extends Model {
   licenseUser: LicenseUser[];
 
   toJSON() {
-    return { ...this, password: undefined, active: undefined };
+    return {
+      ...this,
+      password: undefined,
+      active: undefined,
+      created_at: undefined,
+      updated_at: undefined,
+    };
   }
 }
