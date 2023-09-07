@@ -1,34 +1,40 @@
-Usage
+Uso
 =====
 
 .. _installation:
 
-Installation
+Instalación
 ------------
 
-To use Lumache, first install it using pip:
+API-REST for CA-MyGestor aplications.
 
-.. code-block:: console
+1. Run ``npm i`` command
+2. Setup database settings inside ``data-source.ts`` file
+3. Run ``npm start`` command
 
-   (.venv) $ pip install lumache
+.. Steps to run this project:
 
-Creating recipes
-----------------
+.. .. code-block:: console
 
-To retrieve a list of random ingredients,
-you can use the ``lumache.get_random_ingredients()`` function:
+..    (.venv) $ pip install lumache
 
-.. autofunction:: lumache.get_random_ingredients
+.. Creating recipes
+.. ----------------
 
-The ``kind`` parameter should be either ``"meat"``, ``"fish"``,
-or ``"veggies"``. Otherwise, :py:func:`lumache.get_random_ingredients`
-will raise an exception.
+.. To retrieve a list of random ingredients,
+.. you can use the ``lumache.get_random_ingredients()`` function:
 
-.. autoexception:: lumache.InvalidKindError
+.. .. autofunction:: lumache.get_random_ingredients
 
-For example:
+.. The ``kind`` parameter should be either ``"meat"``, ``"fish"``,
+.. or ``"veggies"``. Otherwise, :py:func:`lumache.get_random_ingredients`
+.. will raise an exception.
 
->>> import lumache
->>> lumache.get_random_ingredients()
-['shells', 'gorgonzola', 'parsley']
+.. .. autoexception:: lumache.InvalidKindError
+
+.. For example:
+
+.. >>> import lumache
+.. >>> lumache.get_random_ingredients()
+.. ['shells', 'gorgonzola', 'parsley']
 
