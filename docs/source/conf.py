@@ -2,9 +2,9 @@
 
 # -- Project information
 
-project = 'Lumache'
-copyright = '2021, Graziella'
-author = 'Graziella'
+project = 'CA-MyGestor'
+copyright = '2023, Desoft Granma'
+author = 'Randy'
 
 release = '0.1'
 version = '0.1.0'

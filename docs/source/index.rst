@@ -1,19 +1,15 @@
-Welcome to Lumache's documentation!
+¡Bienvenido a la documentación de la API DJ!
 ===================================
 
-**Lumache** (/lu'make/) is a Python library for cooks and food lovers
-that creates recipes mixing random ingredients.
-It pulls data from the `Open Food Facts database <https://world.openfoodfacts.org/>`_
-and offers a *simple* and *intuitive* API.
+[**API-REST-DJ**](/latest/) es un api de Express para TCP y tenedores de libro que gestiona los ingresos y gastos, también guardará toda la información por usuario y controlará el uso a través de licencias de uso ofreciendo una API *simple* y *intuctiva*.
 
-Check out the :doc:`usage` section for further information, including
-how to :ref:`installation` the project.
+Consulte la sección :doc:`usage` para obtener más información, incluido cómo :ref:`installation` el proyecto.
 
 .. note::
 
-   This project is under active development.
+   Este proyecto está en desarrollo activo.
 
-Contents
+Contenido
 --------
 
 .. toctree::
