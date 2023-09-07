@@ -10,6 +10,7 @@ import { JWT } from "../security/jwt";
 import { AuthenticationDTO } from "../dto/response/auth/authentication.dto";
 import { RefreshTokenDTO } from "../dto/request/refreshToken.dto";
 import { useResponseError } from "../hooks/useResponseError";
+import Email from "../../utils/email";
 
 export class AuthController {
   private userRepository = AppDataSource.getRepository(User);
@@ -43,11 +44,14 @@ export class AuthController {
 
       const user: UserDTO = newUser;
       const { token } = await JWT.generateTokenAndRefreshToken(newUser);
+      const redirectUrl = `/user/activation/${token}`;
       const resp: RegistryDTO = {
         status: "success",
         error: null,
-        data: { user, confirUrl: "", token },
-      }; //falta implementar la url de activacion
+        data: { user, confirUrl: redirectUrl, token },
+      };
+
+      await new Email(newUser, redirectUrl).sendVerificationCode();
 
       response.status(201);
       return { ...resp };

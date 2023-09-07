@@ -3,8 +3,17 @@ import * as bodyParser from "body-parser";
 import { Request, Response } from "express";
 import { AppDataSource } from "./data-source";
 import { Routes } from "./router";
-import { authMiddleware } from "./auth/middlewares/authMiddleware";
 import { ENV } from "./utils/settings/environment";
+
+//Para provar el envio de correo. Eliminar!
+import * as nodemailer from "nodemailer";
+if (ENV.debug === "develop") {
+  (async function () {
+    const credentials = await nodemailer.createTestAccount();
+    console.log(credentials);
+  })();
+}
+//
 
 AppDataSource.initialize()
   .then(async () => {
@@ -38,7 +47,10 @@ AppDataSource.initialize()
 
     // setup express app here
     const port = ENV.apiPort || 4000;
-    app.use(authMiddleware);
+
+    // TEMPLATE ENGINE
+    app.set("view engine", "pug");
+    app.set("views", `${__dirname}/utils/views`);
 
     // start express server
     app.listen(port);

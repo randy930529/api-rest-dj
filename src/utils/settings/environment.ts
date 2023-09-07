@@ -19,7 +19,9 @@ export const ENV = {
 
   //Config smtp client
   emailHost: process.env.EMAIL_HOST,
-  emailPort: process.env.EMAIL_PORT,
+  emailPort: parseInt(process.env.EMAIL_PORT),
+  emailSecure: process.env.EMAIL_SECURE === "true",
+  emailFrom: process.env.EMAIL_FROM,
   auth: {
     user: process.env.EMAIL_HOST_USER,
     pass: process.env.EMAIL_HOST_PASSWORD,
