@@ -26,14 +26,12 @@ export default class Email {
   }
 
   private async send(template: string, subject: string) {
-    // Generate HTML template based on the template string
     const html = pug.renderFile(`${__dirname}/views/${template}.pug`, {
       emailUser: this.emailUser,
       subject,
       url: this.url,
     });
 
-    // Create mailOptions
     const mailOptions = {
       from: this.from,
       to: this.to,
@@ -42,9 +40,10 @@ export default class Email {
       html,
     };
 
-    // Send email
     const info = await this.newTransport().sendMail(mailOptions);
-    console.log(nodemailer.getTestMessageUrl(info));
+    if (ENV.debug === "develop") {
+      console.log(nodemailer.getTestMessageUrl(info));
+    }
   }
 
   async sendVerificationCode() {

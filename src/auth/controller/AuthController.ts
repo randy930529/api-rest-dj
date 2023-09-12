@@ -12,6 +12,8 @@ import { RefreshTokenDTO } from "../dto/request/refreshToken.dto";
 import { useResponseError } from "../hooks/useResponseError";
 import Email from "../../utils/email";
 
+const ACTIVATION_URL = (uid, token) => `#/activate/${uid}/${token}`;
+
 export class AuthController {
   private userRepository = AppDataSource.getRepository(User);
 
@@ -44,14 +46,21 @@ export class AuthController {
 
       const user: UserDTO = newUser;
       const { token } = await JWT.generateTokenAndRefreshToken(newUser);
-      const redirectUrl = `/user/activation/${token}`;
+      const confirUrl = ACTIVATION_URL(user.id, token);
       const resp: RegistryDTO = {
         status: "success",
         error: null,
-        data: { user, confirUrl: redirectUrl, token },
+        data: { user, confirUrl, token },
       };
 
-      await new Email(newUser, redirectUrl).sendVerificationCode();
+      await new Email(newUser, confirUrl)
+        .sendVerificationCode()
+        .catch((error) => {
+          useResponseError(
+            response,
+            "Server is not ready to send your messages."
+          );
+        });
 
       response.status(201);
       return { ...resp };
@@ -243,17 +252,27 @@ export class AuthController {
         where: { email },
       });
 
-      if (!existingUser) {
+      if (!existingUser || !email) {
         useResponseError(response, "The user not already exists.", 409);
       }
 
       const user: UserDTO = existingUser;
       const { token } = await JWT.generateTokenAndRefreshToken(existingUser);
+      const confirUrl = ACTIVATION_URL(user.id, token);
       const resp: RegistryDTO = {
         status: "success",
         error: null,
-        data: { user, confirUrl: "", token },
-      }; //falta implementar la url de activacion
+        data: { user, confirUrl, token },
+      };
+
+      await new Email(existingUser, confirUrl)
+        .sendVerificationCode()
+        .catch((error) => {
+          useResponseError(
+            response,
+            "Server is not ready to send your messages."
+          );
+        });
 
       response.status(201);
       return { ...resp };
