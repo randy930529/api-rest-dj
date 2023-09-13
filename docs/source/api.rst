@@ -2,6 +2,7 @@ Configuración y API
 ===================
 
 .. autosummary::
-   :toctree: generated
+   :toctree: 
 
-   lumache
+    settings
+    base_endpoints

@@ -21,7 +21,7 @@ Contenido
 
 .. toctree::
     :maxdepth: 2
-    :caption: Settings & API
+    :caption: Configuración y API
 
     settings
     base_endpoints
