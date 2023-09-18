@@ -26,7 +26,7 @@ export const userRoutes = [
   },
   {
     method: "delete",
-    route: "/users/:id",
+    route: "/user/:id",
     controller: UserController,
     middlewares: [authMiddleware],
     action: "remove",
