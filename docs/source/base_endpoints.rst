@@ -60,7 +60,7 @@ Reenvió de E-mail de activación de usuario
 Utilícese este endpoint para volver a enviar el correo electrónico de activación. 
 .. Tenga en cuenta que ningún correo electrónico ser enviado si el usuario ya está activo.
 
-**Default URL**: ``/users/resend_activation/``
+**Default URL**: ``/user/resend_activation/``
 
 +----------+-----------------------------------+------------------------------------+
 | Method   | Request                           | Response                           |
@@ -110,7 +110,7 @@ Eliminar Usuario
 
 Utilice este endpoint para eliminar el usuario autenticado.Se enviará la información del usuario loguedo en un token mediante la cabecera HTTP Authorization utilizando un `Authentication schemes <https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#authentication_schemes>`_.
 
-**Default URL**: ``/users/<:uid>/``
+**Default URL**: ``/user/<:uid>/``
 
 +------------+---------------------------------+----------------------------------+
 | Method     |  Request                        | Response                         |
@@ -158,7 +158,7 @@ Confirmar Restableser Contraseña
 
 
 
-**Default URL**: ``/users/reset_password_confirm/``
+**Default URL**: ``/user/reset_password_confirm/``
 
 +----------+----------------------------------+--------------------------------------+
 | Method   | Request                          | Response                             |
