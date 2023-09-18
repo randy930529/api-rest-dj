@@ -1,13 +1,14 @@
 import * as express from "express";
 import * as bodyParser from "body-parser";
+import validateEnv from "./utils/settings/validateEnv";
 import { Request, Response } from "express";
 import { AppDataSource } from "./data-source";
 import { Routes } from "./router";
-import { ENV } from "./utils/settings/environment";
+import { appConfig } from "../config";
 
 //Para provar el envio de correo. Eliminar!
 import * as nodemailer from "nodemailer";
-if (ENV.debug === "develop") {
+if (appConfig.debug === "development") {
   (async function () {
     const credentials = await nodemailer.createTestAccount();
     console.log(credentials);
@@ -17,6 +18,8 @@ if (ENV.debug === "develop") {
 
 AppDataSource.initialize()
   .then(async () => {
+    validateEnv();
+
     // create express app
     const app = express();
     app.use(bodyParser.json());
@@ -46,17 +49,16 @@ AppDataSource.initialize()
     });
 
     // setup express app here
-    const port = ENV.apiPort || 4000;
 
     // TEMPLATE ENGINE
     app.set("view engine", "pug");
     app.set("views", `${__dirname}/utils/views`);
 
     // start express server
-    app.listen(port);
+    app.listen(appConfig.port);
 
     console.log(
-      `🚀  Express server has started on port ${port}. Server ready at: http://localhost:${port}/`
+      `🚀  Express server has started on port ${appConfig.port}. Server ready at: http://localhost:${appConfig.port}/`
     );
   })
   .catch((error) => console.log(error));

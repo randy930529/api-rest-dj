@@ -1,0 +1,10 @@
+{
+  "email": {
+    "smtp": {
+      "host": "smtp.dev.example.com",
+      "port": 587,
+      "username": "your_dev_username",
+      "password": "your_dev_password"
+    }
+  }
+}

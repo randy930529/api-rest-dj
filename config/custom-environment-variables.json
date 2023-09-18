@@ -1,0 +1,28 @@
+{
+  "ENV": {
+    "postgresConfig": {
+      "host": "API_DATABASE_HOST",
+      "port": "API_DATABASE_PORT",
+      "username": "API_DATABASE_USER",
+      "password": "API_DATABASE_PASSWORD",
+      "database": "API_DATABASE_NAME"
+    },
+
+    "jwt": {
+      "secretKey": "JWT_SECRET_KEY",
+      "tokenLifetime": "ACCESS_TOKEN_LIFETIME",
+      "refreshTokenLifetime": "REFRESH_TOKEN_LIFETIME"
+    },
+
+    "smtp": {
+      "emailHost": "EMAIL_HOST",
+      "emailPort": "EMAIL_PORT",
+      "emailSecure": "EMAIL_SECURE",
+      "emailFrom": "EMAIL_FROM",
+      "auth": {
+        "user": "EMAIL_HOST_USER",
+        "pass": "EMAIL_HOST_PASSWORD"
+      }
+    }
+  }
+}

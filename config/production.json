@@ -1,0 +1,9 @@
+{
+  "app": {
+    "site": "http://production-server",
+    "debug": "production",
+    "port": 443
+  },
+  "accessTokenExpiresIn": 15,
+  "refreshTokenExpiresIn": 60
+}
