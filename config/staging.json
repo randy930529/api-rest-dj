@@ -1,7 +1,14 @@
 {
+  "app": {
+    "site": "http://mygestor.grm.desoft.cu/",
+    "debug": "staging",
+    "port": 80
+  },
+  "accessTokenExpiresIn": 15,
+  "refreshTokenExpiresIn": 60,
   "email": {
     "smtp": {
-      "host": "smtp.dev.example.com",
+      "host": "https://webmail.desoft.cu",
       "port": 587,
       "username": "your_dev_username",
       "password": "your_dev_password"
