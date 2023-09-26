@@ -4,8 +4,6 @@
     "debug": "staging",
     "port": 4001
   },
-  "accessTokenExpiresIn": 15,
-  "refreshTokenExpiresIn": 60,
   "email": {
     "smtp": {
       "host": "https://webmail.desoft.cu",
