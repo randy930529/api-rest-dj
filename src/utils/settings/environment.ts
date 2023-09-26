@@ -2,6 +2,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 export const ENV = {
+  //NODE_ENV = development | test | production | staging
   debug: process.env.NODE_ENV,
   apiPort: process.env.API_PORT,
 
