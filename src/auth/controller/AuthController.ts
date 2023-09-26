@@ -49,7 +49,7 @@ export class AuthController {
       const confirUrl = ACTIVATION_URL(user.id, token);
       const resp: RegistryDTO = {
         status: "success",
-        error: null,
+        error: undefined,
         data: { user, confirUrl, token },
       };
 
@@ -70,7 +70,7 @@ export class AuthController {
         error: {
           message: error.message,
         },
-        data: null,
+        data: undefined,
       };
       return {
         ...resp,
@@ -110,7 +110,7 @@ export class AuthController {
       const userDTO: UserDTO = user;
       const resp: AuthenticationDTO = {
         status: "success",
-        error: null,
+        error: undefined,
         data: { user: userDTO, token, refreshToken },
       };
 
@@ -122,7 +122,7 @@ export class AuthController {
         error: {
           message: error.message,
         },
-        data: null,
+        data: undefined,
       };
       return {
         ...resp,
@@ -175,7 +175,7 @@ export class AuthController {
       const userDTO: UserDTO = user;
       const resp: AuthenticationDTO = {
         status: "success",
-        error: null,
+        error: undefined,
         data: {
           user: userDTO,
           token: accessToken.token,
@@ -191,7 +191,7 @@ export class AuthController {
         error: {
           message: error.message,
         },
-        data: null,
+        data: undefined,
       };
       return {
         ...resp,
@@ -232,7 +232,7 @@ export class AuthController {
         error: {
           message: error.message,
         },
-        data: null,
+        data: undefined,
       };
       return {
         ...resp,
@@ -261,7 +261,7 @@ export class AuthController {
       const confirUrl = ACTIVATION_URL(user.id, token);
       const resp: RegistryDTO = {
         status: "success",
-        error: null,
+        error: undefined,
         data: { user, confirUrl, token },
       };
 
@@ -282,7 +282,7 @@ export class AuthController {
         error: {
           message: error.message,
         },
-        data: null,
+        data: undefined,
       };
       return {
         ...resp,

@@ -55,7 +55,7 @@ export class UserController {
         error: {
           message: error.message,
         },
-        data: null,
+        data: undefined,
       };
       return {
         ...resp,
