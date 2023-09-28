@@ -12,7 +12,9 @@ import { RefreshTokenDTO } from "../dto/request/refreshToken.dto";
 import { useResponseError } from "../hooks/useResponseError";
 import Email from "../../utils/email";
 
-const ACTIVATION_URL = (uid, token) => `#/activate/${uid}/${token}`;
+const transferProtocol: string = "ca-mygestor" as const;
+const ACTIVATION_URL = (appName, uid, token) =>
+  `${appName}://activate/?uid=${uid}&token=${token}`;
 
 export class AuthController {
   private userRepository = AppDataSource.getRepository(User);
@@ -46,7 +48,7 @@ export class AuthController {
 
       const user: UserDTO = newUser;
       const { token } = await JWT.generateTokenAndRefreshToken(newUser);
-      const confirUrl = ACTIVATION_URL(user.id, token);
+      const confirUrl = ACTIVATION_URL(transferProtocol, user.id, token);
       const resp: RegistryDTO = {
         status: "success",
         error: undefined,
@@ -258,7 +260,7 @@ export class AuthController {
 
       const user: UserDTO = existingUser;
       const { token } = await JWT.generateTokenAndRefreshToken(existingUser);
-      const confirUrl = ACTIVATION_URL(user.id, token);
+      const confirUrl = ACTIVATION_URL(transferProtocol, user.id, token);
       const resp: RegistryDTO = {
         status: "success",
         error: undefined,
