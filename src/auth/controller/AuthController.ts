@@ -9,8 +9,10 @@ import { UserDTO } from "../dto/response/auth/user.dto";
 import { JWT } from "../security/jwt";
 import { AuthenticationDTO } from "../dto/response/auth/authentication.dto";
 import { RefreshTokenDTO } from "../dto/request/refreshToken.dto";
-import { useResponseError } from "../hooks/useResponseError";
+import { responseError } from "../utils/responseError";
 import Email from "../../utils/email";
+import BaseResponseDTO from "../dto/response/base.dto";
+import { verifyTokenAndRefreshTokenForUserLogin } from "../utils/verifyTokenAndRefreshTokenForUserLogin";
 
 const transferProtocol: string = "ca-mygestor" as const;
 const ACTIVATION_URL = (appName, uid, token) =>
@@ -25,9 +27,9 @@ export class AuthController {
       const { email, password, repeatPassword } = body;
 
       if (password !== repeatPassword) {
-        useResponseError(
+        responseError(
           response,
-          "Repeat password does not match the password."
+          "Repeat password does not match the password.",
         );
       }
 
@@ -36,7 +38,7 @@ export class AuthController {
       });
 
       if (existingUser) {
-        useResponseError(response, "The user already exists.", 409);
+        responseError(response, "The user already exists.", 409);
       }
 
       const hashedPassword = await PasswordHash.hashPassword(password);
@@ -58,9 +60,9 @@ export class AuthController {
       await new Email(newUser, confirUrl)
         .sendVerificationCode()
         .catch((error) => {
-          useResponseError(
+          responseError(
             response,
-            "Server is not ready to send your messages."
+            "Server is not ready to send your messages.",
           );
         });
 
@@ -90,25 +92,24 @@ export class AuthController {
       });
 
       if (!user) {
-        useResponseError(response, "Invalid credentials.", 401);
+        responseError(response, "Invalid credentials.", 401);
       }
 
       if (!user.active) {
-        useResponseError(response, "User not activate.", 401);
+        responseError(response, "User not activate.", 401);
       }
 
       const isPasswordValid = await PasswordHash.isPasswordValid(
         password,
-        user.password
+        user.password,
       );
 
       if (!isPasswordValid) {
-        useResponseError(response, "Invalid credentials.", 401);
+        responseError(response, "Invalid credentials.", 401);
       }
 
-      const { token, refreshToken } = await JWT.generateTokenAndRefreshToken(
-        user
-      );
+      const { token, refreshToken } =
+        await JWT.generateTokenAndRefreshToken(user);
       const userDTO: UserDTO = user;
       const resp: AuthenticationDTO = {
         status: "success",
@@ -137,36 +138,19 @@ export class AuthController {
       const body: RefreshTokenDTO = request.body;
       const { token, refreshToken } = body;
 
-      if (!JWT.isTokenValid(token)) {
-        useResponseError(response, "JWT is not valid.");
+      const { jwtId, getRefreshToken } = await verifyTokenAndRefreshTokenForUserLogin(
+        { token, refreshToken },
+        response,
+      );
+      if (!jwtId && !getRefreshToken) {
+        responseError(response, "User does not login.");
       }
-
-      const jwtId = JWT.getJwtId(token);
 
       const user = await this.userRepository.findOne({
         where: { id: JWT.getJwtPayloadValueByKey(token, "id") },
       });
       if (!user) {
-        useResponseError(response, "User does not exist.");
-      }
-
-      const getRefreshToken = await JWT.getRefreshTokenFindOne({
-        id: refreshToken,
-      });
-
-      if (!(await JWT.isRefreshTokenLinkedToToken(getRefreshToken, jwtId))) {
-        useResponseError(response, "Token does not match with Refresh Token.");
-      }
-
-      if (await JWT.isRefreshTokenExpired(getRefreshToken)) {
-        useResponseError(response, "Refresh Token has expired.");
-      }
-
-      if (await JWT.isRefreshTokenUsedOrInvalidated(getRefreshToken)) {
-        useResponseError(
-          response,
-          "Refresh Token has been used or invalidated."
-        );
+        responseError(response, "User does not exist.");
       }
 
       getRefreshToken.used = true;
@@ -202,13 +186,41 @@ export class AuthController {
   }
 
   async jwtVerify(request: Request, response: Response, next: NextFunction) {
-    /*Implementar*/
+    try {
+      const { token } = request.body;
+
+      if (!JWT.isTokenValid(token)) {
+        responseError(response, "JWT is not valid.");
+      }
+
+      const resp: BaseResponseDTO = {
+        status: "success",
+        error: undefined,
+        data: {
+          token,
+        },
+      };
+
+      response.status(200);
+      return { ...resp };
+    } catch (error) {
+      const resp: BaseResponseDTO = {
+        status: "fail",
+        error: {
+          message: error.message,
+        },
+        data: undefined,
+      };
+      return {
+        ...resp,
+      };
+    }
   }
 
   async userActivation(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const token = request.headers.authorization.split(" ")[1];
@@ -220,7 +232,7 @@ export class AuthController {
       });
 
       if (!user) {
-        useResponseError(response, "User does not exist.");
+        responseError(response, "User does not exist.");
       }
 
       user.active = true;
@@ -245,7 +257,7 @@ export class AuthController {
   async userResendActivation(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const { email } = request.body;
@@ -255,7 +267,7 @@ export class AuthController {
       });
 
       if (!existingUser || !email) {
-        useResponseError(response, "The user not already exists.", 409);
+        responseError(response, "The user not already exists.", 409);
       }
 
       const user: UserDTO = existingUser;
@@ -270,9 +282,9 @@ export class AuthController {
       await new Email(existingUser, confirUrl)
         .sendVerificationCode()
         .catch((error) => {
-          useResponseError(
+          responseError(
             response,
-            "Server is not ready to send your messages."
+            "Server is not ready to send your messages.",
           );
         });
 
@@ -292,17 +304,10 @@ export class AuthController {
     }
   }
 
-  async userMe(request: Request, response: Response, next: NextFunction) {
-    /*Implementar
-    Met:[GET, PUT, PATCH]
-    */
-    console.log(request.method);
-  }
-
   async userSetPassword(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     /*Implementar*/
   }
@@ -310,7 +315,7 @@ export class AuthController {
   async userResetPassword(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     /*Implementar*/
   }
@@ -318,7 +323,7 @@ export class AuthController {
   async userResetPasswordConfirm(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     /*Implementar*/
   }

@@ -47,27 +47,6 @@ export const authRoutes = [
     action: "userResendActivation",
   },
   {
-    method: "get",
-    route: "/user/me",
-    controller: AuthController,
-    middlewares: [nextFunction],
-    action: "userMe",
-  },
-  {
-    method: "put",
-    route: "/user/me",
-    controller: AuthController,
-    middlewares: [nextFunction],
-    action: "userMe",
-  },
-  {
-    method: "patch",
-    route: "/user/me",
-    controller: AuthController,
-    middlewares: [nextFunction],
-    action: "userMe",
-  },
-  {
     method: "post",
     route: "/user/set_password",
     controller: AuthController,

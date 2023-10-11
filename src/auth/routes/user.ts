@@ -31,4 +31,25 @@ export const userRoutes = [
     middlewares: [authMiddleware],
     action: "remove",
   },
+  {
+    method: "get",
+    route: "/user/me",
+    controller: UserController,
+    middlewares: [nextFunction],
+    action: "userMe",
+  },
+  {
+    method: "put",
+    route: "/user/me",
+    controller: UserController,
+    middlewares: [nextFunction],
+    action: "userMe",
+  },
+  {
+    method: "patch",
+    route: "/user/me",
+    controller: UserController,
+    middlewares: [nextFunction],
+    action: "userMe",
+  },
 ];
