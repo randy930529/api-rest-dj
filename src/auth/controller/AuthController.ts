@@ -13,6 +13,8 @@ import { responseError } from "../utils/responseError";
 import Email from "../../utils/email";
 import BaseResponseDTO from "../dto/response/base.dto";
 import { verifyTokenAndRefreshTokenForUserLogin } from "../utils/verifyTokenAndRefreshTokenForUserLogin";
+import { userSetPasswordDTO } from "../dto/request/userSetPassword.dto";
+import * as moment from "moment";
 
 const transferProtocol: string = "ca-mygestor" as const;
 const ACTIVATION_URL = (appName, uid, token) =>
@@ -27,10 +29,7 @@ export class AuthController {
       const { email, password, repeatPassword } = body;
 
       if (password !== repeatPassword) {
-        responseError(
-          response,
-          "Repeat password does not match the password.",
-        );
+        responseError(response, "Repeat password does not match the password.");
       }
 
       const existingUser = await this.userRepository.findOne({
@@ -60,10 +59,7 @@ export class AuthController {
       await new Email(newUser, confirUrl)
         .sendVerificationCode()
         .catch((error) => {
-          responseError(
-            response,
-            "Server is not ready to send your messages.",
-          );
+          responseError(response, "Server is not ready to send your messages.");
         });
 
       response.status(201);
@@ -138,10 +134,11 @@ export class AuthController {
       const body: RefreshTokenDTO = request.body;
       const { token, refreshToken } = body;
 
-      const { jwtId, getRefreshToken } = await verifyTokenAndRefreshTokenForUserLogin(
-        { token, refreshToken },
-        response,
-      );
+      const { jwtId, getRefreshToken } =
+        await verifyTokenAndRefreshTokenForUserLogin(
+          { token, refreshToken },
+          response,
+        );
       if (!jwtId && !getRefreshToken) {
         responseError(response, "User does not login.");
       }
@@ -282,10 +279,7 @@ export class AuthController {
       await new Email(existingUser, confirUrl)
         .sendVerificationCode()
         .catch((error) => {
-          responseError(
-            response,
-            "Server is not ready to send your messages.",
-          );
+          responseError(response, "Server is not ready to send your messages.");
         });
 
       response.status(201);
@@ -309,7 +303,58 @@ export class AuthController {
     response: Response,
     next: NextFunction,
   ) {
-    /*Implementar*/
+    try {
+      const body: userSetPasswordDTO = request.body;
+      const { email, password, newPassword } = body;
+
+      const userToUpdate = await this.userRepository.findOne({
+        where: { email },
+      });
+
+      if (!userToUpdate || !email) {
+        responseError(response, "The user not already exists.", 409);
+      }
+
+      if (!userToUpdate.active) {
+        responseError(response, "User not activate.", 401);
+      }
+
+      const isPasswordValid = await PasswordHash.isPasswordValid(
+        password,
+        userToUpdate.password,
+      );
+
+      if (!isPasswordValid) {
+        responseError(response, "Invalid credentials.", 401);
+      }
+
+      const hashedNewPassword = await PasswordHash.hashPassword(newPassword);
+      const newUpdateDate = moment().toDate();
+      userToUpdate.password = hashedNewPassword;
+      userToUpdate.password_update_date = newUpdateDate;
+      await this.userRepository.save(userToUpdate);
+
+      const user: UserDTO = userToUpdate;
+      const resp: BaseResponseDTO = {
+        status: "success",
+        error: undefined,
+        data: { user },
+      };
+
+      response.status(200);
+      return { ...resp };
+    } catch (error) {
+      const resp: RegistryDTO = {
+        status: "fail",
+        error: {
+          message: error.message,
+        },
+        data: undefined,
+      };
+      return {
+        ...resp,
+      };
+    }
   }
 
   async userResetPassword(
