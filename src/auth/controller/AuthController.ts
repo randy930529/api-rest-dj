@@ -19,6 +19,8 @@ import * as moment from "moment";
 const transferProtocol: string = "ca-mygestor" as const;
 const ACTIVATION_URL = (appName, uid, token) =>
   `${appName}://activate/?uid=${uid}&token=${token}`;
+const RESETPASSWORD_URL = (appName, uid, token) =>
+  `${appName}://reset_password/?uid=${uid}&token=${token}`;
 
 export class AuthController {
   private userRepository = AppDataSource.getRepository(User);
@@ -362,7 +364,46 @@ export class AuthController {
     response: Response,
     next: NextFunction,
   ) {
-    /*Implementar*/
+    try {
+      const { email } = request.body;
+
+      const existingUser = await this.userRepository.findOne({
+        where: { email },
+      });
+
+      if (!existingUser || !email) {
+        responseError(response, "The user not already exists.", 409);
+      }
+
+      const user: UserDTO = existingUser;
+      const { token } = await JWT.generateTokenAndRefreshToken(existingUser);
+      const confirUrl = RESETPASSWORD_URL(transferProtocol, user.id, token);
+      const resp: RegistryDTO = {
+        status: "success",
+        error: undefined,
+        data: { user, confirUrl, token },
+      };
+
+      await new Email(existingUser, confirUrl)
+        .sendPasswordResetToken()
+        .catch((error) => {
+          responseError(response, "Server is not ready to send your messages.");
+        });
+
+      response.status(201);
+      return { ...resp };
+    } catch (error) {
+      const resp: RegistryDTO = {
+        status: "fail",
+        error: {
+          message: error.message,
+        },
+        data: undefined,
+      };
+      return {
+        ...resp,
+      };
+    }
   }
 
   async userResetPasswordConfirm(
@@ -370,6 +411,56 @@ export class AuthController {
     response: Response,
     next: NextFunction,
   ) {
-    /*Implementar*/
+    try {
+      const body: RegisterDTO = request.body;
+      const { password, repeatPassword } = body;
+
+      if (password !== repeatPassword) {
+        responseError(response, "Repeat password does not match the password.");
+      }
+
+      const token = request.headers.authorization.split(" ")[1];
+
+      const id = JWT.getJwtPayloadValueByKey(token, "id");
+
+      const userToSetPassword = await this.userRepository.findOne({
+        where: { id },
+      });
+
+      if (!userToSetPassword) {
+        responseError(response, "User does not exist.");
+      }
+
+      if (!userToSetPassword.active) {
+        responseError(response, "User not activate.", 401);
+      }
+
+      const hashedNewPassword = await PasswordHash.hashPassword(password);
+      const newUpdateDate = moment().toDate();
+      userToSetPassword.password = hashedNewPassword;
+      userToSetPassword.password_update_date = newUpdateDate;
+      await this.userRepository.save(userToSetPassword);
+
+      const user: UserDTO = userToSetPassword;
+      const resp: BaseResponseDTO = {
+        status: "success",
+        error: undefined,
+        data: { user },
+      };
+
+      response.status(201);
+      return { ...resp };
+    } catch (error) {
+      const resp: RegistryDTO = {
+        status: "fail",
+        error: {
+          message: error.message,
+        },
+        data: undefined,
+      };
+      return {
+        ...resp,
+      };
+    }
   }
 }
