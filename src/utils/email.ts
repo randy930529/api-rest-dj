@@ -15,7 +15,10 @@ export default class Email {
   emailUser: string;
   to: string;
   from: string;
-  constructor(public user: User, public url: string) {
+  constructor(
+    public user: User,
+    public url: string,
+  ) {
     this.emailUser = user.email.split(" ")[0];
     this.to = user.email;
     this.from = `Codevo ${ENV.emailFrom}`;
@@ -53,7 +56,7 @@ export default class Email {
   async sendPasswordResetToken() {
     await this.send(
       "resetPassword",
-      "Your password reset token (valid for only 10 minutes)"
+      `Your password reset token (valid for only ${ENV.tokenLifetime})`,
     );
   }
 }
