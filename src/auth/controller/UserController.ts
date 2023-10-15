@@ -8,6 +8,7 @@ import { verifyTokenAndRefreshTokenForUserLogin } from "../utils/verifyTokenAndR
 import { JWT } from "../security/jwt";
 import { UserDTO } from "../dto/response/auth/user.dto";
 import BaseResponseDTO from "../dto/response/base.dto";
+import { LoginDTO } from "../dto/request/login.dto";
 
 export class UserController {
   private userRepository = AppDataSource.getRepository(User);
@@ -162,19 +163,106 @@ export class UserController {
     }
   }
 
+  private async update(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const body: LoginDTO = request.body;
+      const token = request.headers.authorization.split(" ")[1];
+
+      const id = JWT.getJwtPayloadValueByKey(token, "id");
+
+      const userToUpdate = await this.userRepository.findOne({
+        where: { id },
+      });
+
+      if (!userToUpdate) {
+        responseError(response, "User does not exist.");
+      }
+
+      const userUpdate = { ...userToUpdate, ...body };
+      await this.userRepository.save(userUpdate);
+
+      const user: UserDTO = userUpdate;
+      const resp: BaseResponseDTO = {
+        status: "success",
+        error: undefined,
+        data: { user: userToUpdate },
+      };
+
+      response.status(200);
+      return { ...resp };
+    } catch (error) {
+      const resp: RegistryDTO = {
+        status: "fail",
+        error: {
+          message: error.message,
+        },
+        data: undefined,
+      };
+      return {
+        ...resp,
+      };
+    }
+  }
+
+  private async partialUpdate(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const body: LoginDTO = request.body;
+      const token = request.headers.authorization.split(" ")[1];
+
+      const fieldToUpdate: string = Object.keys(body)[0];
+      const id = JWT.getJwtPayloadValueByKey(token, "id");
+
+      const userToUpdate = await this.userRepository.findOne({
+        where: { id },
+      });
+
+      if (!userToUpdate) {
+        responseError(response, "User does not exist.");
+      }
+
+      const userUpdate = { ...userToUpdate, [fieldToUpdate]: body[fieldToUpdate] };
+      await this.userRepository.save(userUpdate);
+
+      const user: UserDTO = userUpdate;
+      const resp: BaseResponseDTO = {
+        status: "success",
+        error: undefined,
+        data: { user: userToUpdate },
+      };
+
+      response.status(200);
+      return { ...resp };
+    } catch (error) {
+      const resp: RegistryDTO = {
+        status: "fail",
+        error: {
+          message: error.message,
+        },
+        data: undefined,
+      };
+      return {
+        ...resp,
+      };
+    }
+  }
+
   async userMe(request: Request, response: Response, next: NextFunction) {
-    /*Implementar
-    Met:[GET, PUT, PATCH]
-    */
-    console.log(request.method);
     if (request.method == "GET") {
-      this.retrieve(request, response, next);
+      return this.retrieve(request, response, next);
     } else if (request.method == "PUT") {
-      // return this.update()
+      return this.update(request, response, next);
     } else if (request.method == "PATCH") {
-      // return this.partial_update()
+      return this.partialUpdate(request, response, next);
     } else if (request.method == "DELETE") {
-      this.delete(request, response, next);
+      return this.delete(request, response, next);
     }
   }
 }
