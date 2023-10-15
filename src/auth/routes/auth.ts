@@ -64,7 +64,7 @@ export const authRoutes = [
     method: "post",
     route: "/user/reset_password_confirm",
     controller: AuthController,
-    middlewares: [nextFunction],
+    middlewares: [authMiddleware],
     action: "userResetPasswordConfirm",
   },
 ];

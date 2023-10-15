@@ -42,14 +42,14 @@ export const userRoutes = [
     method: "put",
     route: "/user/me",
     controller: UserController,
-    middlewares: [nextFunction],
+    middlewares: [authMiddleware],
     action: "userMe",
   },
   {
     method: "patch",
     route: "/user/me",
     controller: UserController,
-    middlewares: [nextFunction],
+    middlewares: [authMiddleware],
     action: "userMe",
   },
 ];
