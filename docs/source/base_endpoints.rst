@@ -14,7 +14,7 @@ Utilícese este endpoint para registrar al nuevo usuario. Su controlador de enti
 | ``POST`` | * ``{``                           | ``HTTP_201_CREATED``               |
 |          | * `` email``                      |                                    |
 |          | * `` password``                   | * ``status: "success"``            |
-|          | * `` re_password``                | * ``error: null``                  |
+|          | * `` repeatPassword``                | * ``error: null``                  |
 |          | * ``}``                           | * ``data: {                        |
 |          |                                   |              User.FIELD,           |
 |          |                                   |              confirUrl,            |
