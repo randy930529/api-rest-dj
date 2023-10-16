@@ -8,7 +8,7 @@ import { verifyTokenAndRefreshTokenForUserLogin } from "../utils/verifyTokenAndR
 import { JWT } from "../security/jwt";
 import { UserDTO } from "../dto/response/auth/user.dto";
 import BaseResponseDTO from "../dto/response/base.dto";
-import { LoginDTO } from "../dto/request/login.dto";
+import { UpdateDTO } from "../dto/request/update.dto";
 
 export class UserController {
   private userRepository = AppDataSource.getRepository(User);
@@ -66,7 +66,7 @@ export class UserController {
   private async retrieve(
     request: Request,
     response: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
       const body: RefreshTokenDTO = request.body;
@@ -74,7 +74,7 @@ export class UserController {
 
       const { getRefreshToken } = await verifyTokenAndRefreshTokenForUserLogin(
         { token, refreshToken },
-        response,
+        response
       );
       if (!getRefreshToken) {
         responseError(response, "User does not login.");
@@ -129,7 +129,7 @@ export class UserController {
   private async delete(
     request: Request,
     response: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
       const body: RefreshTokenDTO = request.body;
@@ -137,7 +137,7 @@ export class UserController {
 
       const { getRefreshToken } = await verifyTokenAndRefreshTokenForUserLogin(
         { token, refreshToken },
-        response,
+        response
       );
       if (!getRefreshToken) {
         responseError(response, "User does not login.");
@@ -166,10 +166,10 @@ export class UserController {
   private async update(
     request: Request,
     response: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
-      const body: LoginDTO = request.body;
+      const body: UpdateDTO = request.body;
       const token = request.headers.authorization.split(" ")[1];
 
       const id = JWT.getJwtPayloadValueByKey(token, "id");
@@ -189,7 +189,7 @@ export class UserController {
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
-        data: { user: userToUpdate },
+        data: { ...user, password: undefined },
       };
 
       response.status(200);
@@ -211,10 +211,10 @@ export class UserController {
   private async partialUpdate(
     request: Request,
     response: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
-      const body: LoginDTO = request.body;
+      const body: UpdateDTO = request.body;
       const token = request.headers.authorization.split(" ")[1];
 
       const fieldToUpdate: string = Object.keys(body)[0];
@@ -228,14 +228,17 @@ export class UserController {
         responseError(response, "User does not exist.");
       }
 
-      const userUpdate = { ...userToUpdate, [fieldToUpdate]: body[fieldToUpdate] };
+      const userUpdate = {
+        ...userToUpdate,
+        [fieldToUpdate]: body[fieldToUpdate],
+      };
       await this.userRepository.save(userUpdate);
 
       const user: UserDTO = userUpdate;
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
-        data: { user: userToUpdate },
+        data: { ...user, password: undefined },
       };
 
       response.status(200);
