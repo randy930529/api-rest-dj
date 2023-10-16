@@ -20,6 +20,9 @@ export class Profile extends Model {
   @Column({ nullable: true })
   address: string;
 
+  @Column({ default: false })
+  primary: boolean;
+
   @ManyToOne(() => User, {
     onDelete: "CASCADE",
   })
