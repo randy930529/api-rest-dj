@@ -70,7 +70,7 @@ export class UserController {
     next: NextFunction
   ) {
     try {
-      const { token } = request.body;
+      const token = request.headers.authorization.split(" ")[1];
 
       if (!JWT.isTokenValid(token)) {
         responseError(response, "JWT is not valid.");
@@ -137,7 +137,7 @@ export class UserController {
     next: NextFunction
   ) {
     try {
-      const { token } = request.body;
+      const token = request.headers.authorization.split(" ")[1];
 
       if (!JWT.isTokenValid(token)) {
         responseError(response, "JWT is not valid.");
