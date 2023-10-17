@@ -6,7 +6,7 @@ import { LicenseUser } from "./LicenseUser";
 export enum UserRole {
   ADMIN = "admin",
   EDITOR = "editor",
-  GHOST = "ghost",
+  GHOST = "cliente",
 }
 
 @Entity()
