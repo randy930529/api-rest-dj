@@ -3,8 +3,6 @@ import { NextFunction, Request, Response } from "express";
 import { User } from "../../entity/User";
 import { responseError } from "../utils/responseError";
 import { RegistryDTO } from "../dto/response/auth/registry.dto";
-import { RefreshTokenDTO } from "../dto/request/refreshToken.dto";
-import { verifyTokenAndRefreshTokenForUserLogin } from "../utils/verifyTokenAndRefreshTokenForUserLogin";
 import { JWT } from "../security/jwt";
 import { UserDTO } from "../dto/response/auth/user.dto";
 import BaseResponseDTO from "../dto/response/base.dto";
@@ -69,15 +67,10 @@ export class UserController {
     next: NextFunction
   ) {
     try {
-      const body: RefreshTokenDTO = request.body;
-      const { token, refreshToken } = body;
+      const { token } = request.body;
 
-      const { getRefreshToken } = await verifyTokenAndRefreshTokenForUserLogin(
-        { token, refreshToken },
-        response
-      );
-      if (!getRefreshToken) {
-        responseError(response, "User does not login.");
+      if (!JWT.isTokenValid(token)) {
+        responseError(response, "JWT is not valid.");
       }
 
       const user = await this.userRepository.findOne({
@@ -132,15 +125,10 @@ export class UserController {
     next: NextFunction
   ) {
     try {
-      const body: RefreshTokenDTO = request.body;
-      const { token, refreshToken } = body;
+      const { token } = request.body;
 
-      const { getRefreshToken } = await verifyTokenAndRefreshTokenForUserLogin(
-        { token, refreshToken },
-        response
-      );
-      if (!getRefreshToken) {
-        responseError(response, "User does not login.");
+      if (!JWT.isTokenValid(token)) {
+        responseError(response, "JWT is not valid.");
       }
 
       const id = JWT.getJwtPayloadValueByKey(token, "id");
