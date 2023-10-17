@@ -5,16 +5,16 @@ import { ProfileHiredPerson } from "./ProfileHiredPerson";
 
 @Entity()
 export class Profile extends Model {
-  @Column()
+  @Column({ default: "" })
   nombre: string;
 
-  @Column()
+  @Column({ default: "" })
   last_name: string;
 
-  @Column({ type: "varchar", length: 11 })
+  @Column({ type: "varchar", length: 11, default: "" })
   ci: string;
 
-  @Column({ type: "varchar", length: 20, nullable: true })
+  @Column({ type: "varchar", length: 20, nullable: true, default: "" })
   nit: string;
 
   @Column({ nullable: true })

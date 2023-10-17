@@ -1,6 +1,7 @@
 import { AppDataSource } from "../../data-source";
 import { NextFunction, Request, Response } from "express";
 import { User } from "../../entity/User";
+import { Profile } from "../../entity/Profile";
 import { RegisterDTO } from "../dto/request/register.dto";
 import { LoginDTO } from "../dto/request/login.dto";
 import { PasswordHash } from "../security/passwordHash";
@@ -24,6 +25,7 @@ const RESETPASSWORD_URL = (appName, uid, token) =>
 
 export class AuthController {
   private userRepository = AppDataSource.getRepository(User);
+  private profileRepository = AppDataSource.getRepository(Profile);
 
   async register(request: Request, response: Response, next: NextFunction) {
     try {
@@ -99,15 +101,16 @@ export class AuthController {
 
       const isPasswordValid = await PasswordHash.isPasswordValid(
         password,
-        user.password,
+        user.password
       );
 
       if (!isPasswordValid) {
         responseError(response, "Invalid credentials.", 401);
       }
 
-      const { token, refreshToken } =
-        await JWT.generateTokenAndRefreshToken(user);
+      const { token, refreshToken } = await JWT.generateTokenAndRefreshToken(
+        user
+      );
       const userDTO: UserDTO = user;
       const resp: AuthenticationDTO = {
         status: "success",
@@ -139,7 +142,7 @@ export class AuthController {
       const { jwtId, getRefreshToken } =
         await verifyTokenAndRefreshTokenForUserLogin(
           { token, refreshToken },
-          response,
+          response
         );
       if (!jwtId && !getRefreshToken) {
         responseError(response, "User does not login.");
@@ -219,7 +222,7 @@ export class AuthController {
   async userActivation(
     request: Request,
     response: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
       const token = request.headers.authorization.split(" ")[1];
@@ -234,8 +237,16 @@ export class AuthController {
         responseError(response, "User does not exist.");
       }
 
-      user.active = true;
-      await this.userRepository.save(user);
+      if (!user.active) {
+        const newProfile = this.profileRepository.create({
+          user,
+          primary: true,
+        });
+
+        user.active = true;
+        await this.userRepository.save(user);
+        await this.profileRepository.save(newProfile);
+      }
 
       response.status(200);
       return { message: "Account activated successfully." };
@@ -256,7 +267,7 @@ export class AuthController {
   async userResendActivation(
     request: Request,
     response: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
       const { email } = request.body;
@@ -303,7 +314,7 @@ export class AuthController {
   async userSetPassword(
     request: Request,
     response: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
       const body: userSetPasswordDTO = request.body;
@@ -323,7 +334,7 @@ export class AuthController {
 
       const isPasswordValid = await PasswordHash.isPasswordValid(
         password,
-        userToUpdate.password,
+        userToUpdate.password
       );
 
       if (!isPasswordValid) {
@@ -362,7 +373,7 @@ export class AuthController {
   async userResetPassword(
     request: Request,
     response: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
       const { email } = request.body;
@@ -409,7 +420,7 @@ export class AuthController {
   async userResetPasswordConfirm(
     request: Request,
     response: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
       const body: RegisterDTO = request.body;
