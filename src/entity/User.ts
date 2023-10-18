@@ -2,6 +2,7 @@ import { Entity, Column, OneToMany, Index } from "typeorm";
 import { RefreshToken } from "./RefreshToken";
 import Model from "./Base";
 import { LicenseUser } from "./LicenseUser";
+import { Profile } from "./Profile";
 
 export enum UserRole {
   ADMIN = "admin",
@@ -45,6 +46,9 @@ export class User extends Model {
     onDelete: "CASCADE",
   })
   licenseUser: LicenseUser[];
+
+  @OneToMany(() => Profile, (profile) => profile.user)
+  profiles: Profile[];
 
   toJSON() {
     return {
