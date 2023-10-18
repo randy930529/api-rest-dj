@@ -7,15 +7,17 @@ import { JWT } from "../security/jwt";
 import { UserDTO } from "../dto/response/auth/user.dto";
 import BaseResponseDTO from "../dto/response/base.dto";
 import { UpdateDTO } from "../dto/request/update.dto";
-import { Profile } from "../../entity/Profile";
 import { UserWhitProfileDTO } from "../dto/response/auth/userWhitProfile.dto";
 
 export class UserController {
   private userRepository = AppDataSource.getRepository(User);
-  private profileRepository = AppDataSource.getRepository(Profile);
 
   async all(request: Request, response: Response, next: NextFunction) {
-    return this.userRepository.find();
+    return this.userRepository.find({
+      relations: {
+        profiles: true,
+      },
+    });
   }
 
   async one(request: Request, response: Response, next: NextFunction) {
@@ -77,6 +79,12 @@ export class UserController {
       }
 
       const user = await this.userRepository.findOne({
+        select: {
+          password: false,
+        },
+        relations: {
+          profiles: true,
+        },
         where: { id: JWT.getJwtPayloadValueByKey(token, "id") },
       });
 
@@ -84,15 +92,7 @@ export class UserController {
         responseError(response, "User does not exist.");
       }
 
-      const profiles = await this.profileRepository.find({
-        where: {
-          user: {
-            id: user.id,
-          },
-        },
-      });
-
-      const userDTO: UserWhitProfileDTO = { ...user.toJSON(), profiles };
+      const userDTO: UserWhitProfileDTO = user.toJSON();
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,

@@ -92,6 +92,9 @@ export class AuthController {
         select: {
           password: false,
         },
+        relations: {
+          profiles: true,
+        },
         where: { email },
       });
 
@@ -116,15 +119,7 @@ export class AuthController {
         user
       );
 
-      const profiles = await this.profileRepository.find({
-        where: {
-          user: {
-            id: user.id,
-          },
-        },
-      });
-
-      const userDTO: UserWhitProfileDTO = { ...user.toJSON(), profiles };
+      const userDTO: UserWhitProfileDTO = user.toJSON();
       const resp: AuthenticationDTO = {
         status: "success",
         error: undefined,
