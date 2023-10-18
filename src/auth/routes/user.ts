@@ -1,5 +1,6 @@
 import { UserController } from "../controller/UserController";
 import { authMiddleware } from "../middlewares/authMiddleware";
+import { isAdminMiddleware } from "../middlewares/isAdminMiddleware";
 import { nextFunction } from "../middlewares/nextMiddleware";
 
 export const userRoutes = [
@@ -7,7 +8,7 @@ export const userRoutes = [
     method: "get",
     route: "/users",
     controller: UserController,
-    middlewares: [authMiddleware],
+    middlewares: [authMiddleware, isAdminMiddleware],
     action: "all",
   },
   {
