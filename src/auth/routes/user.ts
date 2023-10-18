@@ -7,7 +7,7 @@ export const userRoutes = [
     method: "get",
     route: "/users",
     controller: UserController,
-    middlewares: [nextFunction],
+    middlewares: [authMiddleware],
     action: "all",
   },
   {
