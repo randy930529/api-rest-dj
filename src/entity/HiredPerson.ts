@@ -6,10 +6,10 @@ import { ProfileHiredPerson } from "./ProfileHiredPerson";
 @Entity()
 export class HiredPerson extends Model {
   @Column({ type: "varchar", length: 255 })
-  nombre: string;
+  name: string;
 
   @Column({ type: "varchar", length: 255 })
-  apellidos: string;
+  last_name: string;
 
   @Column({ type: "varchar", length: 11 })
   ci: string;
