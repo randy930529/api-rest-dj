@@ -1,5 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { FindOptionsWhere, Repository } from "typeorm";
+import { responseError } from "../auth/utils/responseError";
+
+type Params = { id: number; res: Response };
 
 export abstract class EntityControllerBase<TEntity> {
   protected repository: Repository<TEntity>;
@@ -8,15 +11,11 @@ export abstract class EntityControllerBase<TEntity> {
     this.repository = repository;
   }
 
-  async create(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const entity = this.repository.create(req.body);
-      const createdEntity = await this.repository.save(entity);
-      res.status(201).json(createdEntity);
-    } catch (error) {
-      console.error("Error creating entity:", error);
-      res.status(500).json({ message: "Error creating entity" });
-    }
+  async create(entity: TEntity): Promise<TEntity> {
+    const newEntity = this.repository.create(entity);
+    const createdEntity = await this.repository.save(newEntity);
+
+    return createdEntity;
   }
 
   async all(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -29,57 +28,31 @@ export abstract class EntityControllerBase<TEntity> {
     }
   }
 
-  async one(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const id = parseInt(req.params.id, 10);
-      const options = { id } as unknown as FindOptionsWhere<TEntity>;
+  async one({ id, res }: Params): Promise<TEntity> {
+    const options = { id } as unknown as FindOptionsWhere<TEntity>;
+    const entity = await this.repository.findOneBy(options);
 
-      const entity = await this.repository.findOneBy(options);
-      if (!entity) {
-        res.status(404).json({ message: "Entity not found" });
-      } else {
-        res.json(entity);
-      }
-    } catch (error) {
-      console.error("Error fetching entity:", error);
-      res.status(500).json({ message: "Error fetching entity" });
-    }
+    if (!entity) responseError(res, "Entity not found.", 404);
+
+    return entity;
   }
 
-  async update(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const id = parseInt(req.params.id, 10);
-      const options = { id } as unknown as FindOptionsWhere<TEntity>;
+  async update({ id, res }: Params, entity: TEntity): Promise<TEntity> {
+    const options = { id } as unknown as FindOptionsWhere<TEntity>;
+    const entityToUpdate = await this.repository.findOneBy(options);
 
-      const entity = await this.repository.findOneBy(options);
-      if (!entity) {
-        res.status(404).json({ message: "Entity not found" });
-      } else {
-        this.repository.merge(entity, req.body);
-        const updatedEntity = await this.repository.save(entity);
-        res.json(updatedEntity);
-      }
-    } catch (error) {
-      console.error("Error updating entity:", error);
-      res.status(500).json({ message: "Error updating entity" });
-    }
+    if (!entityToUpdate) responseError(res, "Entity not found.", 404);
+
+    const userUpdate = { ...entityToUpdate, ...entity };
+    return await this.repository.save(userUpdate);
   }
 
-  async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const id = parseInt(req.params.id, 10);
-      const options = { id } as unknown as FindOptionsWhere<TEntity>;
+  async delete({ id, res }: Params): Promise<TEntity> {
+    const options = { id } as unknown as FindOptionsWhere<TEntity>;
+    const entity = await this.repository.findOneBy(options);
 
-      const entity = await this.repository.findOneBy(options);
-      if (!entity) {
-        res.status(404).json({ message: "Entity not found" });
-      } else {
-        await this.repository.remove(entity);
-        res.json({ message: "Entity deleted successfully" });
-      }
-    } catch (error) {
-      console.error("Error deleting entity:", error);
-      res.status(500).json({ message: "Error deleting entity" });
-    }
+    if (!entity) responseError(res, "Entity not found.", 404);
+
+    return await this.repository.remove(entity);
   }
 }
