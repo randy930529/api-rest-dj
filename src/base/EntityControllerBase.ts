@@ -11,9 +11,10 @@ export abstract class EntityControllerBase<TEntity> {
     this.repository = repository;
   }
 
-  async create({ res }: Params, entity: TEntity): Promise<TEntity> {
+  async create(entity: TEntity): Promise<TEntity> {
     const newEntity = this.repository.create(entity);
     const createdEntity = await this.repository.save(newEntity);
+
     return createdEntity;
   }
 
@@ -39,7 +40,6 @@ export abstract class EntityControllerBase<TEntity> {
   async update({ id, res }: Params, entity: TEntity): Promise<TEntity> {
     const options = { id } as unknown as FindOptionsWhere<TEntity>;
     const entityToUpdate = await this.repository.findOneBy(options);
-    console.log(entity.constructor.name);
 
     if (!entityToUpdate) responseError(res, "Entity not found.", 404);
 
