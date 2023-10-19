@@ -326,13 +326,17 @@ export class AuthController {
   ) {
     try {
       const body: userSetPasswordDTO = request.body;
-      const { email, password, newPassword } = body;
+      const { password, newPassword } = body;
+
+      const token = request.headers.authorization.split(" ")[1];
+
+      const id = JWT.getJwtPayloadValueByKey(token, "id");
 
       const userToUpdate = await this.userRepository.findOne({
-        where: { email },
+        where: { id },
       });
 
-      if (!userToUpdate || !email) {
+      if (!userToUpdate) {
         responseError(response, "The user not already exists.", 409);
       }
 

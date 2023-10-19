@@ -50,7 +50,7 @@ export const authRoutes = [
     method: "post",
     route: "/user/set_password",
     controller: AuthController,
-    middlewares: [nextFunction],
+    middlewares: [authMiddleware],
     action: "userSetPassword",
   },
   {
