@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { Repository } from "typeorm";
+import { FindOptionsWhere, Repository } from "typeorm";
 
 export abstract class EntityControllerBase<TEntity> {
   protected repository: Repository<TEntity>;
@@ -32,7 +32,9 @@ export abstract class EntityControllerBase<TEntity> {
   async one(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const id = parseInt(req.params.id, 10);
-      const entity = await this.repository.findOneBy({ id });
+      const options = { id } as unknown as FindOptionsWhere<TEntity>;
+
+      const entity = await this.repository.findOneBy(options);
       if (!entity) {
         res.status(404).json({ message: "Entity not found" });
       } else {
@@ -47,7 +49,9 @@ export abstract class EntityControllerBase<TEntity> {
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const id = parseInt(req.params.id, 10);
-      const entity = await this.repository.findOneBy({ id });
+      const options = { id } as unknown as FindOptionsWhere<TEntity>;
+
+      const entity = await this.repository.findOneBy(options);
       if (!entity) {
         res.status(404).json({ message: "Entity not found" });
       } else {
@@ -64,7 +68,9 @@ export abstract class EntityControllerBase<TEntity> {
   async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const id = parseInt(req.params.id, 10);
-      const entity = await this.repository.findOneBy({ id });
+      const options = { id } as unknown as FindOptionsWhere<TEntity>;
+
+      const entity = await this.repository.findOneBy(options);
       if (!entity) {
         res.status(404).json({ message: "Entity not found" });
       } else {
