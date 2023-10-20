@@ -57,7 +57,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       const resp: BaseresDTO = {
         status: "success",
         error: undefined,
-        data: { hiredPerson },
+        data: { profileHiredPerson },
       };
 
       res.status(200);
@@ -166,11 +166,12 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
 
       await this.update({ id, res }, profileHiredPersonUpdate);
 
-      const profile: ProfileHiredPersonDTO = profileHiredPersonUpdate;
+      const profileHiredPerson: ProfileHiredPersonDTO =
+        profileHiredPersonUpdate;
       const resp: BaseresDTO = {
         status: "success",
         error: undefined,
-        data: { profile },
+        data: { profileHiredPerson },
       };
 
       res.status(200);
