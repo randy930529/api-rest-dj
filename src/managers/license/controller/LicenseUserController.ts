@@ -26,7 +26,7 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
-        data: { LicenseUser },
+        data: { licenseUser },
       };
 
       res.status(200);
@@ -50,7 +50,7 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
     try {
       const id = parseInt(req.params.id);
 
-      return await this.one({ id, res: res });
+      return await this.one({ id, res });
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       const resp: BaseResponseDTO = {
@@ -69,11 +69,12 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
   async updateLicenseUser(req: Request, res: Response, next: NextFunction) {
     try {
       const body: LicenseUser = req.body;
-      const { id } = body;
+      const { id } = req.body;
 
-      if (!id) responseError(res, "Delete license requiere id valid.", 404);
+      if (!id)
+        responseError(res, "Update license user requiere id valid.", 404);
 
-      const licenseUserUpdate = await this.update({ id, res: res }, body);
+      const licenseUserUpdate = await this.update({ id, res }, body);
 
       const licenseUser: LicenseUserDTO = licenseUserUpdate;
       const resp: BaseResponseDTO = {
@@ -102,23 +103,24 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
   async partialUpdateLicenseUser(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
       const body: LicenseUserDTO = req.body;
       const { id } = req.body;
 
-      if (!id) responseError(res, "Delete license requiere id valid.", 404);
+      if (!id)
+        responseError(res, "Update license user requiere id valid.", 404);
 
       const fieldToUpdate: string = Object.keys(body)[1];
-      const licenseUserToUpdate = await this.one({ id, res: res });
+      const licenseUserToUpdate = await this.one({ id, res });
 
       const licenseUserUpdate = Object.assign(new LicenseUser(), {
         ...licenseUserToUpdate,
         [fieldToUpdate]: body[fieldToUpdate],
       });
 
-      await this.update({ id, res: res }, licenseUserUpdate);
+      await this.update({ id, res }, licenseUserUpdate);
 
       const licenseUser: LicenseUserDTO = licenseUserUpdate;
       const resp: BaseResponseDTO = {
@@ -148,12 +150,13 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
     try {
       const id = parseInt(req.params.id);
 
-      if (!id) responseError(res, "Delete license requiere id valid.", 404);
+      if (!id)
+        responseError(res, "Delete license user requiere id valid.", 404);
 
-      await this.delete({ id, res: res });
+      await this.delete({ id, res });
 
       res.status(204);
-      return "License has been removed successfully.";
+      return "License user has been removed successfully.";
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       const resp: BaseResponseDTO = {
