@@ -5,6 +5,8 @@ import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { AppDataSource } from "../../../data-source";
 import { LicenseUser } from "../../../entity/LicenseUser";
 import { LicenseUserDTO } from "../dto/request/licenseUser.dto";
+import { User } from "../../../entity/User";
+import { License } from "../../../entity/License";
 
 export class LicenseUserController extends EntityControllerBase<LicenseUser> {
   constructor() {
@@ -15,9 +17,32 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
   async createLicenseUser(req: Request, res: Response, next: NextFunction) {
     try {
       const body: LicenseUserDTO = req.body;
+      const userId = body.user.id;
+      const licenseId = body.license.id;
+
+      if (!userId) responseError(res, "Do must provide a valid user id.", 404);
+
+      if (!licenseId)
+        responseError(res, "Do must provide a valid license id.", 404);
+
+      const userRepository = AppDataSource.getRepository(User);
+      const licenseRepository = AppDataSource.getRepository(License);
+
+      const user = await userRepository.findOne({
+        where: { id: userId },
+      });
+
+      const license = await licenseRepository.findOne({
+        where: { id: licenseId },
+      });
+
+      if (!user) responseError(res, "User not found.", 404);
+
+      if (!license) responseError(res, "License not found.", 404);
 
       const newLicenseUser = Object.assign(new LicenseUser(), {
-        ...body,
+        user,
+        license,
       });
 
       await this.create(newLicenseUser);
