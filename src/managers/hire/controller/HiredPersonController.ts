@@ -4,7 +4,7 @@ import { AppDataSource } from "../../../data-source";
 import { HiredPerson } from "../../../entity/HiredPerson";
 import { NextFunction, Response } from "express";
 import BaseResponseDTO from "../../../auth/dto/response/base.dto";
-import { HiredPersonDTO } from "../dto/request/hired.person.dto";
+import { HiredPersonDTO } from "../dto/request/hiredPerson.dto";
 import { CreateHiredPersonDTO } from "../dto/response/createHiredPerson.dto";
 import { Profile } from "../../../entity/Profile";
 import { responseError } from "../../../auth/utils/responseError";
@@ -15,17 +15,12 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
     super(repository);
   }
 
-  async createHiredPerson(
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) {
+  async createHiredPerson(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: HiredPersonDTO = request.body;
+      const body: HiredPersonDTO = req.body;
       const { id } = body.profile;
 
-      if (!id)
-        responseError(response, "Do must provide a valid profile id.", 404);
+      if (!id) responseError(res, "Do must provide a valid profile id.", 404);
 
       const profileRepository = AppDataSource.getRepository(Profile);
 
@@ -33,7 +28,7 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
         where: { id },
       });
 
-      if (!profile) responseError(response, "Profile not found.", 404);
+      if (!profile) responseError(res, "Profile not found.", 404);
 
       const newHiredPerson = Object.assign(new HiredPerson(), {
         ...body,
@@ -49,10 +44,10 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
         data: { hiredPerson },
       };
 
-      response.status(200);
+      res.status(200);
       return { ...resp };
     } catch (error) {
-      if (response.statusCode === 200) response.status(500);
+      if (res.statusCode === 200) res.status(500);
       const resp: BaseResponseDTO = {
         status: "fail",
         error: {
@@ -66,17 +61,13 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
     }
   }
 
-  async onHiredPerson(
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) {
+  async onHiredPerson(req: Request, res: Response, next: NextFunction) {
     try {
-      const id = parseInt(request.params.id);
+      const id = parseInt(req.params.id);
 
-      return await this.one({ id, res: response });
+      return await this.one({ id, res });
     } catch (error) {
-      if (response.statusCode === 200) response.status(500);
+      if (res.statusCode === 200) res.status(500);
       const resp: BaseResponseDTO = {
         status: "fail",
         error: {
@@ -90,35 +81,31 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
     }
   }
 
-  async updateHiredPerson(
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) {
+  async updateHiredPerson(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: HiredPerson = request.body;
+      const body: HiredPerson = req.body;
       const { id } = body.profile;
 
       if (!id)
         responseError(
-          response,
-          "Delete pired person requiere profile id valid.",
+          res,
+          "Update pired person requiere profile id valid.",
           404
         );
 
-      const profileUpdate = await this.update({ id, res: response }, body);
+      const hiredPersonUpdate = await this.update({ id, res: res }, body);
 
-      const hiredPerson: CreateHiredPersonDTO = profileUpdate;
+      const hiredPerson: CreateHiredPersonDTO = hiredPersonUpdate;
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
         data: { hiredPerson },
       };
 
-      response.status(201);
+      res.status(201);
       return { ...resp };
     } catch (error) {
-      if (response.statusCode === 200) response.status(500);
+      if (res.statusCode === 200) res.status(500);
       const resp: BaseResponseDTO = {
         status: "fail",
         error: {
@@ -133,42 +120,38 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
   }
 
   async partialUpdateHiredPerson(
-    request: Request,
-    response: Response,
+    req: Request,
+    res: Response,
     next: NextFunction
   ) {
     try {
-      const body: HiredPersonDTO = request.body;
-      const { id } = request.body;
+      const body: HiredPersonDTO = req.body;
+      const { id } = req.body;
 
       if (!id)
-        responseError(
-          response,
-          "Delete profile requiere profile id valid.",
-          404
-        );
+        responseError(res, "Update requiere hired person id valid.", 404);
 
       const fieldToUpdate: string = Object.keys(body)[1];
-      const hiredPersonToUpdate = await this.one({ id, res: response });
+      const hiredPersonToUpdate = await this.one({ id, res });
 
       const hiredPersonUpdate = Object.assign(new HiredPerson(), {
         ...hiredPersonToUpdate,
         [fieldToUpdate]: body[fieldToUpdate],
       });
 
-      await this.update({ id, res: response }, hiredPersonUpdate);
+      await this.update({ id, res }, hiredPersonUpdate);
 
-      const profile: CreateHiredPersonDTO = hiredPersonUpdate;
+      const hiredPerson: CreateHiredPersonDTO = hiredPersonUpdate;
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
-        data: { profile },
+        data: { hiredPerson },
       };
 
-      response.status(200);
+      res.status(200);
       return { ...resp };
     } catch (error) {
-      if (response.statusCode === 200) response.status(500);
+      if (res.statusCode === 200) res.status(500);
       const resp: BaseResponseDTO = {
         status: "fail",
         error: {
@@ -182,27 +165,23 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
     }
   }
 
-  async deleteHiredPerson(
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) {
+  async deleteHiredPerson(req: Request, res: Response, next: NextFunction) {
     try {
-      const id = parseInt(request.params.id);
+      const id = parseInt(req.params.id);
 
       if (!id)
         responseError(
-          response,
+          res,
           "Delete hired person requiere profile id valid.",
           404
         );
 
-      let profileToRemove = await this.delete({ id, res: response });
+      await this.delete({ id, res });
 
-      response.status(204);
+      res.status(204);
       return "Hired person has been removed successfully.";
     } catch (error) {
-      if (response.statusCode === 200) response.status(500);
+      if (res.statusCode === 200) res.status(500);
       const resp: BaseResponseDTO = {
         status: "fail",
         error: {
