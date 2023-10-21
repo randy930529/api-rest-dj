@@ -26,3 +26,9 @@ Contenido
     settings
     base_endpoints
     manager
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Entidades
+
+    entities
