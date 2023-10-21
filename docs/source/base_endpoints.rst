@@ -14,13 +14,12 @@ Utilícese este endpoint para registrar al nuevo usuario. Su controlador de enti
 | ``POST`` | * ``{``                           | ``HTTP_201_CREATED``               |
 |          | * `` email``                      |                                    |
 |          | * `` password``                   | * ``status: "success"``            |
-|          | * `` repeatPassword``                | * ``error: null``                  |
-|          | * ``}``                           | * ``data: {                        |
-|          |                                   |              User.FIELD,           |
-|          |                                   |              confirUrl,            |
-|          |                                   |              token                 |
-|          |                                   |             }                      |
-|          |                                   |    ``                              |
+|          | * `` repeatPassword``             | * ``error: null``                  |
+|          | * ``}``                           | * ``data:`` ``{``                  |
+|          |                                   |              ``User.FIELDS,``      |
+|          |                                   |              ``confirUrl,  ``      |
+|          |                                   |              ``token       ``      |
+|          |                                   |             ``}``                  |
 |          |                                   |                                    |
 |          |                                   | ``HTTP_409_CONFLICT``              |
 |          |                                   | ``HTTP_500_INTERNAL_SERVER_ERROR`` |
@@ -70,11 +69,10 @@ Utilícese este endpoint para volver a enviar el correo electrónico de activaci
 |          |                                   | * ``status: "success"``            |
 |          |                                   | * ``error: null``                  |
 |          |                                   | * ``data: {                        |
-|          |                                   |              User.FIELD,           |
-|          |                                   |              confirUrl,            |
-|          |                                   |              token                 |
-|          |                                   |             }                      |
-|          |                                   |    ``                              |
+|          |                                   |              ``User.FIELDS,``      |
+|          |                                   |              ``confirUrl,``        |
+|          |                                   |              ``token``             |
+|          |                                   |    ``         }``                  |
 |          |                                   |                                    |
 |          |                                   | ``HTTP_409_CONFLICT``              |
 |          |                                   | ``HTTP_500_INTERNAL_SERVER_ERROR`` |
@@ -92,18 +90,49 @@ Utilice este endpoint para recuperar/actualizar al usuario autenticado.
 
 **Default URL**: ``/user/me/``
 
-+----------+--------------------------------+----------------------------------+
-| Method   |           Request              |           Response               |
-+==========+================================+==================================+
-| ``GET``  |    --                          | ``HTTP_200_OK``                  |
-|          |                                |                                  |
-+----------+--------------------------------+----------------------------------+
-| ``PUT``  | ``{}``                         | ``HTTP_200_OK``                  |
-|          |                                |                                  |
-+----------+--------------------------------+----------------------------------+
-| ``PATCH``| ``{}``                         | ``HTTP_200_OK``                  |
-|          |                                |                                  |
-+----------+--------------------------------+----------------------------------+
++----------+--------------------------------+------------------------------------+
+| Method   |           Request              |           Response                 |
++==========+================================+====================================+
+| ``GET``  | * ``Bearer``                   | ``HTTP_200_OK``                    |
+|          | * ``token``                    |                                    |
+|          |                                | * ``status: "success"``            |
+|          |                                | * ``error: null``                  |
+|          |                                | * ``data: {                        |
+|          |                                |              ``User.FIELDS,``      |
+|          |                                |              ``confirUrl,``        |
+|          |                                |              ``token``             |
+|          |                                |    ``         }``                  |
+|          |                                |                                    |
+|          |                                |                                    |
+|          |                                | ``HTTP_500_INTERNAL_SERVER_ERROR`` |
+|          |                                |                                    |
+|          |                                | * ``status: "fail"``               |
+|          |                                | * ``error: { message }``           |
+|          |                                | * ``data: null``                   |
+|          |                                |                                    |
++----------+--------------------------------+------------------------------------+
+| ``PUT``  | * ``Bearer``                   | ``HTTP_200_OK``                    |
+|          | * ``token``                    |                                    |
+|          | * ``User.FIELDS``              |                                    |
+|          |                                |                                    |
+|          |                                | ``HTTP_500_INTERNAL_SERVER_ERROR`` |
+|          |                                |                                    |
+|          |                                | * ``status: "fail"``               |
+|          |                                | * ``error: { message }``           |
+|          |                                | * ``data: null``                   |
+|          |                                |                                    |
++----------+--------------------------------+------------------------------------+
+| ``PATCH``| * ``Bearer``                   | ``HTTP_200_OK``                    |
+|          | * ``token``                    |                                    |
+|          | * ``User.FIELDS``              |                                    |
+|          |                                |                                    |
+|          |                                | ``HTTP_500_INTERNAL_SERVER_ERROR`` |
+|          |                                |                                    |
+|          |                                | * ``status: "fail"``               |
+|          |                                | * ``error: { message }``           |
+|          |                                | * ``data: null``                   |
+|          |                                |                                    |
++----------+--------------------------------+------------------------------------+
 
 Eliminar Usuario
 ----------------
@@ -135,7 +164,18 @@ Utile este endpoint para cambiar la contraseña de usuario.
 +----------+------------------------+-------------------------------------------+
 | Method   | Request                | Response                                  |
 +==========+========================+===========================================+
-| ``POST`` |                        | ``HTTP_400_BAD_REQUEST``                  |
+| ``POST`` | * ``Bearer``           | ``HTTP_400_BAD_REQUEST``                  |
+|          | * ``token``            |                                           |
+|          | * ``{``                |                                           |
+|          | * `` password``        |                                           |
+|          | * `` newPassword``     |                                           |
+|          | * ``}``                |                                           |
+|          |                        | ``HTTP_409_CONFLICT``                     |
+|          |                        | ``HTTP_401_UNAUTHORIZED``                 |
+|          |                        |                                           |
+|          |                        | * ``status: "fail"``                      |
+|          |                        | * ``error: { message }``                  |
+|          |                        | * ``data: null``                          |
 |          |                        |                                           |
 +----------+------------------------+-------------------------------------------+
 
@@ -149,22 +189,36 @@ Utilre este punto final para enviar correo electrónico al usuario con enlace de
 +----------+---------------------------------+------------------------------+
 | Method   | Request                         | Response                     |
 +==========+=================================+==============================+
-| ``POST`` |                                 | ``HTTP_204_NO_CONTENT``      |
+| ``POST`` | * ``{ User.EMAIL_FIELD }``      | ``HTTP_204_NO_CONTENT``      |
 |          |                                 |                              |
+|          |                                 | ``HTTP_409_CONFLICT``        |
+|          |                                 |                              |
+|          |                                 | * ``status: "fail"``         |
+|          |                                 | * ``error: { message }``     |
+|          |                                 | * ``data: null``             |
 +----------+---------------------------------+------------------------------+
 
 Confirmar Restableser Contraseña
 --------------------------------
 
-
+Utilícese este punto final para el restablecimiento de la contraseña del usuario.
 
 **Default URL**: ``/user/reset_password_confirm/``
 
 +----------+----------------------------------+--------------------------------------+
 | Method   | Request                          | Response                             |
 +==========+==================================+======================================+
-| ``POST`` |                                  | ``HTTP_204_NO_CONTENT``              |
+| ``POST`` |  * ``Bearer``                    | ``HTTP_204_NO_CONTENT``              |
+|          |  * ``token``                     |                                      |
+|          | * ``{``                          |                                      |
+|          | * `` password``                  |                                      |
+|          | * `` newPassword``               |                                      |
+|          | * ``}``                          | ``HTTP_401_UNAUTHORIZED``            |
+|          |                                  | ``HTTP_500_INTERNAL_SERVER_ERROR``   |
 |          |                                  |                                      |
+|          |                                  | * ``status: "fail"``                 |
+|          |                                  | * ``error: { message }``             |
+|          |                                  | * ``data: null``                     |
 +----------+----------------------------------+--------------------------------------+
 
 Refresh JWT
