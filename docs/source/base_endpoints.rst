@@ -201,21 +201,21 @@ Utilícese este punto final para el restablecimiento de la contraseña del usuar
 
 **Default URL**: ``/user/reset_password_confirm/``
 
-+----------+----------------------------------+--------------------------------------+
-| Method   | Request                          | Response                             |
-+==========+==================================+======================================+
-| ``POST`` |  * ``Bearer``                    | ``HTTP_204_NO_CONTENT``              |
-|          |  * ``token``                     |                                      |
-|          | * ``{``                          |                                      |
-|          | *  ``password``                  |                                      |
-|          | *  ``repeatPassword``            |                                      |
-|          | * ``}``                          | ``HTTP_401_UNAUTHORIZED``            |
-|          |                                  | ``HTTP_500_INTERNAL_SERVER_ERROR``   |
-|          |                                  |                                      |
-|          |                                  | * ``status: "fail"``                 |
-|          |                                  | * ``error: { message }``             |
-|          |                                  | * ``data: null``                     |
-+----------+----------------------------------+--------------------------------------+
++----------+----------------------------------+------------------------------------+
+| Method   | Request                          | Response                           |
++==========+==================================+====================================+
+| ``POST`` |  * ``Bearer``                    | ``HTTP_204_NO_CONTENT``            |
+|          |  * ``token``                     |                                    |
+|          | * ``{``                          |                                    |
+|          | *  ``password``                  |                                    |
+|          | *  ``repeatPassword``            |                                    |
+|          | * ``}``                          | ``HTTP_401_UNAUTHORIZED``          |
+|          |                                  | ``HTTP_500_INTERNAL_SERVER_ERROR`` |
+|          |                                  |                                    |
+|          |                                  | * ``status: "fail"``               |
+|          |                                  | * ``error: { message }``           |
+|          |                                  | * ``data: null``                   |
++----------+----------------------------------+------------------------------------+
 
 Refresh JWT
 -----------
@@ -232,8 +232,8 @@ Utilícese este punto final para refrescar JWT.
 |          |                                 | * ``status: "success"``            |
 |          |                                 | * ``error: null``                  |
 |          |                                 | * ``data:``                        |
-|          |                                 |       ``User.FIELD, ``             |
-|          |                                 |       ``token,      ``             |
+|          |                                 |       ``User.FIELD,``              |
+|          |                                 |       ``token,``                   |
 |          |                                 |       ``refreshToken``             |
 |          |                                 |                                    |
 |          |                                 | ``HTTP_500_INTERNAL_SERVER_ERROR`` |

@@ -6,3 +6,4 @@ Configuración y API
 
     settings
     base_endpoints
+    manager

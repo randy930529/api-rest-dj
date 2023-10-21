@@ -20,9 +20,9 @@ Contenido
     api
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
     :caption: Configuración y API
 
     settings
     base_endpoints
-    
+    manager
