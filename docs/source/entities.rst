@@ -51,7 +51,7 @@ Perfil para una persona contratada
 
 .. note::
 
-   Gestiona los perfiles para una persona contratada agregando o eliminando una entidad ``ProfileHiredPerson``.
+   Gestiona los perfiles para una persona contratada agregando o eliminando una entidad **ProfileHiredPerson**.
 
 **ProfileHiredPerson**
 
@@ -70,7 +70,7 @@ Licensias para usuario
 
 .. note::
 
-   Gestiona las licensia para una usuario determinado agregando o eliminando una entidad ``LicenseUser``.
+   Gestiona las licensia para una usuario determinado agregando o eliminando una entidad **LicenseUser**.
 
 **LicenseUser**
 

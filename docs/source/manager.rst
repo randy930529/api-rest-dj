@@ -15,9 +15,13 @@ Utilícese estos endpoint para gestionar los datos de los modelos de la base de 
 **URLs de las Entidades**
 
 **Default URL**: ``POST`` ``/<Entity.route>/``
+
 **Default URL**: ``GET`` ``/<Entity.route>s/``
+
 **Default URL**: ``GET`` ``/<Entity.route>/:id``
+
 **Default URL**: ``PUT`` ``/<Entity.route>/``
+
 **Default URL**: ``PATCH`` ``/<Entity.route>/``
 
 Rutas por entidad
@@ -25,7 +29,7 @@ Rutas por entidad
 
 +--------------------+----------------+--------------------+-----------------------------+---------------+--------------------+
 | Default URL/Entity |  Profile       | HiredPerson        | ProfileHiredPerson          | License       | LicenseUser        |
-+====================+================+====================+=============================+====================================+
++====================+================+====================+=============================+===============+====================+
 | Entity route       | * ``profile``  | * ``hired/person`` | * ``profile/hired/persons`` | * ``license`` | * ``license/user`` |
 |                    |                |                    |                             |               |                    |
 +--------------------+----------------+--------------------+-----------------------------+---------------+--------------------+
