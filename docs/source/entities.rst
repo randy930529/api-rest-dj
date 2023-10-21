@@ -8,43 +8,43 @@ Perfil
 
 **Profile**
 
-``` json
-{
-  "nombre": "string",
-  "last_name": "string",
-  "ci": "string",
-  "nit": "string",
-  "address": "string"
-}
-```
+.. code-block:: JSON
+
+    {
+    "nombre": "string",
+    "last_name": "string",
+    "ci": "string",
+    "nit": "string",
+    "address": "string"
+    }
 
 Persona contratada
 ------------------
 
 **HiredPerson**
 
-``` json
-{
-  "name": "string",
-  "last_name": "string",
-  "ci": "string",
-  "profile": "Profile"
-}
-```
+.. code-block:: JSON
+
+    {
+    "name": "string",
+    "last_name": "string",
+    "ci": "string",
+    "profile": "Profile"
+    }
 
 Licensias
 ---------
 
 **License**
 
-``` json
-{
-  "days": "number",
-  "max_profiles": "number",
-  "active": "boolean",
-  "import": "number"
-}
-```
+.. code-block:: JSON
+
+    {
+    "days": "number",
+    "max_profiles": "number",
+    "active": "boolean",
+    "import": "number"
+    }
 
 Perfil para una persona contratada
 ----------------------------------
@@ -55,15 +55,15 @@ Perfil para una persona contratada
 
 **ProfileHiredPerson**
 
-``` json
-{
-  "date_start": "string",
-  "date_end": "string",
-  "import": "number",
-  "profile": "Profile",
-  "hiredPerson": "HiredPerson"
-}
-```
+.. code-block:: JSON
+
+    {
+    "date_start": "string",
+    "date_end": "string",
+    "import": "number",
+    "profile": "Profile",
+    "hiredPerson": "HiredPerson"
+    }
 
 Licensias para usuario
 ----------------------
@@ -74,10 +74,10 @@ Licensias para usuario
 
 **LicenseUser**
 
-``` json
-{
-  "user": "User",
-  "license": "License",
-  "active": "boolean"
-}
-```
+.. code-block:: JSON
+
+    {
+    "user": "User",
+    "license": "License",
+    "active": "boolean"
+    }
