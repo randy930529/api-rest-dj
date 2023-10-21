@@ -20,6 +20,9 @@ Utilícese este endpoint para registrar al nuevo usuario. Su controlador de enti
 |          |                                   |              ``confirUrl,  ``      |
 |          |                                   |              ``token       ``      |
 |          |                                   |             ``}``                  |
+|          |                                   | ```json                            |
+|          |                                   |    {}                              |
+|          |                                   | ```                                |
 |          |                                   |                                    |
 |          |                                   | ``HTTP_409_CONFLICT``              |
 |          |                                   | ``HTTP_500_INTERNAL_SERVER_ERROR`` |
