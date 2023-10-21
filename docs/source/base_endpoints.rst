@@ -12,17 +12,13 @@ Utilícese este endpoint para registrar al nuevo usuario. Su controlador de enti
 | Method   |  Request                          | Response                           |
 +==========+===================================+====================================+
 | ``POST`` | * ``{``                           | ``HTTP_201_CREATED``               |
-|          | * `` email``                      |                                    |
-|          | * `` password``                   | * ``status: "success"``            |
-|          | * `` repeatPassword``             | * ``error: null``                  |
-|          | * ``}``                           | * ``data:`` ``{``                  |
-|          |                                   |              ``User.FIELDS,``      |
-|          |                                   |              ``confirUrl,  ``      |
-|          |                                   |              ``token       ``      |
-|          |                                   |             ``}``                  |
-|          |                                   | ```json                            |
-|          |                                   |    {}                              |
-|          |                                   | ```                                |
+|          | *  ``email``                      |                                    |
+|          | *  ``password``                   | * ``status: "success"``            |
+|          | *  ``repeatPassword``             | * ``error: null``                  |
+|          | * ``}``                           | * ``data:``                        |
+|          |                                   |       ``User.FIELDS,``             |
+|          |                                   |       ``confirUrl,``               |
+|          |                                   |       ``token``                    |
 |          |                                   |                                    |
 |          |                                   | ``HTTP_409_CONFLICT``              |
 |          |                                   | ``HTTP_500_INTERNAL_SERVER_ERROR`` |
@@ -71,11 +67,10 @@ Utilícese este endpoint para volver a enviar el correo electrónico de activaci
 |          |                                   |                                    |
 |          |                                   | * ``status: "success"``            |
 |          |                                   | * ``error: null``                  |
-|          |                                   | * ``data: {                        |
-|          |                                   |              ``User.FIELDS,``      |
-|          |                                   |              ``confirUrl,``        |
-|          |                                   |              ``token``             |
-|          |                                   |    ``         }``                  |
+|          |                                   | * ``data:``                        |
+|          |                                   |       ``User.FIELDS,``             |
+|          |                                   |       ``confirUrl,``               |
+|          |                                   |       ``token``                    |
 |          |                                   |                                    |
 |          |                                   | ``HTTP_409_CONFLICT``              |
 |          |                                   | ``HTTP_500_INTERNAL_SERVER_ERROR`` |
@@ -100,12 +95,10 @@ Utilice este endpoint para recuperar/actualizar al usuario autenticado.
 |          | * ``token``                    |                                    |
 |          |                                | * ``status: "success"``            |
 |          |                                | * ``error: null``                  |
-|          |                                | * ``data: {                        |
-|          |                                |              ``User.FIELDS,``      |
-|          |                                |              ``confirUrl,``        |
-|          |                                |              ``token``             |
-|          |                                |    ``         }``                  |
-|          |                                |                                    |
+|          |                                | * ``data:``                        |
+|          |                                |       ``User.FIELDS,``             |
+|          |                                |       ``confirUrl,``               |
+|          |                                |       ``token``                    |
 |          |                                |                                    |
 |          |                                | ``HTTP_500_INTERNAL_SERVER_ERROR`` |
 |          |                                |                                    |
@@ -170,8 +163,8 @@ Utile este endpoint para cambiar la contraseña de usuario.
 | ``POST`` | * ``Bearer``           | ``HTTP_400_BAD_REQUEST``                  |
 |          | * ``token``            |                                           |
 |          | * ``{``                |                                           |
-|          | * `` password``        |                                           |
-|          | * `` newPassword``     |                                           |
+|          | *  ``password``        |                                           |
+|          | *  ``newPassword``     |                                           |
 |          | * ``}``                |                                           |
 |          |                        | ``HTTP_409_CONFLICT``                     |
 |          |                        | ``HTTP_401_UNAUTHORIZED``                 |
@@ -214,8 +207,8 @@ Utilícese este punto final para el restablecimiento de la contraseña del usuar
 | ``POST`` |  * ``Bearer``                    | ``HTTP_204_NO_CONTENT``              |
 |          |  * ``token``                     |                                      |
 |          | * ``{``                          |                                      |
-|          | * `` password``                  |                                      |
-|          | * `` newPassword``               |                                      |
+|          | *  ``password``                  |                                      |
+|          | *  ``repeatPassword``            |                                      |
 |          | * ``}``                          | ``HTTP_401_UNAUTHORIZED``            |
 |          |                                  | ``HTTP_500_INTERNAL_SERVER_ERROR``   |
 |          |                                  |                                      |
@@ -238,12 +231,10 @@ Utilícese este punto final para refrescar JWT.
 |          | * ``refreshToken``              |                                    |
 |          |                                 | * ``status: "success"``            |
 |          |                                 | * ``error: null``                  |
-|          |                                 | * ``data: {                        |
-|          |                                 |              User.FIELD,           |
-|          |                                 |              token,                |
-|          |                                 |              refreshToken          |
-|          |                                 |             }                      |
-|          |                                 |    ``                              |
+|          |                                 | * ``data:``                        |
+|          |                                 |       ``User.FIELD, ``             |
+|          |                                 |       ``token,      ``             |
+|          |                                 |       ``refreshToken``             |
 |          |                                 |                                    |
 |          |                                 | ``HTTP_500_INTERNAL_SERVER_ERROR`` |
 |          |                                 |                                    |
