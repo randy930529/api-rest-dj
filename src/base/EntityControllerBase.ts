@@ -18,7 +18,17 @@ export abstract class EntityControllerBase<TEntity> {
     return createdEntity;
   }
 
-  async all(
+  async all(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const entities = await this.repository.find();
+      res.json(entities);
+    } catch (error) {
+      console.error("Error fetching entities:", error);
+      res.status(500).json({ message: "Error fetching entities" });
+    }
+  }
+
+  async getAll(
     req: Request,
     res: Response,
     next: NextFunction
