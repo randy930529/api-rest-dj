@@ -187,7 +187,7 @@ export class LicenseController extends EntityControllerBase<License> {
 
   async allPublic(req: Request, res: Response, next: NextFunction) {
     try {
-      const licenses = await this.all(req, res, next);
+      const licenses = await this.allPublic(req, res, next);
       const licensesPublic = licenses.filter((e) => e.public);
       return licensesPublic;
     } catch (error) {
