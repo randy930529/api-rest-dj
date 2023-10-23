@@ -13,6 +13,9 @@ export class License extends Model {
   @Column({ default: false })
   active: boolean;
 
+  @Column({ default: false })
+  public: boolean;
+
   @Column()
   import: number;
 

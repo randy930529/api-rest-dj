@@ -84,6 +84,7 @@ export class UserController {
         },
         relations: {
           profiles: true,
+          licenseUser: true,
         },
         where: { id: JWT.getJwtPayloadValueByKey(token, "id") },
       });
