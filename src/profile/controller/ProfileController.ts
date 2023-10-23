@@ -43,12 +43,13 @@ export class ProfileController {
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
-        data: { profile: newProfile },
+        data: { profile },
       };
 
       response.status(200);
       return { ...resp };
     } catch (error) {
+      if (response.statusCode === 200) response.status(500);
       const resp: RegistryDTO = {
         status: "fail",
         error: {
@@ -70,6 +71,9 @@ export class ProfileController {
     const id = parseInt(request.params.id);
 
     const profile = await this.profileRepository.findOne({
+      relations: {
+        profileHiredPerson: true,
+      },
       where: { id },
     });
 
@@ -83,6 +87,8 @@ export class ProfileController {
     try {
       const body: ProfileDTO = request.body;
       const { id } = request.body;
+      const token = request.headers.authorization.split(" ")[1];
+      const userId = JWT.getJwtPayloadValueByKey(token, "id");
 
       if (!id)
         responseError(
@@ -92,8 +98,18 @@ export class ProfileController {
         );
 
       const profileToUpdate = await this.profileRepository.findOne({
+        relations: {
+          user: true,
+        },
         where: { id },
       });
+
+      if (profileToUpdate.user.id !== userId)
+        responseError(
+          response,
+          "User is not authorized to update this profile",
+          401
+        );
 
       const profileUpdate = { ...profileToUpdate, ...body };
       await this.profileRepository.save(profileUpdate);
@@ -108,6 +124,7 @@ export class ProfileController {
       response.status(201);
       return { ...resp };
     } catch (error) {
+      if (response.statusCode === 200) response.status(500);
       const resp: RegistryDTO = {
         status: "fail",
         error: {
@@ -129,6 +146,8 @@ export class ProfileController {
     try {
       const body: ProfileDTO = request.body;
       const { id } = request.body;
+      const token = request.headers.authorization.split(" ")[1];
+      const userId = JWT.getJwtPayloadValueByKey(token, "id");
 
       if (!id)
         responseError(
@@ -140,12 +159,22 @@ export class ProfileController {
       const fieldToUpdate: string = Object.keys(body)[1];
 
       const profileToUpdate = await this.profileRepository.findOne({
+        relations: {
+          user: true,
+        },
         where: { id },
       });
 
       if (!profileToUpdate) {
         responseError(response, "User does not exist.");
       }
+
+      if (profileToUpdate.user.id !== userId)
+        responseError(
+          response,
+          "User is not authorized to update this profile",
+          401
+        );
 
       const profileUpdate = {
         ...profileToUpdate,
@@ -163,6 +192,7 @@ export class ProfileController {
       response.status(200);
       return { ...resp };
     } catch (error) {
+      if (response.statusCode === 200) response.status(500);
       const resp: RegistryDTO = {
         status: "fail",
         error: {
@@ -197,6 +227,7 @@ export class ProfileController {
       response.status(204);
       return "Profile has been removed successfully.";
     } catch (error) {
+      if (response.statusCode === 200) response.status(500);
       const resp: RegistryDTO = {
         status: "fail",
         error: {
