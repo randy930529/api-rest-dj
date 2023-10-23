@@ -15,14 +15,14 @@ export const userRoutes = [
     method: "get",
     route: "/users/:id",
     controller: UserController,
-    middlewares: [nextFunction],
+    middlewares: [authMiddleware],
     action: "one",
   },
   {
     method: "post",
     route: "/users",
     controller: UserController,
-    middlewares: [nextFunction],
+    middlewares: [authMiddleware, isAdminMiddleware],
     action: "save",
   },
   {
@@ -36,7 +36,7 @@ export const userRoutes = [
     method: "get",
     route: "/user/me",
     controller: UserController,
-    middlewares: [nextFunction],
+    middlewares: [authMiddleware],
     action: "userMe",
   },
   {

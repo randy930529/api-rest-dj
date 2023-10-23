@@ -22,14 +22,14 @@ export const authRoutes = [
     method: "post",
     route: "/refresh/token",
     controller: AuthController,
-    middlewares: [nextFunction],
+    middlewares: [authMiddleware],
     action: "refreshToken",
   },
   {
     method: "post",
     route: "/jwt/verify",
     controller: AuthController,
-    middlewares: [nextFunction],
+    middlewares: [authMiddleware],
     action: "jwtVerify",
   },
   {
