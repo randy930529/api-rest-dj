@@ -16,7 +16,7 @@ export class LicenseController extends EntityControllerBase<License> {
   async createLicense(
     request: Request,
     response: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
       const body: LicenseDTO = request.body;
@@ -74,7 +74,7 @@ export class LicenseController extends EntityControllerBase<License> {
   async updateLicense(
     request: Request,
     response: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
       const body: License = request.body;
@@ -112,7 +112,7 @@ export class LicenseController extends EntityControllerBase<License> {
   async partialUpdateLicense(
     request: Request,
     response: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
       const body: LicenseDTO = request.body;
@@ -158,7 +158,7 @@ export class LicenseController extends EntityControllerBase<License> {
   async deleteLicense(
     request: Request,
     response: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
       const id = parseInt(request.params.id);
@@ -172,6 +172,26 @@ export class LicenseController extends EntityControllerBase<License> {
       return "License has been removed successfully.";
     } catch (error) {
       if (response.statusCode === 200) response.status(500);
+      const resp: BaseResponseDTO = {
+        status: "fail",
+        error: {
+          message: error.message,
+        },
+        data: undefined,
+      };
+      return {
+        ...resp,
+      };
+    }
+  }
+
+  async allPublic(req: Request, res: Response, next: NextFunction) {
+    try {
+      const licenses = await this.all(req, res, next);
+      const licensesPublic = licenses.filter((e) => e.public);
+      return licensesPublic;
+    } catch (error) {
+      if (res.statusCode === 200) res.status(500);
       const resp: BaseResponseDTO = {
         status: "fail",
         error: {

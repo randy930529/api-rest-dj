@@ -19,6 +19,13 @@ export const LicenseRoutes = [
   },
   {
     method: "get",
+    route: "/licenses/public",
+    controller: LicenseController,
+    middlewares: [authMiddleware],
+    action: "allPublic",
+  },
+  {
+    method: "get",
     route: "/license/:id",
     controller: LicenseController,
     middlewares: [authMiddleware, isAdminMiddleware],
