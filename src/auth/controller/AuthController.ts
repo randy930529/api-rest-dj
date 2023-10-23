@@ -16,7 +16,6 @@ import BaseResponseDTO from "../dto/response/base.dto";
 import { verifyTokenAndRefreshTokenForUserLogin } from "../utils/verifyTokenAndRefreshTokenForUserLogin";
 import { userSetPasswordDTO } from "../dto/request/userSetPassword.dto";
 import * as moment from "moment";
-import { UserWhitProfileDTO } from "../dto/response/auth/userWhitProfile.dto";
 
 const transferProtocol: string = "ca-mygestor" as const;
 const ACTIVATION_URL = (appName, uid, token) =>
@@ -89,12 +88,6 @@ export class AuthController {
       const { email, password } = body;
 
       const user = await this.userRepository.findOne({
-        select: {
-          password: false,
-        },
-        relations: {
-          profiles: true,
-        },
         where: { email },
       });
 
@@ -119,7 +112,7 @@ export class AuthController {
         user
       );
 
-      const userDTO: UserWhitProfileDTO = user.toJSON();
+      const userDTO: UserDTO = user.toJSON();
       const resp: AuthenticationDTO = {
         status: "success",
         error: undefined,
