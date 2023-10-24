@@ -1,6 +1,5 @@
 import { HiredPersonController } from "../controller/HiredPersonController";
 import { authMiddleware } from "../../../auth/middlewares/authMiddleware";
-import { isAdminMiddleware } from "../../../auth/middlewares/isAdminMiddleware";
 
 export const hiredPersonRoutes = [
   {
@@ -14,7 +13,7 @@ export const hiredPersonRoutes = [
     method: "get",
     route: "/hired/persons",
     controller: HiredPersonController,
-    middlewares: [authMiddleware, isAdminMiddleware],
+    middlewares: [authMiddleware],
     action: "all",
   },
   {
