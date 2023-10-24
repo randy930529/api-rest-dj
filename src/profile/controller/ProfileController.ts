@@ -72,7 +72,7 @@ export class ProfileController {
 
     const profile = await this.profileRepository.findOne({
       relations: {
-        profileHiredPerson: true,
+        hiredPerson: true,
       },
       where: { id },
     });
