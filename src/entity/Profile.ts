@@ -2,6 +2,7 @@ import { Entity, Column, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import Model from "./Base";
 import { User } from "./User";
 import { ProfileHiredPerson } from "./ProfileHiredPerson";
+import { HiredPerson } from "./HiredPerson";
 
 @Entity()
 export class Profile extends Model {
@@ -34,4 +35,7 @@ export class Profile extends Model {
     (profileHiredPerson) => profileHiredPerson.profile
   )
   profileHiredPerson: ProfileHiredPerson[];
+
+  @OneToMany(() => HiredPerson, (profile) => profile.profile)
+  hiredPerson: HiredPerson[];
 }
