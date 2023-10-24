@@ -15,7 +15,7 @@ export class ProfileController {
 
   async create(request: Request, response: Response, next: NextFunction) {
     try {
-      const body: ProfileDTO = request.body;
+      const body: ProfileDTO = { ...request.body, id: undefined };
       const token = request.headers.authorization.split(" ")[1];
 
       const id = JWT.getJwtPayloadValueByKey(token, "id");
