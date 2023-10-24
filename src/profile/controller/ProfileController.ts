@@ -37,7 +37,9 @@ export class ProfileController {
         user,
       });
 
-      await this.profileRepository.save(newProfile);
+      const newProfileRepository = this.profileRepository.create(newProfile);
+
+      await this.profileRepository.save(newProfileRepository);
 
       const profile: CreateProfileDTO = newProfile;
       const resp: BaseResponseDTO = {
