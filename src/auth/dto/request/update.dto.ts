@@ -1,3 +1,3 @@
-export class UpdateDTO {
+export type UpdateDTO = {
   email: string;
-}
+};

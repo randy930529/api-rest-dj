@@ -1,6 +1,6 @@
 import { User } from "../../../entity/User";
 
-export class CreateProfileDTO {
+export type CreateProfileDTO = {
   id: number;
   nombre: string;
   last_name: string;
@@ -8,4 +8,4 @@ export class CreateProfileDTO {
   nit: string;
   address: string;
   user: User;
-}
+};

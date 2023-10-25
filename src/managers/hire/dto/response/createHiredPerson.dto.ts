@@ -1,8 +1,8 @@
 import { Profile } from "../../../../entity/Profile";
 
-export class CreateHiredPersonDTO {
+export type CreateHiredPersonDTO = {
   name: string;
   last_name: string;
   ci: string;
   profile: Profile;
-}
+};
