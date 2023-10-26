@@ -13,5 +13,6 @@
       "@/*": ["./src/*"],
       "@entity/": ["./src/entity/*"]
     }
-  }
+  },
+  "exclude": ["node_modules"]
 }
