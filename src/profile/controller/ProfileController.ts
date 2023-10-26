@@ -8,38 +8,39 @@ import { JWT } from "../../auth/security/jwt";
 import { RegistryDTO } from "../../auth/dto/response/auth/registry.dto";
 import { BaseResponseDTO } from "../../auth/dto/response/base.dto";
 import { CreateProfileDTO } from "../dto/response/createProfile.dto";
+import { EntityControllerBase } from "../../base/EntityControllerBase";
 
-export class ProfileController {
-  private profileRepository = AppDataSource.getRepository(Profile);
-  private userRepository = AppDataSource.getRepository(User);
+export class ProfileController extends EntityControllerBase<Profile> {
+  constructor() {
+    const repository = AppDataSource.getRepository(Profile);
+    super(repository);
+  }
 
-  async create(request: Request, response: Response, next: NextFunction) {
+  async createProfile(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: ProfileDTO = { ...request.body, id: undefined };
-      const token = request.headers.authorization.split(" ")[1];
+      const fields: ProfileDTO = req.body;
+      const token = req.headers.authorization.split(" ")[1];
 
       const id = JWT.getJwtPayloadValueByKey(token, "id");
 
-      const user = await this.userRepository.findOne({
-        where: { id },
-      });
+      const userRepository = AppDataSource.getRepository(User);
+      const user = await userRepository.findOneBy({ id });
 
       if (!user) {
-        responseError(response, "User does not exist.");
+        responseError(res, "User does not exist.");
       }
 
       if (!user.active) {
-        responseError(response, "User not activate.", 401);
+        responseError(res, "User not activate.", 401);
       }
 
-      const newProfile = Object.assign(new Profile(), {
-        ...body,
-        user,
-      });
+      // const newProfile = Object.assign(new Profile(), {
+      //   ...body,
+      //   user,
+      // });
 
-      const newProfileRepository = this.profileRepository.create(newProfile);
-
-      await this.profileRepository.save(newProfileRepository);
+      const newProfile = this.repository.create({ ...fields, user });
+      await this.repository.save(newProfile);
 
       const profile: CreateProfileDTO = newProfile;
       const resp: BaseResponseDTO = {
@@ -48,10 +49,10 @@ export class ProfileController {
         data: { profile },
       };
 
-      response.status(200);
+      res.status(200);
       return { ...resp };
     } catch (error) {
-      if (response.statusCode === 200) response.status(500);
+      if (res.statusCode === 200) res.status(500);
       const resp: RegistryDTO = {
         status: "fail",
         error: {
@@ -65,41 +66,48 @@ export class ProfileController {
     }
   }
 
-  async all(request: Request, response: Response, next: NextFunction) {
-    return this.profileRepository.find();
-  }
-
-  async on(request: Request, response: Response, next: NextFunction) {
-    const id = parseInt(request.params.id);
-
-    const profile = await this.profileRepository.findOne({
-      relations: {
-        hiredPerson: true,
-      },
-      where: { id },
-    });
-
-    if (!profile) {
-      return "Unregistered profile.";
-    }
-    return profile;
-  }
-
-  async update(request: Request, response: Response, next: NextFunction) {
+  async onProfile(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: ProfileDTO = request.body;
-      const { id } = request.body;
-      const token = request.headers.authorization.split(" ")[1];
+      const id = parseInt(req.params.id);
+
+      const profile = await this.repository.findOne({
+        relations: {
+          hiredPerson: true,
+        },
+        where: { id },
+      });
+
+      if (!profile) {
+        responseError(res, "Unregistered this profile.");
+      }
+
+      return profile;
+    } catch (error) {
+      if (res.statusCode === 200) res.status(500);
+      const resp: BaseResponseDTO = {
+        status: "fail",
+        error: {
+          message: error.message,
+        },
+        data: undefined,
+      };
+      return {
+        ...resp,
+      };
+    }
+  }
+
+  async updateProfile(req: Request, res: Response, next: NextFunction) {
+    try {
+      const fields: ProfileDTO = req.body;
+      const { id } = req.body;
+      const token = req.headers.authorization.split(" ")[1];
       const userId = JWT.getJwtPayloadValueByKey(token, "id");
 
       if (!id)
-        responseError(
-          response,
-          "Delete profile requiere profile id valid.",
-          404,
-        );
+        responseError(res, "Update profile requiere profile id valid.", 404);
 
-      const profileToUpdate = await this.profileRepository.findOne({
+      const profileToUpdate = await this.repository.findOne({
         relations: {
           user: true,
         },
@@ -108,13 +116,13 @@ export class ProfileController {
 
       if (profileToUpdate.user.id !== userId)
         responseError(
-          response,
+          res,
           "User is not authorized to update this profile",
           401,
         );
 
-      const profileUpdate = { ...profileToUpdate, ...body };
-      await this.profileRepository.save(profileUpdate);
+      const profileUpdate = { ...profileToUpdate, ...fields };
+      await this.repository.save(profileUpdate);
 
       const profile: ProfileDTO = profileUpdate;
       const resp: BaseResponseDTO = {
@@ -123,10 +131,10 @@ export class ProfileController {
         data: { profile },
       };
 
-      response.status(201);
+      res.status(201);
       return { ...resp };
     } catch (error) {
-      if (response.statusCode === 200) response.status(500);
+      if (res.statusCode === 200) res.status(500);
       const resp: RegistryDTO = {
         status: "fail",
         error: {
@@ -140,27 +148,19 @@ export class ProfileController {
     }
   }
 
-  async partialUpdate(
-    request: Request,
-    response: Response,
-    next: NextFunction,
-  ) {
+  async partialUpdate(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: ProfileDTO = request.body;
-      const { id } = request.body;
-      const token = request.headers.authorization.split(" ")[1];
+      const fields: ProfileDTO = req.body;
+      const { id } = req.body;
+      const token = req.headers.authorization.split(" ")[1];
       const userId = JWT.getJwtPayloadValueByKey(token, "id");
 
       if (!id)
-        responseError(
-          response,
-          "Delete profile requiere profile id valid.",
-          404,
-        );
+        responseError(res, "Update profile requiere profile id valid.", 401);
 
-      const fieldToUpdate: string = Object.keys(body)[1];
+      const fieldToUpdate: string = Object.keys(fields)[1];
 
-      const profileToUpdate = await this.profileRepository.findOne({
+      const profileToUpdate = await this.repository.findOne({
         relations: {
           user: true,
         },
@@ -168,21 +168,21 @@ export class ProfileController {
       });
 
       if (!profileToUpdate) {
-        responseError(response, "User does not exist.");
+        responseError(res, "User does not exist.", 404);
       }
 
       if (profileToUpdate.user.id !== userId)
         responseError(
-          response,
+          res,
           "User is not authorized to update this profile",
           401,
         );
 
       const profileUpdate = {
         ...profileToUpdate,
-        [fieldToUpdate]: body[fieldToUpdate],
+        [fieldToUpdate]: fields[fieldToUpdate],
       };
-      await this.profileRepository.save(profileUpdate);
+      await this.repository.save(profileUpdate);
 
       const profile: ProfileDTO = profileUpdate;
       const resp: BaseResponseDTO = {
@@ -191,10 +191,10 @@ export class ProfileController {
         data: { profile },
       };
 
-      response.status(200);
+      res.status(200);
       return { ...resp };
     } catch (error) {
-      if (response.statusCode === 200) response.status(500);
+      if (res.statusCode === 200) res.status(500);
       const resp: RegistryDTO = {
         status: "fail",
         error: {
@@ -208,28 +208,19 @@ export class ProfileController {
     }
   }
 
-  async delete(request: Request, response: Response, next: NextFunction) {
+  async deleteProfile(req: Request, res: Response, next: NextFunction) {
     try {
-      const id = parseInt(request.params.id);
+      const id = parseInt(req.params.id);
 
       if (!id)
-        responseError(
-          response,
-          "Delete profile requiere profile id valid.",
-          404,
-        );
+        responseError(res, "Delete profile requiere profile id valid.", 404);
 
-      let profileToRemove = await this.profileRepository.findOneBy({ id });
+      await this.delete({ id, res });
 
-      if (!profileToRemove)
-        responseError(response, "This profile does not exist.", 400);
-
-      await this.profileRepository.remove(profileToRemove);
-
-      response.status(204);
+      res.status(204);
       return "Profile has been removed successfully.";
     } catch (error) {
-      if (response.statusCode === 200) response.status(500);
+      if (res.statusCode === 200) res.status(500);
       const resp: RegistryDTO = {
         status: "fail",
         error: {

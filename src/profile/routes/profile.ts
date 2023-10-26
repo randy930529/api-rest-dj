@@ -8,7 +8,7 @@ export const profileRoutes = [
     route: "/profile",
     controller: ProfileController,
     middlewares: [authMiddleware],
-    action: "create",
+    action: "createProfile",
   },
   {
     method: "get",
@@ -22,14 +22,14 @@ export const profileRoutes = [
     route: "/profile/:id",
     controller: ProfileController,
     middlewares: [authMiddleware],
-    action: "on",
+    action: "onProfile",
   },
   {
     method: "put",
     route: "/profile",
     controller: ProfileController,
     middlewares: [authMiddleware],
-    action: "update",
+    action: "updateProfile",
   },
   {
     method: "patch",
@@ -43,6 +43,6 @@ export const profileRoutes = [
     route: "/profile/:id",
     controller: ProfileController,
     middlewares: [authMiddleware],
-    action: "delete",
+    action: "deleteProfile",
   },
 ];
