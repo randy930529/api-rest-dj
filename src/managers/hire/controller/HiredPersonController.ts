@@ -3,7 +3,7 @@ import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { AppDataSource } from "../../../data-source";
 import { HiredPerson } from "../../../entity/HiredPerson";
 import { NextFunction, Response } from "express";
-import BaseResponseDTO from "../../../auth/dto/response/base.dto";
+import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import { HiredPersonDTO } from "../dto/request/hiredPerson.dto";
 import { CreateHiredPersonDTO } from "../dto/response/createHiredPerson.dto";
 import { Profile } from "../../../entity/Profile";
@@ -90,7 +90,7 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
         responseError(
           res,
           "Update pired person requiere profile id valid.",
-          404
+          404,
         );
 
       const hiredPersonUpdate = await this.update({ id, res: res }, body);
@@ -122,7 +122,7 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
   async partialUpdateHiredPerson(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const body: HiredPersonDTO = req.body;
@@ -173,7 +173,7 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
         responseError(
           res,
           "Delete hired person requiere profile id valid.",
-          404
+          404,
         );
 
       await this.delete({ id, res });

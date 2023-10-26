@@ -6,7 +6,7 @@ import { ProfileHiredPersonDTO } from "../dto/request/profileHiredPerson.dto";
 import { responseError } from "../../../auth/utils/responseError";
 import { Profile } from "../../../entity/Profile";
 import { HiredPerson } from "../../../entity/HiredPerson";
-import BaseresDTO from "../../../auth/dto/response/base.dto";
+import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 
 export class ProfileHiredPersonController extends EntityControllerBase<ProfileHiredPerson> {
   constructor() {
@@ -17,7 +17,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
   async createProfileHiredPerson(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const body: ProfileHiredPersonDTO = req.body;
@@ -54,7 +54,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       await this.create(newProfileHiredPerson);
 
       const profileHiredPerson: ProfileHiredPersonDTO = newProfileHiredPerson;
-      const resp: BaseresDTO = {
+      const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
         data: { profileHiredPerson },
@@ -64,7 +64,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       return { ...resp };
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
-      const resp: BaseresDTO = {
+      const resp: BaseResponseDTO = {
         status: "fail",
         error: {
           message: error.message,
@@ -84,7 +84,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       return await this.one({ id, res });
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
-      const resp: BaseresDTO = {
+      const resp: BaseResponseDTO = {
         status: "fail",
         error: {
           message: error.message,
@@ -100,7 +100,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
   async updateProfileHiredPerson(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const body: ProfileHiredPerson = req.body;
@@ -110,14 +110,14 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
         responseError(
           res,
           "Update profile hired person requiere profile id valid.",
-          404
+          404,
         );
 
       const profileHiredPersonUpdate = await this.update({ id, res }, body);
 
       const profileHiredPerson: ProfileHiredPersonDTO =
         profileHiredPersonUpdate;
-      const resp: BaseresDTO = {
+      const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
         data: { profileHiredPerson },
@@ -127,7 +127,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       return { ...resp };
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
-      const resp: BaseresDTO = {
+      const resp: BaseResponseDTO = {
         status: "fail",
         error: {
           message: error.message,
@@ -143,7 +143,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
   async partialUpdateProfileHiredPerson(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const body: ProfileHiredPersonDTO = req.body;
@@ -153,7 +153,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
         responseError(
           res,
           "Update requiere profile hired person id valid.",
-          404
+          404,
         );
 
       const fieldToUpdate: string = Object.keys(body)[1];
@@ -168,7 +168,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
 
       const profileHiredPerson: ProfileHiredPersonDTO =
         profileHiredPersonUpdate;
-      const resp: BaseresDTO = {
+      const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
         data: { profileHiredPerson },
@@ -178,7 +178,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       return { ...resp };
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
-      const resp: BaseresDTO = {
+      const resp: BaseResponseDTO = {
         status: "fail",
         error: {
           message: error.message,
@@ -194,7 +194,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
   async deleteProfileHiredPerson(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const id = parseInt(req.params.id);
@@ -203,7 +203,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
         responseError(
           res,
           "Delete profile hired person requiere profile id valid.",
-          404
+          404,
         );
 
       await this.delete({ id, res });
@@ -212,7 +212,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       return "Profile hired person has been removed successfully.";
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
-      const resp: BaseresDTO = {
+      const resp: BaseResponseDTO = {
         status: "fail",
         error: {
           message: error.message,

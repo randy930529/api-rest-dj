@@ -5,7 +5,7 @@ import { responseError } from "../utils/responseError";
 import { RegistryDTO } from "../dto/response/auth/registry.dto";
 import { JWT } from "../security/jwt";
 import { UserDTO } from "../dto/response/auth/user.dto";
-import BaseResponseDTO from "../dto/response/base.dto";
+import { BaseResponseDTO } from "../dto/response/base.dto";
 import { UpdateDTO } from "../dto/request/update.dto";
 import { UserWhitProfileDTO } from "../dto/response/auth/userWhitProfile.dto";
 
@@ -69,7 +69,7 @@ export class UserController {
   private async retrieve(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const token = request.headers.authorization.split(" ")[1];
@@ -135,7 +135,7 @@ export class UserController {
   private async delete(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const token = request.headers.authorization.split(" ")[1];
@@ -167,7 +167,7 @@ export class UserController {
   private async update(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const body: UpdateDTO = request.body;
@@ -212,7 +212,7 @@ export class UserController {
   private async partialUpdate(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const body: UpdateDTO = request.body;

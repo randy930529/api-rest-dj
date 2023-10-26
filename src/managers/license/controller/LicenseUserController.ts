@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import BaseResponseDTO from "../../../auth/dto/response/base.dto";
+import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import { responseError } from "../../../auth/utils/responseError";
 import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { AppDataSource } from "../../../data-source";
@@ -128,7 +128,7 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
   async partialUpdateLicenseUser(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const body: LicenseUserDTO = req.body;

@@ -6,7 +6,7 @@ import { responseError } from "../../auth/utils/responseError";
 import { User } from "../../entity/User";
 import { JWT } from "../../auth/security/jwt";
 import { RegistryDTO } from "../../auth/dto/response/auth/registry.dto";
-import BaseResponseDTO from "../../auth/dto/response/base.dto";
+import { BaseResponseDTO } from "../../auth/dto/response/base.dto";
 import { CreateProfileDTO } from "../dto/response/createProfile.dto";
 
 export class ProfileController {
@@ -96,7 +96,7 @@ export class ProfileController {
         responseError(
           response,
           "Delete profile requiere profile id valid.",
-          404
+          404,
         );
 
       const profileToUpdate = await this.profileRepository.findOne({
@@ -110,7 +110,7 @@ export class ProfileController {
         responseError(
           response,
           "User is not authorized to update this profile",
-          401
+          401,
         );
 
       const profileUpdate = { ...profileToUpdate, ...body };
@@ -143,7 +143,7 @@ export class ProfileController {
   async partialUpdate(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const body: ProfileDTO = request.body;
@@ -155,7 +155,7 @@ export class ProfileController {
         responseError(
           response,
           "Delete profile requiere profile id valid.",
-          404
+          404,
         );
 
       const fieldToUpdate: string = Object.keys(body)[1];
@@ -175,7 +175,7 @@ export class ProfileController {
         responseError(
           response,
           "User is not authorized to update this profile",
-          401
+          401,
         );
 
       const profileUpdate = {
@@ -216,7 +216,7 @@ export class ProfileController {
         responseError(
           response,
           "Delete profile requiere profile id valid.",
-          404
+          404,
         );
 
       let profileToRemove = await this.profileRepository.findOneBy({ id });

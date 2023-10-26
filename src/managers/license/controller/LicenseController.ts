@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import BaseResponseDTO from "../../../auth/dto/response/base.dto";
+import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import { responseError } from "../../../auth/utils/responseError";
 import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { AppDataSource } from "../../../data-source";

@@ -12,7 +12,7 @@ import { AuthenticationDTO } from "../dto/response/auth/authentication.dto";
 import { RefreshTokenDTO } from "../dto/request/refreshToken.dto";
 import { responseError } from "../utils/responseError";
 import Email from "../../utils/email";
-import BaseResponseDTO from "../dto/response/base.dto";
+import { BaseResponseDTO } from "../dto/response/base.dto";
 import { verifyTokenAndRefreshTokenForUserLogin } from "../utils/verifyTokenAndRefreshTokenForUserLogin";
 import { userSetPasswordDTO } from "../dto/request/userSetPassword.dto";
 import * as moment from "moment";
@@ -101,16 +101,15 @@ export class AuthController {
 
       const isPasswordValid = await PasswordHash.isPasswordValid(
         password,
-        user.password
+        user.password,
       );
 
       if (!isPasswordValid) {
         responseError(response, "Invalid credentials.", 401);
       }
 
-      const { token, refreshToken } = await JWT.generateTokenAndRefreshToken(
-        user
-      );
+      const { token, refreshToken } =
+        await JWT.generateTokenAndRefreshToken(user);
 
       const userDTO: UserDTO = user.toJSON();
       const resp: AuthenticationDTO = {
@@ -143,7 +142,7 @@ export class AuthController {
       const { jwtId, getRefreshToken } =
         await verifyTokenAndRefreshTokenForUserLogin(
           { token, refreshToken },
-          response
+          response,
         );
       if (!jwtId && !getRefreshToken) {
         responseError(response, "User does not login.");
@@ -223,7 +222,7 @@ export class AuthController {
   async userActivation(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const token = request.headers.authorization.split(" ")[1];
@@ -268,7 +267,7 @@ export class AuthController {
   async userResendActivation(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const { email } = request.body;
@@ -315,7 +314,7 @@ export class AuthController {
   async userSetPassword(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const body: userSetPasswordDTO = request.body;
@@ -339,7 +338,7 @@ export class AuthController {
 
       const isPasswordValid = await PasswordHash.isPasswordValid(
         password,
-        userToUpdate.password
+        userToUpdate.password,
       );
 
       if (!isPasswordValid) {
@@ -378,7 +377,7 @@ export class AuthController {
   async userResetPassword(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const { email } = request.body;
@@ -425,7 +424,7 @@ export class AuthController {
   async userResetPasswordConfirm(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const body: RegisterDTO = request.body;
