@@ -12,7 +12,7 @@ import { UserWhitProfileDTO } from "../dto/response/auth/userWhitProfile.dto";
 export class UserController {
   private userRepository = AppDataSource.getRepository(User);
 
-  async all(request: Request, response: Response, next: NextFunction) {
+  async all(req: Request, res: Response, next: NextFunction) {
     return this.userRepository.find({
       relations: {
         profiles: true,
@@ -20,12 +20,10 @@ export class UserController {
     });
   }
 
-  async one(request: Request, response: Response, next: NextFunction) {
-    const id = parseInt(request.params.id);
+  async one(req: Request, res: Response, next: NextFunction) {
+    const id = parseInt(req.params.id);
 
-    const user = await this.userRepository.findOne({
-      where: { id },
-    });
+    const user = await this.userRepository.findOneBy({ id });
 
     if (!user) {
       return "Unregistered user.";
@@ -33,8 +31,8 @@ export class UserController {
     return user;
   }
 
-  async save(request: Request, response: Response, next: NextFunction) {
-    const { email, password } = request.body;
+  async save(req: Request, res: Response, next: NextFunction) {
+    const { email, password } = req.body;
 
     const user = Object.assign(new User(), {
       email,
@@ -44,13 +42,13 @@ export class UserController {
     return this.userRepository.save(user);
   }
 
-  async remove(request: Request, response: Response, next: NextFunction) {
+  async remove(req: Request, res: Response, next: NextFunction) {
     try {
-      const id = parseInt(request.params.id);
+      const id = parseInt(req.params.id);
 
-      await this.destroy(response, id);
+      await this.destroy(res, id);
 
-      response.status(204);
+      res.status(204);
       return "User has been removed successfully.";
     } catch (error) {
       const resp: RegistryDTO = {
@@ -66,31 +64,25 @@ export class UserController {
     }
   }
 
-  private async retrieve(
-    request: Request,
-    response: Response,
-    next: NextFunction,
-  ) {
+  private async retrieve(req: Request, res: Response, next: NextFunction) {
     try {
-      const token = request.headers.authorization.split(" ")[1];
+      const token = req.headers.authorization.split(" ")[1];
 
       if (!JWT.isTokenValid(token)) {
-        responseError(response, "JWT is not valid.");
+        responseError(res, "JWT is not valid.");
       }
 
+      const id = JWT.getJwtPayloadValueByKey(token, "id");
       const user = await this.userRepository.findOne({
-        select: {
-          password: false,
-        },
         relations: {
           profiles: true,
           licenseUser: true,
         },
-        where: { id: JWT.getJwtPayloadValueByKey(token, "id") },
+        where: { id },
       });
 
       if (!user) {
-        responseError(response, "User does not exist.");
+        responseError(res, "User does not exist.");
       }
 
       const userDTO: UserWhitProfileDTO = user.toJSON();
@@ -102,7 +94,7 @@ export class UserController {
         },
       };
 
-      response.status(200);
+      res.status(200);
       return { ...resp };
     } catch (error) {
       const resp: RegistryDTO = {
@@ -118,37 +110,31 @@ export class UserController {
     }
   }
 
-  private async destroy(response: Response, userId: number) {
+  private async destroy(res: Response, userId: number) {
     const id = userId;
 
-    if (!id)
-      responseError(response, "Destroy user requiere user id valid.", 400);
+    if (!id) responseError(res, "Destroy user requiere user id valid.", 400);
 
     let userToRemove = await this.userRepository.findOneBy({ id });
 
-    if (!userToRemove)
-      responseError(response, "This user does not exist.", 400);
+    if (!userToRemove) responseError(res, "This user does not exist.", 400);
 
     await this.userRepository.remove(userToRemove);
   }
 
-  private async delete(
-    request: Request,
-    response: Response,
-    next: NextFunction,
-  ) {
+  private async delete(req: Request, res: Response, next: NextFunction) {
     try {
-      const token = request.headers.authorization.split(" ")[1];
+      const token = req.headers.authorization.split(" ")[1];
 
       if (!JWT.isTokenValid(token)) {
-        responseError(response, "JWT is not valid.");
+        responseError(res, "JWT is not valid.");
       }
 
       const id = JWT.getJwtPayloadValueByKey(token, "id");
 
-      await this.destroy(response, id);
+      await this.destroy(res, id);
 
-      response.status(204);
+      res.status(204);
       return "User has been removed successfully.";
     } catch (error) {
       const resp: RegistryDTO = {
@@ -164,23 +150,17 @@ export class UserController {
     }
   }
 
-  private async update(
-    request: Request,
-    response: Response,
-    next: NextFunction,
-  ) {
+  private async update(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: UpdateDTO = request.body;
-      const token = request.headers.authorization.split(" ")[1];
+      const body: UpdateDTO = req.body;
+      const token = req.headers.authorization.split(" ")[1];
 
       const id = JWT.getJwtPayloadValueByKey(token, "id");
 
-      const userToUpdate = await this.userRepository.findOne({
-        where: { id },
-      });
+      const userToUpdate = await this.userRepository.findOneBy({ id });
 
       if (!userToUpdate) {
-        responseError(response, "User does not exist.");
+        responseError(res, "User does not exist.");
       }
 
       const userUpdate = { ...userToUpdate, ...body };
@@ -193,7 +173,7 @@ export class UserController {
         data: { ...user, password: undefined },
       };
 
-      response.status(200);
+      res.status(200);
       return { ...resp };
     } catch (error) {
       const resp: RegistryDTO = {
@@ -209,24 +189,18 @@ export class UserController {
     }
   }
 
-  private async partialUpdate(
-    request: Request,
-    response: Response,
-    next: NextFunction,
-  ) {
+  private async partialUpdate(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: UpdateDTO = request.body;
-      const token = request.headers.authorization.split(" ")[1];
+      const body: UpdateDTO = req.body;
+      const token = req.headers.authorization.split(" ")[1];
 
       const fieldToUpdate: string = Object.keys(body)[0];
       const id = JWT.getJwtPayloadValueByKey(token, "id");
 
-      const userToUpdate = await this.userRepository.findOne({
-        where: { id },
-      });
+      const userToUpdate = await this.userRepository.findOneBy({ id });
 
       if (!userToUpdate) {
-        responseError(response, "User does not exist.");
+        responseError(res, "User does not exist.");
       }
 
       const userUpdate = {
@@ -242,7 +216,7 @@ export class UserController {
         data: { ...user, password: undefined },
       };
 
-      response.status(200);
+      res.status(200);
       return { ...resp };
     } catch (error) {
       const resp: RegistryDTO = {
@@ -258,15 +232,15 @@ export class UserController {
     }
   }
 
-  async userMe(request: Request, response: Response, next: NextFunction) {
-    if (request.method == "GET") {
-      return this.retrieve(request, response, next);
-    } else if (request.method == "PUT") {
-      return this.update(request, response, next);
-    } else if (request.method == "PATCH") {
-      return this.partialUpdate(request, response, next);
-    } else if (request.method == "DELETE") {
-      return this.delete(request, response, next);
+  async userMe(req: Request, res: Response, next: NextFunction) {
+    if (req.method == "GET") {
+      return this.retrieve(req, res, next);
+    } else if (req.method == "PUT") {
+      return this.update(req, res, next);
+    } else if (req.method == "PATCH") {
+      return this.partialUpdate(req, res, next);
+    } else if (req.method == "DELETE") {
+      return this.delete(req, res, next);
     }
   }
 }

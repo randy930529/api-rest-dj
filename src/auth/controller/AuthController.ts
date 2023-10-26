@@ -27,21 +27,19 @@ export class AuthController {
   private userRepository = AppDataSource.getRepository(User);
   private profileRepository = AppDataSource.getRepository(Profile);
 
-  async register(request: Request, response: Response, next: NextFunction) {
+  async register(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: RegisterDTO = request.body;
-      const { email, password, repeatPassword } = body;
+      const fields: RegisterDTO = req.body;
+      const { email, password, repeatPassword } = fields;
 
       if (password !== repeatPassword) {
-        responseError(response, "Repeat password does not match the password.");
+        responseError(res, "Repeat password does not match the password.");
       }
 
-      const existingUser = await this.userRepository.findOne({
-        where: { email },
-      });
+      const existingUser = await this.userRepository.findOneBy({ email });
 
       if (existingUser) {
-        responseError(response, "The user already exists.", 409);
+        responseError(res, "The user already exists.", 409);
       }
 
       const hashedPassword = await PasswordHash.hashPassword(password);
@@ -63,10 +61,10 @@ export class AuthController {
       await new Email(newUser, confirUrl)
         .sendVerificationCode()
         .catch((error) => {
-          responseError(response, "Server is not ready to send your messages.");
+          responseError(res, "Server is not ready to send your messages.");
         });
 
-      response.status(201);
+      res.status(201);
       return { ...resp };
     } catch (error) {
       const resp: RegistryDTO = {
@@ -82,21 +80,19 @@ export class AuthController {
     }
   }
 
-  async login(request: Request, response: Response, next: NextFunction) {
+  async login(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: LoginDTO = request.body;
-      const { email, password } = body;
+      const fields: LoginDTO = req.body;
+      const { email, password } = fields;
 
-      const user = await this.userRepository.findOne({
-        where: { email },
-      });
+      const user = await this.userRepository.findOneBy({ email });
 
       if (!user) {
-        responseError(response, "Invalid credentials.", 401);
+        responseError(res, "Invalid credentials.", 401);
       }
 
       if (!user.active) {
-        responseError(response, "User not activate.", 401);
+        responseError(res, "User not activate.", 401);
       }
 
       const isPasswordValid = await PasswordHash.isPasswordValid(
@@ -105,7 +101,7 @@ export class AuthController {
       );
 
       if (!isPasswordValid) {
-        responseError(response, "Invalid credentials.", 401);
+        responseError(res, "Invalid credentials.", 401);
       }
 
       const { token, refreshToken } =
@@ -118,7 +114,7 @@ export class AuthController {
         data: { user: userDTO, token, refreshToken },
       };
 
-      response.status(200);
+      res.status(200);
       return { ...resp };
     } catch (error) {
       const resp: RegistryDTO = {
@@ -134,25 +130,24 @@ export class AuthController {
     }
   }
 
-  async refreshToken(request: Request, response: Response, next: NextFunction) {
+  async refreshToken(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: RefreshTokenDTO = request.body;
-      const { token, refreshToken } = body;
+      const fields: RefreshTokenDTO = req.body;
+      const { token, refreshToken } = fields;
 
       const { jwtId, getRefreshToken } =
         await verifyTokenAndRefreshTokenForUserLogin(
           { token, refreshToken },
-          response,
+          res,
         );
       if (!jwtId && !getRefreshToken) {
-        responseError(response, "User does not login.");
+        responseError(res, "User does not login.");
       }
 
-      const user = await this.userRepository.findOne({
-        where: { id: JWT.getJwtPayloadValueByKey(token, "id") },
-      });
+      const id = JWT.getJwtPayloadValueByKey(token, "id");
+      const user = await this.userRepository.findOneBy({ id });
       if (!user) {
-        responseError(response, "User does not exist.");
+        responseError(res, "User does not exist.");
       }
 
       getRefreshToken.used = true;
@@ -171,7 +166,7 @@ export class AuthController {
         },
       };
 
-      response.status(200);
+      res.status(200);
       return { ...resp };
     } catch (error) {
       const resp: RegistryDTO = {
@@ -187,12 +182,12 @@ export class AuthController {
     }
   }
 
-  async jwtVerify(request: Request, response: Response, next: NextFunction) {
+  async jwtVerify(req: Request, res: Response, next: NextFunction) {
     try {
-      const { token } = request.body;
+      const { token } = req.body;
 
       if (!JWT.isTokenValid(token)) {
-        responseError(response, "JWT is not valid.");
+        responseError(res, "JWT is not valid.");
       }
 
       const resp: BaseResponseDTO = {
@@ -203,7 +198,7 @@ export class AuthController {
         },
       };
 
-      response.status(200);
+      res.status(200);
       return { ...resp };
     } catch (error) {
       const resp: BaseResponseDTO = {
@@ -219,22 +214,16 @@ export class AuthController {
     }
   }
 
-  async userActivation(
-    request: Request,
-    response: Response,
-    next: NextFunction,
-  ) {
+  async userActivation(req: Request, res: Response, next: NextFunction) {
     try {
-      const token = request.headers.authorization.split(" ")[1];
+      const token = req.headers.authorization.split(" ")[1];
 
       const id = JWT.getJwtPayloadValueByKey(token, "id");
 
-      const user = await this.userRepository.findOne({
-        where: { id },
-      });
+      const user = await this.userRepository.findOneBy({ id });
 
       if (!user) {
-        responseError(response, "User does not exist.");
+        responseError(res, "User does not exist.");
       }
 
       if (!user.active) {
@@ -248,7 +237,7 @@ export class AuthController {
         await this.profileRepository.save(newProfile);
       }
 
-      response.status(200);
+      res.status(200);
       return { message: "Account activated successfully." };
     } catch (error) {
       const resp: RegistryDTO = {
@@ -264,20 +253,14 @@ export class AuthController {
     }
   }
 
-  async userResendActivation(
-    request: Request,
-    response: Response,
-    next: NextFunction,
-  ) {
+  async userResendActivation(req: Request, res: Response, next: NextFunction) {
     try {
-      const { email } = request.body;
+      const { email } = req.body;
 
-      const existingUser = await this.userRepository.findOne({
-        where: { email },
-      });
+      const existingUser = await this.userRepository.findOneBy({ email });
 
       if (!existingUser || !email) {
-        responseError(response, "The user not already exists.", 409);
+        responseError(res, "The user not already exists.", 409);
       }
 
       const user: UserDTO = existingUser;
@@ -292,10 +275,10 @@ export class AuthController {
       await new Email(existingUser, confirUrl)
         .sendVerificationCode()
         .catch((error) => {
-          responseError(response, "Server is not ready to send your messages.");
+          responseError(res, "Server is not ready to send your messages.");
         });
 
-      response.status(201);
+      res.status(201);
       return { ...resp };
     } catch (error) {
       const resp: RegistryDTO = {
@@ -311,29 +294,23 @@ export class AuthController {
     }
   }
 
-  async userSetPassword(
-    request: Request,
-    response: Response,
-    next: NextFunction,
-  ) {
+  async userSetPassword(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: userSetPasswordDTO = request.body;
-      const { password, newPassword } = body;
+      const fields: userSetPasswordDTO = req.body;
+      const { password, newPassword } = fields;
 
-      const token = request.headers.authorization.split(" ")[1];
+      const token = req.headers.authorization.split(" ")[1];
 
       const id = JWT.getJwtPayloadValueByKey(token, "id");
 
-      const userToUpdate = await this.userRepository.findOne({
-        where: { id },
-      });
+      const userToUpdate = await this.userRepository.findOneBy({ id });
 
       if (!userToUpdate) {
-        responseError(response, "The user not already exists.", 409);
+        responseError(res, "The user not already exists.", 409);
       }
 
       if (!userToUpdate.active) {
-        responseError(response, "User not activate.", 401);
+        responseError(res, "User not activate.", 401);
       }
 
       const isPasswordValid = await PasswordHash.isPasswordValid(
@@ -342,7 +319,7 @@ export class AuthController {
       );
 
       if (!isPasswordValid) {
-        responseError(response, "Invalid credentials.", 401);
+        responseError(res, "Invalid credentials.", 401);
       }
 
       const hashedNewPassword = await PasswordHash.hashPassword(newPassword);
@@ -358,7 +335,7 @@ export class AuthController {
         data: { user },
       };
 
-      response.status(200);
+      res.status(200);
       return { ...resp };
     } catch (error) {
       const resp: RegistryDTO = {
@@ -374,20 +351,14 @@ export class AuthController {
     }
   }
 
-  async userResetPassword(
-    request: Request,
-    response: Response,
-    next: NextFunction,
-  ) {
+  async userResetPassword(req: Request, res: Response, next: NextFunction) {
     try {
-      const { email } = request.body;
+      const { email } = req.body;
 
-      const existingUser = await this.userRepository.findOne({
-        where: { email },
-      });
+      const existingUser = await this.userRepository.findOneBy({ email });
 
       if (!existingUser || !email) {
-        responseError(response, "The user not already exists.", 409);
+        responseError(res, "The user not already exists.", 409);
       }
 
       const user: UserDTO = existingUser;
@@ -402,10 +373,10 @@ export class AuthController {
       await new Email(existingUser, confirUrl)
         .sendPasswordResetToken()
         .catch((error) => {
-          responseError(response, "Server is not ready to send your messages.");
+          responseError(res, "Server is not ready to send your messages.");
         });
 
-      response.status(201);
+      res.status(201);
       return { ...resp };
     } catch (error) {
       const resp: RegistryDTO = {
@@ -422,32 +393,30 @@ export class AuthController {
   }
 
   async userResetPasswordConfirm(
-    request: Request,
-    response: Response,
+    req: Request,
+    res: Response,
     next: NextFunction,
   ) {
     try {
-      const body: RegisterDTO = request.body;
-      const { password, repeatPassword } = body;
+      const fields: RegisterDTO = req.body;
+      const { password, repeatPassword } = fields;
 
       if (password !== repeatPassword) {
-        responseError(response, "Repeat password does not match the password.");
+        responseError(res, "Repeat password does not match the password.");
       }
 
-      const token = request.headers.authorization.split(" ")[1];
+      const token = req.headers.authorization.split(" ")[1];
 
       const id = JWT.getJwtPayloadValueByKey(token, "id");
 
-      const userToSetPassword = await this.userRepository.findOne({
-        where: { id },
-      });
+      const userToSetPassword = await this.userRepository.findOneBy({ id });
 
       if (!userToSetPassword) {
-        responseError(response, "User does not exist.");
+        responseError(res, "User does not exist.");
       }
 
       if (!userToSetPassword.active) {
-        responseError(response, "User not activate.", 401);
+        responseError(res, "User not activate.", 401);
       }
 
       const hashedNewPassword = await PasswordHash.hashPassword(password);
@@ -463,7 +432,7 @@ export class AuthController {
         data: { user },
       };
 
-      response.status(201);
+      res.status(201);
       return { ...resp };
     } catch (error) {
       const resp: RegistryDTO = {
