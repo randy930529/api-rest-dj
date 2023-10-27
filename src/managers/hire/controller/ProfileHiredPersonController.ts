@@ -64,16 +64,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       return { ...resp };
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
-      const resp: BaseResponseDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      next(error);
     }
   }
 
@@ -84,16 +75,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       return await this.one({ id, res });
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
-      const resp: BaseResponseDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      next(error);
     }
   }
 
@@ -127,16 +109,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       return { ...resp };
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
-      const resp: BaseResponseDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      next(error);
     }
   }
 
@@ -178,16 +151,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       return { ...resp };
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
-      const resp: BaseResponseDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      next(error);
     }
   }
 
@@ -212,16 +176,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       return "Profile hired person has been removed successfully.";
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
-      const resp: BaseResponseDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      next(error);
     }
   }
 }

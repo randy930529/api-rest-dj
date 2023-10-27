@@ -109,16 +109,8 @@ export class AuthController {
       res.status(200);
       return { ...resp };
     } catch (error) {
-      const resp: RegistryDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      if (res.statusCode === 200) res.status(500);
+      next(error);
     }
   }
 
@@ -161,16 +153,8 @@ export class AuthController {
       res.status(200);
       return { ...resp };
     } catch (error) {
-      const resp: RegistryDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      if (res.statusCode === 200) res.status(500);
+      next(error);
     }
   }
 
@@ -193,16 +177,8 @@ export class AuthController {
       res.status(200);
       return { ...resp };
     } catch (error) {
-      const resp: BaseResponseDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      if (res.statusCode === 200) res.status(500);
+      next(error);
     }
   }
 
@@ -232,16 +208,8 @@ export class AuthController {
       res.status(200);
       return { message: "Account activated successfully." };
     } catch (error) {
-      const resp: RegistryDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      if (res.statusCode === 200) res.status(500);
+      next(error);
     }
   }
 
@@ -273,16 +241,8 @@ export class AuthController {
       res.status(201);
       return { ...resp };
     } catch (error) {
-      const resp: RegistryDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      if (res.statusCode === 200) res.status(500);
+      next(error);
     }
   }
 
@@ -330,16 +290,8 @@ export class AuthController {
       res.status(200);
       return { ...resp };
     } catch (error) {
-      const resp: RegistryDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      if (res.statusCode === 200) res.status(500);
+      next(error);
     }
   }
 
@@ -371,16 +323,8 @@ export class AuthController {
       res.status(201);
       return { ...resp };
     } catch (error) {
-      const resp: RegistryDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      if (res.statusCode === 200) res.status(500);
+      next(error);
     }
   }
 
@@ -427,16 +371,8 @@ export class AuthController {
       res.status(201);
       return { ...resp };
     } catch (error) {
-      const resp: RegistryDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      if (res.statusCode === 200) res.status(500);
+      next(error);
     }
   }
 }

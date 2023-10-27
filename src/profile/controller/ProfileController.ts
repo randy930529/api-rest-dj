@@ -5,7 +5,6 @@ import { ProfileDTO } from "../dto/request/profile.dto";
 import { responseError } from "../../errors/responseError";
 import { User } from "../../entity/User";
 import { JWT } from "../../auth/security/jwt";
-import { RegistryDTO } from "../../auth/dto/response/auth/registry.dto";
 import { BaseResponseDTO } from "../../auth/dto/response/base.dto";
 import { CreateProfileDTO } from "../dto/response/createProfile.dto";
 import { EntityControllerBase } from "../../base/EntityControllerBase";
@@ -53,16 +52,7 @@ export class ProfileController extends EntityControllerBase<Profile> {
       return { ...resp };
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
-      const resp: RegistryDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      next(error);
     }
   }
 
@@ -84,16 +74,7 @@ export class ProfileController extends EntityControllerBase<Profile> {
       return profile;
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
-      const resp: BaseResponseDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      next(error);
     }
   }
 
@@ -135,16 +116,7 @@ export class ProfileController extends EntityControllerBase<Profile> {
       return { ...resp };
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
-      const resp: RegistryDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      next(error);
     }
   }
 
@@ -195,16 +167,7 @@ export class ProfileController extends EntityControllerBase<Profile> {
       return { ...resp };
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
-      const resp: RegistryDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      next(error);
     }
   }
 
@@ -221,16 +184,7 @@ export class ProfileController extends EntityControllerBase<Profile> {
       return "Profile has been removed successfully.";
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
-      const resp: RegistryDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      next(error);
     }
   }
 }

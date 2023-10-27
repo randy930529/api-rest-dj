@@ -2,7 +2,6 @@ import { AppDataSource } from "../../data-source";
 import { NextFunction, Request, Response } from "express";
 import { User } from "../../entity/User";
 import { responseError } from "../../errors/responseError";
-import { RegistryDTO } from "../dto/response/auth/registry.dto";
 import { JWT } from "../security/jwt";
 import { UserDTO } from "../dto/response/auth/user.dto";
 import { BaseResponseDTO } from "../dto/response/base.dto";
@@ -51,16 +50,8 @@ export class UserController {
       res.status(204);
       return "User has been removed successfully.";
     } catch (error) {
-      const resp: RegistryDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      if (res.statusCode === 200) res.status(500);
+      next(error);
     }
   }
 
@@ -97,16 +88,8 @@ export class UserController {
       res.status(200);
       return { ...resp };
     } catch (error) {
-      const resp: RegistryDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      if (res.statusCode === 200) res.status(500);
+      next(error);
     }
   }
 
@@ -137,16 +120,8 @@ export class UserController {
       res.status(204);
       return "User has been removed successfully.";
     } catch (error) {
-      const resp: RegistryDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      if (res.statusCode === 200) res.status(500);
+      next(error);
     }
   }
 
@@ -176,16 +151,8 @@ export class UserController {
       res.status(200);
       return { ...resp };
     } catch (error) {
-      const resp: RegistryDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      if (res.statusCode === 200) res.status(500);
+      next(error);
     }
   }
 
@@ -219,16 +186,8 @@ export class UserController {
       res.status(200);
       return { ...resp };
     } catch (error) {
-      const resp: RegistryDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      if (res.statusCode === 200) res.status(500);
+      next(error);
     }
   }
 

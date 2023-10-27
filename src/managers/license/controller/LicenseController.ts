@@ -13,13 +13,9 @@ export class LicenseController extends EntityControllerBase<License> {
     super(repository);
   }
 
-  async createLicense(
-    request: Request,
-    response: Response,
-    next: NextFunction,
-  ) {
+  async createLicense(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: LicenseDTO = request.body;
+      const body: LicenseDTO = req.body;
 
       const newLicense = Object.assign(new License(), {
         ...body,
@@ -34,56 +30,33 @@ export class LicenseController extends EntityControllerBase<License> {
         data: { license },
       };
 
-      response.status(200);
+      res.status(200);
       return { ...resp };
     } catch (error) {
-      if (response.statusCode === 200) response.status(500);
-      const resp: BaseResponseDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      if (res.statusCode === 200) res.status(500);
+      next(error);
     }
   }
 
-  async onLicense(request: Request, response: Response, next: NextFunction) {
+  async onLicense(req: Request, res: Response, next: NextFunction) {
     try {
-      const id = parseInt(request.params.id);
+      const id = parseInt(req.params.id);
 
-      return await this.one({ id, res: response });
+      return await this.one({ id, res });
     } catch (error) {
-      if (response.statusCode === 200) response.status(500);
-      const resp: BaseResponseDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      if (res.statusCode === 200) res.status(500);
+      next(error);
     }
   }
 
-  async updateLicense(
-    request: Request,
-    response: Response,
-    next: NextFunction,
-  ) {
+  async updateLicense(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: License = request.body;
+      const body: License = req.body;
       const { id } = body;
 
-      if (!id)
-        responseError(response, "Delete license requiere id valid.", 404);
+      if (!id) responseError(res, "Delete license requiere id valid.", 404);
 
-      const licenseUpdate = await this.update({ id, res: response }, body);
+      const licenseUpdate = await this.update({ id, res }, body);
 
       const license: CreateLicenseDTO = licenseUpdate;
       const resp: BaseResponseDTO = {
@@ -92,44 +65,30 @@ export class LicenseController extends EntityControllerBase<License> {
         data: { license },
       };
 
-      response.status(201);
+      res.status(201);
       return { ...resp };
     } catch (error) {
-      if (response.statusCode === 200) response.status(500);
-      const resp: BaseResponseDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      if (res.statusCode === 200) res.status(500);
+      next(error);
     }
   }
 
-  async partialUpdateLicense(
-    request: Request,
-    response: Response,
-    next: NextFunction,
-  ) {
+  async partialUpdateLicense(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: LicenseDTO = request.body;
-      const { id } = request.body;
+      const body: LicenseDTO = req.body;
+      const { id } = req.body;
 
-      if (!id)
-        responseError(response, "Delete license requiere id valid.", 404);
+      if (!id) responseError(res, "Delete license requiere id valid.", 404);
 
       const fieldToUpdate: string = Object.keys(body)[1];
-      const licenseToUpdate = await this.one({ id, res: response });
+      const licenseToUpdate = await this.one({ id, res });
 
       const licenseUpdate = Object.assign(new License(), {
         ...licenseToUpdate,
         [fieldToUpdate]: body[fieldToUpdate],
       });
 
-      await this.update({ id, res: response }, licenseUpdate);
+      await this.update({ id, res }, licenseUpdate);
 
       const license: CreateLicenseDTO = licenseUpdate;
       const resp: BaseResponseDTO = {
@@ -138,50 +97,27 @@ export class LicenseController extends EntityControllerBase<License> {
         data: { license },
       };
 
-      response.status(200);
+      res.status(200);
       return { ...resp };
     } catch (error) {
-      if (response.statusCode === 200) response.status(500);
-      const resp: BaseResponseDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      if (res.statusCode === 200) res.status(500);
+      next(error);
     }
   }
 
-  async deleteLicense(
-    request: Request,
-    response: Response,
-    next: NextFunction,
-  ) {
+  async deleteLicense(req: Request, res: Response, next: NextFunction) {
     try {
-      const id = parseInt(request.params.id);
+      const id = parseInt(req.params.id);
 
-      if (!id)
-        responseError(response, "Delete license requiere id valid.", 404);
+      if (!id) responseError(res, "Delete license requiere id valid.", 404);
 
-      await this.delete({ id, res: response });
+      await this.delete({ id, res });
 
-      response.status(204);
+      res.status(204);
       return "License has been removed successfully.";
     } catch (error) {
-      if (response.statusCode === 200) response.status(500);
-      const resp: BaseResponseDTO = {
-        status: "fail",
-        error: {
-          message: error.message,
-        },
-        data: undefined,
-      };
-      return {
-        ...resp,
-      };
+      if (res.statusCode === 200) res.status(500);
+      next(error);
     }
   }
 }
