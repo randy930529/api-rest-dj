@@ -2,7 +2,7 @@ import { AppDataSource } from "../../data-source";
 import { NextFunction, Request, Response } from "express";
 import { Profile } from "../../entity/Profile";
 import { ProfileDTO } from "../dto/request/profile.dto";
-import { responseError } from "../../auth/utils/responseError";
+import { responseError } from "../../errors/responseError";
 import { User } from "../../entity/User";
 import { JWT } from "../../auth/security/jwt";
 import { RegistryDTO } from "../../auth/dto/response/auth/registry.dto";

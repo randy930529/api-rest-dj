@@ -10,10 +10,10 @@ import { UserDTO } from "../dto/response/auth/user.dto";
 import { JWT } from "../security/jwt";
 import { AuthenticationDTO } from "../dto/response/auth/authentication.dto";
 import { RefreshTokenDTO } from "../dto/request/refreshToken.dto";
-import { responseError } from "../utils/responseError";
+import { responseError } from "../../errors/responseError";
 import Email from "../../utils/email";
 import { BaseResponseDTO } from "../dto/response/base.dto";
-import { verifyTokenAndRefreshTokenForUserLogin } from "../utils/verifyTokenAndRefreshTokenForUserLogin";
+import { verifyTokenAndRefreshTokenForUserLogin } from "../security/verifyTokenAndRefreshTokenForUserLogin";
 import { userSetPasswordDTO } from "../dto/request/userSetPassword.dto";
 import * as moment from "moment";
 

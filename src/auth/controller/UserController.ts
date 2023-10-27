@@ -1,7 +1,7 @@
 import { AppDataSource } from "../../data-source";
 import { NextFunction, Request, Response } from "express";
 import { User } from "../../entity/User";
-import { responseError } from "../utils/responseError";
+import { responseError } from "../../errors/responseError";
 import { RegistryDTO } from "../dto/response/auth/registry.dto";
 import { JWT } from "../security/jwt";
 import { UserDTO } from "../dto/response/auth/user.dto";

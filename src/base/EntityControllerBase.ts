@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { FindOptionsWhere, Repository } from "typeorm";
-import { responseError } from "../auth/utils/responseError";
+import { responseError } from "../errors/responseError";
 
 type Params = { id: number; res: Response };
 

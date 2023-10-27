@@ -1,6 +1,6 @@
 import { Response } from "express";
 import { JWT } from "../security/jwt";
-import { responseError } from "./responseError";
+import { responseError } from "../../errors/responseError";
 
 type Params = {
   token: string;

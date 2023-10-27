@@ -1,3 +1,4 @@
+import { BaseResponseDTO } from "../../auth/dto/response/base.dto";
 import { NextFunction, Request, Response } from "express";
 import { CustomError } from "../CustomError";
 
@@ -12,14 +13,14 @@ export function errorHandler(
   }
 
   if (err instanceof CustomError) {
-    const { statusCode, errors, logging } = err;
+    const { statusCode, errors, logging, stack } = err;
     if (logging) {
       console.error(
         JSON.stringify(
           {
-            code: err.statusCode,
-            errors: err.errors,
-            stack: err.stack,
+            code: statusCode,
+            errors,
+            stack,
           },
           null,
           2,
@@ -30,7 +31,13 @@ export function errorHandler(
     return res.status(statusCode).send({ errors });
   }
 
-  res.status(500);
-  res.render("error", { error: err });
-  //return res.status(500).send({ errors: [{ message: "Something went wrong" }] });
+  const resp: BaseResponseDTO = {
+    status: "fail",
+    error: {
+      message: err.message,
+    },
+    data: undefined,
+  };
+
+  return res.send(resp);
 }

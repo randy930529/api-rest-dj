@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from "express";
-import { responseError } from "../utils/responseError";
+import { responseError } from "../../errors/responseError";
 import { JWT } from "../security/jwt";
 
 export const authMiddleware = (
   request: Request,
   response: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const { authorization } = request.headers;

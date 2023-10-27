@@ -1,9 +1,11 @@
 import * as express from "express";
 import * as bodyParser from "body-parser";
+import "express-async-errors";
 import validateEnv from "./utils/settings/validateEnv";
 import { Request, Response } from "express";
 import { AppDataSource } from "./data-source";
 import { Routes } from "./router";
+import { errorHandler } from "./errors/middlewares/errorHandler";
 import { appConfig } from "../config";
 
 //Para provar el envio de correo. Eliminar!
@@ -33,20 +35,23 @@ AppDataSource.initialize()
           const result = new (route.controller as any)()[route.action](
             req,
             res,
-            next
+            next,
           );
           if (result instanceof Promise) {
             result.then((result) =>
               result !== null && result !== undefined
                 ? res.send(result)
-                : undefined
+                : undefined,
             );
           } else if (result !== null && result !== undefined) {
             res.json(result);
           }
-        }
+        },
       );
     });
+
+    // Error handling
+    app.use(errorHandler);
 
     // setup express app here
 
@@ -58,7 +63,7 @@ AppDataSource.initialize()
     app.listen(appConfig.port);
 
     console.log(
-      `🚀  Express server has started on port ${appConfig.port}. Server ready at: http://localhost:${appConfig.port}/`
+      `🚀  Express server has started on port ${appConfig.port}. Server ready at: http://localhost:${appConfig.port}/`,
     );
   })
   .catch((error) => console.log(error));

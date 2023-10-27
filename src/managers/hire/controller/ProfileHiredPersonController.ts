@@ -3,7 +3,7 @@ import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { AppDataSource } from "../../../data-source";
 import { ProfileHiredPerson } from "../../../entity/ProfileHiredPerson";
 import { ProfileHiredPersonDTO } from "../dto/request/profileHiredPerson.dto";
-import { responseError } from "../../../auth/utils/responseError";
+import { responseError } from "../../../errors/responseError";
 import { Profile } from "../../../entity/Profile";
 import { HiredPerson } from "../../../entity/HiredPerson";
 import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";

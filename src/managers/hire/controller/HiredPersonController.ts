@@ -7,7 +7,7 @@ import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import { HiredPersonDTO } from "../dto/request/hiredPerson.dto";
 import { CreateHiredPersonDTO } from "../dto/response/createHiredPerson.dto";
 import { Profile } from "../../../entity/Profile";
-import { responseError } from "../../../auth/utils/responseError";
+import { responseError } from "../../../errors/responseError";
 
 export class HiredPersonController extends EntityControllerBase<HiredPerson> {
   constructor() {

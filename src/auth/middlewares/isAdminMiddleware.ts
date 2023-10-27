@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { responseError } from "../utils/responseError";
+import { responseError } from "../../errors/responseError";
 import { JWT } from "../security/jwt";
 import { AppDataSource } from "../../data-source";
 import { User } from "../../entity/User";
@@ -7,7 +7,7 @@ import { User } from "../../entity/User";
 export const isAdminMiddleware = async (
   request: Request,
   response: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const { authorization } = request.headers;
@@ -32,7 +32,7 @@ export const isAdminMiddleware = async (
       responseError(
         response,
         "User does not have permission to perform this action",
-        401
+        401,
       );
     }
 
