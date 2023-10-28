@@ -4,6 +4,7 @@ import { hiredPersonRoutes } from "./managers/hire/routes/hirePerson";
 import { profileHiredPersonRoutes } from "./managers/hire/routes/profileHirePerson";
 import { LicenseRoutes } from "./managers/license/routes/license";
 import { LicenseUserRoutes } from "./managers/license/routes/licenseUser";
+import { fiscalYearRoutes } from "./managers/period/routes/fiscalYear";
 import { profileRoutes } from "./profile/routes/profile";
 
 export const Routes = [
@@ -14,4 +15,5 @@ export const Routes = [
   ...profileHiredPersonRoutes,
   ...LicenseRoutes,
   ...LicenseUserRoutes,
+  ...fiscalYearRoutes,
 ];
