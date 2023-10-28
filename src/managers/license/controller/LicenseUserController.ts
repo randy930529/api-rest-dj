@@ -16,9 +16,9 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
 
   async createLicenseUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: LicenseUserDTO = req.body;
-      const userId = body.user.id;
-      const licenseId = body.license.id;
+      const fields: LicenseUserDTO = req.body;
+      const userId = fields.user.id;
+      const licenseId = fields.license.id;
 
       if (!userId) responseError(res, "Do must provide a valid user id.", 404);
 
@@ -40,12 +40,12 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
 
       if (!license) responseError(res, "License not found.", 404);
 
-      const newLicenseUser = Object.assign(new LicenseUser(), {
+      const objectLicenseUser = Object.assign(new LicenseUser(), {
         user,
         license,
       });
 
-      await this.create(newLicenseUser);
+      const newLicenseUser = await this.create(objectLicenseUser);
 
       const licenseUser: LicenseUserDTO = newLicenseUser;
       const resp: BaseResponseDTO = {
@@ -75,13 +75,13 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
 
   async updateLicenseUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: LicenseUser = req.body;
+      const fields: LicenseUser = req.body;
       const { id } = req.body;
 
       if (!id)
         responseError(res, "Update license user requiere id valid.", 404);
 
-      const licenseUserUpdate = await this.update({ id, res }, body);
+      const licenseUserUpdate = await this.update({ id, res }, fields);
 
       const licenseUser: LicenseUserDTO = licenseUserUpdate;
       const resp: BaseResponseDTO = {
@@ -104,21 +104,24 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
     next: NextFunction,
   ) {
     try {
-      const body: LicenseUserDTO = req.body;
+      const fields: LicenseUserDTO = req.body;
       const { id } = req.body;
 
       if (!id)
         responseError(res, "Update license user requiere id valid.", 404);
 
-      const fieldToUpdate: string = Object.keys(body)[1];
+      const fieldToUpdate: string = Object.keys(fields)[1];
       const licenseUserToUpdate = await this.one({ id, res });
 
-      const licenseUserUpdate = Object.assign(new LicenseUser(), {
+      const licenseUserUpdateObject = Object.assign(new LicenseUser(), {
         ...licenseUserToUpdate,
-        [fieldToUpdate]: body[fieldToUpdate],
+        [fieldToUpdate]: fields[fieldToUpdate],
       });
 
-      await this.update({ id, res }, licenseUserUpdate);
+      const licenseUserUpdate = await this.update(
+        { id, res },
+        licenseUserUpdateObject,
+      );
 
       const licenseUser: LicenseUserDTO = licenseUserUpdate;
       const resp: BaseResponseDTO = {

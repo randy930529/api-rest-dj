@@ -15,13 +15,13 @@ export class LicenseController extends EntityControllerBase<License> {
 
   async createLicense(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: LicenseDTO = req.body;
+      const fields: LicenseDTO = req.body;
 
-      const newLicense = Object.assign(new License(), {
-        ...body,
+      const objectLicense = Object.assign(new License(), {
+        ...fields,
       });
 
-      await this.create(newLicense);
+      const newLicense = await this.create(objectLicense);
 
       const license: CreateLicenseDTO = newLicense;
       const resp: BaseResponseDTO = {
@@ -51,12 +51,12 @@ export class LicenseController extends EntityControllerBase<License> {
 
   async updateLicense(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: License = req.body;
-      const { id } = body;
+      const fields: License = req.body;
+      const { id } = fields;
 
       if (!id) responseError(res, "Delete license requiere id valid.", 404);
 
-      const licenseUpdate = await this.update({ id, res }, body);
+      const licenseUpdate = await this.update({ id, res }, fields);
 
       const license: CreateLicenseDTO = licenseUpdate;
       const resp: BaseResponseDTO = {
@@ -75,20 +75,20 @@ export class LicenseController extends EntityControllerBase<License> {
 
   async partialUpdateLicense(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: LicenseDTO = req.body;
+      const fields: LicenseDTO = req.body;
       const { id } = req.body;
 
       if (!id) responseError(res, "Delete license requiere id valid.", 404);
 
-      const fieldToUpdate: string = Object.keys(body)[1];
+      const fieldToUpdate: string = Object.keys(fields)[1];
       const licenseToUpdate = await this.one({ id, res });
 
-      const licenseUpdate = Object.assign(new License(), {
+      const licenseUpdateObject = Object.assign(new License(), {
         ...licenseToUpdate,
-        [fieldToUpdate]: body[fieldToUpdate],
+        [fieldToUpdate]: fields[fieldToUpdate],
       });
 
-      await this.update({ id, res }, licenseUpdate);
+      const licenseUpdate = await this.update({ id, res }, licenseUpdateObject);
 
       const license: CreateLicenseDTO = licenseUpdate;
       const resp: BaseResponseDTO = {

@@ -6,8 +6,8 @@ import { NextFunction, Response } from "express";
 import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import { HiredPersonDTO } from "../dto/request/hiredPerson.dto";
 import { CreateHiredPersonDTO } from "../dto/response/createHiredPerson.dto";
-import { Profile } from "../../../entity/Profile";
 import { responseError } from "../../../errors/responseError";
+import getProfileById from "../../../profile/utils/getProfileById";
 
 export class HiredPersonController extends EntityControllerBase<HiredPerson> {
   constructor() {
@@ -17,25 +17,17 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
 
   async createHiredPerson(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: HiredPersonDTO = req.body;
-      const { id } = body.profile;
+      const fields: HiredPersonDTO = req.body;
+      const { id } = fields.profile;
 
-      if (!id) responseError(res, "Do must provide a valid profile id.", 404);
+      const profile = await getProfileById({ id, res });
 
-      const profileRepository = AppDataSource.getRepository(Profile);
-
-      const profile = await profileRepository.findOne({
-        where: { id },
-      });
-
-      if (!profile) responseError(res, "Profile not found.", 404);
-
-      const newHiredPerson = Object.assign(new HiredPerson(), {
-        ...body,
+      const objectHiredPerson = Object.assign(new HiredPerson(), {
+        ...fields,
         profile,
       });
 
-      await this.create(newHiredPerson);
+      const newHiredPerson = await this.create(objectHiredPerson);
 
       const hiredPerson: CreateHiredPersonDTO = newHiredPerson;
       const resp: BaseResponseDTO = {
@@ -65,8 +57,8 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
 
   async updateHiredPerson(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: HiredPerson = req.body;
-      const { id } = body.profile;
+      const fields: HiredPerson = req.body;
+      const { id } = fields.profile;
 
       if (!id)
         responseError(
@@ -75,7 +67,7 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
           404,
         );
 
-      const hiredPersonUpdate = await this.update({ id, res: res }, body);
+      const hiredPersonUpdate = await this.update({ id, res: res }, fields);
 
       const hiredPerson: CreateHiredPersonDTO = hiredPersonUpdate;
       const resp: BaseResponseDTO = {
@@ -98,18 +90,18 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
     next: NextFunction,
   ) {
     try {
-      const body: HiredPersonDTO = req.body;
+      const fields: HiredPersonDTO = req.body;
       const { id } = req.body;
 
       if (!id)
         responseError(res, "Update requiere hired person id valid.", 404);
 
-      const fieldToUpdate: string = Object.keys(body)[1];
+      const fieldToUpdate: string = Object.keys(fields)[1];
       const hiredPersonToUpdate = await this.one({ id, res });
 
       const hiredPersonUpdate = Object.assign(new HiredPerson(), {
         ...hiredPersonToUpdate,
-        [fieldToUpdate]: body[fieldToUpdate],
+        [fieldToUpdate]: fields[fieldToUpdate],
       });
 
       await this.update({ id, res }, hiredPersonUpdate);

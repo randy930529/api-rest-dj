@@ -4,9 +4,9 @@ import { AppDataSource } from "../../../data-source";
 import { ProfileHiredPerson } from "../../../entity/ProfileHiredPerson";
 import { ProfileHiredPersonDTO } from "../dto/request/profileHiredPerson.dto";
 import { responseError } from "../../../errors/responseError";
-import { Profile } from "../../../entity/Profile";
 import { HiredPerson } from "../../../entity/HiredPerson";
 import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
+import getProfileById from "../../../profile/utils/getProfileById";
 
 export class ProfileHiredPersonController extends EntityControllerBase<ProfileHiredPerson> {
   constructor() {
@@ -20,38 +20,32 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
     next: NextFunction,
   ) {
     try {
-      const body: ProfileHiredPersonDTO = req.body;
-      const profileId = body.profile.id;
-      const hiredPersonId = body.hiredPerson.id;
-
-      if (!profileId)
-        responseError(res, "Do must provide a valid profile id.", 404);
+      const fields: ProfileHiredPersonDTO = req.body;
+      const profileId = fields.profile.id;
+      const hiredPersonId = fields.hiredPerson.id;
 
       if (!hiredPersonId)
         responseError(res, "Do must provide a valid hired person id.", 404);
 
-      const profileRepository = AppDataSource.getRepository(Profile);
       const hiredPersonRepository = AppDataSource.getRepository(HiredPerson);
 
-      const profile = await profileRepository.findOne({
-        where: { id: profileId },
-      });
+      const profile = await getProfileById({ id: profileId, res });
 
-      const hiredPerson = await hiredPersonRepository.findOne({
-        where: { id: hiredPersonId },
+      const hiredPerson = await hiredPersonRepository.findOneBy({
+        id: hiredPersonId,
       });
 
       if (!profile) responseError(res, "Profile not found.", 404);
 
       if (!hiredPerson) responseError(res, "Hired person not found.", 404);
 
-      const newProfileHiredPerson = Object.assign(new ProfileHiredPerson(), {
-        ...body,
+      const objectProfileHiredPerson = Object.assign(new ProfileHiredPerson(), {
+        ...fields,
         profile,
         hiredPerson,
       });
 
-      await this.create(newProfileHiredPerson);
+      const newProfileHiredPerson = await this.create(objectProfileHiredPerson);
 
       const profileHiredPerson: ProfileHiredPersonDTO = newProfileHiredPerson;
       const resp: BaseResponseDTO = {
@@ -85,7 +79,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
     next: NextFunction,
   ) {
     try {
-      const body: ProfileHiredPerson = req.body;
+      const fields: ProfileHiredPerson = req.body;
       const { id } = req.body;
 
       if (!id)
@@ -95,7 +89,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
           404,
         );
 
-      const profileHiredPersonUpdate = await this.update({ id, res }, body);
+      const profileHiredPersonUpdate = await this.update({ id, res }, fields);
 
       const profileHiredPerson: ProfileHiredPersonDTO =
         profileHiredPersonUpdate;
@@ -119,7 +113,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
     next: NextFunction,
   ) {
     try {
-      const body: ProfileHiredPersonDTO = req.body;
+      const fields: ProfileHiredPersonDTO = req.body;
       const { id } = req.body;
 
       if (!id)
@@ -129,12 +123,12 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
           404,
         );
 
-      const fieldToUpdate: string = Object.keys(body)[1];
+      const fieldToUpdate: string = Object.keys(fields)[1];
       const profileHiredPersonToUpdate = await this.one({ id, res });
 
       const profileHiredPersonUpdate = Object.assign(new ProfileHiredPerson(), {
         ...profileHiredPersonToUpdate,
-        [fieldToUpdate]: body[fieldToUpdate],
+        [fieldToUpdate]: fields[fieldToUpdate],
       });
 
       await this.update({ id, res }, profileHiredPersonUpdate);
