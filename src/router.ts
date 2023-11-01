@@ -10,6 +10,8 @@ import { profileHiredPersonRoutes } from "./managers/hire/routes/profileHirePers
 import { LicenseRoutes } from "./managers/license/routes/license";
 import { LicenseUserRoutes } from "./managers/license/routes/licenseUser";
 import { fiscalYearRoutes } from "./managers/period/routes/fiscalYear";
+import { taxRoutes } from "./managers/tax/routes/tax";
+import { TaxPaidRoutes } from "./managers/tax/routes/taxPaid";
 import { profileRoutes } from "./profile/routes/profile";
 
 export const Routes = [
@@ -26,4 +28,6 @@ export const Routes = [
   ...voucherRoutes,
   ...accountRoutes,
   ...voucherDetailRoutes,
+  ...taxRoutes,
+  ...TaxPaidRoutes,
 ];
