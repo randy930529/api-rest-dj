@@ -27,13 +27,38 @@ Utilícese estos endpoint para gestionar los datos de los modelos de la base de 
 Rutas por entidad
 -----------------
 
-+--------------------+----------------+--------------------+-----------------------------+---------------+--------------------+
-| Default URL/Entity |  Profile       | HiredPerson        | ProfileHiredPerson          | License       | LicenseUser        |
-+====================+================+====================+=============================+===============+====================+
-| Entity route       | * ``profile``  | * ``hired/person`` | * ``profile/hired/persons`` | * ``license`` | * ``license/user`` |
-|                    |                |                    |                             |               |                    |
-+--------------------+----------------+--------------------+-----------------------------+---------------+--------------------+
-
++--------------------+-----------------------------+
+| Default URL/Entity |  Entity route               |
++====================+=============================+
+| Profile            | * ``profile``               |
++--------------------+-----------------------------+
+| HiredPerson        | * ``hired/person``          |
++--------------------+-----------------------------+
+| ProfileHiredPerson | * ``profile/hired/persons`` |
++--------------------+-----------------------------+
+| License            | * ``license``               |
++--------------------+-----------------------------+
+| LicenseUser        | * ``license/user``          |
++--------------------+-----------------------------+
+| FiscalYear         | * ``fiscal/year``           |
++--------------------+-----------------------------+
+| ExpenseElement     | * ``expense/element``       |
++--------------------+-----------------------------+
+| SupportDocument    | * ``support/document``      |
++--------------------+-----------------------------+
+| Voucher            | * ``voucher``               |
++--------------------+-----------------------------+
+| VoucherDetail      | * ``voucher/detail``        |
++--------------------+-----------------------------+
+| Account            | * ``account``               |
++--------------------+-----------------------------+
+| Tax                | * ``tax``                   |
+|                    | * ``GET`` ``/taxes``        |
++--------------------+-----------------------------+
+| TaxPaid            | * ``tax/paid``              |
+|                    | * ``GET`` ``/taxes/paid``   |
+|                    |                             |
++--------------------+-----------------------------+
 
 +----------+-----------------------------------+------------------------------------+
 | Method   |  Request                          | Response                           |
@@ -63,11 +88,19 @@ Eliminar
 
 Utilice este endpoint para eliminar la entidad deceada. Se enviará la información del usuario loguedo en un token mediante la cabecera HTTP Authorization utilizando un `Authentication schemes <https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#authentication_schemes>`_.
 
-**Default URL**: ``/profile/<:uid>/``
-**Default URL**: ``/hired/person/<:uid>/``
-**Default URL**: ``/profile/hired/person/<:uid>/``
-**Default URL**: ``/license/<:uid>/``
-**Default URL**: ``/license/user/<:uid>/``
+**Default URL**: ``/profile/<:uid>/``                   **Default URL**: ``/support/document/<:uid>/``
+
+**Default URL**: ``/hired/person/<:uid>/``              **Default URL**: ``/voucher/<:uid>/``
+
+**Default URL**: ``/profile/hired/person/<:uid>/``      **Default URL**: ``/voucher/detail/<:uid>/``
+
+**Default URL**: ``/license/<:uid>/``                   **Default URL**: ``/account/<:uid>/``
+
+**Default URL**: ``/license/user/<:uid>/``              **Default URL**: ``/tax/<:uid>/``
+
+**Default URL**: ``/fiscal/year/<:uid>/``               **Default URL**: ``/tax/paid/<:uid>/``
+
+**Default URL**: ``/expense/element/<:uid>/``
 
 +------------+---------------------------------+----------------------------------+
 | Method     |  Request                        | Response                         |
