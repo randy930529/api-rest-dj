@@ -26,6 +26,7 @@ Contenido
     settings
     base_endpoints
     manager
+    token
 
 .. toctree::
     :maxdepth: 2
