@@ -12,7 +12,8 @@ Utilice este endpoint para obtener el token de autenticación de usuario y un to
 | Method   |  Request                          | Response                         |
 +==========+===================================+==================================+
 | ``POST`` | * ``{ User.USERNAME_FIELD }``     | ``HTTP_200_OK``                  |
-|          | * ``password``                    | * ``status: "success"``          |
+|          | * ``password``                    |                                  |
+|          |                                   | * ``status: "success"``          |
 |          |                                   | * ``data:``                      |
 |          |                                   |       ``token,``                 |
 |          |                                   |       ``refreshToken,``          |
