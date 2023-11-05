@@ -1,0 +1,135 @@
+style.
+    /* -------------------------------------
+    VARIABLES
+    ------------------------------------- */
+    $mainPadding: 130px;
+    $colorOne:   hsl(217, 28%, 15%);
+    $colorTwo: hsl(0, 0%, 100%);
+    $colorThree:  hsl(176, 68%, 64%);
+    $colorFour:   hsl(198, 60%, 50%);
+    $colorFive:  hsla(0, 0%, 100%, 0.7);
+    /* -------------------------------------
+    MIXINS
+    ------------------------------------- */
+    @mixin alignCenter($justifyContent, $alignItems, $flexDirection) {
+        display: flex;
+        justify-content: $justifyContent;
+        align-items: $alignItems;
+        flex-direction: $flexDirection
+    }
+    /* -------------------------------------
+    GLOBAL RESETS
+    ------------------------------------- */
+    * {
+        font-family: "Glory", sans-serif;
+        color: $colorTwo;
+    }
+
+    body {
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+        background-color: $colorOne !important;
+    }
+    /* -------------------------------------
+    STYLE
+    MENU SECTION
+    ------------------------------------- */
+    .menu {
+        padding-top: 3rem;
+    
+        .row {
+            @include alignCenter(space-between, auto, auto);
+            
+            .menu-items {
+                ul {
+                    @include alignCenter(space-evenly, center, auto);
+                    list-style: none;
+                    padding: 0%;
+            
+                    li {
+                        font-weight: lighter;
+            
+                        &:hover {
+                            cursor: pointer;
+                            text-decoration: underline;
+                            font-weight: bold;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @media (min-width: 768px) {
+        .menu {
+            .logo {
+                width: auto !important;
+            }
+        }
+    }
+
+    .container {
+        max-width: 800px;
+    }
+    /* -------------------------------------
+    HEADER SECTION
+    ------------------------------------- */
+    .header {
+        padding-top: ($mainPadding - 50px);
+        padding-bottom: $mainPadding;
+
+        .image {
+            @include alignCenter(center, center, auto);
+            padding-bottom: 20px;
+
+            img {
+                max-width: 100%;
+            }
+        }
+
+        .info {
+            text-align: center;
+
+            h3 {
+                padding-bottom: 25px;
+                font-weight: 700;
+                font-size: 35px;
+            }
+
+            p {
+                padding-bottom: 5px;
+                font-size: 17px;
+                color: $colorFive;
+            }
+
+            button {
+                padding: 10px 70px;
+                background-color: $colorThree;
+                background-image: linear-gradient(90deg, $colorThree, $colorFour);
+            }
+        }
+    }
+    /* -------------------------------------
+    GRADIENT
+    ------------------------------------- */
+    .gradient-text {
+        letter-spacing: 3px;
+        font-size: 96px;
+        background-clip: text;
+        background-size: 200% 100%;
+        animation: gradientFlow 1s ease-in-out infinite follow;
+        -webkit-background-clip: text;
+        color: transparent;
+        background-color: #4158D0;
+        background-image: linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);
+    }
+        
+    @keyframes gradientFlow {
+        from {
+            background-position-x: left;
+        }
+        to {
+            background-position-x: right;
+        }
+    }

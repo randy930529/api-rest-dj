@@ -1,0 +1,28 @@
+doctype html
+html(lang="es")
+  head
+
+    meta(name='viewport' content='width=device-width, initial-scale=1.0')
+    meta(http-equiv='Content-Type' content='text/html; charset=UTF-8')
+    title #{title}
+    include _styles
+
+  body
+    div(class="menu")
+      .container 
+        .row 
+            div(class="menu-items")
+              ul 
+                each item in ["Doc", "Desoft", "GitHub"]
+                  li= item
+
+    div(class="header")
+        .container 
+            div(class="image")
+                img(src=`${url}`, alt="Logo to Enterprise")
+            div(class="info") 
+                h3 All your files in one secure location, #[br] accessible anywhere.
+                p Fylo stores all your most important files in one secure  location. #[br]
+                    | Access them wherever you need, share and collaborate  with #[br]
+                    | friends family, and co-workers.
+                button(class="btn") Empezar
