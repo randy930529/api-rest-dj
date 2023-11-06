@@ -36,18 +36,18 @@ AppDataSource.initialize()
           const result = new (route.controller as any)()[route.action](
             req,
             res,
-            next,
+            next
           );
           if (result instanceof Promise) {
             result.then((result) =>
               result !== null && result !== undefined
                 ? res.send(result)
-                : undefined,
+                : undefined
             );
           } else if (result !== null && result !== undefined) {
             res.json(result);
           }
-        },
+        }
       );
     });
 
@@ -56,11 +56,14 @@ AppDataSource.initialize()
 
     // setup express app here
     app.get("/", function (req: Request, res: Response, next: Function) {
-      const html = pug.renderFile(`${__dirname}/views/api/index.pug`, {
+      const filePath = `${__dirname}/utils/views/api/index.pug`;
+      const options = {
         title: "API-rest dj",
         url: "logo.empresa",
-      });
-      res.render(html);
+      };
+      const html = pug.renderFile(filePath, options);
+
+      res.send(html);
     });
 
     // TEMPLATE ENGINE
@@ -71,7 +74,7 @@ AppDataSource.initialize()
     app.listen(appConfig.port);
 
     console.log(
-      `🚀  Express server has started on port ${appConfig.port}. Server ready at: http://localhost:${appConfig.port}/`,
+      `🚀  Express server has started on port ${appConfig.port}. Server ready at: http://localhost:${appConfig.port}/`
     );
   })
   .catch((error) => console.log(error));
