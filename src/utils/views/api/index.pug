@@ -9,20 +9,35 @@ html(lang="es")
 
   body
     div(class="menu")
-      .container 
-        .row 
+      .container
+        .row
+            div(class="logo")
+
             div(class="menu-items")
-              ul 
+              ul
                 each item in ["Doc", "Desoft", "GitHub"]
                   li= item
 
     div(class="header")
-        .container 
+        .container
             div(class="image")
                 img(src=`${url}`, alt="Logo to Enterprise")
-            div(class="info") 
-                h3 All your files in one secure location, #[br] accessible anywhere.
-                p Fylo stores all your most important files in one secure  location. #[br]
-                    | Access them wherever you need, share and collaborate  with #[br]
-                    | friends family, and co-workers.
+            div(class="info")
+                h3 ¡Bienvenido a la API DJ! , #[br] CA-MyGestor.
+                p API-REST-DJ es un api para TCP y tenedores de libro #[br]
+                    | Gestiona los ingresos y gastos, #[br]
+                    | controla el uso a través de licencias de uso.
                 button(class="btn") Empezar
+
+    div(class="features")
+      .container
+        .row
+          div(class="logo-github")
+            span
+              svg(width='100', height='100', viewBox='0 0 16 16')
+                path(d='M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.49-.94-.84-1.13-.29-.15-.71-.52-.01-.53.66-.01 1.13.61 1.29.86.76 1.28 1.97.92 2.45.7.07-.55.29-.92.53-1.13-1.86-.21-3.82-.93-3.82-4.12 0-.91.32-1.65.86-2.23-.09-.21-.37-1.05.08-2.19 0 0 .69-.22 2.27.85A7.72 7.72 0 0 1 8 4.77c.68 0 1.37-.09 2.03-.27 1.58-1.07 2.27-.85 2.27-.85.45 1.14.17 1.98.08 2.19.54.58.86 1.32.86 2.23 0 3.2-1.96 3.91-3.83 4.11.3.26.57.77.57 1.55 0 1.12-.01 2.03-.01 2.31 0 .21.14.46.55.38A8.03 8.03 0 0 0 16 8c0-4.42-3.58-8-8-8z')
+
+          div(class="logo-doc")
+            span
+              svg(width='100', height='100', viewBox='0 0 16 16')
+                path(fill-rule="evenodd", clip-rule="evenodd", d="M6.27103 2.11151C5.46135 2.21816 5.03258 2.41324 4.72718 2.71244C4.42179 3.01165 4.22268 3.43172 4.11382 4.225C4.00176 5.04159 4 6.12387 4 7.67568V16.2442C4.38867 15.9781 4.82674 15.7756 5.29899 15.6517C5.82716 15.513 6.44305 15.5132 7.34563 15.5135L20 15.5135V7.67568C20 6.12387 19.9982 5.04159 19.8862 4.22499C19.7773 3.43172 19.5782 3.01165 19.2728 2.71244C18.9674 2.41324 18.5387 2.21816 17.729 2.11151C16.8955 2.00172 15.7908 2 14.2069 2H9.7931C8.2092 2 7.10452 2.00172 6.27103 2.11151ZM6.75862 6.59459C6.75862 6.1468 7.12914 5.78378 7.58621 5.78378H16.4138C16.8709 5.78378 17.2414 6.1468 17.2414 6.59459C17.2414 7.04239 16.8709 7.40541 16.4138 7.40541H7.58621C7.12914 7.40541 6.75862 7.04239 6.75862 6.59459ZM7.58621 9.56757C7.12914 9.56757 6.75862 9.93058 6.75862 10.3784C6.75862 10.8262 7.12914 11.1892 7.58621 11.1892H13.1034C13.5605 11.1892 13.931 10.8262 13.931 10.3784C13.931 9.93058 13.5605 9.56757 13.1034 9.56757H7.58621Z")
