@@ -15,8 +15,9 @@ html(lang="es")
 
             div(class="menu-items")
               ul
-                each item in ["Doc", "Desoft", "GitHub"]
-                  li= item
+                each item in [{li:"Doc", hrf:"https://api-rest-dj.readthedocs.io/es/latest/"}, {li:"Desoft", hrf:"#"}, {li:"GitHub", hrf:"https://github.com/randy930529/api-rest-dj"}]
+                  a(href=`${item.hrf}`)
+                    li= item.li
 
     div(class="header")
         .container
@@ -27,7 +28,7 @@ html(lang="es")
                 p API-REST-DJ es un api para TCP y tenedores de libro #[br]
                     | Gestiona los ingresos y gastos, #[br]
                     | controla el uso a través de licencias de uso.
-                button(class="btn") Empezar
+                a(href="https://api-rest-dj.readthedocs.io/es/latest/usage.html", class="btn") Empezar
 
     div(class="features")
       .container
