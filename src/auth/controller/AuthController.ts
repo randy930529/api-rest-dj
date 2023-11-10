@@ -89,15 +89,16 @@ export class AuthController {
 
       const isPasswordValid = await PasswordHash.isPasswordValid(
         password,
-        user.password,
+        user.password
       );
 
       if (!isPasswordValid) {
         responseError(res, "Invalid credentials.", 401);
       }
 
-      const { token, refreshToken } =
-        await JWT.generateTokenAndRefreshToken(user);
+      const { token, refreshToken } = await JWT.generateTokenAndRefreshToken(
+        user
+      );
 
       const userDTO: UserDTO = user.toJSON();
       const resp: AuthenticationDTO = {
@@ -122,7 +123,7 @@ export class AuthController {
       const { jwtId, getRefreshToken } =
         await verifyTokenAndRefreshTokenForUserLogin(
           { token, refreshToken },
-          res,
+          res
         );
       if (!jwtId && !getRefreshToken) {
         responseError(res, "User does not login.");
@@ -198,6 +199,7 @@ export class AuthController {
         const newProfile = this.profileRepository.create({
           user,
           primary: true,
+          current: true,
         });
 
         user.active = true;
@@ -267,7 +269,7 @@ export class AuthController {
 
       const isPasswordValid = await PasswordHash.isPasswordValid(
         password,
-        userToUpdate.password,
+        userToUpdate.password
       );
 
       if (!isPasswordValid) {
@@ -331,7 +333,7 @@ export class AuthController {
   async userResetPasswordConfirm(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
       const fields: RegisterDTO = req.body;
