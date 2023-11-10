@@ -10,6 +10,9 @@ export class FiscalYear extends Model {
   @Column({ default: false })
   general_scheme: boolean;
 
+  @Column({ default: false })
+  current: boolean;
+
   @ManyToOne(() => Profile)
   @JoinColumn()
   profile: Profile;
