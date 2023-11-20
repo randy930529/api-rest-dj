@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { FindOptionsWhere, Repository } from "typeorm";
+import { FindManyOptions, FindOptionsWhere, Repository } from "typeorm";
 import { responseError } from "../errors/responseError";
 
 type Params = { id: number; res: Response };
@@ -20,7 +20,12 @@ export abstract class EntityControllerBase<TEntity> {
 
   async all(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const entities = await this.repository.find();
+      const optionsString = req.query.options as string;
+      const options: FindManyOptions<TEntity> = {
+        ...(optionsString && JSON.parse(optionsString)),
+      };
+
+      const entities = await this.repository.find(options);
       res.json(entities);
     } catch (error) {
       console.error("Error fetching entities:", error);
