@@ -14,7 +14,7 @@ Contenido
 
 .. toctree::
     :maxdepth: 2
-    :caption: Basics
+    :caption: Básico
     
     usage
     api
@@ -33,3 +33,9 @@ Contenido
     :caption: Entidades
 
     entities
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Parámetros de consulta
+
+    query_params
