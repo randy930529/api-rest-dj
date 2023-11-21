@@ -8,6 +8,7 @@ import { JWT } from "../../auth/security/jwt";
 import { BaseResponseDTO } from "../../auth/dto/response/base.dto";
 import { CreateProfileDTO } from "../dto/response/createProfile.dto";
 import { EntityControllerBase } from "../../base/EntityControllerBase";
+import { FindOneOptions } from "typeorm";
 
 export class ProfileController extends EntityControllerBase<Profile> {
   constructor() {
@@ -59,13 +60,13 @@ export class ProfileController extends EntityControllerBase<Profile> {
   async onProfile(req: Request, res: Response, next: NextFunction) {
     try {
       const id = parseInt(req.params.id);
-
-      const profile = await this.repository.findOne({
-        relations: {
-          hiredPerson: true,
-        },
+      const optionsString = req.query.options as string;
+      const options: FindOneOptions<Profile> = {
+        ...(optionsString && JSON.parse(optionsString)),
         where: { id },
-      });
+      };
+
+      const profile = await this.repository.findOne(options);
 
       if (!profile) {
         responseError(res, "Unregistered this profile.");
@@ -98,8 +99,8 @@ export class ProfileController extends EntityControllerBase<Profile> {
       if (profileToUpdate.user.id !== userId)
         responseError(
           res,
-          "User is not authorized to update this profile",
-          401,
+          "User is not authorized to update this profile.",
+          401
         );
 
       const profileUpdate = { ...profileToUpdate, ...fields };
@@ -146,8 +147,8 @@ export class ProfileController extends EntityControllerBase<Profile> {
       if (profileToUpdate.user.id !== userId)
         responseError(
           res,
-          "User is not authorized to update this profile",
-          401,
+          "User is not authorized to update this profile.",
+          401
         );
 
       const profileUpdate = {
@@ -182,6 +183,48 @@ export class ProfileController extends EntityControllerBase<Profile> {
 
       res.status(204);
       return "Profile has been removed successfully.";
+    } catch (error) {
+      if (res.statusCode === 200) res.status(500);
+      next(error);
+    }
+  }
+
+  async setCurrentProfile(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = parseInt(req.params.currentProfileId);
+      const newCurrentProfileId = parseInt(req.params.newCurrentProfileId);
+
+      const token = req.headers.authorization.split(" ")[1];
+      const userId = JWT.getJwtPayloadValueByKey(token, "id");
+
+      const profile = await this.repository.findOne({
+        relations: { user: true },
+        where: { id },
+      });
+      const newCurrentProfile = await this.repository.findOne({
+        relations: { user: true },
+        where: { id: newCurrentProfileId },
+      });
+
+      if (!profile && !newCurrentProfile) {
+        responseError(res, "Unregistered this profile.");
+      }
+
+      if (!(profile.user.id === userId && newCurrentProfile.user.id === userId))
+        responseError(
+          res,
+          "User is not authorized to update this profile.",
+          401
+        );
+
+      if (!newCurrentProfile.current) {
+        newCurrentProfile.current = true;
+        profile.current = false;
+        await this.repository.save(newCurrentProfile);
+        await this.repository.save(profile);
+      }
+
+      return newCurrentProfile;
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);
