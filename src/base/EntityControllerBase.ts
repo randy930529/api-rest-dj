@@ -1,8 +1,19 @@
 import { NextFunction, Request, Response } from "express";
-import { FindManyOptions, FindOptionsWhere, Repository } from "typeorm";
+import {
+  FindManyOptions,
+  FindOneOptions,
+  FindOptionsWhere,
+  Repository,
+} from "typeorm";
 import { responseError } from "../errors/responseError";
+import { createFindOptions } from "./utils/createFindOptions";
 
-type Params = { id: number; res: Response };
+type Params = {
+  id: number;
+  req?: Request;
+  res: Response;
+  next?: NextFunction;
+};
 
 export abstract class EntityControllerBase<TEntity> {
   protected repository: Repository<TEntity>;
@@ -20,10 +31,7 @@ export abstract class EntityControllerBase<TEntity> {
 
   async all(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const optionsString = req.query.options as string;
-      const options: FindManyOptions<TEntity> = {
-        ...(optionsString && JSON.parse(optionsString)),
-      };
+      const options: FindManyOptions<TEntity> = createFindOptions(req);
 
       const entities = await this.repository.find(options);
       res.json(entities);
@@ -33,9 +41,12 @@ export abstract class EntityControllerBase<TEntity> {
     }
   }
 
-  async one({ id, res }: Params): Promise<TEntity> {
-    const options = { id } as unknown as FindOptionsWhere<TEntity>;
-    const entity = await this.repository.findOneBy(options);
+  async one({ id, req, res }: Params): Promise<TEntity> {
+    const options: FindOneOptions<TEntity> = createFindOptions(req, {
+      where: { id },
+    });
+
+    const entity = await this.repository.findOne(options);
 
     if (!entity) responseError(res, "Entity not found.", 404);
 

@@ -8,7 +8,6 @@ import { JWT } from "../../auth/security/jwt";
 import { BaseResponseDTO } from "../../auth/dto/response/base.dto";
 import { CreateProfileDTO } from "../dto/response/createProfile.dto";
 import { EntityControllerBase } from "../../base/EntityControllerBase";
-import { FindOneOptions } from "typeorm";
 
 export class ProfileController extends EntityControllerBase<Profile> {
   constructor() {
@@ -60,13 +59,8 @@ export class ProfileController extends EntityControllerBase<Profile> {
   async onProfile(req: Request, res: Response, next: NextFunction) {
     try {
       const id = parseInt(req.params.id);
-      const optionsString = req.query.options as string;
-      const options: FindOneOptions<Profile> = {
-        ...(optionsString && JSON.parse(optionsString)),
-        where: { id },
-      };
 
-      const profile = await this.repository.findOne(options);
+      const profile = await this.one({ id, req, res });
 
       if (!profile) {
         responseError(res, "Unregistered this profile.");
