@@ -25,3 +25,42 @@ Opciones
 | take         | * Paginado máximo de entidades que se deben tomar.                                                |
 |              |                                                                                                   |
 +--------------+---------------------------------------------------------------------------------------------------+
+
+Uso de las Opciones
+-------------------
+
+.. note::
+
+    Para espesificar los parametros de consulta en las ``url`` utilice la sintaxis para formatos ``JSON``.
+
+* ``relations`` - espesifique las relaciones.
+
+.. code-block:: bash
+
+    "relations":{"relacion1": true,"relacion2": true}
+
+* ``where`` - indique las condiciones simples para la consulta.
+
+.. code-block:: bash
+
+    "where":{"firstName": "Carlos", "lastName": "Perez"}
+
+* ``order`` - orden por propiedad en que se optienen los resultados.
+
+.. code-block:: bash
+
+    "order":{"name": "ASC", "id": "DESC"}
+
+* ``skip`` - para paginar los resultados, valor desde donde se deben tomar las entidades.
+
+.. code-block:: bash
+
+    "skip":{"skip": number}
+    "skip":{"skip": 5}
+
+* ``take`` - para especificar el límite de elementos por paginado.
+
+.. code-block:: bash
+
+    "take":{"take": number}
+    "take":{"take": 10,}
