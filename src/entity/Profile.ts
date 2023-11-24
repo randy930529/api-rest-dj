@@ -3,6 +3,7 @@ import Model from "./Base";
 import { User } from "./User";
 import { ProfileHiredPerson } from "./ProfileHiredPerson";
 import { HiredPerson } from "./HiredPerson";
+import { FiscalYear } from "./FiscalYear";
 
 @Entity()
 export class Profile extends Model {
@@ -39,6 +40,9 @@ export class Profile extends Model {
   )
   profileHiredPerson: ProfileHiredPerson[];
 
-  @OneToMany(() => HiredPerson, (profile) => profile.profile)
+  @OneToMany(() => HiredPerson, (hiredPerson) => hiredPerson.profile)
   hiredPerson: HiredPerson[];
+
+  @OneToMany(() => FiscalYear, (fiscalYear) => fiscalYear.profile)
+  fiscalYear: FiscalYear[];
 }
