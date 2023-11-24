@@ -7,11 +7,11 @@ import { voucherRoutes } from "./managers/expenses/routes/voucher";
 import { voucherDetailRoutes } from "./managers/expenses/routes/voucherDetail";
 import { hiredPersonRoutes } from "./managers/hire/routes/hirePerson";
 import { profileHiredPersonRoutes } from "./managers/hire/routes/profileHirePerson";
-import { LicenseRoutes } from "./managers/license/routes/license";
-import { LicenseUserRoutes } from "./managers/license/routes/licenseUser";
+import { licenseRoutes } from "./managers/license/routes/license";
+import { licenseUserRoutes } from "./managers/license/routes/licenseUser";
 import { fiscalYearRoutes } from "./managers/period/routes/fiscalYear";
 import { taxRoutes } from "./managers/tax/routes/tax";
-import { TaxPaidRoutes } from "./managers/tax/routes/taxPaid";
+import { taxPaidRoutes } from "./managers/tax/routes/taxPaid";
 import { profileRoutes } from "./profile/routes/profile";
 
 export const Routes = [
@@ -20,8 +20,8 @@ export const Routes = [
   ...profileRoutes,
   ...hiredPersonRoutes,
   ...profileHiredPersonRoutes,
-  ...LicenseRoutes,
-  ...LicenseUserRoutes,
+  ...licenseRoutes,
+  ...licenseUserRoutes,
   ...fiscalYearRoutes,
   ...expenseElementRoutes,
   ...supportDocumentRoutes,
@@ -29,5 +29,5 @@ export const Routes = [
   ...accountRoutes,
   ...voucherDetailRoutes,
   ...taxRoutes,
-  ...TaxPaidRoutes,
+  ...taxPaidRoutes,
 ];

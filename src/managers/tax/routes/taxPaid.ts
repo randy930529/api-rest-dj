@@ -1,7 +1,7 @@
 import { TaxPaidController } from "../controller/TaxPaidController";
 import { authMiddleware } from "../../../auth/middlewares/authMiddleware";
 
-export const TaxPaidRoutes = [
+export const taxPaidRoutes = [
   {
     method: "post",
     route: "/tax/paid",

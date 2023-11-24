@@ -2,7 +2,7 @@ import { LicenseController } from "../controller/LicenseController";
 import { authMiddleware } from "../../../auth/middlewares/authMiddleware";
 import { isAdminMiddleware } from "../../../auth/middlewares/isAdminMiddleware";
 
-export const LicenseRoutes = [
+export const licenseRoutes = [
   {
     method: "post",
     route: "/license",
