@@ -17,7 +17,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
   async createProfileHiredPerson(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
       const fields: ProfileHiredPersonDTO = req.body;
@@ -66,7 +66,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
     try {
       const id = parseInt(req.params.id);
 
-      return await this.one({ id, res });
+      return await this.one({ id, req, res });
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);
@@ -76,7 +76,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
   async updateProfileHiredPerson(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
       const fields: ProfileHiredPerson = req.body;
@@ -86,7 +86,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
         responseError(
           res,
           "Update profile hired person requiere profile id valid.",
-          404,
+          404
         );
 
       const profileHiredPersonUpdate = await this.update({ id, res }, fields);
@@ -110,7 +110,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
   async partialUpdateProfileHiredPerson(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
       const fields: ProfileHiredPersonDTO = req.body;
@@ -120,11 +120,11 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
         responseError(
           res,
           "Update requiere profile hired person id valid.",
-          404,
+          404
         );
 
       const fieldToUpdate: string = Object.keys(fields)[1];
-      const profileHiredPersonToUpdate = await this.one({ id, res });
+      const profileHiredPersonToUpdate = await this.one({ id, req, res });
 
       const profileHiredPersonUpdate = Object.assign(new ProfileHiredPerson(), {
         ...profileHiredPersonToUpdate,
@@ -152,7 +152,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
   async deleteProfileHiredPerson(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
       const id = parseInt(req.params.id);
@@ -161,7 +161,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
         responseError(
           res,
           "Delete profile hired person requiere profile id valid.",
-          404,
+          404
         );
 
       await this.delete({ id, res });

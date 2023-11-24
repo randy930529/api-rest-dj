@@ -60,7 +60,7 @@ export class TaxPaidController extends EntityControllerBase<TaxPaid> {
     try {
       const id = parseInt(req.params.id);
 
-      return await this.one({ id, res });
+      return await this.one({ id, req, res });
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);
@@ -99,7 +99,7 @@ export class TaxPaidController extends EntityControllerBase<TaxPaid> {
       if (!id) responseError(res, "Delete tax paid requiere id valid.", 404);
 
       const fieldToUpdate: string = Object.keys(fields)[1];
-      const taxPaidToUpdate = await this.one({ id, res });
+      const taxPaidToUpdate = await this.one({ id, req, res });
 
       const taxPaidUpdateObject = Object.assign(new TaxPaid(), {
         ...taxPaidToUpdate,

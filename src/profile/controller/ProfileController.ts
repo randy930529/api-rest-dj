@@ -60,13 +60,7 @@ export class ProfileController extends EntityControllerBase<Profile> {
     try {
       const id = parseInt(req.params.id);
 
-      const profile = await this.one({ id, req, res });
-
-      if (!profile) {
-        responseError(res, "Unregistered this profile.");
-      }
-
-      return profile;
+      return await this.one({ id, req, res });
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);

@@ -47,7 +47,7 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
     try {
       const id = parseInt(req.params.id);
 
-      return await this.one({ id, res });
+      return await this.one({ id, req, res });
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);
@@ -81,7 +81,7 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
   async partialUpdateFiscalYear(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
       const fields: FiscalYearDTO = req.body;
@@ -90,7 +90,7 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
       if (!id) responseError(res, "Delete fiscal year requiere id valid.", 404);
 
       const fieldToUpdate: string = Object.keys(fields)[1];
-      const fiscalYearToUpdate = await this.one({ id, res });
+      const fiscalYearToUpdate = await this.one({ id, req, res });
 
       const fiscalYearUpdateObject = Object.assign(new FiscalYear(), {
         ...fiscalYearToUpdate,
@@ -99,7 +99,7 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
 
       const fiscalYearUpdate = await this.update(
         { id, res },
-        fiscalYearUpdateObject,
+        fiscalYearUpdateObject
       );
 
       const fiscalYear: CreateFiscalYearDTO = fiscalYearUpdate;

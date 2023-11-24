@@ -70,7 +70,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
     try {
       const id = parseInt(req.params.id);
 
-      return await this.one({ id, res });
+      return await this.one({ id, req, res });
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);
@@ -105,7 +105,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
   async partialUpdateSupportDocument(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
       const fields: SupportDocumentDTO = req.body;
@@ -115,7 +115,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         responseError(res, "Update requiere support document id valid.", 404);
 
       const fieldToUpdate: string = Object.keys(fields)[1];
-      const supportDocumentToUpdate = await this.one({ id, res });
+      const supportDocumentToUpdate = await this.one({ id, req, res });
 
       const supportDocumentUpdate = Object.assign(new SupportDocument(), {
         ...supportDocumentToUpdate,
@@ -147,7 +147,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         responseError(
           res,
           "Delete support document requiere one id valid.",
-          404,
+          404
         );
 
       await this.delete({ id, res });

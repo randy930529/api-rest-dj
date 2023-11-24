@@ -42,7 +42,7 @@ export class LicenseController extends EntityControllerBase<License> {
     try {
       const id = parseInt(req.params.id);
 
-      return await this.one({ id, res });
+      return await this.one({ id, req, res });
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);
@@ -81,7 +81,7 @@ export class LicenseController extends EntityControllerBase<License> {
       if (!id) responseError(res, "Delete license requiere id valid.", 404);
 
       const fieldToUpdate: string = Object.keys(fields)[1];
-      const licenseToUpdate = await this.one({ id, res });
+      const licenseToUpdate = await this.one({ id, req, res });
 
       const licenseUpdateObject = Object.assign(new License(), {
         ...licenseToUpdate,

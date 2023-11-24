@@ -19,8 +19,9 @@ export class VoucherController extends EntityControllerBase<Voucher> {
       const fields: VoucherDTO = req.body;
       const { id } = fields.supportDocument;
 
-      const supportDocumentRepository =
-        await AppDataSource.getRepository(SupportDocument);
+      const supportDocumentRepository = await AppDataSource.getRepository(
+        SupportDocument
+      );
       const supportDocument = await supportDocumentRepository.findOneBy({
         id,
       });
@@ -54,7 +55,7 @@ export class VoucherController extends EntityControllerBase<Voucher> {
     try {
       const id = parseInt(req.params.id);
 
-      return await this.one({ id, res });
+      return await this.one({ id, req, res });
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);
@@ -93,7 +94,7 @@ export class VoucherController extends EntityControllerBase<Voucher> {
       if (!id) responseError(res, "Delete voucher requiere id valid.", 404);
 
       const fieldToUpdate: string = Object.keys(fields)[1];
-      const voucherToUpdate = await this.one({ id, res });
+      const voucherToUpdate = await this.one({ id, req, res });
 
       const voucherUpdateObject = Object.assign(new Voucher(), {
         ...voucherToUpdate,

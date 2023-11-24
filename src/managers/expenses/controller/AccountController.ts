@@ -47,7 +47,7 @@ export class AccountController extends EntityControllerBase<Account> {
     try {
       const id = parseInt(req.params.id);
 
-      return await this.one({ id, res });
+      return await this.one({ id, req, res });
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);
@@ -86,7 +86,7 @@ export class AccountController extends EntityControllerBase<Account> {
       if (!id) responseError(res, "Delete account requiere id valid.", 404);
 
       const fieldToUpdate: string = Object.keys(fields)[1];
-      const accountToUpdate = await this.one({ id, res });
+      const accountToUpdate = await this.one({ id, req, res });
 
       const accountUpdateObject = Object.assign(new Account(), {
         ...accountToUpdate,

@@ -68,7 +68,7 @@ export class VoucherDetailController extends EntityControllerBase<VoucherDetail>
     try {
       const id = parseInt(req.params.id);
 
-      return await this.one({ id, res });
+      return await this.one({ id, req, res });
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);
@@ -103,7 +103,7 @@ export class VoucherDetailController extends EntityControllerBase<VoucherDetail>
   async partialUpdateVoucherDetail(
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
   ) {
     try {
       const fields: VoucherDetailDTO = req.body;
@@ -113,7 +113,7 @@ export class VoucherDetailController extends EntityControllerBase<VoucherDetail>
         responseError(res, "Update requiere voucher detail id valid.", 404);
 
       const fieldToUpdate: string = Object.keys(fields)[1];
-      const voucherDetailToUpdate = await this.one({ id, res });
+      const voucherDetailToUpdate = await this.one({ id, req, res });
 
       const voucherDetailUpdate = Object.assign(new VoucherDetail(), {
         ...voucherDetailToUpdate,
