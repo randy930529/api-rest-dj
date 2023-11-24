@@ -6,6 +6,8 @@ import { AppDataSource } from "../../../data-source";
 import { License } from "../../../entity/License";
 import { LicenseDTO } from "../dto/request/license.dto";
 import { CreateLicenseDTO } from "../dto/response/createLicense.dto";
+import { FindManyOptions } from "typeorm";
+import { createFindOptions } from "../../../base/utils/createFindOptions";
 
 export class LicenseController extends EntityControllerBase<License> {
   constructor() {
@@ -115,6 +117,19 @@ export class LicenseController extends EntityControllerBase<License> {
 
       res.status(204);
       return "License has been removed successfully.";
+    } catch (error) {
+      if (res.statusCode === 200) res.status(500);
+      next(error);
+    }
+  }
+
+  async allLicensesPublic(req: Request, res: Response, next: NextFunction) {
+    try {
+      const options: FindManyOptions<License> = createFindOptions(req, {
+        where: { public: true },
+      });
+      const licenses = await this.repository.find(options);
+      res.json(licenses);
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);

@@ -14,14 +14,14 @@ export const LicenseRoutes = [
     method: "get",
     route: "/licenses",
     controller: LicenseController,
-    middlewares: [authMiddleware],
+    middlewares: [authMiddleware, isAdminMiddleware],
     action: "all",
   },
   {
     method: "get",
     route: "/license/:id",
     controller: LicenseController,
-    middlewares: [authMiddleware],
+    middlewares: [authMiddleware, isAdminMiddleware],
     action: "onLicense",
   },
   {
@@ -44,5 +44,12 @@ export const LicenseRoutes = [
     controller: LicenseController,
     middlewares: [authMiddleware, isAdminMiddleware],
     action: "deleteLicense",
+  },
+  {
+    method: "get",
+    route: "/licenses/public",
+    controller: LicenseController,
+    middlewares: [authMiddleware],
+    action: "allLicensesPublic",
   },
 ];
