@@ -7,7 +7,7 @@ export class FiscalYear extends Model {
   @Column({ type: "integer", width: 4 })
   year: number;
 
-  @Column({ default: false })
+  @Column({ default: true })
   general_scheme: boolean;
 
   @Column({ default: false })
