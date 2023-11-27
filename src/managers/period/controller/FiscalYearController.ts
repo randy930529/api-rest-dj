@@ -59,7 +59,7 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
       const fields: FiscalYear = req.body;
       const { id } = fields;
 
-      if (!id) responseError(res, "Delete fiscal year requiere id valid.", 404);
+      if (!id) responseError(res, "Update fiscal year requiere id valid.", 404);
 
       const fiscalYearUpdate = await this.update({ id, res }, fields);
 
@@ -87,7 +87,7 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
       const fields: FiscalYearDTO = req.body;
       const { id } = req.body;
 
-      if (!id) responseError(res, "Delete fiscal year requiere id valid.", 404);
+      if (!id) responseError(res, "Update fiscal year requiere id valid.", 404);
 
       const fieldToUpdate: string = Object.keys(fields)[1];
       const fiscalYearToUpdate = await this.one({ id, req, res });
