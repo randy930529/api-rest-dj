@@ -176,46 +176,4 @@ export class ProfileController extends EntityControllerBase<Profile> {
       next(error);
     }
   }
-
-  async setCurrentProfile(req: Request, res: Response, next: NextFunction) {
-    try {
-      const id = parseInt(req.params.currentProfileId);
-      const newCurrentProfileId = parseInt(req.params.newCurrentProfileId);
-
-      const token = req.headers.authorization.split(" ")[1];
-      const userId = JWT.getJwtPayloadValueByKey(token, "id");
-
-      const profile = await this.repository.findOne({
-        relations: { user: true },
-        where: { id },
-      });
-      const newCurrentProfile = await this.repository.findOne({
-        relations: { user: true },
-        where: { id: newCurrentProfileId },
-      });
-
-      if (!profile && !newCurrentProfile) {
-        responseError(res, "Unregistered this profile.");
-      }
-
-      if (!(profile.user.id === userId && newCurrentProfile.user.id === userId))
-        responseError(
-          res,
-          "User is not authorized to update this profile.",
-          401
-        );
-
-      if (!newCurrentProfile.current) {
-        newCurrentProfile.current = true;
-        profile.current = false;
-        await this.repository.save(newCurrentProfile);
-        await this.repository.save(profile);
-      }
-
-      return newCurrentProfile;
-    } catch (error) {
-      if (res.statusCode === 200) res.status(500);
-      next(error);
-    }
-  }
 }

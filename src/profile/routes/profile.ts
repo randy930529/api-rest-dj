@@ -45,11 +45,4 @@ export const profileRoutes = [
     middlewares: [authMiddleware],
     action: "deleteProfile",
   },
-  {
-    method: "post",
-    route: "/profile/:currentProfileId/:newCurrentProfileId",
-    controller: ProfileController,
-    middlewares: [authMiddleware],
-    action: "setCurrentProfile",
-  },
 ];

@@ -13,6 +13,7 @@ import { fiscalYearRoutes } from "./managers/period/routes/fiscalYear";
 import { taxRoutes } from "./managers/tax/routes/tax";
 import { taxPaidRoutes } from "./managers/tax/routes/taxPaid";
 import { profileRoutes } from "./profile/routes/profile";
+import { sectionRoutes } from "./section/routes/section";
 
 export const Routes = [
   ...authRoutes,
@@ -30,4 +31,5 @@ export const Routes = [
   ...voucherDetailRoutes,
   ...taxRoutes,
   ...taxPaidRoutes,
+  ...sectionRoutes,
 ];

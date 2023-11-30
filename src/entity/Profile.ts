@@ -25,9 +25,6 @@ export class Profile extends Model {
   @Column({ default: false })
   primary: boolean;
 
-  @Column({ default: false })
-  current: boolean;
-
   @ManyToOne(() => User, {
     onDelete: "CASCADE",
   })

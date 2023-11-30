@@ -199,7 +199,6 @@ export class AuthController {
         const newProfile = this.profileRepository.create({
           user,
           primary: true,
-          current: true,
         });
 
         user.active = true;
