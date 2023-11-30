@@ -92,13 +92,12 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
       const fieldToUpdate: string = Object.keys(fields)[1];
       const fiscalYearToUpdate = await this.one({ id, req, res });
 
-      const fiscalYearUpdateObject = Object.assign(new FiscalYear(), {
+      const fiscalYearUpdateObject = this.repository.create({
         ...fiscalYearToUpdate,
         [fieldToUpdate]: fields[fieldToUpdate],
       });
 
-      const fiscalYearUpdate = await this.update(
-        { id, res },
+      const fiscalYearUpdate = await this.repository.save(
         fiscalYearUpdateObject
       );
 
