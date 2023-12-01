@@ -39,3 +39,9 @@ Contenido
     :caption: Parámetros de consulta
 
     query_params
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Estado de sección
+
+    section_state
