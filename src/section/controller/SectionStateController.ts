@@ -106,6 +106,50 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
     }
   }
 
+  async userSection(req: Request, res: Response, next: NextFunction) {
+    try {
+      const token = req.headers.authorization.split(" ")[1];
+      const userId = JWT.getJwtPayloadValueByKey(token, "id");
+
+      const existToSectionUser = await this.repository.findOne({
+        relations: ["profile", "fiscalYear"],
+        where: {
+          user: {
+            id: userId,
+          },
+        },
+      });
+
+      if (existToSectionUser) return existToSectionUser;
+
+      const currentProfile = await Profile.findOne({
+        relations: ["user", "fiscalYear"],
+        where: {
+          primary: true,
+          user: {
+            id: userId,
+          },
+        },
+      });
+
+      const newSectionStateToProfileAndFiscalYear =
+        await this.repository.create({
+          user: currentProfile.user,
+          profile: currentProfile,
+          fiscalYear: currentProfile.fiscalYear[0] || null,
+        });
+
+      const newSectionState = await this.repository.save(
+        newSectionStateToProfileAndFiscalYear
+      );
+
+      return newSectionState;
+    } catch (error) {
+      if (res.statusCode === 200) res.status(500);
+      next(error);
+    }
+  }
+
   async updateSectionState(req: Request, res: Response, next: NextFunction) {
     try {
       const fields: SectionStateDTO = req.body;
