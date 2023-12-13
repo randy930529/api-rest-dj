@@ -40,6 +40,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
         relations: ["user"],
         where: {
           id: profile.id,
+          primary: true,
           user: {
             id: userId,
           },
@@ -161,7 +162,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
         responseError(res, "Update section state requiere id valid.", 404);
 
       const sectionStateToUpdate = await this.repository.findOne({
-        relations: ["user"],
+        relations: ["user", "profile", "fiscalYear"],
         where: { id },
       });
 
@@ -172,8 +173,24 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
           401
         );
 
-      const sectionStateUpdate = { ...sectionStateToUpdate, ...fields };
-      await this.repository.save(sectionStateUpdate);
+      const profile = await Profile.findOne({
+        relations: ["fiscalYear"],
+        where: {
+          id: fields.profile.id,
+          user: {
+            id: userId,
+          },
+        },
+      });
+
+      if (!profile)
+        responseError(res, "Profile does not exist in this user.", 404);
+
+      const sectionStateUpdate = await this.repository.save({
+        ...sectionStateToUpdate,
+        profile,
+        fiscalYear: fields.fiscalYear || profile.fiscalYear[0] || null,
+      });
 
       const sectionState: SectionStateDTO = sectionStateUpdate;
       const resp: BaseResponseDTO = {
@@ -210,9 +227,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
       const fieldToUpdate: string = Object.keys(fields)[1];
 
       const sectionStateToUpdate = await this.repository.findOne({
-        relations: {
-          user: true,
-        },
+        relations: ["user", "profile", "fiscalYear"],
         where: { id },
       });
 
@@ -227,11 +242,10 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
           401
         );
 
-      const sectionStateUpdate = {
+      const sectionStateUpdate = await this.repository.save({
         ...sectionStateToUpdate,
         [fieldToUpdate]: fields[fieldToUpdate],
-      };
-      await this.repository.save(sectionStateUpdate);
+      });
 
       const sectionState: SectionStateDTO = sectionStateUpdate;
       const resp: BaseResponseDTO = {
