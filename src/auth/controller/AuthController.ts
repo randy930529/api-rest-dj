@@ -15,6 +15,7 @@ import Email from "../../utils/email";
 import { BaseResponseDTO } from "../dto/response/base.dto";
 import { verifyTokenAndRefreshTokenForUserLogin } from "../security/verifyTokenAndRefreshTokenForUserLogin";
 import { userSetPasswordDTO } from "../dto/request/userSetPassword.dto";
+import { FiscalYear } from "../../entity/FiscalYear";
 import * as moment from "moment";
 
 const transferProtocol: string = "ca-mygestor" as const;
@@ -26,6 +27,7 @@ const RESETPASSWORD_URL = (appName, uid, token) =>
 export class AuthController {
   private userRepository = AppDataSource.getRepository(User);
   private profileRepository = AppDataSource.getRepository(Profile);
+  private fiscalYearRepository = AppDataSource.getRepository(FiscalYear);
 
   async register(req: Request, res: Response, next: NextFunction) {
     try {
@@ -203,7 +205,14 @@ export class AuthController {
 
         user.active = true;
         await this.userRepository.save(user);
-        await this.profileRepository.save(newProfile);
+        const profile = await this.profileRepository.save(newProfile);
+        const year = moment().year();
+
+        const newFiscalYear = this.fiscalYearRepository.create({
+          year,
+          profile,
+        });
+        await this.fiscalYearRepository.save(newFiscalYear);
       }
 
       res.status(200);
