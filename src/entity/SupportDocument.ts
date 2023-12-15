@@ -2,6 +2,7 @@ import { Entity, Column, JoinColumn, ManyToOne } from "typeorm";
 import Model from "./Base";
 import { ExpenseElement } from "./ExpenseElement";
 import { FiscalYear } from "./FiscalYear";
+import { ColumnNumericTransformer } from "../utils/ColumnNumericTransformer";
 
 @Entity()
 export class SupportDocument extends Model {
@@ -11,7 +12,12 @@ export class SupportDocument extends Model {
   @Column({ type: "varchar", length: 255, nullable: true })
   document: string;
 
-  @Column({ type: "numeric", precision: 19, scale: 0 })
+  @Column({
+    type: "numeric",
+    precision: 19,
+    scale: 0,
+    transformer: new ColumnNumericTransformer(),
+  })
   amount: number;
 
   @Column({ type: "time", precision: 7 })
