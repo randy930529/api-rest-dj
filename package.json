@@ -42,7 +42,7 @@
     "start": "ts-node src/index.ts",
     "typeorm": "typeorm-ts-node-commonjs",
     "build": "tsc -p .",
-    "migrate": "typeorm-ts-node-commonjs migration:generate ./src/migration/UserRolRefactoring -d ./src/data-source.ts",
+    "migrate": "typeorm-ts-node-commonjs migration:generate ./src/migration/ProfileHiredPersonRefactoring -d ./src/data-source.ts",
     "db:push": "typeorm-ts-node-commonjs migration:run -d ./src/data-source.ts"
   }
 }

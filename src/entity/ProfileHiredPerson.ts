@@ -6,11 +6,11 @@ import { ColumnNumericTransformer } from "../utils/ColumnNumericTransformer";
 
 @Entity()
 export class ProfileHiredPerson extends Model {
-  @Column({ type: "time", precision: 7 })
-  date_start: string;
+  @Column()
+  date_start: Date;
 
-  @Column({ type: "time", precision: 7 })
-  date_end: string;
+  @Column()
+  date_end: Date;
 
   @Column({
     type: "numeric",
