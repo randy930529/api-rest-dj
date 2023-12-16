@@ -3,6 +3,7 @@ import Model from "./Base";
 import { ExpenseElement } from "./ExpenseElement";
 import { FiscalYear } from "./FiscalYear";
 import { ColumnNumericTransformer } from "../utils/ColumnNumericTransformer";
+import { Tax } from "./Tax";
 
 @Entity()
 export class SupportDocument extends Model {
@@ -36,4 +37,8 @@ export class SupportDocument extends Model {
   @ManyToOne(() => FiscalYear)
   @JoinColumn()
   fiscalYear: FiscalYear;
+
+  @ManyToOne(() => Tax)
+  @JoinColumn()
+  tax: Tax;
 }

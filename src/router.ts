@@ -11,7 +11,6 @@ import { licenseRoutes } from "./managers/license/routes/license";
 import { licenseUserRoutes } from "./managers/license/routes/licenseUser";
 import { fiscalYearRoutes } from "./managers/period/routes/fiscalYear";
 import { taxRoutes } from "./managers/tax/routes/tax";
-import { taxPaidRoutes } from "./managers/tax/routes/taxPaid";
 import { profileRoutes } from "./profile/routes/profile";
 import { sectionRoutes } from "./section/routes/section";
 
@@ -30,6 +29,5 @@ export const Routes = [
   ...accountRoutes,
   ...voucherDetailRoutes,
   ...taxRoutes,
-  ...taxPaidRoutes,
   ...sectionRoutes,
 ];

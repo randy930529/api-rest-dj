@@ -1,5 +1,6 @@
-import { Entity, Column } from "typeorm";
+import { Entity, Column, OneToMany } from "typeorm";
 import Model from "./Base";
+import { SupportDocument } from "./SupportDocument";
 
 @Entity()
 export class Tax extends Model {
@@ -11,4 +12,7 @@ export class Tax extends Model {
 
   @Column({ default: false })
   active: boolean;
+
+  @OneToMany(() => SupportDocument, (supportDocument) => supportDocument.tax)
+  supportDocument: SupportDocument[];
 }
