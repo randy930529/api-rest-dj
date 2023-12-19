@@ -6,7 +6,7 @@ import { Element } from "../../../entity/Element";
 import { responseError } from "../../../errors/responseError";
 import getProfileById from "../../../profile/utils/getProfileById";
 import { ElementDTO } from "../dto/request/element.dto";
-import { CreateExpenseElementDTO } from "../dto/response/createExpenseElement.dto";
+import { CreateElementDTO } from "../dto/response/createElement.dto";
 
 export class ElementController extends EntityControllerBase<Element> {
   constructor() {
@@ -14,25 +14,25 @@ export class ElementController extends EntityControllerBase<Element> {
     super(repository);
   }
 
-  async createExpenseElement(req: Request, res: Response, next: NextFunction) {
+  async createElement(req: Request, res: Response, next: NextFunction) {
     try {
       const fields: ElementDTO = req.body;
       const { id } = fields.profile;
 
       const profile = await getProfileById({ id, res });
 
-      const objectExpenseElement = Object.assign(new Element(), {
+      const objectElement = Object.assign(new Element(), {
         ...fields,
         profile,
       });
 
-      const newExpenseElement = await this.create(objectExpenseElement);
+      const newElement = await this.create(objectElement);
 
-      const expenseElement: CreateExpenseElementDTO = newExpenseElement;
+      const element: CreateElementDTO = newElement;
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
-        data: { expenseElement },
+        data: { element },
       };
 
       res.status(200);
@@ -43,7 +43,7 @@ export class ElementController extends EntityControllerBase<Element> {
     }
   }
 
-  async onExpenseElement(req: Request, res: Response, next: NextFunction) {
+  async onElement(req: Request, res: Response, next: NextFunction) {
     try {
       const id = parseInt(req.params.id);
 
@@ -54,21 +54,20 @@ export class ElementController extends EntityControllerBase<Element> {
     }
   }
 
-  async updateExpenseElement(req: Request, res: Response, next: NextFunction) {
+  async updateElement(req: Request, res: Response, next: NextFunction) {
     try {
       const fields: Element = req.body;
       const { id } = fields;
 
-      if (!id)
-        responseError(res, "Delete expense element requiere id valid.", 404);
+      if (!id) responseError(res, "Delete element requiere id valid.", 404);
 
-      const expenseElementUpdate = await this.update({ id, res }, fields);
+      const elementUpdate = await this.update({ id, res }, fields);
 
-      const expenseElement: CreateExpenseElementDTO = expenseElementUpdate;
+      const element: CreateElementDTO = elementUpdate;
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
-        data: { expenseElement },
+        data: { element },
       };
 
       res.status(201);
@@ -79,36 +78,28 @@ export class ElementController extends EntityControllerBase<Element> {
     }
   }
 
-  async partialUpdateExpenseElement(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
+  async partialUpdateElement(req: Request, res: Response, next: NextFunction) {
     try {
       const fields: ElementDTO = req.body;
       const { id } = req.body;
 
-      if (!id)
-        responseError(res, "Delete expense element requiere id valid.", 404);
+      if (!id) responseError(res, "Delete element requiere id valid.", 404);
 
       const fieldToUpdate: string = Object.keys(fields)[1];
-      const expenseElementToUpdate = await this.one({ id, req, res });
+      const elementToUpdate = await this.one({ id, req, res });
 
-      const expenseElementUpdateObject = Object.assign(new Element(), {
-        ...expenseElementToUpdate,
+      const elementUpdateObject = Object.assign(new Element(), {
+        ...elementToUpdate,
         [fieldToUpdate]: fields[fieldToUpdate],
       });
 
-      const expenseElementUpdate = await this.update(
-        { id, res },
-        expenseElementUpdateObject
-      );
+      const elementUpdate = await this.update({ id, res }, elementUpdateObject);
 
-      const expenseElement: CreateExpenseElementDTO = expenseElementUpdate;
+      const element: CreateElementDTO = elementUpdate;
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
-        data: { expenseElement },
+        data: { element },
       };
 
       res.status(200);
@@ -119,17 +110,16 @@ export class ElementController extends EntityControllerBase<Element> {
     }
   }
 
-  async deleteExpenseElement(req: Request, res: Response, next: NextFunction) {
+  async deleteElement(req: Request, res: Response, next: NextFunction) {
     try {
       const id = parseInt(req.params.id);
 
-      if (!id)
-        responseError(res, "Delete expense element requiere id valid.", 404);
+      if (!id) responseError(res, "Delete element requiere id valid.", 404);
 
       await this.delete({ id, res });
 
       res.status(204);
-      return "Expense element has been removed successfully.";
+      return " element has been removed successfully.";
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);
