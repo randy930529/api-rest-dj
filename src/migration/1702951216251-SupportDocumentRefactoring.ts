@@ -13,6 +13,18 @@ export class SupportDocumentRefactoring1702951216251
       `ALTER TABLE "support_document" RENAME COLUMN "expenseElementId" TO "elementId"`
     );
     await queryRunner.query(
+      `ALTER TABLE "support_document" DROP COLUMN "date"`
+    );
+    await queryRunner.query(
+      `ALTER TABLE "support_document" ADD COLUMN "date" TIMESTAMP`
+    );
+    await queryRunner.query(
+      `UPDATE "support_document" SET "date" = '2023-12-18' WHERE "date" IS NULL`
+    );
+    await queryRunner.query(
+      `ALTER TABLE "support_document" ALTER COLUMN "date" SET NOT NULL`
+    );
+    await queryRunner.query(
       `CREATE TABLE "element" ("id" SERIAL NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now(), "description" character varying(100) NOT NULL, "type" character(1) NOT NULL, "active" boolean NOT NULL DEFAULT false, "is_general" boolean NOT NULL DEFAULT false, "profileId" integer, "accountId" integer, CONSTRAINT "PK_6c5f203479270d39efaad8cd82b" PRIMARY KEY ("id"))`
     );
     await queryRunner.query(
