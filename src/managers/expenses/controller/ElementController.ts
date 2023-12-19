@@ -7,6 +7,8 @@ import { responseError } from "../../../errors/responseError";
 import getProfileById from "../../../profile/utils/getProfileById";
 import { ElementDTO } from "../dto/request/element.dto";
 import { CreateElementDTO } from "../dto/response/createElement.dto";
+import { JWT } from "../../../auth/security/jwt";
+import { User } from "../../../entity/User";
 
 export class ElementController extends EntityControllerBase<Element> {
   constructor() {
@@ -18,6 +20,21 @@ export class ElementController extends EntityControllerBase<Element> {
     try {
       const fields: ElementDTO = req.body;
       const { id } = fields.profile;
+
+      const token = req.headers.authorization.split(" ")[1];
+      const userId = JWT.getJwtPayloadValueByKey(token, "id");
+
+      if (fields.type === "i") {
+        const user = await User.findOne({
+          select: { role: true },
+          where: { id: userId },
+        });
+
+        if (!user) responseError(res, "User not found.", 404);
+
+        if (user.role === "cliente")
+          responseError(res, "User not allowed.", 401);
+      }
 
       const profile = await getProfileById({ id, res });
 
@@ -119,7 +136,7 @@ export class ElementController extends EntityControllerBase<Element> {
       await this.delete({ id, res });
 
       res.status(204);
-      return " element has been removed successfully.";
+      return "Element has been removed successfully.";
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);
