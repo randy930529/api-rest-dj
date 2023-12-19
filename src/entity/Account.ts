@@ -1,6 +1,7 @@
-import { Entity, Column, JoinColumn, ManyToOne } from "typeorm";
+import { Entity, Column, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import Model from "./Base";
 import { Profile } from "./Profile";
+import { Element } from "./Element";
 
 @Entity()
 export class Account extends Model {
@@ -19,4 +20,8 @@ export class Account extends Model {
   @ManyToOne(() => Profile)
   @JoinColumn()
   profile: Profile;
+
+  @ManyToOne(() => Element, (element) => element.account)
+  @JoinColumn()
+  elements: Element[];
 }

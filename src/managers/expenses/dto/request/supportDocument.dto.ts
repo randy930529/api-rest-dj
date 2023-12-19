@@ -1,13 +1,13 @@
-import { ExpenseElement } from "../../../../entity/ExpenseElement";
+import { Element } from "../../../../entity/Element";
 import { FiscalYear } from "../../../../entity/FiscalYear";
 
 export type SupportDocumentDTO = {
   description: string;
   document?: string;
   amount: number;
-  date: string;
+  date: Date;
   type_document: string;
   is_bank: boolean;
-  expenseElement: ExpenseElement;
+  element: Element;
   fiscalYear: FiscalYear;
 };

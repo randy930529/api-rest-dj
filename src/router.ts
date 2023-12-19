@@ -1,7 +1,7 @@
 import { authRoutes } from "./auth/routes/auth";
 import { userRoutes } from "./auth/routes/user";
 import { accountRoutes } from "./managers/expenses/routes/account";
-import { expenseElementRoutes } from "./managers/expenses/routes/expenseElement";
+import { elementRoutes } from "./managers/expenses/routes/element";
 import { supportDocumentRoutes } from "./managers/expenses/routes/supportDocument";
 import { voucherRoutes } from "./managers/expenses/routes/voucher";
 import { voucherDetailRoutes } from "./managers/expenses/routes/voucherDetail";
@@ -23,7 +23,7 @@ export const Routes = [
   ...licenseRoutes,
   ...licenseUserRoutes,
   ...fiscalYearRoutes,
-  ...expenseElementRoutes,
+  ...elementRoutes,
   ...supportDocumentRoutes,
   ...voucherRoutes,
   ...accountRoutes,

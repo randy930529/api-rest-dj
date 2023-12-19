@@ -1,5 +1,5 @@
-import { ExpenseElementDTO } from "../request/expenseElement.dto";
+import { ElementDTO } from "../request/element.dto";
 
-export type CreateExpenseElementDTO = ExpenseElementDTO & {
+export type CreateExpenseElementDTO = ElementDTO & {
   id: number;
 };

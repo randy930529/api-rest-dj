@@ -8,6 +8,7 @@ import { Routes } from "./router";
 import { errorHandler } from "./errors/middlewares/errorHandler";
 import { appConfig } from "../config";
 import * as pug from "pug";
+import * as path from "path";
 
 //Para provar el envio de correo. Eliminar!
 import * as nodemailer from "nodemailer";
@@ -65,6 +66,23 @@ AppDataSource.initialize()
 
       res.send(html);
     });
+
+    app.use(express.static(path.join(__dirname, "../public")));
+
+    app.get(
+      "/media/:type/:file",
+      function (req: Request, res: Response, next: Function) {
+        const { type, file } = req.params;
+        const filePath = path.join(
+          __dirname,
+          "../public",
+          `${type ? `${type}/` : ``}`,
+          file
+        );
+
+        res.sendFile(filePath);
+      }
+    );
 
     // TEMPLATE ENGINE
     app.set("view engine", "pug");

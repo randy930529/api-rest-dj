@@ -1,9 +1,10 @@
 import { Entity, Column, JoinColumn, ManyToOne } from "typeorm";
 import Model from "./Base";
-import { ExpenseElement } from "./ExpenseElement";
+import { Element } from "./Element";
 import { FiscalYear } from "./FiscalYear";
 import { ColumnNumericTransformer } from "../utils/ColumnNumericTransformer";
 import { Tax } from "./Tax";
+import * as moment from "moment";
 
 @Entity()
 export class SupportDocument extends Model {
@@ -21,8 +22,8 @@ export class SupportDocument extends Model {
   })
   amount: number;
 
-  @Column({ type: "time", precision: 7 })
-  date: string;
+  @Column({ default: moment() })
+  date: Date;
 
   @Column({ type: "char", length: 1 })
   type_document: string;
@@ -30,9 +31,9 @@ export class SupportDocument extends Model {
   @Column({ default: false })
   is_bank: boolean;
 
-  @ManyToOne(() => ExpenseElement)
+  @ManyToOne(() => Element)
   @JoinColumn()
-  expenseElement: ExpenseElement;
+  element: Element;
 
   @ManyToOne(() => FiscalYear)
   @JoinColumn()

@@ -5,7 +5,7 @@ import { SupportDocument } from "../../../entity/SupportDocument";
 import { SupportDocumentDTO } from "../dto/request/supportDocument.dto";
 import { responseError } from "../../../errors/responseError";
 import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
-import { ExpenseElement } from "../../../entity/ExpenseElement";
+import { Element } from "../../../entity/Element";
 import { FiscalYear } from "../../../entity/FiscalYear";
 
 export class SupportDocumentController extends EntityControllerBase<SupportDocument> {
@@ -17,25 +17,23 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
   async createSupportDocument(req: Request, res: Response, next: NextFunction) {
     try {
       const fields: SupportDocumentDTO = req.body;
-      const expenseElementId = fields.expenseElement.id;
+      const elementId = fields.element.id;
       const fiscalYearId = fields.fiscalYear.id;
 
-      if (!expenseElementId)
+      if (!elementId)
         responseError(res, "Do must provide a valid expense element id.", 404);
 
       if (!fiscalYearId)
         responseError(res, "Do must provide a valid fiscal yearId id.", 404);
 
-      const expenseElementRepository =
-        AppDataSource.getRepository(ExpenseElement);
+      const elementRepository = AppDataSource.getRepository(Element);
       const fiscalYearRepository = AppDataSource.getRepository(FiscalYear);
 
-      const expenseElement = await expenseElementRepository.findOneBy({
-        id: expenseElementId,
+      const element = await elementRepository.findOneBy({
+        id: elementId,
       });
 
-      if (!expenseElement)
-        responseError(res, "Expense element not found.", 404);
+      if (!element) responseError(res, "Expense element not found.", 404);
 
       const fiscalYear = await fiscalYearRepository.findOneBy({
         id: fiscalYearId,
@@ -45,7 +43,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
 
       const objectSupportDocument = Object.assign(new SupportDocument(), {
         ...fields,
-        expenseElement,
+        element,
         fiscalYear,
       });
 
