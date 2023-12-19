@@ -8,7 +8,7 @@ export class FiscalYear extends Model {
   @Column({ type: "integer", width: 4 })
   year: number;
 
-  @Column({ default: moment() })
+  @Column({ default: moment().startOf("year") })
   date: Date;
 
   @Column({ default: true })
