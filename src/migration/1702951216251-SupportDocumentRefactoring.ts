@@ -19,6 +19,7 @@ export class SupportDocumentRefactoring1702951216251
       `INSERT INTO "element" ("created_at", "updated_at", "description", "type", "active", "is_general", "profileId") SELECT "created_at", "updated_at", "description", "type", "active", "is_general", "profileId" FROM "expense_element"`
     );
     await queryRunner.query(`ALTER TABLE "account" ADD "elementsId" integer`);
+    await queryRunner.query(`ALTER TABLE "fiscal_year" ADD "date" TIMESTAMP`);
     await queryRunner.query(
       `ALTER TABLE "fiscal_year" ALTER COLUMN "date" SET DEFAULT '"2023-12-19T02:00:19.173Z"'`
     );
