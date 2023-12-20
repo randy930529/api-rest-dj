@@ -7,6 +7,7 @@ import { HiredPersonDTO } from "../dto/request/hiredPerson.dto";
 import { CreateHiredPersonDTO } from "../dto/response/createHiredPerson.dto";
 import { responseError } from "../../../errors/responseError";
 import getProfileById from "../../../profile/utils/getProfileById";
+import { Address } from "../../../entity/Address";
 
 export class HiredPersonController extends EntityControllerBase<HiredPerson> {
   constructor() {
@@ -21,9 +22,13 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
 
       const profile = await getProfileById({ id, res });
 
+      const addressDTO = await Address.create(fields.address);
+      const address = await addressDTO.save();
+
       const objectHiredPerson = Object.assign(new HiredPerson(), {
         ...fields,
         profile,
+        address,
       });
 
       const newHiredPerson = await this.create(objectHiredPerson);

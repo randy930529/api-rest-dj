@@ -1,8 +1,3 @@
-import { Profile } from "../../../../entity/Profile";
+import { HiredPersonDTO } from "../request/hiredPerson.dto";
 
-export type CreateHiredPersonDTO = {
-  name: string;
-  last_name: string;
-  ci: string;
-  profile: Profile;
-};
+export type CreateHiredPersonDTO = HiredPersonDTO & {};

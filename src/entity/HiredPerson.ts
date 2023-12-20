@@ -1,8 +1,18 @@
-import { Entity, Column, JoinColumn, ManyToOne, OneToMany } from "typeorm";
+import {
+  Entity,
+  Column,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  BeforeRemove,
+  AfterRemove,
+} from "typeorm";
 import Model from "./Base";
 import { Profile } from "./Profile";
 import { ProfileHiredPerson } from "./ProfileHiredPerson";
-import { Municipio } from "./Municipio";
+import { Address } from "./Address";
+
+let addressToRemoveRef: Address;
 
 @Entity()
 export class HiredPerson extends Model {
@@ -15,20 +25,42 @@ export class HiredPerson extends Model {
   @Column({ type: "varchar", length: 11 })
   ci: string;
 
-  @Column({ default: "" })
-  address: string;
-
   @ManyToOne(() => Profile)
   @JoinColumn()
   profile: Profile;
 
   @OneToMany(
     () => ProfileHiredPerson,
-    (profileHiredPerson) => profileHiredPerson.hiredPerson
+    (profileHiredPerson) => profileHiredPerson.hiredPerson,
+    {
+      onDelete: "CASCADE",
+    }
   )
   profileHiredPerson: ProfileHiredPerson[];
 
-  @ManyToOne(() => Municipio)
+  @ManyToOne(() => Address, { nullable: true })
   @JoinColumn()
-  municipio: Municipio;
+  address: Address;
+
+  @BeforeRemove()
+  async saveMeAddressRef(): Promise<void> {
+    const me = await HiredPerson.findOne({
+      relations: ["address"],
+      where: { id: this.id },
+    });
+    console.log("Run Trigger in Hired Person @BeforeRemove.");
+
+    if (me.address) {
+      addressToRemoveRef = me.address;
+    }
+  }
+
+  @AfterRemove()
+  async removeAddress(): Promise<void> {
+    console.log("Run Trigger in Hired Person @AfterRemove.");
+
+    if (addressToRemoveRef) {
+      addressToRemoveRef.remove();
+    }
+  }
 }
