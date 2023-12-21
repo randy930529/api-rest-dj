@@ -62,16 +62,16 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
   async updateHiredPerson(req: Request, res: Response, next: NextFunction) {
     try {
       const fields: HiredPerson = req.body;
-      const { id } = fields.profile;
+      const { id } = req.body;
 
       if (!id)
         responseError(
           res,
-          "Update pired person requiere profile id valid.",
+          "Update hired person requiere profile id valid.",
           404
         );
 
-      const hiredPersonUpdate = await this.update({ id, res: res }, fields);
+      const hiredPersonUpdate = await this.update({ id, res }, fields);
 
       const hiredPerson: CreateHiredPersonDTO = hiredPersonUpdate;
       const resp: BaseResponseDTO = {
