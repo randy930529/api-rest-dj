@@ -42,7 +42,7 @@ Rutas por entidad
 +--------------------+-----------------------------+
 | FiscalYear         | * ``fiscal/year``           |
 +--------------------+-----------------------------+
-| ExpenseElement     | * ``expense/element``       |
+| Element            | * ``element``               |
 +--------------------+-----------------------------+
 | SupportDocument    | * ``support/document``      |
 +--------------------+-----------------------------+
@@ -54,9 +54,6 @@ Rutas por entidad
 +--------------------+-----------------------------+
 | Tax                | * ``tax``                   |
 |                    | * ``GET`` ``/taxes``        |
-+--------------------+-----------------------------+
-| TaxPaid            | * ``tax/paid``              |
-|                    | * ``GET`` ``/taxes/paid``   |
 |                    |                             |
 +--------------------+-----------------------------+
 
@@ -98,9 +95,9 @@ Utilice este endpoint para eliminar la entidad deceada. Se enviará la informaci
 
 **Default URL**: ``/license/user/<:uid>/``              **Default URL**: ``/tax/<:uid>/``
 
-**Default URL**: ``/fiscal/year/<:uid>/``               **Default URL**: ``/tax/paid/<:uid>/``
+**Default URL**: ``/fiscal/year/<:uid>/``
 
-**Default URL**: ``/expense/element/<:uid>/``
+**Default URL**: ``/element/<:uid>/``
 
 +------------+---------------------------------+----------------------------------+
 | Method     |  Request                        | Response                         |

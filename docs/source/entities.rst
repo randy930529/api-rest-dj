@@ -29,7 +29,8 @@ Persona contratada
     "name": "string",
     "last_name": "string",
     "ci": "string",
-    "profile": "Profile"
+    "profile": "Profile",
+    "address": "Address"
     }
 
 Licensias
@@ -40,9 +41,11 @@ Licensias
 .. code-block:: JSON
 
     {
+    "name": "string",
     "days": "number",
     "max_profiles": "number",
-    "active": "boolean",
+    "active": "boolean", //opcional
+    "public": "boolean", //opcional
     "import": "number"
     }
 
@@ -58,8 +61,8 @@ Perfil para una persona contratada
 .. code-block:: JSON
 
     {
-    "date_start": "string",
-    "date_end": "string",
+    "date_start": "Date",
+    "date_end": "Date",
     "import": "number",
     "profile": "Profile",
     "hiredPerson": "HiredPerson"
@@ -91,21 +94,26 @@ Periodo fiscal
 
     {
     "year": "number",
-    "general_scheme"?: "boolean",
+    "date": "Date",
+    "general_scheme": "boolean", //opcional
     "profile": "Profile"
     }
 
-Elemento de gastos
-------------------
+Elemento de gastos o ingresos
+-----------------------------
 
-**ExpenseElement**
+**Element**
 
 .. code-block:: JSON
 
     {
     "description": "string",
     "type": "string",
-    "profile": "Profile"
+    "profile": "Profile",
+    "active": "boolean", //opcional
+    "is_general": "boolean", //opcional
+    "profile": "Profile", //opcional
+    "account": "Account"
     }
 
 Documento de soporte
@@ -117,13 +125,14 @@ Documento de soporte
 
     {
     "description": "string",
-    "document"?: "string",
+    "document": "string", //opcional
     "amount": "number",
-    "date": "string",
+    "date": "Date",
     "type_document": "string",
-    "is_bank": "boolean";
-    "expenseElement": "ExpenseElement",
-    "fiscalYear": "FiscalYear"
+    "is_bank": "boolean", //opcional
+    "element": "Element",
+    "fiscalYear": "FiscalYear",
+    "tax": "Tax"
     }
 
 Comprobante
@@ -149,7 +158,7 @@ Detalles del comprobante
 
     {
     "debe": "number",
-    "haber": "number";
+    "haber": "number",
     "voucher": "Voucher",
     "account": "Account"
     }
@@ -177,20 +186,6 @@ Impuesto
 
     {
     "description": "string",
-    "code"?: "string",
-    "active"?: "boolean"
-    }
-
-Impuesto pagado
----------------
-
-**TaxPaid**
-
-.. code-block:: JSON
-
-    {
-    "import": "number",
-    "date": "Date",
-    "profile": "Profile",
-    "tax": "Tax"
+    "code": "string", //opcional
+    "active": "boolean" //opcional
     }
