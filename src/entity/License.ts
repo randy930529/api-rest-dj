@@ -4,6 +4,9 @@ import { LicenseUser } from "./LicenseUser";
 
 @Entity()
 export class License extends Model {
+  @Column({ default: "" })
+  name: string;
+
   @Column({ type: "integer", width: 4 })
   days: number;
 
