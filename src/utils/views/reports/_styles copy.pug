@@ -1,0 +1,147 @@
+-const border="1px solid #000"
+-const font="Calibri, Arial, sans-serif"
+
+style.
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f2f2f2;
+  }
+
+  .container {
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .page-letter {
+    width: 8.5in;
+    height: 11in;
+  }
+
+  .page-a4 {
+    width: 8.27in;
+    height: 11.69in;
+  }
+
+  h1 {
+    text-align: center;
+    color: #333;
+  }
+
+  table {
+    display: table;
+    position: relative;
+    font-family: #{font};
+    font-size: 11px;
+    line-height: 1.25rem;
+    width: 100%;
+    text-indent: 0;
+    border-color: inherit;
+    border-collapse: collapse;
+    margin-top: 20px;
+    border-spacing: 0;
+  }
+
+  tbody {
+    line-height: 1rem;
+  }
+
+    /* Estilos para el encabezado de la tabla */
+    th {
+        color: #333;
+        font-weight: bold;
+        padding: 0.7px 0.75px 0.7px 0.75px;
+        text-align: left;
+    }
+
+    /* Estilos para las celdas de datos de la tabla */
+    td {
+        padding: 0.7px 0.75px 0.7px 0.75px;
+        text-align: left;
+    }
+
+    td,th {
+        border: 1px solid #000;
+    }
+
+    /* Estilos para la última celda de cada fila */
+    td:last-child,
+    th:last-child {
+        border-right: none;
+    }
+
+    /* Estilos alternativos para filas */
+    tr.tr-nice:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    /* Estilo para resaltar una celda o fila */
+    .highlight {
+        background-color: #ffc;
+    }
+
+    /* Estilos para la tabla con un borde alrededor */
+    .table-bordered {
+        border: 1px solid #000;
+    }
+
+    /* Estilos para la tabla con celdas que se ajustan automáticamente */
+    .table-auto {
+        table-layout: auto;
+        width: auto;
+    }
+
+    /* Estilos para una tabla de diseño compacto */
+    .table-compact {
+        font-size: 14px;
+    }
+
+    /* Estilos para una tabla con cabecera fija */
+    .table-fixed-header thead {
+        position: sticky;
+        top: 0;
+        background-color: #f5f5f5;
+    }
+
+    /* Estilos para una tabla con columnas de ancho fijo */
+    .table-fixed-column th,
+    .table-fixed-column td {
+        width: 150px;
+    }
+
+    .total {
+        font-weight: bold;
+    }
+
+    .w-100 {
+        width: 100% !important;
+    }
+
+    .text-inline {
+        white-space: nowrap;
+    }
+
+    .page-one {
+        break-inside: auto;
+      }
+
+      .page-next {
+        page-break-before: always;
+      }
+
+      .br-none {
+        border: 0 !important;
+      }
+
+      .br-bottom-1 {
+        border-bottom: #{border} !important;
+      }
+
+      .br-left-1 {
+        border-left: #{border} !important;
+      }
+
+      .br-right-1 {
+        border-right: #{border} !important;
+      }

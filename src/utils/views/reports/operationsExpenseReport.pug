@@ -1,0 +1,220 @@
+-const operatingTb1=["Materias primas y materiales", "Mercancias para la venta", "Combustibles", "Energia electrica", "Remuneraciones al personal contratado", "Teneduria de libros", "Aceites y lubricantes", "Neumaticos", "Parqueos y Garaje", "Fregado", "Derecho a servicios de agencia", "Otros gastos monetarios"]
+-const operatingTb2=["", "", "", "total a deducir de la base imponible", "Egresos no incluidos a efectos de impuestos autorizados por el MFP", "total de gastos de operación", "efectivo en caja", "efectivo en banco", "total pagado"]
+
+mixin operatingListTb1(operating=[])
+    each item in operating
+        th= item
+
+mixin operatingListTb2(operating=[])
+    each item in operating
+        th.col-width= item.toUpperCase()
+
+doctype html
+html
+  head
+    meta(name='viewport' content='width=device-width, initial-scale=1.0')
+    meta(http-equiv='Content-Type' content='text/html; charset=UTF-8')
+    title #{title}
+    include _styles
+    style.
+      .container {
+        background-color: #fff;
+      }
+
+      thead,tbody {
+        display: block;
+        width: auto;
+      }
+
+      
+
+      tr.flex-row {
+        display: flex;
+        flex-direction: row;
+        border: 0;
+      }
+
+      .col-width {
+        width: 7.49%;
+      }
+
+      tr.one {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      tr.two {
+        width: 88.7%;
+        justify-content: center;
+      }
+
+      tr.three {
+        width: 88.7%;
+        justify-content: center;
+      }
+
+      .report-title {
+        font-size: inherit;
+      }
+
+      .table-one {
+        break-inside: auto;
+      }
+
+      .table-two {
+        page-break-before: always;
+      }
+  body
+    .container.page-letter
+        h1.report-title #{title}
+        table.table-one.table-bordered.table-auto(role='presentation' border='0' cellpadding='0' cellspacing='0')
+            thead
+                tr.flex-row.one.br-bottom-1
+                    th(style={width: '10%', border: 0}) #{"Enero".toUpperCase()}
+                    th.text-inline(style="width: 90%; border-top: 0; border-bottom: 0; text-align: center") #{"GASTOS DE OPERACIONES".toUpperCase()}
+                tr.flex-row.two
+                    th.w-100(style="text-align: center; border-top: 0; border-right: 1px solid #000; border-left: 0") #{"SUBCUENTAS".toUpperCase()}
+                tr.flex-row.three
+                    th.w-100(style="border: 0; text-align: center; border-right: 1px solid #000") #{"POSIBLES A DEDUCIR DENTRO DE LOS LIMITES DE GASTOS ESTABLECIDOS".toUpperCase()}
+            tbody
+                tr
+                    th(style="border-left: 0") Día
+                    +operatingListTb1(operatingTb1)
+                    th(style="border-top: 0") TOTAL DE GASTOS AUTORIZADOS POSIBLES A DEDUCIR
+                tr
+                    th(style="border-left: 0")
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                    th
+                        1  
+                tr
+                    td(style="border-left: 0")
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+    .container.page-letter
+        table.table-two.table-bordered.table-auto(role='presentation' border='0' cellpadding='0' cellspacing='0')
+            thead
+                tr.flex-row.one.br-bottom-1
+                    th(style="width: 52.43%; text-align: center; border: 0; border-right: 1px solid #000") #{"GASTOS DE OPERACIONES".toUpperCase()}
+                    th.col-width.br-none
+                    th(style="width: 37.45%; border: 0; border-left: 1px solid #000; text-align: right") #{"Enero".toUpperCase()}
+                tr.flex-row.one
+                    th.br-bottom-1(style="width: 37.45%; text-align: center; border: 0; border-right: 1px solid #000") #{"SUBCUENTAS".toUpperCase()}
+                    th.col-width(style={border: 0})
+                    th.col-width.br-bottom-1(style="text-align: center; border: 0; border-left: 1px solid #000") #{"SUBCUENTAS".toUpperCase()}
+                    th.col-width(style="border: 0; border-left: 1px solid #000; border-right: 1px solid #000")
+                    th.br-none(style={width: "14.98%"})
+                    th.col-width(style="border: 0; border-left: 1px solid #000; border-right: 1px solid #000")
+                    th.br-none(style={width: "14.98%"})
+                tr.flex-row.one.br-none
+                    th.text-inline(style="width: 37.45%; text-align: center; border: 0; border-right: 1px solid #000") #{"DEDUCIBLES DIRECTAMENTE DE LA BASE IMPONIBLE".toUpperCase()}
+                    th.col-width(style={border: 0})
+                    th.col-width(style="border: 0; border-left: 1px solid #000")
+                    th.col-width(style="border: 0; border-left: 1px solid #000; border-right: 1px solid #000")
+                    th.br-none(style="width: 14.98%; text-align: center") #{"CREDITOS".toUpperCase()}
+                    th.col-width(style="border: 0; border-left: 1px solid #000; border-right: 1px solid #000")
+                    th.br-none(style={width: "14.98%"})
+            tbody
+                tr
+                    th.col-width(style="border-left: 0") Día
+                    th.col-width Pagos por arrendamiento de bienes a entidades estatales
+                    +operatingListTb2(operatingTb2)
+                    th(style={width: '14.98%'}) #{"DETALLE".toUpperCase()}
+                tr
+                    th(style="border-left: 0")
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                    th
+                        1 
+                tr
+                    td(style="border-left: 0")
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+                    td
+                        1 
+                    td
+                        1 
