@@ -1,0 +1,560 @@
+-const border="1px solid #000"
+-const font="Calibri, Arial, sans-serif"
+-const windowtext="#000"
+
+style.
+  .style-0 {
+    text-align:general;
+    vertical-align:bottom;
+    white-space:nowrap;
+    color:black;
+    font-size:10.0pt;
+    font-weight:400;
+    font-style:normal;
+    text-decoration:none;
+    font-family:"Times New Roman";
+    border:none;
+  }
+
+  .font-8 {
+    color:#000;
+    font-size:11.0pt;
+    font-weight:400;
+    font-style:normal;
+    text-decoration:none;
+    font-family:Calibri, serif;
+  }
+
+  .font-9 {
+    color:#000;
+    font-size:11.0pt;
+    font-weight:700;
+    font-style:normal;
+    text-decoration:none;
+    font-family:Calibri, serif;
+  }
+
+  td {
+    padding-top:1px;
+    padding-right:1px;
+    padding-left:1px;
+    color:black;
+    font-size:10.0pt;
+    font-weight:400;
+    font-style:normal;
+    text-decoration:none;
+    font-family:"Times New Roman";
+    text-align:left;
+    vertical-align:top;
+    border:none;
+    white-space:nowrap;
+  }
+  
+  .xl-65 {
+    color:#000;
+    font-size:11.0pt;
+    font-weight:700;
+    font-family:Calibri;
+    border:.5pt solid black;
+    white-space:normal;
+  }
+
+  .xl-66 {
+    vertical-align:bottom;
+    border:.5pt solid black;
+    white-space:normal;
+  }
+
+  .xl-67 {
+    border:.5pt solid black;
+    white-space:normal;
+  }
+
+  .xl-68 {
+    color:#000;
+    font-size:11.0pt;
+    font-family:Calibri;
+    border:.5pt solid black;
+    white-space:normal;
+    padding-left:9px;
+  }
+
+  .xl-69 {
+    color:#000;
+    font-size:11.0pt;
+    font-family:Calibri;
+    text-align:right;
+    vertical-align:middle;
+    border:.5pt solid black;
+    white-space:normal;
+  }
+
+  .xl-70 {
+    font-size:11.0pt;
+    font-family:Calibri, sans-serif;
+    text-align:center;
+    border:.5pt solid black;
+    white-space:nowrap;
+  }
+
+  .xl-71 {
+    font-size:11.0pt;
+    font-family:Calibri, sans-serif;
+    text-align:right;
+    border:.5pt solid black;
+    white-space:nowrap;
+  }
+
+  .xl-72 {
+    color:#000;
+    font-size:11.0pt;
+    font-family:Calibri;
+    border:.5pt solid black;
+    white-space:normal;
+  }
+
+  .xl-73 {
+    color:#000;
+    font-size:11.0pt;
+    font-family:Calibri;
+    text-align:center;
+    border-top:.5pt solid black;
+    border-right:none;
+    border-bottom:.5pt solid black;
+    border-left:.5pt solid black;
+    white-space:normal;
+  }
+
+  .xl-74 {
+    color:#000;
+    font-size:11.0pt;
+    font-family:Calibri;
+    text-align:center;
+    border-top:.5pt solid black;
+    border-right:.5pt solid black;
+    border-bottom:.5pt solid black;
+    border-left:none;
+    white-space:normal;
+  }
+
+  .xl-75 {
+    color:#000;
+    font-size:11.0pt;
+    font-weight:700;
+    font-family:Calibri;
+    text-align:center;
+    border-top:.5pt solid black;
+    border-right:none;
+    border-bottom:.5pt solid black;
+    border-left:.5pt solid black;
+    white-space:normal;
+  }
+
+  .xl-76 {
+    color:#000;
+    font-size:11.0pt;
+    font-weight:700;
+    font-family:Calibri;
+    text-align:center;
+    border-top:.5pt solid black;
+    border-right:none;
+    border-bottom:.5pt solid black;
+    border-left:none;
+    white-space:normal;
+  }
+
+  .xl-77 {
+    color:#000;
+    font-size:11.0pt;
+    font-weight:700;
+    font-family:Calibri;
+    text-align:center;
+    border-top:.5pt solid black;
+    border-right:.5pt solid black;
+    border-bottom:.5pt solid black;
+    border-left:none;
+    white-space:normal;
+  }
+
+  .xl-78 {
+    color:#000;
+    font-size:11.0pt;
+    font-family:Calibri;
+    text-align:center;
+    vertical-align:bottom;
+    border-top:.5pt solid black;
+    border-right:.5pt solid black;
+    border-bottom:none;
+    border-left:.5pt solid black;
+    white-space:normal;
+  }
+
+  .xl-79 {
+    color:#000;
+    font-size:11.0pt;
+    font-family:Calibri;
+    text-align:center;
+    vertical-align:bottom;
+    border-top:none;
+    border-right:.5pt solid black;
+    border-bottom:none;
+    border-left:.5pt solid black;
+    white-space:normal;
+  }
+
+  .xl-80 {
+    color:#000;
+    font-size:11.0pt;
+    font-family:Calibri;
+    text-align:center;
+    vertical-align:bottom;
+    border-top:none;
+    border-right:.5pt solid black;
+    border-bottom:.5pt solid black;
+    border-left:.5pt solid black;
+    white-space:normal;
+  }
+
+  .xl-81 {
+    color:#000;
+    font-size:11.0pt;
+    font-family:Calibri;
+    vertical-align:middle;
+    border-top:.5pt solid black;
+    border-right:.5pt solid black;
+    border-bottom:none;
+    border-left:.5pt solid black;
+    white-space:normal;
+    padding-left:45px;
+  }
+
+  .xl-82 {
+    color:#000;
+    font-size:11.0pt;
+    font-family:Calibri;
+    vertical-align:middle;
+    border-top:none;
+    border-right:.5pt solid black;
+    border-bottom:none;
+    border-left:.5pt solid black;
+    white-space:normal;
+    padding-left:45px;
+  }
+
+  .xl-83 {
+    color:#000;
+    font-size:11.0pt;
+    font-family:Calibri;
+    vertical-align:middle;
+    border-top:none;
+    border-right:.5pt solid black;
+    border-bottom:.5pt solid black;
+    border-left:.5pt solid black;
+    white-space:normal;
+    padding-left:45px;
+  }
+
+  .xl-84 {
+    color:#000;
+    font-size:11.0pt;
+    font-family:Calibri;
+    vertical-align:middle;
+    border-top:.5pt solid black;
+    border-right:.5pt solid black;
+    border-bottom:none;
+    border-left:.5pt solid black;
+    white-space:normal;
+  }
+
+  .xl-85 {
+    color:#000;
+    font-size:11.0pt;
+    font-family:Calibri;
+    vertical-align:middle;
+    border-top:none;
+    border-right:.5pt solid black;
+    border-bottom:.5pt solid black;
+    border-left:.5pt solid black;
+    white-space:normal;
+  }
+
+  .xl-86 {
+    color:#000;
+    font-size:11.0pt;
+    font-weight:700;
+    font-family:Calibri;
+    border-top:.5pt solid black;
+    border-right:none;
+    border-bottom:.5pt solid black;
+    border-left:.5pt solid black;
+    white-space:normal;
+    padding-left:18px;
+  }
+
+  .xl-87 {
+    color:#000;
+    font-size:11.0pt;
+    font-weight:700;
+    font-family:Calibri;
+    border-top:.5pt solid black;
+    border-right:.5pt solid black;
+    border-bottom:.5pt solid black;
+    border-left:none;
+    white-space:normal;
+    padding-left:18px;
+  }
+
+  .xl-88 {
+    color:#000;
+    font-size:8.5pt;
+    font-family:Calibri;
+    text-align:center;
+    border-top:.5pt solid black;
+    border-right:.5pt solid black;
+    border-bottom:.5pt solid black;
+    border-left:none;
+    white-space:normal;
+  }
+
+  .xl-89 {
+    color:#000;
+    font-size:8.5pt;
+    font-family:Calibri;
+    text-align:right;
+    border-top:.5pt solid black;
+    border-right:none;
+    border-bottom:.5pt solid black;
+    border-left:.5pt solid black;
+    white-space:normal;
+  }
+
+  .xl-90 {
+    color:#000;
+    font-size:8.5pt;
+    font-family:Calibri;
+    text-align:right;
+    border-top:.5pt solid black;
+    border-right:none;
+    border-bottom:.5pt solid black;
+    border-left:none;
+    white-space:normal;
+  }
+
+  .xl-91 {
+    color:#000;
+    font-size:8.5pt;
+    font-family:Calibri;
+    text-align:right;
+    border-top:.5pt solid black;
+    border-right:.5pt solid black;
+    border-bottom:.5pt solid black;
+    border-left:none;
+    white-space:normal;
+  }
+
+  .xl-92 {
+    color:#000;
+    font-size:8.5pt;
+    font-family:Calibri;
+    text-align:center;
+    border-top:.5pt solid black;
+    border-right:.5pt solid black;
+    border-bottom:none;
+    border-left:.5pt solid black;
+    white-space:normal;
+  }
+
+  .xl-93 {
+    color:#000;
+    font-size:8.5pt;
+    font-family:Calibri;
+    text-align:center;
+    border-top:none;
+    border-right:.5pt solid black;
+    border-bottom:none;
+    border-left:.5pt solid black;
+    white-space:normal;
+  }
+
+  .xl-94 {
+    color:#000;
+    font-size:8.5pt;
+    font-family:Calibri;
+    text-align:center;
+    border-top:none;
+    border-right:.5pt solid black;
+    border-bottom:.5pt solid black;
+    border-left:.5pt solid black;
+    white-space:normal;
+  }
+
+  .xl-95 {
+    color:#000;
+    font-size:8.5pt;
+    font-family:Calibri;
+    vertical-align:middle;
+    border-top:.5pt solid black;
+    border-right:none;
+    border-bottom:none;
+    border-left:.5pt solid black;
+    white-space:normal;
+    padding-left:36px;
+  }
+
+  .xl-96 {
+    color:#000;
+    font-size:8.5pt;
+    font-family:Calibri;
+    vertical-align:middle;
+    border-top:.5pt solid black;
+    border-right:.5pt solid black;
+    border-bottom:none;
+    border-left:none;
+    white-space:normal;
+    padding-left:36px;
+  }
+
+  .xl-97 {
+    color:#000;
+    font-size:8.5pt;
+    font-family:Calibri;
+    vertical-align:middle;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid black;
+    border-left:.5pt solid black;
+    white-space:normal;
+    padding-left:36px;
+  }
+
+  .xl-98 {
+    color:#000;
+    font-size:8.5pt;
+    font-family:Calibri;
+    vertical-align:middle;
+    border-top:none;
+    border-right:.5pt solid black;
+    border-bottom:.5pt solid black;
+    border-left:none;
+    white-space:normal;
+    padding-left:36px;
+  }
+
+  .xl-99 {
+    color:#000;
+    font-size:8.5pt;
+    font-family:Calibri;
+    vertical-align:middle;
+    border-top:.5pt solid black;
+    border-right:.5pt solid black;
+    border-bottom:none;
+    border-left:.5pt solid black;
+    white-space:normal;
+  }
+
+  .xl-100 {
+    color:#000;
+    font-size:8.5pt;
+    font-family:Calibri;
+    vertical-align:middle;
+    border-top:none;
+    border-right:.5pt solid black;
+    border-bottom:none;
+    border-left:.5pt solid black;
+    white-space:normal;
+  }
+
+  .xl-101 {
+    color:#000;
+    font-size:8.5pt;
+    font-family:Calibri;
+    vertical-align:middle;
+    border-top:none;
+    border-right:.5pt solid black;
+    border-bottom:.5pt solid black;
+    border-left:.5pt solid black;
+    white-space:normal;
+  }
+
+  .xl-102 {
+    color:#000;
+    font-size:8.5pt;
+    font-family:Calibri;
+    vertical-align:middle;
+    border-top:.5pt solid black;
+    border-right:.5pt solid black;
+    border-bottom:none;
+    border-left:.5pt solid black;
+    white-space:normal;
+    padding-left:36px;
+  }
+
+  .xl-103 {
+    color:#000;
+    font-size:8.5pt;
+    font-family:Calibri;
+    vertical-align:middle;
+    border-top:none;
+    border-right:.5pt solid black;
+    border-bottom:none;
+    border-left:.5pt solid black;
+    white-space:normal;
+    padding-left:36px;
+  }
+
+  .xl-104 {
+    color:#000;
+    font-size:8.5pt;
+    font-family:Calibri;
+    vertical-align:middle;
+    border-top:none;
+    border-right:.5pt solid black;
+    border-bottom:.5pt solid black;
+    border-left:.5pt solid black;
+    white-space:normal;
+    padding-left:36px;
+  }
+
+  .xl-105 {
+    color:#000;
+    font-size:8.5pt;
+    font-family:Calibri;
+    border-top:.5pt solid black;
+    border-right:none;
+    border-bottom:.5pt solid black;
+    border-left:.5pt solid black;
+    white-space:normal;
+    padding-left:45px;
+  }
+
+  .xl-106 {
+    color:#000;
+    font-size:8.5pt;
+    font-family:Calibri;
+    border-top:.5pt solid black;
+    border-right:none;
+    border-bottom:.5pt solid black;
+    border-left:none;
+    white-space:normal;
+    padding-left:45px;
+  }
+
+  .xl-107 {
+    color:#000;
+    font-size:8.5pt;
+    font-family:Calibri;
+    border-top:.5pt solid black;
+    border-right:.5pt solid black;
+    border-bottom:.5pt solid black;
+    border-left:none;
+    white-space:normal;
+    padding-left:45px;
+  }
+
+  .page-one {
+    break-inside: auto;
+  }
+
+  .page-next {
+    page-break-before: always;
+  }
