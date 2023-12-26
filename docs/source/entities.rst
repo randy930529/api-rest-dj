@@ -132,7 +132,6 @@ Documento de soporte
     "is_bank": "boolean", //opcional
     "element": "Element",
     "fiscalYear": "FiscalYear",
-    "tax": "Tax"
     }
 
 Comprobante
@@ -175,17 +174,4 @@ Cuenta
     "description": "string",
     "moneda": "string",
     "profile": "Profile"
-    }
-
-Impuesto
---------
-
-**Tax**
-
-.. code-block:: JSON
-
-    {
-    "description": "string",
-    "code": "string", //opcional
-    "active": "boolean" //opcional
     }

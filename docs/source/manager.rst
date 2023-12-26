@@ -51,9 +51,6 @@ Rutas por entidad
 | VoucherDetail      | * ``voucher/detail``        |
 +--------------------+-----------------------------+
 | Account            | * ``account``               |
-+--------------------+-----------------------------+
-| Tax                | * ``tax``                   |
-|                    | * ``GET`` ``/taxes``        |
 |                    |                             |
 +--------------------+-----------------------------+
 
@@ -93,7 +90,7 @@ Utilice este endpoint para eliminar la entidad deceada. Se enviará la informaci
 
 **Default URL**: ``/license/<:uid>/``                   **Default URL**: ``/account/<:uid>/``
 
-**Default URL**: ``/license/user/<:uid>/``              **Default URL**: ``/tax/<:uid>/``
+**Default URL**: ``/license/user/<:uid>/``
 
 **Default URL**: ``/fiscal/year/<:uid>/``
 
