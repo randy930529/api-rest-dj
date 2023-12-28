@@ -61,7 +61,7 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
 
   async updateHiredPerson(req: Request, res: Response, next: NextFunction) {
     try {
-      const fields: HiredPerson = req.body;
+      let fields: HiredPersonDTO = req.body;
       const { id } = req.body;
 
       if (!id)
@@ -71,7 +71,22 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
           404
         );
 
-      const hiredPersonUpdate = await this.update({ id, res }, fields);
+      const hiredPersonToUpdate = await this.repository.findOne({
+        relations: ["address"],
+        where: { id },
+      });
+
+      if (!hiredPersonToUpdate) responseError(res, "Entity not found.", 404);
+
+      if (!hiredPersonToUpdate.address) {
+        const address = await Address.create(fields.address);
+        await address.save();
+        fields = { ...fields, address };
+      }
+
+      const entityUpdate = { ...hiredPersonToUpdate, ...fields };
+
+      const hiredPersonUpdate = await this.repository.save(entityUpdate);
 
       const hiredPerson: CreateHiredPersonDTO = hiredPersonUpdate;
       const resp: BaseResponseDTO = {
@@ -94,23 +109,34 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
     next: NextFunction
   ) {
     try {
-      const fields: HiredPersonDTO = req.body;
+      let fields: HiredPersonDTO = req.body;
       const { id } = req.body;
 
       if (!id)
         responseError(res, "Update requiere hired person id valid.", 404);
 
       const fieldToUpdate: string = Object.keys(fields)[1];
-      const hiredPersonToUpdate = await this.one({ id, req, res });
+      const hiredPersonToUpdate = await this.repository.findOne({
+        relations: ["address"],
+        where: { id },
+      });
+
+      if (!hiredPersonToUpdate) responseError(res, "Entity not found.", 404);
+
+      if (!hiredPersonToUpdate.address && fieldToUpdate === "address") {
+        const address = await Address.create(fields.address);
+        await address.save();
+        fields = { ...fields, address };
+      }
 
       const hiredPersonUpdate = Object.assign(new HiredPerson(), {
         ...hiredPersonToUpdate,
         [fieldToUpdate]: fields[fieldToUpdate],
       });
 
-      await this.update({ id, res }, hiredPersonUpdate);
+      const entityToUpdate = await this.repository.save(hiredPersonUpdate);
 
-      const hiredPerson: CreateHiredPersonDTO = hiredPersonUpdate;
+      const hiredPerson: CreateHiredPersonDTO = entityToUpdate;
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
