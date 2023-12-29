@@ -59,10 +59,10 @@ export class JWT {
     return refreshToken.id;
   }
 
-  public static isTokenValid(token: string) {
+  public static isTokenValid(token: string, expiration: boolean = false) {
     try {
       jwt.verify(token, this.privateKey, {
-        ignoreExpiration: false,
+        ignoreExpiration: expiration,
       });
 
       return true;

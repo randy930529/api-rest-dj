@@ -9,9 +9,10 @@ type Params = {
 
 export async function verifyTokenAndRefreshTokenForUserLogin(
   { token, refreshToken }: Params,
-  response: Response,
+  response: Response
 ) {
-  if (!JWT.isTokenValid(token)) {
+  const ignoreExpiration = true;
+  if (!JWT.isTokenValid(token, ignoreExpiration)) {
     responseError(response, "JWT is not valid.");
   }
 
