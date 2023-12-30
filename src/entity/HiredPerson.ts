@@ -48,7 +48,6 @@ export class HiredPerson extends Model {
       relations: ["address"],
       where: { id: this.id },
     });
-    console.log("Run Trigger in Hired Person @BeforeRemove.");
 
     if (me.address) {
       addressToRemoveRef = me.address;
@@ -57,8 +56,6 @@ export class HiredPerson extends Model {
 
   @AfterRemove()
   async removeAddress(): Promise<void> {
-    console.log("Run Trigger in Hired Person @AfterRemove.");
-
     if (addressToRemoveRef) {
       addressToRemoveRef.remove();
     }

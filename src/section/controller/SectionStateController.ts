@@ -166,6 +166,8 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
         where: { id },
       });
 
+      if (!sectionStateToUpdate) responseError(res, "Section not found.", 404);
+
       if (sectionStateToUpdate.user.id !== userId)
         responseError(
           res,
@@ -186,10 +188,24 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
       if (!profile)
         responseError(res, "Profile does not exist in this user.", 404);
 
+      let fiscalYear: FiscalYear;
+      if (fields.fiscalYear) {
+        fiscalYear = profile.fiscalYear.find(
+          (value: FiscalYear) => value.id === fields.fiscalYear.id
+        );
+
+        if (!fiscalYear)
+          responseError(
+            res,
+            "Fiscal year does not exist in this profile.",
+            404
+          );
+      }
+
       const sectionStateUpdate = await this.repository.save({
         ...sectionStateToUpdate,
         profile,
-        fiscalYear: fields.fiscalYear || profile.fiscalYear[0] || null,
+        fiscalYear: fiscalYear || profile.fiscalYear[0] || null,
       });
 
       const sectionState: SectionStateDTO = sectionStateUpdate;
@@ -231,9 +247,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
         where: { id },
       });
 
-      if (!sectionStateToUpdate) {
-        responseError(res, "User does not exist is this section.", 404);
-      }
+      if (!sectionStateToUpdate) responseError(res, "Section not found.", 404);
 
       if (sectionStateToUpdate.user.id !== userId)
         responseError(
@@ -241,6 +255,38 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
           "User is not authorized to update this section state.",
           401
         );
+
+      if (fieldToUpdate === "profile") {
+        const profile = await Profile.findOne({
+          where: {
+            id: fields[fieldToUpdate].id,
+            user: {
+              id: userId,
+            },
+          },
+        });
+
+        if (!profile)
+          responseError(res, "Profile does not exist in this user.", 404);
+      } else if (fieldToUpdate === "fiscalYear") {
+        const profile = await FiscalYear.findOne({
+          where: {
+            id: fields[fieldToUpdate].id,
+            profile: {
+              user: {
+                id: userId,
+              },
+            },
+          },
+        });
+
+        if (!profile)
+          responseError(
+            res,
+            "Fiscal year does not exist in this profile.",
+            404
+          );
+      }
 
       const sectionStateUpdate = await this.repository.save({
         ...sectionStateToUpdate,

@@ -59,8 +59,8 @@ export abstract class EntityControllerBase<TEntity> {
 
     if (!entityToUpdate) responseError(res, "Entity not found.", 404);
 
-    const userUpdate = { ...entityToUpdate, ...entity };
-    return await this.repository.save(userUpdate);
+    const entityUpdate = { ...entityToUpdate, ...entity };
+    return await this.repository.save(entityUpdate);
   }
 
   async delete({ id, res }: Params): Promise<TEntity> {

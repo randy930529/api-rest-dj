@@ -22,7 +22,7 @@ export const authRoutes = [
     method: "post",
     route: "/refresh/token",
     controller: AuthController,
-    middlewares: [authMiddleware],
+    middlewares: [nextFunction],
     action: "refreshToken",
   },
   {
