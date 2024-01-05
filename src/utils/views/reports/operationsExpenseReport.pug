@@ -10,12 +10,13 @@ mixin colGroup(colsArray=[])
         else
             col
 
-mixin enumerate(colsArray=[])
+mixin enumerate(colsArray=[],count=1)
     each val, index in colsArray
         if !index
-            td.xl-67(height=17 style="height:12.75pt; border-top:none") (1)
+            td.xl-67(height=17 style="height:12.75pt; border-top:none")= `(${count})`
         else
-            td.xl-68(style="border-top:none; border-left:none")= '('+ (index+1) +')'
+            td.xl-68(style="border-top:none; border-left:none")= `(${count})`
+        -count++
     else
         td There are no values
 
@@ -88,7 +89,7 @@ html(
                 td.xl-66(width=56 style="border-top:none;border-left:none; width:47pt")
                     font.font-8 Mercancias para la venta
                 td.xl-66(width=47 style="border-top:none;border-left:none; width:47pt")
-                    font.font-8 Combustibles
+                    font.font-8 Combust ibles
                 td.xl-66(width=52 style="border-top:none;border-left:none; width:47pt")
                     font.font-8 Energia electrica
                 td.xl-66(width=80 style="border-top:none;border-left:none; width:47pt")
@@ -156,5 +157,5 @@ html(
                 td.xl-74(width=69 style="border-top:none;border-left:none; vertical-align: middle; width:52pt")
                     font.font-8 EFECTIVO EN BANCO
             tr(height=17 style={height:'12.75pt'})
-                +enumerate(colsArray2)
+                +enumerate(colsArray2,15)
             +setData(dataMatrix2)

@@ -5,6 +5,21 @@ mixin colGroup(colsArray=[])
     each col in colsArray
       col(width=col.width, style=col.style)
 
+mixin values(valuesArray=[])
+  each val in valuesArray
+    td.xl-71(style="border-top:none;border-left:none")= val
+  else
+    td There are no values
+
+mixin setData(dataMatrix=[[]])
+    each val, index in dataMatrix
+        tr(height=22 style={height:'16.5pt'})
+            td.xl-71(height=22 style="height:16.5pt;border-top:none")= (index+1)
+            +values(val)
+            td.xl-66(width=163 style="border-top:none;border-left:none;width:122pt")
+    else
+        td There are no values
+
 doctype html
 html(
   xmlns:v="urn:schemas-microsoft-com:vml" 
@@ -64,18 +79,9 @@ html(
                   td.xl-68(width=117 style="border-top:none;border-left:none; width:88pt")
                     font.font-8 (5)= (3 + 4)=2
                   td.xl-70(style="border-top:none;border-left:none") (6)
-                tr(height=22 style={height:'16.5pt'})
-                  td.xl-71(height=22 style="height:16.5pt;border-top:none") 1
-                  td.xl-71(style="border-top:none;border-left:none") 0
-                  td.xl-71(style="border-top:none;border-left:none") 0
-                  td.xl-71(style="border-top:none;border-left:none") 0
-                  td.xl-71(style="border-top:none;border-left:none") 0
-                  td.xl-66(width=163 style="border-top:none;border-left:none;width:122pt") 
+                +setData(data)
                 tr(height=22 style={height:'16.5pt'})
                   td.xl-72(height=22 width=80 style="height:16.5pt;border-top:none;width:60pt")
                     font.font-8 TOTAL
-                  td.xl-71(style="border-top:none;border-left:none") 69760
-                  td.xl-71(style="border-top:none;border-left:none") 0
-                  td.xl-71(style="border-top:none;border-left:none") 69760
-                  td.xl-71(style="border-top:none;border-left:none") 69760
+                  +values(totals)
                   td.xl-66(width="163" style="border-top:none;border-left:none;width:122pt") 
