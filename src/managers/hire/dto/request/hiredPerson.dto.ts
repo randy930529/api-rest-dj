@@ -2,7 +2,7 @@ import { Address } from "../../../../entity/Address";
 import { Profile } from "../../../../entity/Profile";
 
 export type HiredPersonDTO = {
-  name: string;
+  first_name: string;
   last_name: string;
   ci: string;
   address: Address;

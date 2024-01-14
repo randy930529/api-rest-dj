@@ -204,7 +204,7 @@ export class AuthController {
         });
 
         user.active = true;
-        user.created_at = moment().toDate();
+        user.register_date = moment().toDate();
         await this.userRepository.save(user);
         const profile = await this.profileRepository.save(newProfile);
         const year = moment().year();
