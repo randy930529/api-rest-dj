@@ -25,10 +25,16 @@ export class User extends Model {
   active: boolean;
 
   @Column({ nullable: true })
+  register_date: Date;
+
+  @Column({ nullable: true })
   password_update_date: Date;
 
   @Column({ nullable: true })
   end_license: Date;
+
+  @Column({ type: "integer", width: 4, default: 1 })
+  max_profiles: number;
 
   @Column({
     type: "enum",

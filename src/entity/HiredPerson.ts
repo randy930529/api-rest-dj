@@ -17,7 +17,7 @@ let addressToRemoveRef: Address;
 @Entity()
 export class HiredPerson extends Model {
   @Column({ type: "varchar", length: 255 })
-  name: string;
+  first_name: string;
 
   @Column({ type: "varchar", length: 255 })
   last_name: string;

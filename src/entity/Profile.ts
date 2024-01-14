@@ -16,7 +16,7 @@ import { FiscalYear } from "./FiscalYear";
 @Entity()
 export class Profile extends Model {
   @Column({ default: "" })
-  nombre: string;
+  first_name: string;
 
   @Column({ default: "" })
   last_name: string;

@@ -11,6 +11,9 @@ export class Account extends Model {
   @Column({ type: "varchar", length: 120 })
   description: string;
 
+  @Column({ type: "char", length: 1 })
+  type: string;
+
   @Column({ type: "varchar", length: 120 })
   moneda: string;
 
