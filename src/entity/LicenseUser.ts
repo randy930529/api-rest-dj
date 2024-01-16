@@ -5,11 +5,15 @@ import {
   JoinColumn,
   PrimaryGeneratedColumn,
   Unique,
+  BeforeRemove,
+  AfterRemove,
 } from "typeorm";
 import Model from "./Base";
 import { User } from "./User";
 import { License } from "./License";
 import { TMBill } from "./TMBill";
+
+let tmBillToRemoveRef;
 
 @Entity()
 @Unique(["licenseKey"])
@@ -31,6 +35,26 @@ export class LicenseUser extends Model {
   @JoinColumn()
   license: License;
 
-  @ManyToOne(() => TMBill, (tmbill) => tmbill.licenseUser)
-  tmBills: TMBill[];
+  @ManyToOne(() => TMBill, { cascade: true })
+  @JoinColumn()
+  tmBill: TMBill;
+
+  @BeforeRemove()
+  async savetmBillToRemoveRef(): Promise<void> {
+    const ref = await LicenseUser.findOne({
+      relations: ["tmBill"],
+      where: { id: this.id },
+    });
+
+    if (ref.tmBill) {
+      tmBillToRemoveRef = ref.tmBill;
+    }
+  }
+
+  @AfterRemove()
+  async removeTMBill(): Promise<void> {
+    if (tmBillToRemoveRef) {
+      tmBillToRemoveRef.remove();
+    }
+  }
 }

@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany } from "typeorm";
+import { BeforeRemove, Column, Entity, OneToMany } from "typeorm";
 import Model from "./Base";
 import { ColumnNumericTransformer } from "../utils/ColumnNumericTransformer";
 import { StateTMBill } from "./StateTMBill";
@@ -15,13 +15,13 @@ export class TMBill extends Model {
   })
   import: number;
 
-  @Column({ type: "varchar", length: 5 })
+  @Column({ type: "varchar", length: 5, default: "cup" })
   currency: string;
 
   @Column()
   date: Date;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: "" })
   description: string;
 
   @Column({ nullable: true })
@@ -45,9 +45,22 @@ export class TMBill extends Model {
   @Column({ type: "integer", width: 4, nullable: true })
   referenceRefundTM: number;
 
-  @OneToMany(() => StateTMBill, (stateTMBill) => stateTMBill.tmBill)
+  @OneToMany(() => StateTMBill, (stateTMBill) => stateTMBill.tmBill, {
+    onDelete: "CASCADE",
+  })
   stateTMBills: StateTMBill[];
 
-  @OneToMany(() => LicenseUser, (licenseUser) => licenseUser.tmBills)
+  @OneToMany(() => LicenseUser, (licenseUser) => licenseUser.tmBill)
   licenseUser: LicenseUser[];
+
+  @BeforeRemove()
+  async removeMyStateTMBill(): Promise<void> {
+    const stateTMBill = await StateTMBill.findOne({
+      where: { tmBill: { id: this.id } },
+    });
+
+    if (stateTMBill) {
+      await stateTMBill.remove();
+    }
+  }
 }
