@@ -18,9 +18,6 @@ export class TMBill extends Model {
   @Column({ type: "varchar", length: 5, default: "cup" })
   currency: string;
 
-  @Column()
-  date: Date;
-
   @Column({ nullable: true, default: "" })
   description: string;
 

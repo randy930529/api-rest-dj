@@ -8,10 +8,13 @@ import { LicenseUser } from "../../../entity/LicenseUser";
 import { LicenseUserDTO } from "../dto/request/licenseUser.dto";
 import { User } from "../../../entity/User";
 import { License } from "../../../entity/License";
-import { PasswordHash } from "../../../auth/security/passwordHash";
 import { CreateLicenseUserDTO } from "../dto/response/createLicenseUserDTO.dto";
 import { TMBill } from "../../../entity/TMBill";
 import { StateTMBill } from "../../../entity/StateTMBill";
+import { stateTMBillRoutes } from "../../bills/routes/stateTMBill";
+
+const PAY_NOTIFICATION_URL = (serverName, endpoint) =>
+  `${serverName}${endpoint}`;
 
 export class LicenseUserController extends EntityControllerBase<LicenseUser> {
   constructor() {
@@ -49,7 +52,6 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       const tmBillDTO = await TMBill.create({
         ...fields.tmBill,
         import: license.import,
-        date: moment(),
       });
 
       const stateTMBillDTO = await StateTMBill.create({
@@ -70,13 +72,14 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
 
       const newLicenseUser = await this.create(objectLicenseUser);
 
-      const hashedLicenseKey = await PasswordHash.hashPassword(
-        newLicenseUser.licenseKey
-      );
-
       const licenseUser: CreateLicenseUserDTO = {
         ...newLicenseUser,
-        licenseKey: hashedLicenseKey,
+        user: undefined,
+        expirationDate: undefined,
+        UrlResponse: PAY_NOTIFICATION_URL(
+          "localhost:4000",
+          stateTMBillRoutes[0].route
+        ),
       };
       const resp: BaseResponseDTO = {
         status: "success",
@@ -97,10 +100,8 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       const id = parseInt(req.params.id);
 
       const licenseUser: LicenseUser = await this.one({ id, req, res });
-      const hashedLicenseKey = await PasswordHash.hashPassword(
-        licenseUser.licenseKey
-      );
-      return { ...licenseUser, licenseKey: hashedLicenseKey };
+
+      return licenseUser;
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);
