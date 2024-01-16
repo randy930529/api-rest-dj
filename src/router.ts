@@ -12,6 +12,7 @@ import { licenseUserRoutes } from "./managers/license/routes/licenseUser";
 import { fiscalYearRoutes } from "./managers/period/routes/fiscalYear";
 import { profileRoutes } from "./profile/routes/profile";
 import { sectionRoutes } from "./section/routes/section";
+import { stateTMBillRoutes } from "./managers/bills/routes/stateTMBill";
 
 export const Routes = [
   ...authRoutes,
@@ -28,4 +29,5 @@ export const Routes = [
   ...accountRoutes,
   ...voucherDetailRoutes,
   ...sectionRoutes,
+  ...stateTMBillRoutes,
 ];
