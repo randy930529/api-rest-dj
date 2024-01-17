@@ -1,6 +1,7 @@
 {
   "app": {
-    "site": "http://localhost:3000",
+    "site": "http://localhost:4000",
+    "debug": "development",
     "port": 3000,
     "emailFrom": "randy.delgado@desoft.cu"
   }

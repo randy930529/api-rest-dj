@@ -12,6 +12,7 @@ import { CreateLicenseUserDTO } from "../dto/response/createLicenseUserDTO.dto";
 import { TMBill } from "../../../entity/TMBill";
 import { StateTMBill } from "../../../entity/StateTMBill";
 import { stateTMBillRoutes } from "../../bills/routes/stateTMBill";
+import { appConfig } from "../../../../config";
 
 const PAY_NOTIFICATION_URL = (serverName, endpoint) =>
   `${serverName}${endpoint}`;
@@ -72,14 +73,14 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
 
       const newLicenseUser = await this.create(objectLicenseUser);
 
+      const stateTMBillEndPoint = stateTMBillRoutes[0].route;
+      const url = PAY_NOTIFICATION_URL(appConfig.site, stateTMBillEndPoint);
+
       const licenseUser: CreateLicenseUserDTO = {
         ...newLicenseUser,
         user: undefined,
         expirationDate: undefined,
-        UrlResponse: PAY_NOTIFICATION_URL(
-          "localhost:4000",
-          stateTMBillRoutes[0].route
-        ),
+        UrlResponse: url,
       };
       const resp: BaseResponseDTO = {
         status: "success",
