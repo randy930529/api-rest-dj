@@ -3,6 +3,13 @@
     "site": "http://localhost:4000",
     "debug": "development",
     "port": 3000,
-    "emailFrom": "randy.delgado@desoft.cu"
+    "emailFrom": "randy.delgado@desoft.cu",
+    "businessMetadata": {
+      "name": "Desoft",
+      "source": 1,
+      "address": "",
+      "phone": "",
+      "email": ""
+    }
   }
 }

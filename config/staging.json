@@ -2,14 +2,22 @@
   "app": {
     "site": "http://mygestor.grm.desoft.cu/",
     "debug": "staging",
-    "port": 4001
-  },
-  "email": {
-    "smtp": {
-      "host": "https://webmail.desoft.cu",
-      "port": 587,
-      "username": "your_dev_username",
-      "password": "your_dev_password"
+    "port": 4001,
+    "emailFrom": "randy.delgado@desoft.cu",
+    "email": {
+      "smtp": {
+        "host": "https://webmail.desoft.cu",
+        "port": 587,
+        "username": "your_dev_username",
+        "password": "your_dev_password"
+      }
+    },
+    "businessMetadata": {
+      "name": "Desoft",
+      "source": 1,
+      "address": "",
+      "phone": "",
+      "email": ""
     }
   }
 }
