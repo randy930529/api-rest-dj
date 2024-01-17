@@ -73,7 +73,7 @@ Licensias para usuario
 
 .. note::
 
-   Gestiona las licensia para una usuario determinado agregando o eliminando una entidad **LicenseUser**.
+   Gestiona las licensia para un usuario determinado agregando o eliminando una entidad **LicenseUser**.
 
 **LicenseUser**
 
@@ -82,7 +82,10 @@ Licensias para usuario
     {
     "user": "User",
     "license": "License",
-    "active": "boolean"
+    "tmbill": "TMBill",
+    "licenseKey": "string", //opcional
+    "is_paid": "boolean", //opcional
+    "expirationDate": "date", //opcional
     }
 
 Periodo fiscal
@@ -174,4 +177,45 @@ Cuenta
     "description": "string",
     "moneda": "string",
     "profile": "Profile"
+    }
+
+Factura TranferMovil
+--------------------
+
+.. note::
+
+   Entidad contratada de manera interna por el servidor api.
+
+**TMBill**
+
+.. code-block:: JSON
+
+    {
+    "import": "number",
+    "currency": "string",
+    "description": "string",
+    "orderIdTM": "string",
+    "bankId": "number",
+    "bank": "string",
+    "phone": "string",
+    "refundId": "number",
+    "referenceRefund": "number",
+    "referenceRefundTM": "number",
+    }
+
+Estado de Factura TranferMovil
+------------------------------
+
+.. note::
+
+   Entidad contratada de manera interna por el servidor api.
+
+**StateTMBill**
+
+.. code-block:: JSON
+
+    {
+    "success": "boolean", //opcional
+    "description": "string",
+    "tmBill": "TMBill",
     }

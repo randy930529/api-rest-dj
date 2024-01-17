@@ -55,8 +55,9 @@ Utiliza este endpoint para activar la cuenta de usuario. Este endpoint no es una
 Reenvió de E-mail de activación de usuario
 ------------------------------------------
 
-Utilícese este endpoint para volver a enviar el correo electrónico de activación. 
-.. Tenga en cuenta que ningún correo electrónico ser enviado si el usuario ya está activo.
+Utilícese este endpoint para volver a enviar el correo electrónico de activación.
+
+.. note:: Tenga en cuenta que ningún correo electrónico va a ser enviado si el usuario ya está activo.
 
 **Default URL**: ``/user/resend_activation/``
 

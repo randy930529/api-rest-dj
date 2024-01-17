@@ -45,3 +45,9 @@ Contenido
     :caption: Estado de sección
 
     section_state
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Pago de licencias
+
+    payment_license
