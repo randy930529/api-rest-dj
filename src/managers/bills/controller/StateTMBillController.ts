@@ -18,7 +18,6 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
     try {
       const fields: PayOrderResult = req.body.PayOrderResult;
       const {
-        Source, //Verificar con el de la mypime
         BankId,
         TmId,
         Phone,
@@ -33,10 +32,16 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
       if (!is_paid) responseError(res, "Payment license user faild.", 404);
 
       const licenseUser = await LicenseUser.findOne({
-        relations: ["tmBill", "license"],
+        relations: ["tmBill", "license", "user"],
         select: {
           tmBill: { id: true },
-          license: { days: true },
+          license: { days: true, max_profiles: true },
+          user: {
+            id: true,
+            active: true,
+            end_license: true,
+            max_profiles: true,
+          },
         },
         where: { licenseKey },
       });
@@ -45,6 +50,9 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
       licenseUser.expirationDate = moment()
         .add(licenseUser.license.days, "d")
         .toDate();
+      licenseUser.user.active = true;
+      licenseUser.user.end_license = licenseUser.expirationDate;
+      licenseUser.user.max_profiles = licenseUser.license.max_profiles;
 
       const tmBill = licenseUser.tmBill;
       const stateTMBill = await StateTMBill.findOne({

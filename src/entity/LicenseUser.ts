@@ -27,7 +27,7 @@ export class LicenseUser extends Model {
   @Column({ default: false })
   is_paid: boolean;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { cascade: ["update"] })
   @JoinColumn()
   user: User;
 
