@@ -7,7 +7,7 @@ export const licenseUserRoutes = [
     method: "post",
     route: "/license/user",
     controller: LicenseUserController,
-    middlewares: [authMiddleware, isAdminMiddleware],
+    middlewares: [authMiddleware],
     action: "createLicenseUser",
   },
   {

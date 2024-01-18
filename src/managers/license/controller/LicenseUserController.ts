@@ -13,6 +13,7 @@ import { TMBill } from "../../../entity/TMBill";
 import { StateTMBill } from "../../../entity/StateTMBill";
 import { stateTMBillRoutes } from "../../bills/routes/stateTMBill";
 import { appConfig } from "../../../../config";
+import { JWT } from "../../../auth/security/jwt";
 
 const PAY_NOTIFICATION_URL = (serverName, endpoint) =>
   `${serverName}${endpoint}`;
@@ -35,6 +36,7 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
         responseError(res, "Do must provide a valid license id.", 404);
 
       const user = await User.findOne({
+        relations: ["profiles"],
         where: { id: userId },
       });
 
@@ -45,6 +47,33 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       if (!user) responseError(res, "User not found.", 404);
 
       if (!license) responseError(res, "License not found.", 404);
+
+      if (user.profiles.length > license.max_profiles)
+        responseError(
+          res,
+          "Your number of current profiles exceeds the maximum number of profiles allowed in the license.",
+          409
+        );
+
+      if (!license.public) {
+        const { authorization } = req.headers;
+
+        const token = authorization.split(" ")[1];
+        const id = JWT.getJwtPayloadValueByKey(token, "id");
+
+        const user = await User.findOne({
+          select: { role: true },
+          where: { id },
+        });
+
+        if (user.role !== "admin") {
+          responseError(
+            res,
+            "User does not have permission to perform this action",
+            401
+          );
+        }
+      }
 
       let expirationDate: Date;
       if (license.days)
