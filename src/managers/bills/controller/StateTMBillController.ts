@@ -46,12 +46,15 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
         where: { licenseKey },
       });
 
-      licenseUser.is_paid = is_paid;
-      licenseUser.expirationDate = moment()
+      const end_license = licenseUser.user.end_license ?? undefined;
+      const expirationDate = moment(end_license)
         .add(licenseUser.license.days, "d")
         .toDate();
+
+      licenseUser.is_paid = is_paid;
+      licenseUser.expirationDate = expirationDate;
       licenseUser.user.active = true;
-      licenseUser.user.end_license = licenseUser.expirationDate;
+      licenseUser.user.end_license = expirationDate;
       licenseUser.user.max_profiles = licenseUser.license.max_profiles;
 
       const tmBill = licenseUser.tmBill;
