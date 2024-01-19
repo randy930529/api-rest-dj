@@ -12,7 +12,7 @@
         "password": "your_dev_password"
       }
     },
-    "licenseFreeDays": 7,
+    "licenseFreeDays": 5,
     "businessMetadata": {
       "name": "enterprise_name",
       "source": 1,

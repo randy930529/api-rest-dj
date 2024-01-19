@@ -8,17 +8,9 @@
       "smtp": {
         "host": "https://webmail.desoft.cu",
         "port": 587,
-        "username": "your_dev_username",
-        "password": "your_dev_password"
+        "username": "",
+        "password": ""
       }
-    },
-    "licenseFreeDays": 7,
-    "businessMetadata": {
-      "name": "Desoft",
-      "source": 1,
-      "address": "",
-      "phone": "",
-      "email": ""
     }
   }
 }
