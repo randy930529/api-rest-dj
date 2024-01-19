@@ -1,4 +1,4 @@
-import { cleanEnv, port, str, host } from "envalid";
+import { cleanEnv, port, str, host, num } from "envalid";
 
 enum NODE_ENV {
   DEVELOPMENT = "development",
@@ -24,6 +24,13 @@ const validateEnv = () => {
     API_DATABASE_PASSWORD: str(),
     API_DATABASE_NAME: str(),
     JWT_SECRET_KEY: str(),
+    MEa_By_MFP: num({ default: 39120.0 }),
+    PPD_PERCENTAGE: num({ default: 0.05 }),
+    PE_0_10000: num({ default: 0.15 }),
+    PE_10000_20000: num({ default: 0.2 }),
+    PE_20000_30000: num({ default: 0.3 }),
+    PE_30000_50000: num({ default: 0.4 }),
+    PE_ABOVE_50000: num({ default: 0.5 }),
   });
 };
 

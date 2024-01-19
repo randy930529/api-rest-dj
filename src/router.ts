@@ -1,3 +1,4 @@
+import { apiConfigRoutes } from "./api/routes/apiConfig";
 import { authRoutes } from "./auth/routes/auth";
 import { userRoutes } from "./auth/routes/user";
 import { accountRoutes } from "./managers/expenses/routes/account";
@@ -15,6 +16,7 @@ import { sectionRoutes } from "./section/routes/section";
 import { stateTMBillRoutes } from "./managers/bills/routes/stateTMBill";
 
 export const Routes = [
+  ...apiConfigRoutes,
   ...authRoutes,
   ...userRoutes,
   ...profileRoutes,
