@@ -11,6 +11,7 @@ import { User } from "../../entity/User";
 import { createFindOptions } from "../../base/utils/createFindOptions";
 import { FindManyOptions } from "typeorm";
 import { BaseResponseDTO } from "../../auth/dto/response/base.dto";
+import { LicenseUser } from "../../entity/LicenseUser";
 
 export class SectionStateController extends EntityControllerBase<SectionState> {
   constructor() {
@@ -21,7 +22,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
   async createSection(req: Request, res: Response, next: NextFunction) {
     try {
       const fields: SectionStateDTO = req.body;
-      const { profile, fiscalYear } = fields;
+      const { profile, fiscalYear, license } = fields;
 
       const token = req.headers.authorization.split(" ")[1];
       const userId = JWT.getJwtPayloadValueByKey(token, "id");
@@ -64,9 +65,23 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
         responseError(res, "Fiscal year does not exist in this profile.", 404);
       }
 
+      const currentLicenseUser = await LicenseUser.findOne({
+        where: {
+          id: license.id,
+          user: {
+            id: license.user.id,
+          },
+        },
+      });
+
+      if (!currentLicenseUser) {
+        responseError(res, "LicenseUser does not exist in this user.", 404);
+      }
+
       const newSectionStateToProfileAndFiscalYear =
         await this.repository.create({
           user: currentProfile.user,
+          license: currentLicenseUser,
           profile: currentProfile,
           fiscalYear: currentFiscalYear,
         });
@@ -133,9 +148,23 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
         },
       });
 
+      const currentLicenseUser = await LicenseUser.find({
+        relations: ["user"],
+        where: {
+          is_paid: true,
+          user: {
+            id: userId,
+          },
+        },
+        order: {
+          expirationDate: "DESC",
+        },
+      });
+
       const newSectionStateToProfileAndFiscalYear =
         await this.repository.create({
           user: currentProfile.user,
+          license: currentLicenseUser[0] || null,
           profile: currentProfile,
           fiscalYear: currentProfile.fiscalYear[0] || null,
         });

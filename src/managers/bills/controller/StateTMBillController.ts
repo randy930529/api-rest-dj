@@ -7,6 +7,7 @@ import { LicenseUser } from "../../../entity/LicenseUser";
 import { PayOrderResult } from "../dto/request/payOrderResult.dto";
 import { responseError } from "../../../errors/responseError";
 import { PayOrderConfirm } from "../dto/response/payOrderConfirm.dto";
+import { SectionState } from "../../../entity/SectionState";
 
 export class StateTMBillController extends EntityControllerBase<StateTMBill> {
   constructor() {
@@ -76,7 +77,20 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
         },
       });
 
-      await licenseUser.save();
+      const currentSectionState = await SectionState.findOne({
+        relations: ["user"],
+        where: {
+          user: {
+            id: licenseUser.user.id,
+          },
+        },
+      });
+
+      const newLicenseUser = await licenseUser.save();
+
+      currentSectionState.license = newLicenseUser;
+      currentSectionState.save();
+
       const stateTMBillUpdate = await stateTMBillDTO.save();
 
       const resp: PayOrderConfirm = {

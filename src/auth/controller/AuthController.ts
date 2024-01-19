@@ -16,6 +16,7 @@ import { BaseResponseDTO } from "../dto/response/base.dto";
 import { verifyTokenAndRefreshTokenForUserLogin } from "../security/verifyTokenAndRefreshTokenForUserLogin";
 import { userSetPasswordDTO } from "../dto/request/userSetPassword.dto";
 import { FiscalYear } from "../../entity/FiscalYear";
+import { LicenseUser } from "../../entity/LicenseUser";
 import * as moment from "moment";
 
 const transferProtocol: string = "ca-mygestor" as const;
@@ -214,6 +215,9 @@ export class AuthController {
           profile,
         });
         await this.fiscalYearRepository.save(newFiscalYear);
+
+        const newLicenseUser = LicenseUser.create({ is_paid: true, user });
+        await newLicenseUser.save();
       }
 
       res.status(200);
