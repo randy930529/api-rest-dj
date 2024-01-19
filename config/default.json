@@ -4,6 +4,7 @@
     "debug": "development",
     "port": 3000,
     "emailFrom": "randy.delgado@desoft.cu",
+    "licenseFreeDays": 7,
     "businessMetadata": {
       "name": "Desoft",
       "source": 1,

@@ -12,6 +12,8 @@ import Model from "./Base";
 import { User } from "./User";
 import { License } from "./License";
 import { TMBill } from "./TMBill";
+import { appConfig } from "../../config";
+import moment = require("moment");
 
 let tmBillToRemoveRef;
 
@@ -21,7 +23,10 @@ export class LicenseUser extends Model {
   @PrimaryGeneratedColumn("uuid")
   licenseKey: string;
 
-  @Column({ nullable: true })
+  @Column({
+    nullable: true,
+    default: moment().add(appConfig.licenseFreeDays, "d").toDate(),
+  })
   expirationDate: Date;
 
   @Column({ default: false })

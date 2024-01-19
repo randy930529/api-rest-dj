@@ -12,6 +12,7 @@
         "password": "your_dev_password"
       }
     },
+    "licenseFreeDays": 7,
     "businessMetadata": {
       "name": "Desoft",
       "source": 1,
