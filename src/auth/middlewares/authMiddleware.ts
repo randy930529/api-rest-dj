@@ -5,10 +5,11 @@ import { JWT } from "../security/jwt";
 export const authMiddleware = (
   request: Request,
   response: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const { authorization } = request.headers;
+    const { body } = request;
 
     if (!authorization) {
       responseError(response, "Was not provided confirmation token.");
@@ -23,6 +24,8 @@ export const authMiddleware = (
     if (!token || !JWT.isTokenValid(token)) {
       responseError(response, "JWT is not valid.");
     }
+
+    request.body = { ...body, token };
 
     next();
   } catch (error) {

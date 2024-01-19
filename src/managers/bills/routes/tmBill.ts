@@ -1,5 +1,6 @@
 import { TMBillController } from "../controller/TMBillController";
 import { authMiddleware } from "../../../auth/middlewares/authMiddleware";
+import { userMiddleware } from "../../../auth/middlewares/userMiddleware";
 import { isAdminMiddleware } from "../../../auth/middlewares/isAdminMiddleware";
 
 export const tmBillRoutes = [
@@ -14,7 +15,7 @@ export const tmBillRoutes = [
     method: "get",
     route: "/tmBills",
     controller: TMBillController,
-    middlewares: [authMiddleware, isAdminMiddleware],
+    middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
     action: "all",
   },
   {

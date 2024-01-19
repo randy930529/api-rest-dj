@@ -1,14 +1,14 @@
 import { UserController } from "../controller/UserController";
 import { authMiddleware } from "../middlewares/authMiddleware";
+import { userMiddleware } from "../middlewares/userMiddleware";
 import { isAdminMiddleware } from "../middlewares/isAdminMiddleware";
-import { nextFunction } from "../middlewares/nextMiddleware";
 
 export const userRoutes = [
   {
     method: "get",
     route: "/users",
     controller: UserController,
-    middlewares: [authMiddleware, isAdminMiddleware],
+    middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
     action: "all",
   },
   {
@@ -22,35 +22,35 @@ export const userRoutes = [
     method: "post",
     route: "/users",
     controller: UserController,
-    middlewares: [authMiddleware, isAdminMiddleware],
+    middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
     action: "save",
   },
   {
     method: "delete",
     route: "/user/:id",
     controller: UserController,
-    middlewares: [authMiddleware, isAdminMiddleware],
+    middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
     action: "remove",
   },
   {
     method: "get",
     route: "/user/me",
     controller: UserController,
-    middlewares: [authMiddleware],
+    middlewares: [authMiddleware, userMiddleware],
     action: "userMe",
   },
   {
     method: "put",
     route: "/user/me",
     controller: UserController,
-    middlewares: [authMiddleware],
+    middlewares: [authMiddleware, userMiddleware],
     action: "userMe",
   },
   {
     method: "patch",
     route: "/user/me",
     controller: UserController,
-    middlewares: [authMiddleware],
+    middlewares: [authMiddleware, userMiddleware],
     action: "userMe",
   },
 ];

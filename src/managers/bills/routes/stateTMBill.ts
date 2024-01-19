@@ -1,5 +1,6 @@
 import { nextFunction } from "../../../auth/middlewares/nextMiddleware";
 import { authMiddleware } from "../../../auth/middlewares/authMiddleware";
+import { userMiddleware } from "../../../auth/middlewares/userMiddleware";
 import { isAdminMiddleware } from "../../../auth/middlewares/isAdminMiddleware";
 import { StateTMBillController } from "../controller/StateTMBillController";
 
@@ -15,7 +16,7 @@ export const stateTMBillRoutes = [
     method: "get",
     route: "/stateTMBills",
     controller: StateTMBillController,
-    middlewares: [authMiddleware, isAdminMiddleware],
+    middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
     action: "all",
   },
   {
