@@ -15,7 +15,7 @@ export const sectionRoutes = [
     method: "get",
     route: "/sections",
     controller: SectionStateController,
-    middlewares: [authMiddleware],
+    middlewares: [authMiddleware, userMiddleware],
     action: "allSections",
   },
   {

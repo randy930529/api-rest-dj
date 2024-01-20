@@ -36,7 +36,7 @@ export const userRoutes = [
     method: "get",
     route: "/user/me",
     controller: UserController,
-    middlewares: [authMiddleware, userMiddleware],
+    middlewares: [authMiddleware],
     action: "userMe",
   },
   {
@@ -51,6 +51,13 @@ export const userRoutes = [
     route: "/user/me",
     controller: UserController,
     middlewares: [authMiddleware, userMiddleware],
+    action: "userMe",
+  },
+  {
+    method: "delete",
+    route: "/user/me",
+    controller: UserController,
+    middlewares: [authMiddleware],
     action: "userMe",
   },
 ];

@@ -8,7 +8,7 @@ export const profileRoutes = [
     method: "post",
     route: "/profile",
     controller: ProfileController,
-    middlewares: [authMiddleware],
+    middlewares: [authMiddleware, userMiddleware],
     action: "createProfile",
   },
   {

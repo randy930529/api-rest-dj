@@ -19,9 +19,9 @@ export class ElementController extends EntityControllerBase<Element> {
   async createElement(req: Request, res: Response, next: NextFunction) {
     try {
       const fields: ElementDTO = req.body;
+      const { token } = req.body;
       const { id } = fields.profile;
 
-      const token = req.headers.authorization.split(" ")[1];
       const userId = JWT.getJwtPayloadValueByKey(token, "id");
 
       if (fields.type === "i") {

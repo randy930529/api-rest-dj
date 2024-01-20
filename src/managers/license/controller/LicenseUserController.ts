@@ -58,7 +58,7 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       if (!license.public) {
         const { authorization } = req.headers;
 
-        const token = authorization.split(" ")[1];
+        const { token } = req.body;
         const id = JWT.getJwtPayloadValueByKey(token, "id");
 
         const user = await User.findOne({

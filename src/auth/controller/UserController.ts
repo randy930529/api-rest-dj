@@ -5,8 +5,8 @@ import { responseError } from "../../errors/responseError";
 import { JWT } from "../security/jwt";
 import { UserDTO } from "../dto/response/auth/user.dto";
 import { BaseResponseDTO } from "../dto/response/base.dto";
-import { UpdateDTO } from "../dto/request/update.dto";
 import { UserWhitProfileDTO } from "../dto/response/auth/userWhitProfile.dto";
+import { UserUpdateDTO } from "../dto/request/userUpdate.dto";
 
 export class UserController {
   private userRepository = AppDataSource.getRepository(User);
@@ -57,11 +57,7 @@ export class UserController {
 
   private async retrieve(req: Request, res: Response, next: NextFunction) {
     try {
-      const token = req.headers.authorization.split(" ")[1];
-
-      if (!JWT.isTokenValid(token)) {
-        responseError(res, "JWT is not valid.");
-      }
+      const { token } = req.body;
 
       const id = JWT.getJwtPayloadValueByKey(token, "id");
       const user = await this.userRepository.findOne({
@@ -107,11 +103,7 @@ export class UserController {
 
   private async delete(req: Request, res: Response, next: NextFunction) {
     try {
-      const token = req.headers.authorization.split(" ")[1];
-
-      if (!JWT.isTokenValid(token)) {
-        responseError(res, "JWT is not valid.");
-      }
+      const { token } = req.body;
 
       const id = JWT.getJwtPayloadValueByKey(token, "id");
 
@@ -127,18 +119,10 @@ export class UserController {
 
   private async update(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: UpdateDTO = req.body;
-      const token = req.headers.authorization.split(" ")[1];
+      const fields: UserUpdateDTO = req.body;
+      const { user: userToUpdate }: { user: User } = req.body;
 
-      const id = JWT.getJwtPayloadValueByKey(token, "id");
-
-      const userToUpdate = await this.userRepository.findOneBy({ id });
-
-      if (!userToUpdate) {
-        responseError(res, "User does not exist.");
-      }
-
-      const userUpdate = { ...userToUpdate, ...body };
+      const userUpdate = { ...userToUpdate, ...fields };
       await this.userRepository.save(userUpdate);
 
       const user: UserDTO = userUpdate;
@@ -158,21 +142,14 @@ export class UserController {
 
   private async partialUpdate(req: Request, res: Response, next: NextFunction) {
     try {
-      const body: UpdateDTO = req.body;
-      const token = req.headers.authorization.split(" ")[1];
+      const fields: UserUpdateDTO = req.body;
+      const { user: userToUpdate }: { user: User } = req.body;
 
-      const fieldToUpdate: string = Object.keys(body)[0];
-      const id = JWT.getJwtPayloadValueByKey(token, "id");
-
-      const userToUpdate = await this.userRepository.findOneBy({ id });
-
-      if (!userToUpdate) {
-        responseError(res, "User does not exist.");
-      }
+      const fieldToUpdate: string = Object.keys(fields)[0];
 
       const userUpdate = {
         ...userToUpdate,
-        [fieldToUpdate]: body[fieldToUpdate],
+        [fieldToUpdate]: fields[fieldToUpdate],
       };
       await this.userRepository.save(userUpdate);
 
