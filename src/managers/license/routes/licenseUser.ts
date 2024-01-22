@@ -1,48 +1,49 @@
 import { LicenseUserController } from "../controller/LicenseUserController";
 import { authMiddleware } from "../../../auth/middlewares/authMiddleware";
 import { isAdminMiddleware } from "../../../auth/middlewares/isAdminMiddleware";
+import { userMiddleware } from "../../../auth/middlewares/userMiddleware";
 
 export const licenseUserRoutes = [
   {
     method: "post",
     route: "/license/user",
     controller: LicenseUserController,
-    middlewares: [authMiddleware, isAdminMiddleware],
+    middlewares: [authMiddleware],
     action: "createLicenseUser",
   },
   {
     method: "get",
-    route: "/license/users",
+    route: "/licenses/user",
     controller: LicenseUserController,
-    middlewares: [authMiddleware, isAdminMiddleware],
+    middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
     action: "all",
   },
   {
     method: "get",
     route: "/license/user/:id",
     controller: LicenseUserController,
-    middlewares: [authMiddleware, isAdminMiddleware],
+    middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
     action: "onLicenseUser",
   },
   {
     method: "put",
     route: "/license/user",
     controller: LicenseUserController,
-    middlewares: [authMiddleware, isAdminMiddleware],
+    middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
     action: "updateLicenseUser",
   },
   {
     method: "patch",
     route: "/license/user",
     controller: LicenseUserController,
-    middlewares: [authMiddleware, isAdminMiddleware],
+    middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
     action: "partialUpdateLicenseUser",
   },
   {
     method: "delete",
     route: "/license/user/:id",
     controller: LicenseUserController,
-    middlewares: [authMiddleware, isAdminMiddleware],
+    middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
     action: "deleteLicenseUser",
   },
 ];

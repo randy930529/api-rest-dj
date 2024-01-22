@@ -18,25 +18,11 @@ export class ProfileController extends EntityControllerBase<Profile> {
   async createProfile(req: Request, res: Response, next: NextFunction) {
     try {
       const fields: ProfileDTO = req.body;
-      const token = req.headers.authorization.split(" ")[1];
-
-      const id = JWT.getJwtPayloadValueByKey(token, "id");
-
-      const userRepository = AppDataSource.getRepository(User);
-      const user = await userRepository.findOneBy({ id });
-
-      if (!user) {
-        responseError(res, "User does not exist.");
-      }
+      const { user }: { user: User } = req.body;
 
       if (!user.active) {
         responseError(res, "User not activate.", 401);
       }
-
-      // const newProfile = Object.assign(new Profile(), {
-      //   ...body,
-      //   user,
-      // });
 
       const newProfile = this.repository.create({ ...fields, user });
       await this.repository.save(newProfile);
@@ -70,8 +56,7 @@ export class ProfileController extends EntityControllerBase<Profile> {
   async updateProfile(req: Request, res: Response, next: NextFunction) {
     try {
       const fields: ProfileDTO = req.body;
-      const { id } = req.body;
-      const token = req.headers.authorization.split(" ")[1];
+      const { id, token } = req.body;
       const userId = JWT.getJwtPayloadValueByKey(token, "id");
 
       if (!id)
@@ -91,7 +76,10 @@ export class ProfileController extends EntityControllerBase<Profile> {
           401
         );
 
-      const profileUpdate = { ...profileToUpdate, ...fields };
+      const profileUpdate = this.repository.create({
+        ...profileToUpdate,
+        ...fields,
+      });
       await this.repository.save(profileUpdate);
 
       const profile: ProfileDTO = profileUpdate;
@@ -112,8 +100,8 @@ export class ProfileController extends EntityControllerBase<Profile> {
   async partialUpdate(req: Request, res: Response, next: NextFunction) {
     try {
       const fields: ProfileDTO = req.body;
-      const { id } = req.body;
-      const token = req.headers.authorization.split(" ")[1];
+      console.log(fields);
+      const { id, token } = req.body;
       const userId = JWT.getJwtPayloadValueByKey(token, "id");
 
       if (!id)

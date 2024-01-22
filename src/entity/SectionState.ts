@@ -3,6 +3,7 @@ import Model from "./Base";
 import { User } from "./User";
 import { Profile } from "./Profile";
 import { FiscalYear } from "./FiscalYear";
+import { LicenseUser } from "./LicenseUser";
 
 @Entity()
 export class SectionState extends Model {
@@ -11,6 +12,10 @@ export class SectionState extends Model {
   })
   @JoinColumn()
   user: User;
+
+  @OneToOne(() => LicenseUser)
+  @JoinColumn()
+  license: LicenseUser;
 
   @OneToOne(() => Profile)
   @JoinColumn()

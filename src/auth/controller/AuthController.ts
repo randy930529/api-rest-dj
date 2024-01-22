@@ -1,5 +1,6 @@
-import { AppDataSource } from "../../data-source";
 import { NextFunction, Request, Response } from "express";
+import * as moment from "moment";
+import { AppDataSource } from "../../data-source";
 import { User } from "../../entity/User";
 import { Profile } from "../../entity/Profile";
 import { RegisterDTO } from "../dto/request/register.dto";
@@ -16,7 +17,7 @@ import { BaseResponseDTO } from "../dto/response/base.dto";
 import { verifyTokenAndRefreshTokenForUserLogin } from "../security/verifyTokenAndRefreshTokenForUserLogin";
 import { userSetPasswordDTO } from "../dto/request/userSetPassword.dto";
 import { FiscalYear } from "../../entity/FiscalYear";
-import * as moment from "moment";
+import { LicenseUser } from "../../entity/LicenseUser";
 
 const transferProtocol: string = "ca-mygestor" as const;
 const ACTIVATION_URL = (appName, uid, token) =>
@@ -187,11 +188,7 @@ export class AuthController {
 
   async userActivation(req: Request, res: Response, next: NextFunction) {
     try {
-      const token = req.headers.authorization.split(" ")[1];
-
-      const id = JWT.getJwtPayloadValueByKey(token, "id");
-
-      const user = await this.userRepository.findOneBy({ id });
+      const { user }: { user: User } = req.body;
 
       if (!user) {
         responseError(res, "User does not exist.");
@@ -204,6 +201,7 @@ export class AuthController {
         });
 
         user.active = true;
+        user.register_date = moment().toDate();
         await this.userRepository.save(user);
         const profile = await this.profileRepository.save(newProfile);
         const year = moment().year();
@@ -213,6 +211,9 @@ export class AuthController {
           profile,
         });
         await this.fiscalYearRepository.save(newFiscalYear);
+
+        const newLicenseUser = LicenseUser.create({ is_paid: true, user });
+        await newLicenseUser.save();
       }
 
       res.status(200);
@@ -259,17 +260,8 @@ export class AuthController {
   async userSetPassword(req: Request, res: Response, next: NextFunction) {
     try {
       const fields: userSetPasswordDTO = req.body;
+      const { user: userToUpdate }: { user: User } = req.body;
       const { password, newPassword } = fields;
-
-      const token = req.headers.authorization.split(" ")[1];
-
-      const id = JWT.getJwtPayloadValueByKey(token, "id");
-
-      const userToUpdate = await this.userRepository.findOneBy({ id });
-
-      if (!userToUpdate) {
-        responseError(res, "The user not already exists.", 409);
-      }
 
       if (!userToUpdate.active) {
         responseError(res, "User not activate.", 401);
@@ -345,20 +337,11 @@ export class AuthController {
   ) {
     try {
       const fields: RegisterDTO = req.body;
+      const { user: userToSetPassword }: { user: User } = req.body;
       const { password, repeatPassword } = fields;
 
       if (password !== repeatPassword) {
         responseError(res, "Repeat password does not match the password.");
-      }
-
-      const token = req.headers.authorization.split(" ")[1];
-
-      const id = JWT.getJwtPayloadValueByKey(token, "id");
-
-      const userToSetPassword = await this.userRepository.findOneBy({ id });
-
-      if (!userToSetPassword) {
-        responseError(res, "User does not exist.");
       }
 
       if (!userToSetPassword.active) {

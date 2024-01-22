@@ -1,11 +1,38 @@
-import { Entity, Column, ManyToOne, JoinColumn } from "typeorm";
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  PrimaryGeneratedColumn,
+  Unique,
+  BeforeRemove,
+  AfterRemove,
+} from "typeorm";
 import Model from "./Base";
 import { User } from "./User";
 import { License } from "./License";
+import { TMBill } from "./TMBill";
+import { appConfig } from "../../config";
+import moment = require("moment");
+
+let tmBillToRemoveRef;
 
 @Entity()
+@Unique(["licenseKey"])
 export class LicenseUser extends Model {
-  @ManyToOne(() => User)
+  @PrimaryGeneratedColumn("uuid")
+  licenseKey: string;
+
+  @Column({
+    nullable: true,
+    default: moment().add(appConfig.licenseFreeDays, "d").toDate(),
+  })
+  expirationDate: Date;
+
+  @Column({ default: false })
+  is_paid: boolean;
+
+  @ManyToOne(() => User, { cascade: ["update"] })
   @JoinColumn()
   user: User;
 
@@ -13,6 +40,26 @@ export class LicenseUser extends Model {
   @JoinColumn()
   license: License;
 
-  @Column({ default: false })
-  active: boolean;
+  @ManyToOne(() => TMBill, { cascade: true })
+  @JoinColumn()
+  tmBill: TMBill;
+
+  @BeforeRemove()
+  async savetmBillToRemoveRef(): Promise<void> {
+    const ref = await LicenseUser.findOne({
+      relations: ["tmBill"],
+      where: { id: this.id },
+    });
+
+    if (ref.tmBill) {
+      tmBillToRemoveRef = ref.tmBill;
+    }
+  }
+
+  @AfterRemove()
+  async removeTMBill(): Promise<void> {
+    if (tmBillToRemoveRef) {
+      tmBillToRemoveRef.remove();
+    }
+  }
 }

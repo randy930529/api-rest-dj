@@ -7,10 +7,10 @@ export class Address extends Model {
   @Column()
   residence: string;
 
-  @Column()
+  @Column({ type: "varchar", length: 50, default: "" })
   municipality: string;
 
-  @Column()
+  @Column({ type: "varchar", length: 50, default: "" })
   province: string;
 
   @Column({ type: "varchar", length: 6 })

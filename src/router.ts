@@ -1,3 +1,4 @@
+import { apiConfigRoutes } from "./api/routes/apiConfig";
 import { authRoutes } from "./auth/routes/auth";
 import { userRoutes } from "./auth/routes/user";
 import { accountRoutes } from "./managers/expenses/routes/account";
@@ -12,9 +13,11 @@ import { licenseUserRoutes } from "./managers/license/routes/licenseUser";
 import { fiscalYearRoutes } from "./managers/period/routes/fiscalYear";
 import { profileRoutes } from "./profile/routes/profile";
 import { sectionRoutes } from "./section/routes/section";
+import { stateTMBillRoutes } from "./managers/bills/routes/stateTMBill";
 import { reportsRoutes } from "./reports/routes/reports";
 
 export const Routes = [
+  ...apiConfigRoutes,
   ...authRoutes,
   ...userRoutes,
   ...profileRoutes,
@@ -29,5 +32,6 @@ export const Routes = [
   ...accountRoutes,
   ...voucherDetailRoutes,
   ...sectionRoutes,
+  ...stateTMBillRoutes,
   ...reportsRoutes,
 ];

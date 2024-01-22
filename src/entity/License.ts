@@ -1,6 +1,7 @@
 import { Entity, Column, OneToMany } from "typeorm";
 import Model from "./Base";
 import { LicenseUser } from "./LicenseUser";
+import { ColumnNumericTransformer } from "../utils/ColumnNumericTransformer";
 
 @Entity()
 export class License extends Model {
@@ -19,7 +20,13 @@ export class License extends Model {
   @Column({ default: false })
   public: boolean;
 
-  @Column()
+  @Column({
+    type: "numeric",
+    precision: 19,
+    scale: 0,
+    default: 0,
+    transformer: new ColumnNumericTransformer(),
+  })
   import: number;
 
   @OneToMany(() => LicenseUser, (licenseUser) => licenseUser.license)

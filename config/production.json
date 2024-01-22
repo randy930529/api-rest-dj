@@ -2,6 +2,23 @@
   "app": {
     "site": "http://production-server",
     "debug": "production",
-    "port": 443
+    "port": 443,
+    "emailFrom": "your_dev_email",
+    "email": {
+      "smtp": {
+        "host": "your_dev_server_email",
+        "port": 587,
+        "username": "your_dev_username",
+        "password": "your_dev_password"
+      }
+    },
+    "licenseFreeDays": 5,
+    "businessMetadata": {
+      "name": "enterprise_name",
+      "source": 1,
+      "address": "enterprise_address",
+      "phone": "enterprise_phone",
+      "email": "enterprise_email"
+    }
   }
 }

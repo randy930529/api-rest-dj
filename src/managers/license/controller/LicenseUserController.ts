@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import * as moment from "moment";
 import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import { responseError } from "../../../errors/responseError";
 import { EntityControllerBase } from "../../../base/EntityControllerBase";
@@ -7,6 +8,15 @@ import { LicenseUser } from "../../../entity/LicenseUser";
 import { LicenseUserDTO } from "../dto/request/licenseUser.dto";
 import { User } from "../../../entity/User";
 import { License } from "../../../entity/License";
+import { CreateLicenseUserDTO } from "../dto/response/createLicenseUserDTO.dto";
+import { TMBill } from "../../../entity/TMBill";
+import { StateTMBill } from "../../../entity/StateTMBill";
+import { stateTMBillRoutes } from "../../bills/routes/stateTMBill";
+import { appConfig } from "../../../../config";
+import { JWT } from "../../../auth/security/jwt";
+
+const PAY_NOTIFICATION_URL = (serverName, endpoint) =>
+  `${serverName}${endpoint}`;
 
 export class LicenseUserController extends EntityControllerBase<LicenseUser> {
   constructor() {
@@ -25,14 +35,12 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       if (!licenseId)
         responseError(res, "Do must provide a valid license id.", 404);
 
-      const userRepository = AppDataSource.getRepository(User);
-      const licenseRepository = AppDataSource.getRepository(License);
-
-      const user = await userRepository.findOne({
+      const user = await User.findOne({
+        relations: ["profiles"],
         where: { id: userId },
       });
 
-      const license = await licenseRepository.findOne({
+      const license = await License.findOne({
         where: { id: licenseId },
       });
 
@@ -40,14 +48,69 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
 
       if (!license) responseError(res, "License not found.", 404);
 
+      if (user.profiles.length > license.max_profiles)
+        responseError(
+          res,
+          "Your number of current profiles exceeds the maximum number of profiles allowed in the license.",
+          409
+        );
+
+      if (!license.public) {
+        const { authorization } = req.headers;
+
+        const { token } = req.body;
+        const id = JWT.getJwtPayloadValueByKey(token, "id");
+
+        const user = await User.findOne({
+          select: { role: true },
+          where: { id },
+        });
+
+        if (user.role !== "admin") {
+          responseError(
+            res,
+            "User does not have permission to perform this action",
+            401
+          );
+        }
+      }
+
+      let expirationDate: Date;
+      if (license.days)
+        expirationDate = moment().add(license.days, "d").toDate();
+
+      const tmBillDTO = await TMBill.create({
+        ...fields.tmBill,
+        import: license.import,
+      });
+
+      const stateTMBillDTO = await StateTMBill.create({
+        description: tmBillDTO.description || "",
+        tmBill: tmBillDTO,
+      });
+
+      const stateTMBill = await stateTMBillDTO.save();
+      const tmBill = stateTMBill.tmBill;
+
       const objectLicenseUser = Object.assign(new LicenseUser(), {
+        ...fields,
         user,
         license,
+        expirationDate,
+        tmBill,
       });
 
       const newLicenseUser = await this.create(objectLicenseUser);
 
-      const licenseUser: LicenseUserDTO = newLicenseUser;
+      const stateTMBillEndPoint = stateTMBillRoutes[0].route;
+      const url = PAY_NOTIFICATION_URL(appConfig.site, stateTMBillEndPoint);
+
+      const licenseUser: CreateLicenseUserDTO = {
+        ...newLicenseUser,
+        user: undefined,
+        expirationDate: undefined,
+        UrlResponse: url,
+      };
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
@@ -66,7 +129,9 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
     try {
       const id = parseInt(req.params.id);
 
-      return await this.one({ id, req, res });
+      const licenseUser: LicenseUser = await this.one({ id, req, res });
+
+      return licenseUser;
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);

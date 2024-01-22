@@ -1,6 +1,7 @@
 import { isAdminMiddleware } from "../../auth/middlewares/isAdminMiddleware";
 import { authMiddleware } from "../../auth/middlewares/authMiddleware";
 import { SectionStateController } from "../controller/SectionStateController";
+import { userMiddleware } from "../../auth/middlewares/userMiddleware";
 
 export const sectionRoutes = [
   {
@@ -14,7 +15,7 @@ export const sectionRoutes = [
     method: "get",
     route: "/sections",
     controller: SectionStateController,
-    middlewares: [authMiddleware],
+    middlewares: [authMiddleware, userMiddleware],
     action: "allSections",
   },
   {
@@ -49,7 +50,7 @@ export const sectionRoutes = [
     method: "delete",
     route: "/section/:id",
     controller: SectionStateController,
-    middlewares: [authMiddleware, isAdminMiddleware],
+    middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
     action: "delete",
   },
 ];

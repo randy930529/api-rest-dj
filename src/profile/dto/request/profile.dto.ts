@@ -1,5 +1,5 @@
 export type ProfileDTO = {
-  nombre: string;
+  first_name: string;
   last_name: string;
   ci: string;
   nit: string;

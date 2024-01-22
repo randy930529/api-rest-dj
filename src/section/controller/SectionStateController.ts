@@ -11,6 +11,7 @@ import { User } from "../../entity/User";
 import { createFindOptions } from "../../base/utils/createFindOptions";
 import { FindManyOptions } from "typeorm";
 import { BaseResponseDTO } from "../../auth/dto/response/base.dto";
+import { LicenseUser } from "../../entity/LicenseUser";
 
 export class SectionStateController extends EntityControllerBase<SectionState> {
   constructor() {
@@ -21,9 +22,9 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
   async createSection(req: Request, res: Response, next: NextFunction) {
     try {
       const fields: SectionStateDTO = req.body;
-      const { profile, fiscalYear } = fields;
+      const { profile, fiscalYear, license } = fields;
+      const { token } = req.body;
 
-      const token = req.headers.authorization.split(" ")[1];
       const userId = JWT.getJwtPayloadValueByKey(token, "id");
 
       const existToSectionUser = await this.repository.findOne({
@@ -64,9 +65,23 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
         responseError(res, "Fiscal year does not exist in this profile.", 404);
       }
 
+      const currentLicenseUser = await LicenseUser.findOne({
+        where: {
+          id: license.id,
+          user: {
+            id: license.user.id,
+          },
+        },
+      });
+
+      if (!currentLicenseUser) {
+        responseError(res, "LicenseUser does not exist in this user.", 404);
+      }
+
       const newSectionStateToProfileAndFiscalYear =
         await this.repository.create({
           user: currentProfile.user,
+          license: currentLicenseUser,
           profile: currentProfile,
           fiscalYear: currentFiscalYear,
         });
@@ -84,17 +99,15 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
 
   async allSections(req: Request, res: Response, next: NextFunction) {
     try {
-      const token = req.headers.authorization.split(" ")[1];
-      const userId = JWT.getJwtPayloadValueByKey(token, "id");
+      const { user }: { user: User } = req.body;
+      const { id, role } = user;
 
-      const user = await User.findOneBy({ id: userId });
-
-      if (user.role === "admin") this.all(req, res, next);
+      if (role === "admin") this.all(req, res, next);
 
       const options: FindManyOptions<SectionState> = createFindOptions(req, {
         where: {
           user: {
-            id: userId,
+            id,
           },
         },
       });
@@ -109,14 +122,14 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
 
   async userSection(req: Request, res: Response, next: NextFunction) {
     try {
-      const token = req.headers.authorization.split(" ")[1];
-      const userId = JWT.getJwtPayloadValueByKey(token, "id");
+      const { token } = req.body;
+      const id = JWT.getJwtPayloadValueByKey(token, "id");
 
       const existToSectionUser = await this.repository.findOne({
         relations: ["profile", "fiscalYear"],
         where: {
           user: {
-            id: userId,
+            id,
           },
         },
       });
@@ -128,14 +141,28 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
         where: {
           primary: true,
           user: {
-            id: userId,
+            id,
           },
+        },
+      });
+
+      const currentLicenseUser = await LicenseUser.find({
+        relations: ["user"],
+        where: {
+          is_paid: true,
+          user: {
+            id,
+          },
+        },
+        order: {
+          expirationDate: "DESC",
         },
       });
 
       const newSectionStateToProfileAndFiscalYear =
         await this.repository.create({
           user: currentProfile.user,
+          license: currentLicenseUser[0] || null,
           profile: currentProfile,
           fiscalYear: currentProfile.fiscalYear[0] || null,
         });
@@ -154,8 +181,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
   async updateSectionState(req: Request, res: Response, next: NextFunction) {
     try {
       const fields: SectionStateDTO = req.body;
-      const { id } = req.body;
-      const token = req.headers.authorization.split(" ")[1];
+      const { id, token } = req.body;
       const userId = JWT.getJwtPayloadValueByKey(token, "id");
 
       if (!id)
@@ -229,8 +255,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
   ) {
     try {
       const fields: SectionStateDTO = req.body;
-      const { id } = req.body;
-      const token = req.headers.authorization.split(" ")[1];
+      const { id, token } = req.body;
       const userId = JWT.getJwtPayloadValueByKey(token, "id");
 
       if (!id)

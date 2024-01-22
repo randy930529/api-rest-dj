@@ -1,5 +1,6 @@
 import { AuthController } from "../controller/AuthController";
 import { authMiddleware } from "../middlewares/authMiddleware";
+import { userMiddleware } from "../middlewares/userMiddleware";
 import { authParserMiddleware } from "../middlewares/authValidatorMiddleware";
 import { nextFunction } from "../middlewares/nextMiddleware";
 
@@ -36,7 +37,7 @@ export const authRoutes = [
     method: "post",
     route: "/user/activation",
     controller: AuthController,
-    middlewares: [authMiddleware],
+    middlewares: [authMiddleware, userMiddleware],
     action: "userActivation",
   },
   {
