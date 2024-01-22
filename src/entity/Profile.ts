@@ -4,7 +4,6 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  Unique,
   BeforeInsert,
   BeforeUpdate,
 } from "typeorm";
@@ -15,10 +14,9 @@ import { HiredPerson } from "./HiredPerson";
 import { FiscalYear } from "./FiscalYear";
 
 @Entity()
-@Unique(["nit"])
 export class Profile extends Model {
   @Column({ default: "" })
-  nombre: string;
+  first_name: string;
 
   @Column({ default: "" })
   last_name: string;
@@ -26,11 +24,11 @@ export class Profile extends Model {
   @Column({ type: "varchar", length: 11, default: "" })
   ci: string;
 
-  @Column({ type: "varchar", length: 20, nullable: true, default: "" })
   @Column({
     type: "varchar",
     length: 20,
-    unique: true,
+    nullable: true,
+    default: "",
   })
   nit: string;
 
@@ -60,10 +58,15 @@ export class Profile extends Model {
 
   @BeforeInsert()
   @BeforeUpdate()
-  async checkDuplicateProfiles(): Promise<void> {
-    const profilesWithSameCi = await Profile.count({ where: { ci: this.ci } });
+  async checkDuplicateProfilesForUser(): Promise<void> {
+    const profilesForUserWithSameCi = await Profile.count({
+      where: [
+        { user: { id: this.user.id }, ci: this.ci },
+        { user: { id: this.user.id }, nit: this.nit },
+      ],
+    });
 
-    if (profilesWithSameCi >= 2) {
+    if (profilesForUserWithSameCi >= 2) {
       throw new Error("Only two profiles with the same CI are allowed.");
     }
   }
