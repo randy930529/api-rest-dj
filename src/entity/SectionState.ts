@@ -15,7 +15,7 @@ export class SectionState extends Model {
 
   @OneToOne(() => LicenseUser)
   @JoinColumn()
-  license: LicenseUser;
+  licenseUser: LicenseUser;
 
   @OneToOne(() => Profile)
   @JoinColumn()
