@@ -22,7 +22,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
   async createSection(req: Request, res: Response, next: NextFunction) {
     try {
       const fields: SectionStateDTO = req.body;
-      const { profile, fiscalYear, license } = fields;
+      const { profile, fiscalYear, licenseUser } = fields;
       const { token } = req.body;
 
       const userId = JWT.getJwtPayloadValueByKey(token, "id");
@@ -67,9 +67,9 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
 
       const currentLicenseUser = await LicenseUser.findOne({
         where: {
-          id: license.id,
+          id: licenseUser.id,
           user: {
-            id: license.user.id,
+            id: licenseUser.user.id,
           },
         },
       });
@@ -81,7 +81,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
       const newSectionStateToProfileAndFiscalYear =
         await this.repository.create({
           user: currentProfile.user,
-          license: currentLicenseUser,
+          licenseUser: currentLicenseUser,
           profile: currentProfile,
           fiscalYear: currentFiscalYear,
         });
@@ -126,7 +126,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
       const id = JWT.getJwtPayloadValueByKey(token, "id");
 
       const existToSectionUser = await this.repository.findOne({
-        relations: ["profile", "fiscalYear"],
+        relations: ["profile", "fiscalYear", "licenseUser"],
         where: {
           user: {
             id,
@@ -162,7 +162,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
       const newSectionStateToProfileAndFiscalYear =
         await this.repository.create({
           user: currentProfile.user,
-          license: currentLicenseUser[0] || null,
+          licenseUser: currentLicenseUser[0] || null,
           profile: currentProfile,
           fiscalYear: currentProfile.fiscalYear[0] || null,
         });

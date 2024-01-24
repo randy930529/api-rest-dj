@@ -3,7 +3,7 @@ import { FiscalYear } from "../../../entity/FiscalYear";
 import { Profile } from "../../../entity/Profile";
 
 export type SectionStateDTO = {
-  license: LicenseUser;
+  licenseUser: LicenseUser;
   profile: Profile;
   fiscalYear: FiscalYear;
 };

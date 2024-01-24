@@ -88,7 +88,7 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
 
       const newLicenseUser = await licenseUser.save();
 
-      currentSectionState.license = newLicenseUser;
+      currentSectionState.licenseUser = newLicenseUser;
       currentSectionState.save();
 
       const stateTMBillUpdate = await stateTMBillDTO.save();
