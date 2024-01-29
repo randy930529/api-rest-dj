@@ -7,7 +7,7 @@ export const reportsRoutes = [
     method: "get",
     route: "/report/expense",
     controller: ReportGeneratorController,
-    middlewares: [nextFunction],
+    middlewares: [authMiddleware],
     action: "generateOperationsExpenseReport",
   },
   {

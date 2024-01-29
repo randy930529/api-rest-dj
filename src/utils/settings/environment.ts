@@ -27,4 +27,8 @@ export const ENV = {
     user: process.env.EMAIL_HOST_USER,
     pass: process.env.EMAIL_HOST_PASSWORD,
   },
+
+  group: {
+    expenseId_PD: [14, 15, 16, 17, 18, 19, 20],
+  },
 };

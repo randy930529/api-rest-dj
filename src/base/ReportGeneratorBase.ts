@@ -1,5 +1,4 @@
 import puppeteer from "puppeteer";
-import * as pug from "pug";
 import { JWT } from "../auth/security/jwt";
 import { SectionState } from "../entity/SectionState";
 import { SupportDocument } from "../entity/SupportDocument";
@@ -11,61 +10,41 @@ class ReportGenerator {
     this.chromePath = chromePath;
   }
 
-  async generatePDF({
-    templatePath,
-    data,
-    fileName,
-  }: {
-    templatePath: string;
-    data: any;
-    fileName?: string;
-  }): Promise<Buffer> {
+  async generatePDF({ htmlContent }: { htmlContent: string }): Promise<Buffer> {
     try {
-      // Compilar la plantilla Pug
-      const compiledTemplate = pug.compileFile(templatePath);
-
-      // Generar el contenido HTML utilizando la plantilla y los datos proporcionados
-      const htmlContent = compiledTemplate({ data });
-
-      // Crear una nueva instancia de Puppeteer
       const browser = await puppeteer.launch({
+        headless: "new",
         executablePath: this.chromePath,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
       });
 
-      // Abrir una nueva página en el navegador
       const page = await browser.newPage();
 
-      // Establecer el contenido HTML en la página
       await page.setContent(htmlContent);
 
-      // Generar el informe en formato PDF
       const pdfBuffer = await page.pdf();
 
-      // Cerrar la página y el navegador
       await page.close();
       await browser.close();
 
-      // Establecer el nombre del archivo PDF
-      const finalFileName = fileName || "report.pdf";
-
       return pdfBuffer;
     } catch (error) {
-      console.error("Error al generar el informe en PDF:", error);
-      throw new Error("Error al generar el informe en PDF");
+      throw new Error("Generate pdf of report faild.");
     }
   }
 
   async getInfoReportToDataBase({
     token,
     type,
+    month,
   }: {
     token: string;
     type: string;
+    month?: number;
   }): Promise<SupportDocument[]> {
-    const userId = JWT.getJwtPayloadValueByKey(token, "id");
+    const userId: number = JWT.getJwtPayloadValueByKey(token, "id");
 
-    const existToSectionUser = await SectionState.findOne({
+    const existToSectionUser: SectionState = await SectionState.findOne({
       relations: ["profile", "fiscalYear"],
       where: {
         user: {
@@ -78,19 +57,29 @@ class ReportGenerator {
 
     const { profile, fiscalYear } = existToSectionUser;
 
-    const infoReportToDataBase = await SupportDocument.find({
-      select: ["amount", "element"],
-      relations: {
-        element: { account: true },
-      },
-      where: {
-        fiscalYear: { id: fiscalYear.id, profile: { id: profile.id } },
-        element: { type: type },
-      },
-      order: {
-        id: "DESC",
-      },
-    });
+    const profileId: number | string = profile.id;
+    const fiscalYearId: number | string = fiscalYear.id;
+
+    const conditionMonth: string = month
+      ? `EXTRACT(month FROM document.date)= :month`
+      : `true`;
+
+    const infoReportToDataBase: SupportDocument[] =
+      await SupportDocument.createQueryBuilder(`document`)
+        .select([`document.amount`, `document.date`])
+        .leftJoinAndSelect(`document.element`, `element`)
+        .leftJoin(`document.fiscalYear`, `fiscalYear`)
+        .leftJoin(`fiscalYear.profile`, `profile`)
+        .where(`fiscalYear.id= :fiscalYearId`, { fiscalYearId })
+        .andWhere(`profile.id= :profileId`, { profileId })
+        .andWhere(`document.type_document= :type`, {
+          type,
+        })
+        .andWhere(`element.type= :type`, { type })
+        .andWhere(conditionMonth, { month })
+        .orderBy(`document.date`, `ASC`)
+        .addOrderBy(`element.id`, `ASC`)
+        .getMany();
 
     return infoReportToDataBase;
   }

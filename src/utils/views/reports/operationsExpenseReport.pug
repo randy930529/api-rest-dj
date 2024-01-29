@@ -1,7 +1,5 @@
--const colsArray=[{width:21, style:{width: '16pt'}}, {width:63, style:{width: '47pt'}}, {width:56, style:{width: '42pt'}}, {width:47, style:{width: '35pt'}}, {width:52, style:{width: '39pt'}}, {width:80, style:{width: '60pt'}}, {width:68, style:{width: '51pt'}}, {width:69, style:{width: '52pt'}}, {width:68, style:{width: '51pt'}}, {width:69, style:{width: '52pt'}}, {width:69, style:{width: '52pt'}}, {width:68, style:{width: '51pt'}}, {width:69, style:{width: '52pt'}}, {width:73, style:{width: '55pt'}}];
--const colsArray2=[{width:68, style:{width: '51pt'}}, {width:80, style:{width: '60pt'}}, {width:68, style:{width: '51pt'}}, {width:69, style:{width: '52pt'}}, {width:68, style:{width: '51pt'}}, {width:57, style:{width: '43pt'}}, {width:69, style:{width: '52pt'}}, {width:68, style:{width: '51pt'}}, {width:59, style:{width: '44pt'}}, {width:69, style:{width: '52pt'}}, {width:79, style:{width: '59pt'}}, {width:125, style:{width: '94pt'}}];
--const dataMatrix=[[0,0,0,0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0,0,0,0]]
--const dataMatrix2=[[0,0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0,0]]
+-const colsArrayTab1=[{width:21, style:{width: '21pt'}}, {width:63, style:{width: '47pt'}}, {width:56, style:{width: '42pt'}}, {width:47, style:{width: '35pt'}}, {width:52, style:{width: '39pt'}}, {width:80, style:{width: '60pt'}}, {width:68, style:{width: '51pt'}}, {width:69, style:{width: '52pt'}}, {width:68, style:{width: '51pt'}}, {width:69, style:{width: '52pt'}}, {width:69, style:{width: '52pt'}}, {width:68, style:{width: '51pt'}}, {width:69, style:{width: '52pt'}}, {width:73, style:{width: '55pt'}}];
+-const colsArrayTab2=[{width:68, style:{width: '51pt'}}, {width:80, style:{width: '60pt'}}, {width:68, style:{width: '51pt'}}, {width:69, style:{width: '52pt'}}, {width:68, style:{width: '51pt'}}, {width:57, style:{width: '43pt'}}, {width:69, style:{width: '52pt'}}, {width:68, style:{width: '51pt'}}, {width:59, style:{width: '44pt'}}, {width:69, style:{width: '52pt'}}, {width:79, style:{width: '59pt'}}, {width:125, style:{width: '94pt'}}];
 
 mixin colGroup(colsArray=[])
     colgroup
@@ -20,6 +18,13 @@ mixin enumerate(colsArray=[],count=1)
     else
         td There are no values
 
+mixin setExpensesName(expensesName=[])
+    each val in expensesName
+        td.xl-66(width=69 style="border-top:none;border-left:none; width:47pt")
+            font.font-8= val
+    else
+        td There are no values
+
 mixin setData(dataMatrix=[[]])
     each val, index in dataMatrix
         tr(height=17 style={height:'12.75pt'})
@@ -30,6 +35,15 @@ mixin setData(dataMatrix=[[]])
                 td There are no values
     else
         td There are no values
+
+mixin setTotals(dataTotals=[])
+    tr(height=17 style={height:'12.75pt'})
+        td.xl-69(height=17 style="height:12.75pt;border-top:none")
+        each val in dataTotals
+            td.xl-69(style="border-top:none;border-left:none")= val
+        else
+            td There are no values
+        td.xl-69(height=17 style="height:12.75pt;border-top:none")
 
 doctype html
 html(
@@ -66,7 +80,7 @@ html(
 
   body(link="blue" vlink="purple")
     table.page-one(role='presentation' border='0' cellpadding='0' cellspacing='0' width="872")
-        +colGroup(colsArray)
+        +colGroup(colsArrayTab1)
         tbody
             tr(height=17 style={height:'12.75pt'})
                 td.xl-78(colspan=2 height=17 width=84 style="border-bottom: .5pt solid black; height: 12.75pt; width: 63pt")
@@ -94,28 +108,18 @@ html(
                     font.font-8 Energia electrica
                 td.xl-66(width=80 style="border-top:none;border-left:none; width:47pt")
                     font.font-8 Remuneraciones al personal contratado
-                td.xl-66(width=68 style="border-top:none;border-left:none; width:47pt")
-                    font.font-8 Teneduria de libros
-                td.xl-66(width=69 style="border-top:none;border-left:none; width:47pt")
-                    font.font-8 Aceites y lubricantes
-                td.xl-66(width=68 style="border-top:none;border-left:none; width:47pt")
-                    font.font-8 Neumaticos
-                td.xl-66(width=69 style="border-top:none;border-left:none; width:47pt")
-                    font.font-8 Parqueos y Garaje
-                td.xl-66(width=69 style="border-top:none;border-left:none; width:47pt")
-                    font.font-8 Fregado
-                td.xl-66(width=68 style="border-top:none;border-left:none; width:47pt")
-                    font.font-8 Derecho a servicios de agencia
+                +setExpensesName(expensesName[0])
                 td.xl-66(width=69 style="border-top:none;border-left:none; width:47pt")
                     font.font-8 Otros gastos monetarios
             tr(height=17 style={height:'12.75pt'})
-                +enumerate(colsArray)
-            +setData(dataMatrix)
+                +enumerate(colsArrayTab1)
+            +setData(dataMatrix[0])
+            +setTotals(dataTotals[0])
 
     //-/////////////////////////////////////////////////////////////////////////////////////-//
    
     table.page-next(role='presentation' border='0' cellpadding='0' cellspacing='0' width="879" style={width:"660pt"})
-        +colGroup(colsArray2)
+        +colGroup(colsArrayTab2)
         tbody
             tr(height=17 style={height:'12.75pt'})
                 td.xl-86.text-center(colspan=7  height=17 width=479 style="border-right:.5pt solid black; height:12.75pt; width:360pt")
@@ -128,7 +132,7 @@ html(
                     font.font-8 SUBCUENTAS
                 td.xl-92(rowspan=3 width=57 style="border-bottom:.5pt solid black; border-top:none; width:43pt")
                     font.font-8 TOTAL A DEDUCIR DE LA BASE IMPONIBLE
-                td.xl-73.text-center(width=69 style="border-top:none;border-left:none;width:52pt")
+                td.xl-73.text-center(width=69 style="border-top:none;border-left:none; width:52pt")
                     font.font-8 SUBCUENTAS
                 td.xl-83.text-center(rowspan=3 width=68 style="border-bottom:.5pt solid black; border-top:none; padding-left: 1px; width:51pt")
                     font.font-8 TOTAL GASTOS DE OPERACIÓN
@@ -145,17 +149,16 @@ html(
             tr(height=152 style={height:'114.0pt'})
                 td.xl-66(height=152 width=68 style="height:114.0pt;border-top:none; width:51pt")
                     font.font-8 Dia
-                td.xl-74(width=80 style="border-top:none;border-left:none;width:60pt")
+                td.xl-74(width=80 style="border-top:none;border-left:none; width:60pt")
                     font.font-8 Pagos por arrendamiento de bienes a entidades estatales
-                td.xl-75(width=68 style="border-top:none;border-left:none;width:51pt")
-                td.xl-75(width=69 style="border-top:none;border-left:none;width:52pt")
-                td.xl-75(width=68 style="border-top:none;border-left:none;width:51pt")
-                td.xl-76(width=69 style="border-top:none;border-left:none;width:52pt")
+                +setExpensesName(expensesName[1])
+                td.xl-76(width=69 style="border-top:none;border-left:none; width:52pt")
                     font.font-8 EGRESOS NO INCLUIDOS A EFECTOS DE IMPUESTOS AUTORIZADOS POR EL MFP
                 td.xl-74(width=59 style="border-top:none;border-left:none; vertical-align: middle; width:44pt")
                     font.font-8 EFECTIVO EN CAJA
                 td.xl-74(width=69 style="border-top:none;border-left:none; vertical-align: middle; width:52pt")
                     font.font-8 EFECTIVO EN BANCO
             tr(height=17 style={height:'12.75pt'})
-                +enumerate(colsArray2,15)
-            +setData(dataMatrix2)
+                +enumerate(colsArrayTab2,15)
+            +setData(dataMatrix[1])
+            +setTotals(dataTotals[1])
