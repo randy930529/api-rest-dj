@@ -15,6 +15,7 @@ import { profileRoutes } from "./profile/routes/profile";
 import { sectionRoutes } from "./section/routes/section";
 import { stateTMBillRoutes } from "./managers/bills/routes/stateTMBill";
 import { reportsRoutes } from "./reports/routes/reports";
+import { testTMRoutes } from "./managers/license/routes/testTM";
 
 export const Routes = [
   ...apiConfigRoutes,
@@ -34,4 +35,5 @@ export const Routes = [
   ...sectionRoutes,
   ...stateTMBillRoutes,
   ...reportsRoutes,
+  ...testTMRoutes,
 ];
