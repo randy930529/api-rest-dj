@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import * as pug from "pug";
 import * as moment from "moment";
 import ReportGenerator from "../../base/ReportGeneratorBase";
-import { splitArrayIntoParts } from "../../utils/splitArrayIntoParts";
 import { SupportDocument } from "../../entity/SupportDocument";
 import { ENV } from "../../utils/settings/environment";
 import {
@@ -217,32 +216,74 @@ class ReportGeneratorController extends ReportGenerator {
     next: NextFunction
   ): Promise<void> {
     try {
+      const {
+        month,
+        token,
+      }: { month: number | undefined | null; token: string } = req.body;
+
       this.templatePath = pugTemplatePath("operationsIncomeReport");
-      const token = req.headers.authorization.split(" ")[1];
+      const fileName = `Reporte_de_Operaciones_de_Ingresos_${
+        month ? `en_el_mes_${month}` : "anual"
+      }.pdf`;
 
       const getInfoReportToDataBase = await this.getInfoReportToDataBase({
         token,
         type: "i",
+        month,
       });
 
-      const matrix = splitArrayIntoParts<SupportDocument>(
-        getInfoReportToDataBase,
-        6
+      const incomeMeEI: SupportDocument[] = getInfoReportToDataBase.filter(
+        (val) => val.element.group === "ei"
       );
 
-      console.log(getInfoReportToDataBase, matrix);
+      const incomeMeIG: SupportDocument[] = getInfoReportToDataBase.filter(
+        (val) => val.element.group === "ig"
+      );
+
+      let totals = defaultDataArray<number>(4, 0);
+
+      const incomeForDays: (number | string)[][] = Array.from(
+        { length: 31 },
+        (_, day) => {
+          const incomeMeEIRecordedToDay: SupportDocument[] = incomeMeEI.filter(
+            (val) => moment(val.date).date() === day
+          );
+
+          const incomeMeIGRecordedToDay: SupportDocument[] = incomeMeIG.filter(
+            (val) => moment(val.date).date() === day
+          );
+
+          const toDay = defaultDataArray<number>(3, 0);
+
+          if (incomeMeEIRecordedToDay.length)
+            toDay[1] = incomeMeEIRecordedToDay[0].amount;
+
+          if (incomeMeIGRecordedToDay.length)
+            toDay[2] = incomeMeIGRecordedToDay[0].amount;
+
+          const total: number = sumaTotal(toDay);
+          toDay.push(total);
+          toDay[0] = total;
+          totals = sumaArray(totals, toDay);
+
+          return [...toDay, ""];
+        }
+      );
 
       const compiledTemplate = pug.compileFile(this.templatePath);
-      const data = [
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-      ];
 
-      const totals = [0, 0, 0, 0, 0];
+      const htmlContent = compiledTemplate({
+        data: incomeForDays,
+        totals,
+      });
+      const pdfBuffer = await this.generatePDF({ htmlContent });
 
-      res.send(compiledTemplate({ data, totals }));
+      res.contentType("application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${fileName || this.defaultFileName}"`
+      );
+      res.send(pdfBuffer);
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);
