@@ -1,8 +1,10 @@
 import { BeforeRemove, Column, Entity, OneToMany } from "typeorm";
+import * as moment from "moment";
 import Model from "./Base";
 import { ColumnNumericTransformer } from "../utils/ColumnNumericTransformer";
 import { StateTMBill } from "./StateTMBill";
 import { LicenseUser } from "./LicenseUser";
+import { appConfig } from "../../config";
 
 @Entity()
 export class TMBill extends Model {
@@ -41,6 +43,9 @@ export class TMBill extends Model {
 
   @Column({ type: "integer", width: 4, nullable: true })
   referenceRefundTM: number;
+
+  @Column({ default: moment().add(appConfig.validTimeTMBill, "s").toDate() })
+  validDate: Date;
 
   @OneToMany(() => StateTMBill, (stateTMBill) => stateTMBill.tmBill, {
     onDelete: "CASCADE",

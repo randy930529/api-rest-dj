@@ -4,7 +4,7 @@ import { AppDataSource } from "../../../data-source";
 import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { StateTMBill } from "../../../entity/StateTMBill";
 import { LicenseUser } from "../../../entity/LicenseUser";
-import { PayOrderResult } from "../dto/request/payOrderResult.dto";
+import { PayOrderNotificationDTO } from "../dto/request/payOrderNotification.dto";
 import { responseError } from "../../../errors/responseError";
 import { PayOrderConfirm } from "../dto/response/payOrderConfirm.dto";
 import { SectionState } from "../../../entity/SectionState";
@@ -17,7 +17,7 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
 
   async licensePayOrderResult(req: Request, res: Response, next: NextFunction) {
     try {
-      const fields: PayOrderResult = req.body.PayOrderResult;
+      const fields: PayOrderNotificationDTO = req.body.PayOrderResult;
       const {
         BankId,
         TmId,

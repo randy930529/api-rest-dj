@@ -1,5 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import * as moment from "moment";
+import { v4 as uuidv4 } from "uuid";
+import get from "../../../utils/httpClient";
 import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import { responseError } from "../../../errors/responseError";
 import { EntityControllerBase } from "../../../base/EntityControllerBase";
@@ -14,8 +16,11 @@ import { StateTMBill } from "../../../entity/StateTMBill";
 import { stateTMBillRoutes } from "../../bills/routes/stateTMBill";
 import { appConfig } from "../../../../config";
 import { JWT } from "../../../auth/security/jwt";
+import { CreatePayOrderDTO } from "../dto/request/createPayOrder";
+import { ENV } from "../../../utils/settings/environment";
+import { PayOrderResultDTO } from "../dto/response/payOrderResult";
 
-const PAY_NOTIFICATION_URL = (serverName, endpoint) =>
+const PAY_NOTIFICATION_URL = (serverName: string, endpoint?: string): string =>
   `${serverName}${endpoint}`;
 
 export class LicenseUserController extends EntityControllerBase<LicenseUser> {
@@ -27,15 +32,23 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
   async createLicenseUser(req: Request, res: Response, next: NextFunction) {
     try {
       const fields: LicenseUserDTO = req.body;
-      const userId = fields.user.id;
+      const { token } = req.body;
       const licenseId = fields.license.id;
-
-      if (!userId) responseError(res, "Do must provide a valid user id.", 404);
+      const { businessMetadata, site, validTimeTMBill, paymentAPKHref } =
+        appConfig;
+      const { source } = businessMetadata;
 
       if (!licenseId)
         responseError(res, "Do must provide a valid license id.", 404);
 
+      const userId: number = fields.user
+        ? fields.user.id
+        : JWT.getJwtPayloadValueByKey(token, "id");
+
+      if (!userId) responseError(res, "Do must provide a valid user id.", 404);
+
       const user = await User.findOne({
+        select: { role: true, profiles: { user: { id: true } } },
         relations: ["profiles"],
         where: { id: userId },
       });
@@ -55,39 +68,64 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
           409
         );
 
-      if (!license.public) {
-        const { authorization } = req.headers;
-
-        const { token } = req.body;
-        const id = JWT.getJwtPayloadValueByKey(token, "id");
-
-        const user = await User.findOne({
-          select: { role: true },
-          where: { id },
-        });
-
-        if (user.role !== "admin") {
-          responseError(
-            res,
-            "User does not have permission to perform this action",
-            401
-          );
-        }
-      }
+      if (!license.public && user.role !== "admin")
+        responseError(
+          res,
+          "User does not have permission to perform this action",
+          401
+        );
 
       let expirationDate: Date;
       if (license.days)
         expirationDate = moment().add(license.days, "d").toDate();
 
+      const validDate: Date = moment().add(validTimeTMBill, "s").toDate();
+
       const tmBillDTO = await TMBill.create({
-        ...fields.tmBill,
         import: license.import,
+        validDate,
       });
 
       const stateTMBillDTO = await StateTMBill.create({
         description: tmBillDTO.description || "",
         tmBill: tmBillDTO,
       });
+
+      const stateTMBillEndPoint = stateTMBillRoutes[0].route;
+      const UrlResponse = PAY_NOTIFICATION_URL(site, stateTMBillEndPoint);
+      const uuid: string = uuidv4();
+      const licenseKey: string = uuid.substring(0, 20);
+
+      const body: CreatePayOrderDTO = {
+        request: {
+          Amount: tmBillDTO.import,
+          Phone: tmBillDTO.phone,
+          Currency: tmBillDTO.currency,
+          Description: tmBillDTO.description,
+          ExternalId: licenseKey,
+          Source: source,
+          UrlResponse,
+          ValidTime: validTimeTMBill,
+        },
+      };
+
+      const config = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json;charset=utf-8",
+        },
+        body,
+      };
+
+      const urlPayOrder = PAY_NOTIFICATION_URL(ENV.apiUrlPayment, "/payOrder");
+
+      const tmResponse = await get(new URL(urlPayOrder), config);
+      const { PayOrderResult }: PayOrderResultDTO =
+        tmResponse.json() as unknown as PayOrderResultDTO;
+
+      const is_paid = PayOrderResult.Success;
+
+      if (!is_paid) responseError(res, PayOrderResult.Resultmsg);
 
       const stateTMBill = await stateTMBillDTO.save();
       const tmBill = stateTMBill.tmBill;
@@ -96,20 +134,25 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
         ...fields,
         user,
         license,
+        is_paid,
+        licenseKey,
         expirationDate,
         tmBill,
+        max_profiles: license.max_profiles,
       });
 
       const newLicenseUser = await this.create(objectLicenseUser);
 
-      const stateTMBillEndPoint = stateTMBillRoutes[0].route;
-      const url = PAY_NOTIFICATION_URL(appConfig.site, stateTMBillEndPoint);
+      const payMentUrl = PAY_NOTIFICATION_URL(
+        paymentAPKHref,
+        `/action?id_transaccion=${PayOrderResult.OrderId}&importe=${tmBill.import}&moneda=CUP&numero_proveedor=${source}`
+      );
 
       const licenseUser: CreateLicenseUserDTO = {
         ...newLicenseUser,
         user: undefined,
         expirationDate: undefined,
-        UrlResponse: url,
+        payMentUrl,
       };
       const resp: BaseResponseDTO = {
         status: "success",

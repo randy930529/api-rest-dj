@@ -3,8 +3,6 @@ import { License } from "../../../../entity/License";
 import { User } from "../../../../entity/User";
 
 export type LicenseUserDTO = {
-  user: User;
+  user?: User;
   license: License;
-  is_paid: boolean;
-  tmBill: TMBillDTO;
 };
