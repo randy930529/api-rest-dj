@@ -11,6 +11,9 @@ export const ENV = {
   tokenLifetime: process.env.ACCESS_TOKEN_LIFETIME,
   refreshTokenLifetime: parseInt(process.env.REFRESH_TOKEN_LIFETIME),
 
+  //Config external payment
+  apiUrlPayment: process.env.API_URL_PAYMENT,
+
   //Config data base.
   host: process.env.API_DATABASE_HOST,
   database: process.env.API_DATABASE_NAME,

@@ -5,6 +5,8 @@
     "port": 3000,
     "emailFrom": "admin@localhost",
     "licenseFreeDays": 7,
+    "validTimeTMBill": 3600,
+    "paymentAPKHref": "transfermovil://tm_compra_en_linea",
     "businessMetadata": {
       "name": "Desoft",
       "source": 1,

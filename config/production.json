@@ -13,6 +13,7 @@
       }
     },
     "licenseFreeDays": 5,
+    "paymentAPKHref": "transfermovil://tm_compra_en_linea",
     "businessMetadata": {
       "name": "enterprise_name",
       "source": 1,

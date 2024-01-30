@@ -1,4 +1,4 @@
-import { cleanEnv, port, str, host, num } from "envalid";
+import { cleanEnv, port, str, host, num, url } from "envalid";
 
 enum NODE_ENV {
   DEVELOPMENT = "development",
@@ -23,6 +23,7 @@ const validateEnv = () => {
     API_DATABASE_USER: str({ default: "postgres" }),
     API_DATABASE_PASSWORD: str(),
     API_DATABASE_NAME: str(),
+    API_URL_PAYMENT: url(),
     JWT_SECRET_KEY: str(),
     MEa_By_MFP: num({ default: 39120.0 }),
     PPD_PERCENTAGE: num({ default: 0.05 }),

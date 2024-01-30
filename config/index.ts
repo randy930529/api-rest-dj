@@ -45,6 +45,8 @@ interface AppConfig {
   port: number;
   emailFrom: string;
   licenseFreeDays: number;
+  validTimeTMBill: number;
+  paymentAPKHref: string;
   businessMetadata: businessMetadataType;
   accountingConstants: accountingConstantsType;
 }
