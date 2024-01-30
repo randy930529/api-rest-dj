@@ -20,7 +20,7 @@ let tmBillToRemoveRef;
 @Entity()
 @Unique(["licenseKey"])
 export class LicenseUser extends Model {
-  @PrimaryGeneratedColumn("uuid")
+  @Column({ type: "varchar", length: 20 })
   licenseKey: string;
 
   @Column({
@@ -31,6 +31,9 @@ export class LicenseUser extends Model {
 
   @Column({ default: false })
   is_paid: boolean;
+
+  @Column({ type: "integer", width: 4, default: 1 })
+  max_profiles: number;
 
   @ManyToOne(() => User, { cascade: ["update"] })
   @JoinColumn()
