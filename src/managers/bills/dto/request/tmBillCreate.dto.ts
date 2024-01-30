@@ -9,4 +9,5 @@ export type TMBillDTO = {
   refundId?: number;
   referenceRefund?: number;
   referenceRefundTM?: number;
+  validDate?: Date;
 };

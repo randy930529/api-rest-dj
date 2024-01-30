@@ -1,4 +1,4 @@
-export type PayOrderResult = {
+export type PayOrderNotificationDTO = {
   Source: string;
   BankId: string;
   TmId: string;
