@@ -35,7 +35,7 @@
     "nodemailer": "^6.9.5",
     "pg": "^8.4.0",
     "pug": "^3.0.2",
-    "puppeteer": "^21.6.0",
+    "puppeteer": "^21.10.0",
     "reflect-metadata": "^0.1.13",
     "typeorm": "0.3.17",
     "uuid": "^9.0.0"
@@ -45,7 +45,7 @@
     "start": "ts-node src/index.ts",
     "typeorm": "typeorm-ts-node-commonjs",
     "build": "tsc -p .",
-    "migrate": "typeorm-ts-node-commonjs migration:generate ./src/migration/FiscalYearRefactoring -d ./src/data-source.ts",
+    "migrate": "typeorm-ts-node-commonjs migration:generate ./src/migration/LicenseUserRefactoring -d ./src/data-source.ts",
     "db:push": "typeorm-ts-node-commonjs migration:run -d ./src/data-source.ts"
   }
 }

@@ -13,7 +13,6 @@ import { License } from "./License";
 import { TMBill } from "./TMBill";
 import { appConfig } from "../../config";
 import * as moment from "moment";
-import { v4 as uuidv4 } from "uuid";
 
 let tmBillToRemoveRef;
 
@@ -23,7 +22,6 @@ export class LicenseUser extends Model {
   @Column({
     type: "varchar",
     length: 20,
-    default: uuidv4().substring(0, 20),
   })
   licenseKey: string;
 
