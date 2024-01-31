@@ -6,7 +6,7 @@ import { StateTMBill } from "../../../entity/StateTMBill";
 import { LicenseUser } from "../../../entity/LicenseUser";
 import { PayOrderNotificationDTO } from "../dto/request/payOrderNotification.dto";
 import { responseError } from "../../../errors/responseError";
-import { PayOrderConfirm } from "../dto/response/payOrderConfirm.dto";
+import { PayOrderConfirmDTO } from "../dto/response/payOrderConfirm.dto";
 import { SectionState } from "../../../entity/SectionState";
 
 export class StateTMBillController extends EntityControllerBase<StateTMBill> {
@@ -17,7 +17,7 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
 
   async licensePayOrderResult(req: Request, res: Response, next: NextFunction) {
     try {
-      const fields: PayOrderNotificationDTO = req.body.PayOrderResult;
+      const fields: PayOrderNotificationDTO = req.body;
       const {
         BankId,
         TmId,
@@ -93,7 +93,7 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
 
       const stateTMBillUpdate = await stateTMBillDTO.save();
 
-      const resp: PayOrderConfirm = {
+      const resp: PayOrderConfirmDTO = {
         Success: `${stateTMBillUpdate.success}`,
         Resultmsg: `${Msg}.OK`,
         Status,

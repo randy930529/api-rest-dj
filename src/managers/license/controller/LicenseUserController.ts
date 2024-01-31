@@ -48,7 +48,7 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       if (!userId) responseError(res, "Do must provide a valid user id.", 404);
 
       const user = await User.findOne({
-        select: { role: true, profiles: { user: { id: true } } },
+        select: ["id", "role"],
         relations: ["profiles"],
         where: { id: userId },
       });
@@ -112,16 +112,17 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       const config = {
         method: "POST",
         headers: {
-          "Content-Type": "application/json;charset=utf-8",
+          Accept: "application/json",
+          "Content-Type": "application/json",
         },
-        body,
+        body: JSON.stringify(body),
       };
 
       const urlPayOrder = PAY_NOTIFICATION_URL(ENV.apiUrlPayment, "/payOrder");
 
       const tmResponse = await get(new URL(urlPayOrder), config);
       const { PayOrderResult }: PayOrderResultDTO =
-        tmResponse.json() as unknown as PayOrderResultDTO;
+        (await tmResponse.json()) as unknown as PayOrderResultDTO;
 
       const is_paid = PayOrderResult.Success;
 
@@ -145,7 +146,7 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
 
       const payMentUrl = PAY_NOTIFICATION_URL(
         paymentAPKHref,
-        `/action?id_transaccion=${PayOrderResult.OrderId}&importe=${tmBill.import}&moneda=CUP&numero_proveedor=${source}`
+        `/tm_compra_en_linea/action?id_transaccion=${PayOrderResult.OrderId}&importe=${tmBill.import}&moneda=CUP&numero_proveedor=${source}`
       );
 
       const licenseUser: CreateLicenseUserDTO = {
