@@ -12,7 +12,7 @@ import * as path from "path";
 
 //Para provar el envio de correo. Eliminar!
 import * as nodemailer from "nodemailer";
-if (appConfig.debug === "development") {
+if (appConfig.debug === "development" || appConfig.debug === "staging") {
   (async function () {
     const credentials = await nodemailer.createTestAccount();
     console.log(credentials);

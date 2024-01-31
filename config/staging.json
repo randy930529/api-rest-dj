@@ -1,17 +1,19 @@
 {
   "app": {
-    "site": "http://mygestor.grm.desoft.cu/",
+    "site": "https://api-xvfd.onrender.com",
     "debug": "staging",
-    "port": 4001,
+    "port": 4000,
     "emailFrom": "randy.delgado@desoft.cu",
+    "licenseFreeDays": 5,
+    "validTimeTMBill": 86400,
     "email": {
       "smtp": {
-        "host": "https://webmail.desoft.cu",
+        "host": "smtp.ethereal.email",
         "port": 587,
-        "username": "",
-        "password": ""
+        "username": "u7r2aphtnqg7a4xc@ethereal.email",
+        "password": "M27sUXrsjkY4QxZ6YY"
       }
     },
-    "paymentAPKHref": "transfermovil://tm_compra_en_linea"
+    "paymentAPKHref": "https://api-xvfd.onrender.com"
   }
 }
