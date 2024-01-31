@@ -61,7 +61,7 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
 
       if (!license) responseError(res, "License not found.", 404);
 
-      if (user.profiles.length > license.max_profiles)
+      if (user.profiles.length >= license.max_profiles)
         responseError(
           res,
           "Your number of current profiles exceeds the maximum number of profiles allowed in the license.",
