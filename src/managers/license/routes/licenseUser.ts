@@ -15,8 +15,8 @@ export const licenseUserRoutes = [
     method: "get",
     route: "/licenses/user",
     controller: LicenseUserController,
-    middlewares: [authMiddleware],
-    action: "all",
+    middlewares: [authMiddleware, userMiddleware],
+    action: "allLicenses",
   },
   {
     method: "get",

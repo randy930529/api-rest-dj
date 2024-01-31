@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { FindManyOptions } from "typeorm";
 import * as moment from "moment";
 import { v4 as uuidv4 } from "uuid";
 import get from "../../../utils/httpClient";
@@ -19,6 +20,7 @@ import { JWT } from "../../../auth/security/jwt";
 import { CreatePayOrderDTO } from "../dto/request/createPayOrder";
 import { ENV } from "../../../utils/settings/environment";
 import { PayOrderResultDTO } from "../dto/response/payOrderResult";
+import { createFindOptions } from "../../../base/utils/createFindOptions";
 
 const PAY_NOTIFICATION_URL = (serverName: string, endpoint?: string): string =>
   `${serverName}${endpoint}`;
@@ -27,6 +29,32 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
   constructor() {
     const repository = AppDataSource.getRepository(LicenseUser);
     super(repository);
+  }
+
+  async allLicenses(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { body, query } = req;
+
+      const { user }: { user: User } = body;
+
+      if (user.role !== "admin") {
+        const options: FindManyOptions<LicenseUser> = createFindOptions(req);
+
+        options.where
+          ? (options.where = { ...options.where, user: { id: user.id } })
+          : (options.where = { user: { id: user.id } });
+
+        req.query = {
+          ...query,
+          options: JSON.stringify(options),
+        };
+      }
+
+      await this.all(req, res, next);
+    } catch (error) {
+      if (res.statusCode === 200) res.status(500);
+      next(error);
+    }
   }
 
   async createLicenseUser(req: Request, res: Response, next: NextFunction) {
