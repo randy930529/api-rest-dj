@@ -6,6 +6,8 @@ import {
   Unique,
   BeforeRemove,
   AfterRemove,
+  AfterInsert,
+  AfterUpdate,
 } from "typeorm";
 import Model from "./Base";
 import { User } from "./User";
@@ -49,6 +51,9 @@ export class LicenseUser extends Model {
   @JoinColumn()
   tmBill: TMBill;
 
+  @Column({ nullable: true })
+  payMentUrl: string;
+
   @BeforeRemove()
   async savetmBillToRemoveRef(): Promise<void> {
     const ref = await LicenseUser.findOne({
@@ -65,6 +70,14 @@ export class LicenseUser extends Model {
   async removeTMBill(): Promise<void> {
     if (tmBillToRemoveRef) {
       tmBillToRemoveRef.remove();
+    }
+  }
+
+  @AfterInsert()
+  @AfterUpdate()
+  async setRemovePayMentUrlIfIsPaid(): Promise<void> {
+    if (this.is_paid || moment().isAfter(this.expirationDate)) {
+      this.payMentUrl = null;
     }
   }
 }

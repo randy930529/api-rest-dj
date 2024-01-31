@@ -21,9 +21,7 @@ import { CreatePayOrderDTO } from "../dto/request/createPayOrder";
 import { ENV } from "../../../utils/settings/environment";
 import { PayOrderResultDTO } from "../dto/response/payOrderResult";
 import { createFindOptions } from "../../../base/utils/createFindOptions";
-
-const PAY_NOTIFICATION_URL = (serverName: string, endpoint?: string): string =>
-  `${serverName}${endpoint}`;
+import PAY_NOTIFICATION_URL from "../utils";
 
 export class LicenseUserController extends EntityControllerBase<LicenseUser> {
   constructor() {
@@ -89,7 +87,7 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
 
       if (!license) responseError(res, "License not found.", 404);
 
-      if (user.profiles.length >= license.max_profiles)
+      if (user.profiles.length > license.max_profiles)
         responseError(
           res,
           "Your number of current profiles exceeds the maximum number of profiles allowed in the license.",
@@ -152,36 +150,35 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       const { PayOrderResult }: PayOrderResultDTO =
         (await tmResponse.json()) as unknown as PayOrderResultDTO;
 
-      const is_paid = PayOrderResult.Success;
+      const successPayOrder = PayOrderResult.Success;
 
-      if (!is_paid) responseError(res, PayOrderResult.Resultmsg);
+      if (!successPayOrder) responseError(res, PayOrderResult.Resultmsg);
 
       const stateTMBill = await stateTMBillDTO.save();
       const tmBill = stateTMBill.tmBill;
-
-      const objectLicenseUser = Object.assign(new LicenseUser(), {
-        ...fields,
-        user,
-        license,
-        is_paid,
-        licenseKey,
-        expirationDate,
-        tmBill,
-        max_profiles: license.max_profiles,
-      });
-
-      const newLicenseUser = await this.create(objectLicenseUser);
 
       const payMentUrl = PAY_NOTIFICATION_URL(
         paymentAPKHref,
         `/tm_compra_en_linea/action?id_transaccion=${PayOrderResult.OrderId}&importe=${tmBill.import}&moneda=CUP&numero_proveedor=${source}`
       );
 
+      const objectLicenseUser = Object.assign(new LicenseUser(), {
+        ...fields,
+        user,
+        license,
+        licenseKey,
+        expirationDate,
+        tmBill,
+        max_profiles: license.max_profiles,
+        payMentUrl,
+      });
+
+      const newLicenseUser = await this.create(objectLicenseUser);
+
       const licenseUser: CreateLicenseUserDTO = {
         ...newLicenseUser,
         user: undefined,
         expirationDate: undefined,
-        payMentUrl,
       };
       const resp: BaseResponseDTO = {
         status: "success",

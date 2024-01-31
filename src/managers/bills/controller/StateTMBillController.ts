@@ -57,6 +57,7 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
       licenseUser.user.active = true;
       licenseUser.user.end_license = expirationDate;
       licenseUser.user.max_profiles = licenseUser.license.max_profiles;
+      licenseUser.payMentUrl = null;
 
       const tmBill = licenseUser.tmBill;
       const stateTMBill = await StateTMBill.findOne({
