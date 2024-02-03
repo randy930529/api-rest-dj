@@ -29,6 +29,9 @@ export class License extends Model {
   })
   import: number;
 
+  @Column({ type: "integer", width: 2, nullable: true })
+  order: number;
+
   @OneToMany(() => LicenseUser, (licenseUser) => licenseUser.license)
   licenseUser: LicenseUser[];
 }
