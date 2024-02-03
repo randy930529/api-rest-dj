@@ -1,12 +1,14 @@
 import { SupportDocumentController } from "../controller/SupportDocumentController";
 import { authMiddleware } from "../../../auth/middlewares/authMiddleware";
+import { userMiddleware } from "../../../auth/middlewares/userMiddleware";
+import { licenseMiddleware } from "../../license/middlewares/licenseMiddleware";
 
 export const supportDocumentRoutes = [
   {
     method: "post",
     route: "/support/document",
     controller: SupportDocumentController,
-    middlewares: [authMiddleware],
+    middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
     action: "createSupportDocument",
   },
   {
