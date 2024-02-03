@@ -24,6 +24,18 @@ export class ProfileController extends EntityControllerBase<Profile> {
         responseError(res, "User not activate.", 401);
       }
 
+      const countProfiles: number = await Profile.countBy({
+        user: { id: user.id },
+      });
+
+      if (countProfiles >= user.max_profiles) {
+        responseError(
+          res,
+          "This user excede the max profiles to current licese.",
+          401
+        );
+      }
+
       const newProfile = this.repository.create({ ...fields, user });
       await this.repository.save(newProfile);
 
