@@ -6,14 +6,6 @@
     "emailFrom": "randy.delgado@desoft.cu",
     "licenseFreeDays": 5,
     "validTimeTMBill": 86400,
-    "email": {
-      "smtp": {
-        "host": "smtp.ethereal.email",
-        "port": 587,
-        "username": "u7r2aphtnqg7a4xc@ethereal.email",
-        "password": "M27sUXrsjkY4QxZ6YY"
-      }
-    },
     "paymentAPKHref": "https://api-xvfd.onrender.com"
   }
 }
