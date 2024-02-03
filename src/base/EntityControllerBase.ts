@@ -17,9 +17,11 @@ type Params = {
 
 export abstract class EntityControllerBase<TEntity> {
   protected repository: Repository<TEntity>;
+  protected entityName: string;
 
   constructor(repository: Repository<TEntity>) {
     this.repository = repository;
+    this.entityName = this.constructor.name;
   }
 
   async create(entity: TEntity): Promise<TEntity> {
@@ -36,8 +38,17 @@ export abstract class EntityControllerBase<TEntity> {
       const entities = await this.repository.find(options);
       res.json(entities);
     } catch (error) {
-      console.error("Error fetching entities:", error);
-      res.status(500).json({ message: "Error fetching entities" });
+      console.error(
+        `Error fetching ${this.entityName
+          .toUpperCase()
+          .replace("CONTROLLER", "")} entities:`,
+        error
+      );
+      res.status(500).json({
+        message: `Error fetching ${this.entityName
+          .toUpperCase()
+          .replace("CONTROLLER", "")} entities.`,
+      });
     }
   }
 
@@ -48,7 +59,14 @@ export abstract class EntityControllerBase<TEntity> {
 
     const entity = await this.repository.findOne(options);
 
-    if (!entity) responseError(res, "Entity not found.", 404);
+    if (!entity)
+      responseError(
+        res,
+        `Entity ${this.entityName
+          .toUpperCase()
+          .replace("CONTROLLER", "")} not found.`,
+        404
+      );
 
     return entity;
   }
@@ -57,7 +75,14 @@ export abstract class EntityControllerBase<TEntity> {
     const options = { id } as unknown as FindOptionsWhere<TEntity>;
     const entityToUpdate = await this.repository.findOneBy(options);
 
-    if (!entityToUpdate) responseError(res, "Entity not found.", 404);
+    if (!entityToUpdate)
+      responseError(
+        res,
+        `Entity ${this.entityName
+          .toUpperCase()
+          .replace("CONTROLLER", "")} not found.`,
+        404
+      );
 
     const entityUpdate = { ...entityToUpdate, ...entity };
     return await this.repository.save(entityUpdate);
@@ -67,7 +92,14 @@ export abstract class EntityControllerBase<TEntity> {
     const options = { id } as unknown as FindOptionsWhere<TEntity>;
     const entity = await this.repository.findOneBy(options);
 
-    if (!entity) responseError(res, "Entity not found.", 404);
+    if (!entity)
+      responseError(
+        res,
+        `Entity ${this.entityName
+          .toUpperCase()
+          .replace("CONTROLLER", "")} not found.`,
+        404
+      );
 
     return await this.repository.remove(entity);
   }
