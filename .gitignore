@@ -1,5 +1,6 @@
 .idea/
 .vscode/
+.cache/
 
 # dependencies
 /node_modules
