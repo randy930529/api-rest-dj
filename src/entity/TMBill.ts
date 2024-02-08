@@ -11,7 +11,7 @@ export class TMBill extends Model {
   @Column({
     type: "numeric",
     precision: 19,
-    scale: 0,
+    scale: 4,
     default: 0,
     transformer: new ColumnNumericTransformer(),
   })

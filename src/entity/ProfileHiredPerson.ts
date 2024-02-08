@@ -15,7 +15,7 @@ export class ProfileHiredPerson extends Model {
   @Column({
     type: "numeric",
     precision: 19,
-    scale: 0,
+    scale: 4,
     transformer: new ColumnNumericTransformer(),
   })
   import: number;

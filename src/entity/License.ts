@@ -23,7 +23,7 @@ export class License extends Model {
   @Column({
     type: "numeric",
     precision: 19,
-    scale: 0,
+    scale: 2,
     default: 0,
     transformer: new ColumnNumericTransformer(),
   })
