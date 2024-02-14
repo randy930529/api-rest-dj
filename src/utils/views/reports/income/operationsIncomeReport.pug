@@ -1,0 +1,15 @@
+extends ../generic/base
+
+block stylesheet
+    style.
+        table {
+        border-collapse: collapse;
+        table-layout: fixed;
+        width: 487pt;
+      }
+
+block content
+    -const tableWidth = 649
+    -const months = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"]
+    -const month = months[monthIndex-1]
+    include tableIncomeReportMonth

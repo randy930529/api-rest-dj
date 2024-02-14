@@ -1,0 +1,12 @@
+mixin colGroup(colsArray=[])
+    colgroup
+        each col in colsArray
+            col(width=col.width, style=col.style)
+        else
+            col
+
+mixin values(valuesArray=[], className="")
+  each val in valuesArray
+    td(class=`${className}` style="border-top:none;border-left:none")= val
+  else
+    td There are no values
