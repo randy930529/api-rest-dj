@@ -11,5 +11,11 @@ block stylesheet
 block content
     -const tableWidth = 649
     -const months = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"]
-    each month in months
+    
+    each month, index in months
+        -let data = dataMonths[index]
         include tableIncomeReportMonth
+        span.page-next
+    
+    -const data = totalMonths
+    include tableIncomeReportTI

@@ -1,0 +1,61 @@
+extends ../generic/tableBase
+include ../generic/mixins
+
+mixin setData(dataMatrix=[[]])
+    -const months = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"]
+    each val, index in dataMatrix
+        tr(height=22 style={height:'16.5pt'})
+            td.xl-71(height=22 style="height:16.5pt;border-top:none;text-align:left")= (months[index])
+            +values(val, "xl-71")
+            td.xl-66(width=163 style="border-top:none;border-left:none;width:122pt")
+    else
+        td There are no values
+
+block column
+    -const colsArray=[{width:80, style:{width: '60pt'}}, {width:69, style:{width: '52pt'}}, {width:123, style:{width: '92pt'}}, {width:97, style:{width: '73pt'}}, {width:117, style:{width: '88pt'}}, {width:163, style:{width: '122pt'}}]
+    +colGroup(colsArray)
+
+block tHeadContent
+    tr(height=22 style={height:'16.5pt'})
+        td.xl-73(colspan=2 height=22 width=149 style="border-right: .5pt solid black; height: 16.5pt; width: 112pt")
+            font.font-8 #{month}
+        td.xl-75(colspan=4 width=500 style="border-right:.5pt solid black; border-left:none; width:375pt")
+            font.font-9 GASTOS DE OPERACIONES
+    tr(height=22 style={height:'16.5pt'})
+        td.xl-78(rowspan=3 height=108 width=80 style="border-bottom:.5pt solid black; height:81.0pt; border-top:none; width:60pt")
+            font.font-8 Dia
+        td.xl-65(width=69 style="border-top:none;border-left:none;width:52pt")
+            font.font-9 DEBITOS
+        td.xl-75(colspan=3 width=337 style="border-right:.5pt solid black; border-left:none;width:253pt")
+            font.font-9 CREDITOS
+        td.xl-81(rowspan=3 width=163 style="border-bottom:.5pt solid black; border-top:none;width:122pt")
+            font.font8 DETALLE
+    tr(height=22 style={height:'16.5pt'})
+        td.xl-84(rowspan=2 height=86 width=69 style="border-bottom:.5pt solid black; height:64.5pt;border-top:none;width:52pt")
+            font.font8 EFECTIVO EN CAJA
+        td.xl-86( colspan=2 width=220 style="border-right:.5pt solid black; border-left:none;width:165pt")
+            font.font-9 SUBCUENTAS DE INGRESOS
+        td.xl-66(width=117 style="border-top:none;border-left:none;width:88pt") 
+    tr(height=64 style={height:'48.0pt'})
+        td.xl-67(height=64 width=123 style="height:48.0pt;border-top:none; border-left:none; width:92pt")
+            font.font-8 NO CONSIDERADO A LOS EFECTOS DE IMPUESTOS
+        td.xl-68(width=97 style="border-top:none;border-left:none; width:73pt")
+            font.font-8 INGRESOS OBTENIDOS
+        td.xl-69(width=117 style="border-top:none;border-left:none; width:88pt")
+            font.font-8 TOTAL INGRESOS
+    tr(height=22 style={height:'16.5pt'})
+        td.xl-70(height=22 style="height:16.5pt;border-top:none") (1)
+        td.xl-70(style="border-top:none;border-left:none") (2)
+        td.xl-70(style="border-top:none;border-left:none") (3)
+        td.xl-70(style="border-top:none;border-left:none") (4)
+        td.xl-68(width=117 style="border-top:none;border-left:none; width:88pt")
+            font.font-8 (5)= (3 + 4)=2
+        td.xl-70(style="border-top:none;border-left:none") (6)
+
+block tBodyContent
+    +setData(data)
+    tr(height=22 style={height:'16.5pt'})
+        td.xl-72(height=22 width=80 style="height:16.5pt;border-top:none;width:60pt")
+            font.font-8 TOTAL
+        +values(totals, "xl-71")
+        td.xl-66(width="163" style="border-top:none;border-left:none;width:122pt")
