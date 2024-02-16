@@ -16,7 +16,7 @@ export class SupportDocument extends Model {
   @Column({
     type: "numeric",
     precision: 19,
-    scale: 0,
+    scale: 2,
     transformer: new ColumnNumericTransformer(),
   })
   amount: number;

@@ -9,7 +9,7 @@ export class VoucherDetail extends Model {
   @Column({
     type: "numeric",
     precision: 19,
-    scale: 0,
+    scale: 2,
     transformer: new ColumnNumericTransformer(),
   })
   debe: number;
@@ -17,7 +17,7 @@ export class VoucherDetail extends Model {
   @Column({
     type: "numeric",
     precision: 19,
-    scale: 0,
+    scale: 2,
     transformer: new ColumnNumericTransformer(),
   })
   haber: number;
