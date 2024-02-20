@@ -1,5 +1,5 @@
 import * as path from "path";
-import { SupportDocument } from "../../entity/SupportDocument";
+import { SupportDocumentPartialType } from "utils/definitions";
 
 const pugTemplatePath = (template: string) =>
   path.join(__dirname, `../../utils/views/reports/${template}.pug`);
@@ -17,7 +17,7 @@ const indexBy = <T extends { id: string | number }>(
   }, {});
 
 const sumaArray = (array1: number[], array2: number[]): number[] =>
-  array1.reduce((result, val, index) => {
+  array1.reduce<number[]>((result, val, index) => {
     return [...result, val + array2[index]];
   }, []);
 
@@ -25,7 +25,7 @@ const sumaTotal = (array: number[]): number =>
   array.reduce((suma, val) => suma + val, 0);
 
 const getDataToDay = <T>(
-  documents: SupportDocument[],
+  documents: SupportDocumentPartialType[],
   data: string,
   group: number[],
   defaultValue: T[]
@@ -34,9 +34,9 @@ const getDataToDay = <T>(
   if (!documents.length) return toDay;
 
   for (let i = 0; i < documents.length; i++) {
-    const document: SupportDocument = documents[i];
-    const index: number = group.indexOf(document.element.id);
-    const value = document[data] as unknown as T;
+    const document: SupportDocumentPartialType = documents[i];
+    const index: number = group.indexOf(document.elementId);
+    const value = parseFloat(document[data]) as unknown as T;
     toDay[index] = value;
   }
 

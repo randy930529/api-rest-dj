@@ -2,6 +2,7 @@ import puppeteer from "puppeteer";
 import { JWT } from "../auth/security/jwt";
 import { SectionState } from "../entity/SectionState";
 import { SupportDocument } from "../entity/SupportDocument";
+import { SupportDocumentPartialType } from "../utils/definitions";
 
 class ReportGenerator {
   private chromePath: string;
@@ -36,12 +37,14 @@ class ReportGenerator {
   async getInfoReportToDataBase({
     token,
     type,
+    year,
     month,
   }: {
     token: string;
     type: string;
+    year: number;
     month?: number;
-  }): Promise<SupportDocument[]> {
+  }): Promise<SupportDocumentPartialType[]> {
     const userId: number = JWT.getJwtPayloadValueByKey(token, "id");
 
     const existToSectionUser: SectionState = await SectionState.findOne({
@@ -64,22 +67,32 @@ class ReportGenerator {
       ? `EXTRACT(month FROM document.date)= :month`
       : `true`;
 
-    const infoReportToDataBase: SupportDocument[] =
+    const infoReportToDataBase: SupportDocumentPartialType[] =
       await SupportDocument.createQueryBuilder(`document`)
-        .select([`document.amount`, `document.date`])
-        .leftJoinAndSelect(`document.element`, `element`)
+        .select(`EXTRACT('month' FROM document.date)`, `month`)
+        .addSelect(`document.date`, `date`)
+        .addSelect(`element.id`, `elementId`)
+        .addSelect(`element.is_general`, `is_general`)
+        .addSelect(`element.group`, `group`)
+        .addSelect(`element.description`, `description`)
+        .addSelect(`document.amount`, `amount`)
+        .leftJoin(`document.element`, `element`, `element.type= :type`, {
+          type,
+        })
         .leftJoin(`document.fiscalYear`, `fiscalYear`)
         .leftJoin(`fiscalYear.profile`, `profile`)
         .where(`fiscalYear.id= :fiscalYearId`, { fiscalYearId })
         .andWhere(`profile.id= :profileId`, { profileId })
-        .andWhere(`document.type_document= :type`, {
-          type,
-        })
-        .andWhere(`element.type= :type`, { type })
+        .andWhere(`document.type_document= :type`, { type })
+        .andWhere(`EXTRACT(year FROM document.date)= :year`, { year })
         .andWhere(conditionMonth, { month })
         .orderBy(`document.date`, `ASC`)
         .addOrderBy(`element.id`, `ASC`)
-        .getMany();
+        .groupBy(`document.date`)
+        .addGroupBy(`element.id`)
+        .addGroupBy(`element.group`)
+        .addGroupBy(`amount`)
+        .getRawMany();
 
     return infoReportToDataBase;
   }

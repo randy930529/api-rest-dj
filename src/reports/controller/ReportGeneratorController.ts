@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import * as pug from "pug";
 import * as moment from "moment";
 import ReportGenerator from "../../base/ReportGeneratorBase";
-import { SupportDocument } from "../../entity/SupportDocument";
 import { ENV } from "../../utils/settings/environment";
 import {
   defaultDataArray,
@@ -11,6 +10,12 @@ import {
   sumaArray,
   sumaTotal,
 } from "../utils/utilsToReports";
+import {
+  DataIndexByType,
+  SupportDocumentPartialType,
+} from "../../utils/definitions";
+import { User } from "../../entity/User";
+import { SectionState } from "../../entity/SectionState";
 
 class ReportGeneratorController extends ReportGenerator {
   private templatePath: string;
@@ -33,9 +38,11 @@ class ReportGeneratorController extends ReportGenerator {
   ): Promise<void> {
     try {
       const {
+        year,
         month,
         token,
-      }: { month: number | undefined | null; token: string } = req.body;
+      }: { year: number; month: number | undefined | null; token: string } =
+        req.body;
 
       this.templatePath = pugTemplatePath("operationsExpenseReport");
       const fileName = `Reporte_de_Gastos_de_Operaciones_${
@@ -44,23 +51,26 @@ class ReportGeneratorController extends ReportGenerator {
 
       const { expenseId_PD } = ENV.group;
 
-      const getInfoReportToDataBase: SupportDocument[] =
+      const getInfoReportToDataBase: SupportDocumentPartialType[] =
         await this.getInfoReportToDataBase({
           token,
           type: "g",
+          year,
           month,
         });
 
-      const expensesGenerals: SupportDocument[] =
-        getInfoReportToDataBase.filter((val) => val.element.is_general);
+      const expensesGenerals: SupportDocumentPartialType[] =
+        getInfoReportToDataBase.filter((val) => val.is_general);
 
-      const expensesMePD: SupportDocument[] = getInfoReportToDataBase.filter(
-        (val) => !val.element.is_general && val.element.group === "pd"
-      );
+      const expensesMePD: SupportDocumentPartialType[] =
+        getInfoReportToDataBase.filter(
+          (val) => !val.is_general && val.group === "pd"
+        );
 
-      const expensesMeDD: SupportDocument[] = getInfoReportToDataBase.filter(
-        (val) => !val.element.is_general && val.element.group === "dd"
-      );
+      const expensesMeDD: SupportDocumentPartialType[] =
+        getInfoReportToDataBase.filter(
+          (val) => !val.is_general && val.group === "dd"
+        );
 
       const expensesNameTb1 = defaultDataArray<string>(6, "");
       let totalsTb1 = defaultDataArray<number>(13, 0);
@@ -83,10 +93,10 @@ class ReportGeneratorController extends ReportGenerator {
       const expensesForDaysTb1: (number | string)[][] = Array.from(
         { length: 31 },
         (_, day) => {
-          const expensesGeneralsRecordedToDay: SupportDocument[] =
+          const expensesGeneralsRecordedToDay: SupportDocumentPartialType[] =
             expensesGenerals.filter((val) => moment(val.date).date() === day);
 
-          const expensesMePDRecordedToDay: SupportDocument[] =
+          const expensesMePDRecordedToDay: SupportDocumentPartialType[] =
             expensesMePD.filter((val) => moment(val.date).date() === day);
 
           const expensesGeneralsForDays = getDataToDay<number>(
@@ -98,19 +108,20 @@ class ReportGeneratorController extends ReportGenerator {
 
           let expensesMePDForDays = defaultDataArray<number>(6, 0);
           for (let i = 0; i < expensesMePDRecordedToDay.length; i++) {
-            const document: SupportDocument = expensesMePDRecordedToDay[i];
+            const document: SupportDocumentPartialType =
+              expensesMePDRecordedToDay[i];
 
             const value = document.amount;
-            const description = document.element.description;
+            const description = document.description;
 
             const insertIn: number = expensesNameTb1.indexOf(description);
 
             if (insertIn === -1) {
               expensesNameTb1[nextCol] = description;
-              expensesMePDForDays[nextCol] = value;
+              expensesMePDForDays[nextCol] = parseFloat(value);
               nextCol++;
             } else {
-              expensesMePDForDays[insertIn] = value;
+              expensesMePDForDays[insertIn] = parseFloat(value);
             }
           }
 
@@ -137,26 +148,27 @@ class ReportGeneratorController extends ReportGenerator {
       const expensesForDaysTb2: (number | string)[][] = Array.from(
         { length: 31 },
         (_, day) => {
-          const expensesMeDDRecordedToDay: SupportDocument[] =
+          const expensesMeDDRecordedToDay: SupportDocumentPartialType[] =
             expensesMeDD.filter((val) => moment(val.date).date() === day);
 
           let expensesMeDDForDays = defaultDataArray<number>(3, 0);
           for (let i = 0; i < expensesMeDDRecordedToDay.length; i++) {
-            const document: SupportDocument = expensesMeDDRecordedToDay[i];
+            const document: SupportDocumentPartialType =
+              expensesMeDDRecordedToDay[i];
 
             const value = document.amount;
-            const description = document.element.description;
+            const description = document.description;
 
             const insertIn: number = expensesNameTb2.indexOf(
-              document.element.description
+              document.description
             );
 
             if (insertIn === -1) {
               expensesNameTb1[nextCol] = description;
-              expensesMeDDForDays[nextCol] = value;
+              expensesMeDDForDays[nextCol] = parseFloat(value);
               nextCol++;
             } else {
-              expensesMeDDForDays[insertIn] = value;
+              expensesMeDDForDays[insertIn] = parseFloat(value);
             }
           }
 
@@ -219,25 +231,36 @@ class ReportGeneratorController extends ReportGenerator {
       const {
         month,
         token,
-      }: { month: number | undefined | null; token: string } = req.body;
+        user,
+      }: { month: number | undefined | null; token: string; user: User } =
+        req.body;
 
-      this.templatePath = pugTemplatePath("operationsIncomeReport");
+      this.templatePath = pugTemplatePath("income/operationsIncomeReport");
       const fileName = `Reporte_de_Operaciones_de_Ingresos_${
         month ? `en_el_mes_${month}` : "anual"
       }.pdf`;
 
+      const { fiscalYear } = await SectionState.findOne({
+        relations: ["fiscalYear"],
+        select: { fiscalYear: { year: true } },
+        where: { user: { id: user.id } },
+      });
+
+      const { year } = fiscalYear;
+
       const getInfoReportToDataBase = await this.getInfoReportToDataBase({
         token,
         type: "i",
+        year,
         month,
       });
 
-      const incomeMeEI: SupportDocument[] = getInfoReportToDataBase.filter(
-        (val) => val.element.group === "ei"
+      const incomeMeEI = getInfoReportToDataBase.filter(
+        (val) => val.group === "ei"
       );
 
-      const incomeMeIG: SupportDocument[] = getInfoReportToDataBase.filter(
-        (val) => val.element.group === "ig"
+      const incomeMeIG = getInfoReportToDataBase.filter(
+        (val) => val.group === "ig"
       );
 
       let totals = defaultDataArray<number>(4, 0);
@@ -245,21 +268,19 @@ class ReportGeneratorController extends ReportGenerator {
       const incomeForDays: (number | string)[][] = Array.from(
         { length: 31 },
         (_, day) => {
-          const incomeMeEIRecordedToDay: SupportDocument[] = incomeMeEI.filter(
-            (val) => moment(val.date).date() === day
-          );
+          const incomeMeEIRecordedToDay: SupportDocumentPartialType[] =
+            incomeMeEI.filter((val) => moment(val.date).date() === day);
 
-          const incomeMeIGRecordedToDay: SupportDocument[] = incomeMeIG.filter(
-            (val) => moment(val.date).date() === day
-          );
+          const incomeMeIGRecordedToDay: SupportDocumentPartialType[] =
+            incomeMeIG.filter((val) => moment(val.date).date() === day);
 
           const toDay = defaultDataArray<number>(3, 0);
 
           if (incomeMeEIRecordedToDay.length)
-            toDay[1] = incomeMeEIRecordedToDay[0].amount;
+            toDay[1] = parseFloat(incomeMeEIRecordedToDay[0].amount);
 
           if (incomeMeIGRecordedToDay.length)
-            toDay[2] = incomeMeIGRecordedToDay[0].amount;
+            toDay[2] = parseFloat(incomeMeIGRecordedToDay[0].amount);
 
           const total: number = sumaTotal(toDay);
           toDay.push(total);
@@ -274,6 +295,90 @@ class ReportGeneratorController extends ReportGenerator {
 
       const htmlContent = compiledTemplate({
         data: incomeForDays,
+        totals,
+        monthIndex: month,
+      });
+      const pdfBuffer = await this.generatePDF({ htmlContent });
+
+      res.contentType("application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${fileName || this.defaultFileName}"`
+      );
+      res.send(pdfBuffer);
+    } catch (error) {
+      if (res.statusCode === 200) res.status(500);
+      next(error);
+    }
+  }
+
+  async generateOperationsIncomeReportAnnual(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { token, user }: { token: string; user: User } = req.body;
+
+      this.templatePath = pugTemplatePath(
+        "income/operationsIncomeReportAnnual"
+      );
+      const fileName = `Reporte_de_Operaciones_de_Ingresos_anual.pdf`;
+
+      const { fiscalYear } = await SectionState.findOne({
+        relations: ["fiscalYear"],
+        select: { fiscalYear: { year: true } },
+        where: { user: { id: user.id } },
+      });
+
+      const { year } = fiscalYear;
+
+      const infoReportToDataBase = await this.getInfoReportToDataBase({
+        token,
+        type: "i",
+        year,
+      });
+
+      const dataMonths: DataIndexByType = defaultDataArray<number[][]>(
+        12,
+        defaultDataArray<number[]>(31, defaultDataArray<number>(4, 0))
+      );
+
+      const totalMonths = defaultDataArray<number[]>(
+        12,
+        defaultDataArray<number>(4, 0)
+      );
+
+      let totals = defaultDataArray<number>(4, 0);
+
+      for (let i = 0; i < infoReportToDataBase.length; i++) {
+        const { month, date, group, amount } = infoReportToDataBase[i];
+
+        const index: number = parseInt(month) - 1;
+        const day: number = moment(date).date();
+        const indexGroup: number = group === "ei" ? 1 : 2;
+
+        const toDay = [...dataMonths[index][day]].slice(0, -1);
+        toDay[indexGroup] = parseFloat(amount);
+        const total: number = sumaTotal(toDay);
+        toDay.push(total);
+
+        let updatedTotalMonths = [...totalMonths[index]];
+        updatedTotalMonths = sumaArray(updatedTotalMonths, toDay);
+
+        totalMonths[index] = updatedTotalMonths;
+        totals = sumaArray(totals, toDay);
+
+        const updatedDataMonths = [...dataMonths[index]];
+        updatedDataMonths[day] = toDay;
+        dataMonths[index] = updatedDataMonths;
+      }
+
+      const compiledTemplate = pug.compileFile(this.templatePath);
+
+      const htmlContent = compiledTemplate({
+        dataMonths,
+        totalMonths,
         totals,
       });
       const pdfBuffer = await this.generatePDF({ htmlContent });
