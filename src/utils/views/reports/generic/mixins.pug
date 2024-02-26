@@ -10,3 +10,13 @@ mixin values(valuesArray=[], className="")
     td(class=`${className}` style="border-top:none;border-left:none")= val
   else
     td There are no values
+
+mixin enumerate(colsArray=[],count=1)
+    each val, index in colsArray
+        if !index
+            td.xl-67(height=17 style="height:12.75pt; border-top:none")= `(${count})`
+        else
+            td.xl-68(style="border-top:none; border-left:none")= `(${count})`
+        -count++
+    else
+        td There are no values
