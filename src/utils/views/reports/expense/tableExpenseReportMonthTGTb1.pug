@@ -1,0 +1,42 @@
+extends ../generic/tableBase
+
+block column
+    -const colsArrayTab1=[{width:68, style:{width: '51pt'}}, {width:63, style:{width: '47pt'}}, {width:56, style:{width: '42pt'}}, {width:47, style:{width: '35pt'}}, {width:52, style:{width: '39pt'}}, {width:80, style:{width: '60pt'}}, {width:68, style:{width: '51pt'}}, {width:69, style:{width: '52pt'}}, {width:68, style:{width: '51pt'}}, {width:69, style:{width: '52pt'}}, {width:69, style:{width: '52pt'}}, {width:68, style:{width: '51pt'}}, {width:69, style:{width: '52pt'}}, {width:73, style:{width: '55pt'}}];
+    +colGroup(colsArrayTab1)
+
+block tHeadContent
+    tr(height=17 style={height:'12.75pt'})
+        td.xl-78(colspan=2 height=17 width=84 style="border-bottom: .5pt solid black; height: 12.75pt; width: 63pt")
+            font.font-8
+        td.xl-80(colspan=12 width=788 style="border-top:.5pt solid black; border-left:none; width:592pt")
+            font.font-9 RESUMEN ANUAL DE GASTOS DE OPERACIONES
+    tr(height=17 style={height:'12.75pt'})
+        td.xl-80(colspan=13 height=17 width=799 style="border-right:.5pt solid black; height: 12.75pt; width:600pt")
+            font.font-9 SUBCUENTAS
+        td.xl-83.text-center(rowspan=3 width=73 style="border-bottom:.5pt solid black; border-top:none; padding-left: 1px; width:55pt")
+            font.font-8 TOTAL DE GASTOS AUTORIZADOS POSIBLES A DEDUCIR
+    tr(height=17 style={height:'12.75pt'})
+        td.xl-86.text-center(colspan=13 height=17 width=799 style="border-right:.5pt solid black; height: 12.75pt; width:600pt")
+            font.font-8 POSIBLES A DEDUCIR DENTRO DE LOS LIMITES DE GASTOS ESTABLECIDOS
+    tr(height=152 style={height:'114.0pt'})
+        td.xl-65.text-vertical(height=152 width=21 style="height:114.0pt;border-top:none; width:16pt")
+            font.font-8 Mes
+        td.xl-66(width=80 style="border-top:none;border-left:none; width:60pt")
+            font.font-8 Materias primas y materiales
+        td.xl-66(width=56 style="border-top:none;border-left:none; width:47pt")
+            font.font-8 Mercancias para la venta
+        td.xl-66(width=47 style="border-top:none;border-left:none; width:47pt")
+            font.font-8 Combust ibles
+        td.xl-66(width=52 style="border-top:none;border-left:none; width:47pt")
+            font.font-8 Energia electrica
+        td.xl-66(width=80 style="border-top:none;border-left:none; width:47pt")
+            font.font-8 Remuneraciones al personal contratado
+        +setExpensesName(expenses)
+        td.xl-66(width=69 style="border-top:none;border-left:none; width:47pt")
+            font.font-8 Otros gastos monetarios
+    tr(height=17 style={height:'12.75pt'})
+        +enumerate(colsArrayTab1)
+
+block tBodyContent
+    +setDataTotalsToMonths(data, months)
+    +setTotals(total, "TOTAL")

@@ -1,0 +1,50 @@
+extends ../generic/tableBase
+
+block column
+    -const colsArrayTab2=[{width:68, style:{width: '51pt'}}, {width:80, style:{width: '60pt'}}, {width:68, style:{width: '51pt'}}, {width:69, style:{width: '52pt'}}, {width:68, style:{width: '51pt'}}, {width:57, style:{width: '43pt'}}, {width:69, style:{width: '52pt'}}, {width:68, style:{width: '51pt'}}, {width:59, style:{width: '44pt'}}, {width:69, style:{width: '52pt'}}, {width:79, style:{width: '59pt'}}, {width:125, style:{width: '124pt'}}];
+    +colGroup(colsArrayTab2)
+
+block tHeadContent
+    tr(height=17 style={height:'12.75pt'})
+        td.xl-86.text-center(colspan=7  height=17 width=479 style="border-right:.5pt solid black; height:12.75pt; width:360pt")
+            font.font-8 RESUMEN ANUAL DE GASTOS DE OPERACIONES
+        td.xl-72(width=68 style="border-left:none; width:51pt")
+        td.xl-89(colspan=4 height=17 width=332 style="border:.5pt solid black; border-left:none; width:249pt")
+            font.font-8 #{month}
+    tr(height=18 style={height:'13.5pt'})
+        td.xl-86.text-center(colspan=5 height=18 width=353 style="border-right:.5pt solid black; height:13.5pt; width:265pt")
+            font.font-8 SUBCUENTAS
+        td.xl-92(rowspan=3 width=57 style="border-bottom:.5pt solid black; border-top:none; width:43pt")
+            font.font-8 TOTAL A DEDUCIR DE LA BASE IMPONIBLE
+        td.xl-73.text-center(width=69 style="border-top:none;border-left:none; width:52pt")
+            font.font-8 SUBCUENTAS
+        td.xl-83.text-center(rowspan=3 width=68 style="border-bottom:.5pt solid black; border-top:none; padding-left: 1px; width:51pt")
+            font.font-8 TOTAL GASTOS DE OPERACIÓN
+        td.xl-95(colspan=2 rowspan=2 width=128 style="border-right:.5pt solid black; border-bottom:.5pt solid black; width:96pt")
+            font.font-8 CREDITOS
+        td.xl-99(rowspan=3 width=79 style="border-bottom:.5pt solid black; border-top:none; width:59pt")
+            font.font-8 TOTAL PAGADO
+        td.xl-102(rowspan=3 width=125 style="border-bottom:.5pt solid black; border-top:none;width:94pt")
+            font.font-8 DETALLE
+    tr(height=17 style={height:'12.75pt'})
+        td.xl-105(colspan=5 height=17 width=353 style="border-right:.5pt solid black; height:12.75pt; width:265pt")
+            font.font-8 DEDUCIBLES DIRECTAMENTE DE LA BASE IMPONIBLE
+        td.xl-72(width=69 style="border-top:none;border-left:none; width:52pt")
+    tr(height=152 style={height:'114.0pt'})
+        td.xl-66(height=152 width=68 style="height:114.0pt;border-top:none; width:51pt")
+            font.font-8 Mes
+        td.xl-74(width=80 style="border-top:none;border-left:none; width:60pt")
+            font.font-8 Pagos por arrendamiento de bienes a entidades estatales
+        +setExpensesName(expenses)
+        td.xl-76(width=69 style="border-top:none;border-left:none; width:52pt")
+            font.font-8 EGRESOS NO INCLUIDOS A EFECTOS DE IMPUESTOS AUTORIZADOS POR EL MFP
+        td.xl-74(width=59 style="border-top:none;border-left:none; vertical-align: middle; width:44pt")
+            font.font-8 EFECTIVO EN CAJA
+        td.xl-74(width=69 style="border-top:none;border-left:none; vertical-align: middle; width:52pt")
+            font.font-8 EFECTIVO EN BANCO
+    tr(height=17 style={height:'12.75pt'})
+        +enumerate(colsArrayTab2,15)
+
+block tBodyContent
+    +setDataTotalsToMonths(data, months, 1)
+    +setTotals(total, "TOTAL")
