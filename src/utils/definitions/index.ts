@@ -10,6 +10,9 @@ export type SupportDocumentPartialType = {
 
 export type DataIndexByType =
   | {
+      [key: number]: (number | string)[][][];
+    }
+  | {
       [key: number]: number[][];
     }
   | number[][][];

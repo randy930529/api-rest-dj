@@ -25,4 +25,12 @@ export const reportsRoutes = [
     middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
     action: "generateOperationsIncomeReportAnnual",
   },
+
+  {
+    method: "post",
+    route: "/report/expense/annual",
+    controller: ReportGeneratorController,
+    middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
+    action: "generateOperationsExpenseReportAnnual",
+  },
 ];

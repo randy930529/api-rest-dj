@@ -60,7 +60,7 @@ block content
     -const months = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"]
     
     each month, index in months
-        -let expenses = expensesName[1].tb1
+        -let expenses = expensesName[index+1].tb1
         -let data = dataMonths[index+1][0]
         -let total = totalMonths[index+1][0]
         include tableExpenseReportMonthTB1
@@ -68,10 +68,12 @@ block content
         table.page-next
         
         -tableWidth = 879
-        -expenses = expensesName[2].tb2
+        -expenses = expensesName[index+1].tb2
         -data = dataMonths[index+1][1]
         -total = totalMonths[index+1][1]
         include tableExpenseReportMonthTB2
+
+        table.page-next
     
     -let expenses = allExpensesName.tb1
     -let data = totalMonths

@@ -4,18 +4,21 @@ import * as moment from "moment";
 import ReportGenerator from "../../base/ReportGeneratorBase";
 import { ENV } from "../../utils/settings/environment";
 import {
+  clearDuplicatesInArray,
   defaultDataArray,
+  getDataExpensesInToMenthArrayToTables,
   getDataToDay,
   pugTemplatePath,
   sumaArray,
   sumaTotal,
 } from "../utils/utilsToReports";
+
+import { User } from "../../entity/User";
+import { SectionState } from "../../entity/SectionState";
 import {
   DataIndexByType,
   SupportDocumentPartialType,
 } from "../../utils/definitions";
-import { User } from "../../entity/User";
-import { SectionState } from "../../entity/SectionState";
 
 class ReportGeneratorController extends ReportGenerator {
   private templatePath: string;
@@ -44,7 +47,7 @@ class ReportGeneratorController extends ReportGenerator {
       }: { year: number; month: number | undefined | null; token: string } =
         req.body;
 
-      this.templatePath = pugTemplatePath("operationsExpenseReport");
+      this.templatePath = pugTemplatePath("expense/operationsExpenseReport");
       const fileName = `Reporte_de_Gastos_de_Operaciones_${
         month ? "en_el_mes" : "mensuales"
       }.pdf`;
@@ -159,9 +162,7 @@ class ReportGeneratorController extends ReportGenerator {
             const value = document.amount;
             const description = document.description;
 
-            const insertIn: number = expensesNameTb2.indexOf(
-              document.description
-            );
+            const insertIn: number = expensesNameTb2.indexOf(description);
 
             if (insertIn === -1) {
               expensesNameTb1[nextCol] = description;
@@ -381,6 +382,136 @@ class ReportGeneratorController extends ReportGenerator {
         totalMonths,
         totals,
       });
+      const pdfBuffer = await this.generatePDF({ htmlContent });
+
+      res.contentType("application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${fileName || this.defaultFileName}"`
+      );
+      res.send(pdfBuffer);
+    } catch (error) {
+      if (res.statusCode === 200) res.status(500);
+      next(error);
+    }
+  }
+
+  async generateOperationsExpenseReportAnnual(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { token, user }: { token: string; user: User } = req.body;
+
+      this.templatePath = pugTemplatePath(
+        "expense/operationsExpenseReportAnnual"
+      );
+      const fileName = `Reporte_de_Operaciones_de_Ingresos_anual.pdf`;
+
+      const { fiscalYear } = await SectionState.findOne({
+        relations: ["fiscalYear"],
+        select: { fiscalYear: { year: true } },
+        where: { user: { id: user.id } },
+      });
+
+      const { year } = fiscalYear;
+
+      const infoReportToDataBase = await this.getInfoReportToDataBase({
+        token,
+        type: "g",
+        year,
+      });
+
+      const dataMonths = <DataIndexByType>{};
+
+      const expensesName: {
+        [key: number]: {
+          tb1: string[];
+          tb2: string[];
+        };
+      } = {};
+
+      const allExpensesName: {
+        tb1: string[];
+        tb2: string[];
+      } = {
+        tb1: defaultDataArray<string>(6, ""),
+        tb2: defaultDataArray<string>(3, ""),
+      };
+
+      const totalMonths: {
+        [key: number]: (string | number)[][];
+      } = {};
+
+      let totals: {
+        tb1: (string | number)[];
+        tb2: (string | number)[];
+      } = {
+        tb1: defaultDataArray<number>(13, 0),
+        tb2: defaultDataArray<number>(10, 0),
+      };
+
+      for (let i = 1; i <= 12; i++) {
+        const expensesGenerals = infoReportToDataBase.filter(
+          (val) => val.is_general && i === parseInt(val.month)
+        );
+
+        const expensesMePD = infoReportToDataBase.filter(
+          (val) =>
+            !val.is_general && val.group === "pd" && i === parseInt(val.month)
+        );
+
+        const expensesMeDD = infoReportToDataBase.filter(
+          (val) =>
+            !val.is_general && val.group === "dd" && i === parseInt(val.month)
+        );
+
+        const [dataTb1, dataTb2, displayName, totalMonth] =
+          getDataExpensesInToMenthArrayToTables(
+            expensesGenerals,
+            expensesMePD,
+            expensesMeDD
+          );
+
+        dataMonths[i] = [dataTb1, dataTb2];
+
+        const tb1 = displayName[0] as string[];
+        const tb2 = displayName[1] as string[];
+        expensesName[i] = { tb1, tb2 };
+
+        allExpensesName.tb1 = clearDuplicatesInArray<string>(
+          allExpensesName.tb1,
+          tb1
+        );
+        allExpensesName.tb2 = clearDuplicatesInArray<string>(
+          allExpensesName.tb2,
+          tb2
+        );
+
+        totalMonths[i] = [totalMonth[0], [...totalMonth[1], ""]];
+        totals.tb1 = sumaArray(
+          totals.tb1 as number[],
+          totalMonth[0] as number[]
+        );
+        totals.tb2 = sumaArray(
+          totals.tb2 as number[],
+          totalMonth[1] as number[]
+        );
+      }
+
+      totals.tb2.push("");
+
+      const compiledTemplate = pug.compileFile(this.templatePath);
+
+      const htmlContent = compiledTemplate({
+        dataMonths,
+        totalMonths,
+        expensesName,
+        totals,
+        allExpensesName,
+      });
+
       const pdfBuffer = await this.generatePDF({ htmlContent });
 
       res.contentType("application/pdf");
