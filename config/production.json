@@ -2,7 +2,7 @@
   "app": {
     "site": "http://production-server",
     "debug": "production",
-    "port": 443,
+    "port": 4000,
     "emailFrom": "your_dev_email",
     "licenseFreeDays": 5,
     "paymentAPKHref": "transfermovil://tm_compra_en_linea",
