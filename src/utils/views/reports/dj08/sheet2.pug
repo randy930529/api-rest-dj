@@ -1,0 +1,68 @@
+extends ../generic/tableBase
+
+mixin setDataToSectionA(dataMatrix=[[]])
+    each val, index in dataMatrix
+        tr(height=46 style={height:'34.9pt'})
+            td.xl-65(width=397 style="border-right: .5pt solid black;width:296pt")
+                font.font-8(style="display: block; text-align: center")= val.activity
+            td.xl-65(width=206 style="border-top:none;border-left:none;width:155pt")
+                font.font-8(style="display: block; text-align: center")= val.period.start[0]
+            td.xl-65(width=206 style="border-top:none;border-left:none;width:155pt")
+                font.font-8(style="display: block; text-align: center")= val.period.start[1]
+            td.xl-65(width=73 style="border-top:none;border-left:none;width:55pt")
+                font.font-8(style="display: block; text-align: center")= val.period.end[0]
+            td.xl-65(width=73 style="border-top:none;border-left:none;width:55pt")
+                font.font-8(style="display: block; text-align: center")= val.period.end[1]
+            td.xl-65(width=77 style="border-top:none;border-left:none;width:58pt")
+                font.font-8(style="display: block; text-align: center")= income
+            td.xl-65(width=77 colspan=2 style="border-top:none;border-left:none;width:58pt")
+                font.font-8(style="display: block; text-align: center")= expense
+            td.xl-75(width=23 style="width:22pt")
+                font.font-8(style="display: flex; justify-content: center; align-items: center; height: 60.5pt;")= (index+1)
+    else
+        tr(height=25 style={height:'18.95pt'})
+            td There are no values
+
+block column
+    -colsArray=[{width:23, style:{width: '17pt'}}, {width:50, style:{width: '38pt'}}, {width:328, style:{width: '245pt'}}, {width:27, style:{width: '20pt'}}, {width:30, style:{width: '23pt'}}, {width:32, style:{width: '24pt'}}, {width:35, style:{width: '26pt'}}, {width:132, style:{width: '99pt'}}, {width:37, style:{width: '28pt'}}, {width:111, style:{width: '83pt'}}, {width:32, style:{width: '24pt'}}]
+    +colGroup(colsArray)
+
+block tHeadContent
+    tr(height=58 style={height:'44.1pt'})
+        td.xl-78(width=23 height=522 rowspan=12 style="height: 396.1pt; width: 20pt")
+            font.font-8.vertical-text(style="height:679pt;") Sección A
+        td.xl-75(width=50 rowspan=12 style="border-right:.5pt solid black; border-left:none; border-bottom:none; width:38pt")
+            font.font-8.vertical-text(style="height: 679pt;") Ingresos Obtenidos y Gastos  Deducibles por actividad
+        +celEnumerate(397, 296, "Actividades Concepto", 10)
+        +celEnumerate(397, 296, "Período que se liquida", 11, 4)
+        +celEnumerate(397, 296, "Ingresos   Obtenidos", 12)
+        +celEnumerate(397, 296, "Gastos Deducibles   de la actividad", 13, 2)
+        td.xl-75(width=23 rowspan=2 style="width:22pt")
+            font.font-8(style="display: flex; justify-content: center; align-items: center; height: 60.5pt;") Fila
+    tr(height=25 style={height:'18.95pt'})
+        td.xl-65(width=397 style="border-right: .5pt solid black;width:296pt")
+            font.font-8(style="display: block; text-align: center") Código - Nombre
+        td.xl-65(width=206 colspan=2 style="border-top:none;border-left:none;width:155pt")
+            font.font-8(style="display: block; text-align: center") Desde
+        td.xl-65(width=73 colspan=2 style="border-top:none;border-left:none;width:55pt")
+            font.font-8(style="display: block; text-align: center") Hasta
+        td.xl-65(width=77 style="border-top:none;border-left:none;width:58pt")
+            font.font-8(style="display: block; text-align: center") Importe
+        td.xl-65(width=77 colspan=2 style="border-top:none;border-left:none;width:58pt")
+            font.font-8(style="display: block; text-align: center") Importe
+
+
+block tBodyContent
+    -const data = [{activity:"", period:{start: [1,1], end: [31,12]}, income: 0, expense: 0}, {activity:"", period:{start: [1,1], end: [31,12]}, income: 0, expense: 0},{activity:"", period:{start: [1,1], end: [31,12]}, income: 0, expense: 0},{activity:"", period:{start: [1,1], end: [31,12]}, income: 0, expense: 0},{activity:"", period:{start: [1,1], end: [31,12]}, income: 0, expense: 0},{activity:"", period:{start: [1,1], end: [31,12]}, income: 0, expense: 0},{activity:"", period:{start: [1,1], end: [31,12]}, income: 0, expense: 0},{activity:"", period:{start: [1,1], end: [31,12]}, income: 0, expense: 0},{activity:"", period:{start: [1,1], end: [31,12]}, income: 0, expense: 0},]
+    -const total = {incomes: 0, expenses: 0}
+
+    +setDataToSectionA(data)
+    tr(height=25 style={height:'18.95pt'})
+        td.xl-78(width=521 height=25 colspan=5 style="height: 18.95pt; width: 389pt")
+            font.font-9 Total
+        td.xl-65(width=77 style="border-top:none;border-left:none;width:58pt")
+            font.font-8(style="display: block; text-align: center")= total.incomes
+        td.xl-65(width=77 colspan=2 style="border-top:none;border-left:none;width:58pt")
+            font.font-8(style="display: block; text-align: center")= total.expenses
+        td.xl-75(width=23 style="width:22pt")
+            font.font-8(style="display: flex; justify-content: center; align-items: center; height: 60.5pt;") 10
