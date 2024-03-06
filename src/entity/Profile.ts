@@ -12,6 +12,8 @@ import { User } from "./User";
 import { ProfileHiredPerson } from "./ProfileHiredPerson";
 import { HiredPerson } from "./HiredPerson";
 import { FiscalYear } from "./FiscalYear";
+import { ProfileEnterprise } from "./ProfileEnterprise";
+import { ProfileActivity } from "./ProfileActivity";
 
 @Entity()
 export class Profile extends Model {
@@ -55,6 +57,18 @@ export class Profile extends Model {
 
   @OneToMany(() => FiscalYear, (fiscalYear) => fiscalYear.profile)
   fiscalYear: FiscalYear[];
+
+  @OneToMany(
+    () => ProfileEnterprise,
+    (profileEnterprise) => profileEnterprise.profile
+  )
+  profileEnterprise: ProfileEnterprise[];
+
+  @OneToMany(
+    () => ProfileActivity,
+    (profileActivity) => profileActivity.profile
+  )
+  profileActivity: ProfileActivity[];
 
   @BeforeInsert()
   @BeforeUpdate()
