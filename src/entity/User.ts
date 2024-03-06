@@ -3,6 +3,7 @@ import { RefreshToken } from "./RefreshToken";
 import Model from "./Base";
 import { LicenseUser } from "./LicenseUser";
 import { Profile } from "./Profile";
+import { Enterprise } from "./Enterprise";
 
 export enum UserRole {
   ADMIN = "admin",
@@ -55,6 +56,11 @@ export class User extends Model {
 
   @OneToMany(() => Profile, (profile) => profile.user)
   profiles: Profile[];
+
+  @OneToMany(() => Enterprise, (enterprise) => enterprise.user, {
+    onDelete: "CASCADE",
+  })
+  enterprise: Enterprise[];
 
   toJSON() {
     return {

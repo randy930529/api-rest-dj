@@ -1,4 +1,4 @@
-import { AppDataSource } from "data-source";
+import { AppDataSource } from "../../../data-source";
 import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { TMBill } from "../../../entity/TMBill";
 
