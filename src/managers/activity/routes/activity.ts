@@ -9,11 +9,11 @@ export const activityRoutes = [
     route: "/activity",
     controller: ActivityController,
     middlewares: [authMiddleware],
-    action: "create",
+    action: "createActivity",
   },
   {
     method: "get",
-    route: "/activitys",
+    route: "/activities",
     controller: ActivityController,
     middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
     action: "all",

@@ -14,9 +14,9 @@ mixin setDataToSectionA(data=[])
             td.xl-65(style="border-top:none;border-left:none;width:55pt; vertical-align: middle;")
                 font.font-12(style="display: block; text-align: center")= val.period.end[1]
             td.xl-65(style="border-top:none;border-left:none;width:58pt;vertical-align: middle;")
-                font.font-12(style="display: block; text-align: center")= income
+                font.font-12(style="display: block; text-align: end")= val.income
             td.xl-65(colspan=2 style="border-top:none;border-left:none;width:58pt;vertical-align: middle;")
-                font.font-12(style="display: block; text-align: center")= expense
+                font.font-12(style="display: block; text-align: end")= val.expense
             td.xl-75(style="width:22pt;vertical-align: middle;")
                 font.font-12= (index+1)
     else
@@ -81,21 +81,14 @@ block tHeadContent
 
 
 block tBodyContent
-    -const dataSectionA = [{activity:"808- Transporte pasajeros taxi (MG)", period:{start: [1,1], end: [31,12]}, income: 0, expense: 0}, {activity:"", period:{start: [1,1], end: [31,12]}, income: 0, expense: 0},{activity:"", period:{start: [1,1], end: [31,12]}, income: 0, expense: 0},{activity:"", period:{start: [1,1], end: [31,12]}, income: 0, expense: 0},{activity:"", period:{start: [1,1], end: [31,12]}, income: 0, expense: 0},{activity:"", period:{start: [1,1], end: [31,12]}, income: 0, expense: 0},{activity:"", period:{start: [1,1], end: [31,12]}, income: 0, expense: 0},{activity:"", period:{start: [1,1], end: [31,12]}, income: 0, expense: 0},{activity:"", period:{start: [1,1], end: [31,12]}, income: 0, expense: 0},]
-    -const dataSectionB = [{concepto:"Ingresos obtenidos para  liquidación del Impuesto (viene de SECCIÓN A casilla 12 fila 10)",import: "0"},{concepto:"(-) Mínimo Exento Autorizado",import: "1.183.105"},{concepto:"(-) Gastos deducibles por el ejercicio de la actividad (viene de SECCIÓN A casilla 13 fila 10)",import: "0"},{concepto:"(-) Total de tributos pagados asociados a la actividad (viene de SECCIÓN F casilla 18 fila 44)",import: "0"},{concepto:"(-) Contribución para restauración y preservación de las zonas donde desarrollan su actividad",import: "0"},{concepto:"(-) Pagos por arrendamiento de bienes a entidades estatales autorizadas",import: "0"},{concepto:"(-)Importes exonerados por concepto de arrendamiento por asumir gastos de reparaciones",import: "0"},{concepto:"(-)Otros descuentos autorizados",import: "0"},{concepto:"(-) Bonificacion según aprobacion del MFP",import: "0"},{concepto:"Base Imponible (filas 11-12-13-14-15-16-17-18-19) pasa a SECCIÓN G, filas de casilla 20. Se distribuye por tramos",import: "0"}]
-    -const dataSectionC = [{concepto:"Impuesto a pagar según escala progresiva (viene de SECCIÓN G casilla 21 fila 50)",import: "0"},{concepto:"(-) Total de cuotas mensuales pagadas por el Titular a cuenta del impuesto en el período fiscal",import: "0"},{concepto:"(-) Otros pagos anticipados o Créditos del ejercicio fiscal anterior",import: "0"},{concepto:"(-) Total de retenciones",import: "0"},{concepto:"(-) Bonificaciones autorizadas",import: "0"},{concepto:"Impuesto a pagar (filas 21-22-23-24-25, si el resultado es mayor que cero)",import: "0"},{concepto:"Total a Devolver (filas 21-22-23-24-25, si el resultado es negativo) (Si es TCP se iguala a cero)",import: "0"}]
-    -const dataSectionD = [{concepto:"Impuesto a pagar según Declaración Rectificada (viene de SECCIÓN C fila 26, rebajando el importe que le fue bonificado en la DJ - 08 que esta rectificando)",import: "0"},{concepto:"(-) Pago del impuesto realizado en la Declaración anterior",import: "0"},{concepto:"Diferencia Impuesto a Pagar en Declaración Rectificada (si fila 28 es mayor que fila 29)",import: "0"},{concepto:"Diferencia a devolver por declaración rectificada (si fila 28 es menor que fila 29)",import: "0"}]
-    -const dataSectionE = [{concepto:"IMPUESTO A PAGAR (viene de filas 26 o fila 30 según corresponda: son excluyentes)",import: "0"},{concepto:"(-) Bonificaciones (se aplican los % autorizados al importe de la fila 32)",import: "0"},{concepto:"(-) Impuesto pagado en Declaraciones Juradas presentadas en el año fiscal",import: "0"},{concepto:"(+) Recargo por mora (se aplica al importe de fila 32, si se paga fuera de fecha, si se paga en fecha = 0 )",import: "0"},{concepto:"TOTAL A PAGAR ( fila 32 – fila 33 - fila 34 + fila 35 según corresponda)",import: "0"}]
-    -const total = {incomes: 0, expenses: 0}
-
     +setDataToSectionA(dataSectionA)
     tr(height=25 style="height:14.95pt;border-bottom: 2pt solid black;")
         td.xl-78(width=521 colspan=5 style="width: 389pt; text-align: end;")
             font.font-9 Total
         td.xl-65(width=77 style="border-top:none;border-left:none;width:58pt;text-align: end;vertical-align: bottom;")
-            font.font-12= total.incomes
+            font.font-12= totalSectionA.incomes
         td.xl-65(width=77 colspan=2 style="border-top:none;border-left:none;width:58pt;text-align: end;vertical-align: bottom;")
-            font.font-12= total.expenses
+            font.font-12= totalSectionA.expenses
         td.xl-75(width=23 style="width:22pt; vertical-align: middle;")
             font.font-12 10
     +setSections("Sección B","Determinación de la Base Imponible",dataSectionB,11,14)

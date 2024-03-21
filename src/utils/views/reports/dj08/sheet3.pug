@@ -6,7 +6,7 @@ mixin setDataToSectionF(data=[], row=0, align="start")
             td.xl-65(width=77 colspan=6 style=`border-top:none;border-left:none;width:58pt;text-align:${align};vertical-align: bottom;`) 
                 font.font-12= val.concepto
             td.xl-65(width=111 colspan=2 style=`border-right: .5pt solid black; width: 83pt;text-align: end;vertical-align: bottom;`)
-                font.font-9= val.import
+                font(class=`${align === "start"?"font-12":"font-9"}` style="font-size: 8.5pt;")= val.import
             td.xl-75(width=23 style="width:22pt;vertical-align: middle;")
                 font.font-8= (index+row)
 
@@ -14,15 +14,15 @@ mixin setDataToSectionG(data=[], row=0)
     each val, index in data
         tr(height=24 style={height:'14.0pt'})
             td.xl-65(style="border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
-                font.font-12= val.incomeNA.from
+                font.font-12= val.annualsNetIncomes.from
             td.xl-65(style="border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
-                font.font-12= val.incomeNA.to
+                font.font-12= val.annualsNetIncomes.to
             td.xl-65(colspan=3 style="border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
                 font.font-12= val.baseImponible
             td.xl-65(colspan=2 style="border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
                 font.font-12= val.porcentageType
             td.xl-65(style=`border-right: .5pt solid black; width: 83pt;text-align: center;vertical-align: middle;`)
-                font.font-9= val.import
+                font.font-12= val.import
             td.xl-75(width=23 style="width:22pt;vertical-align: middle;")
                 font.font-8= (index+row)
 
@@ -45,16 +45,6 @@ block column
     +colGroup(colsArray)
 
 block tBodyContent
-    -const dataSectionF = [{concepto:"Impuesto sobre las Ventas y/o Servicio",import: "0"},{concepto:"",import: ""},{concepto:"Impuesto por la Utilización de la Fuerza de Trabajo",import: "0"},{concepto:"Impuesto sobre Documentos",import: "0"},{concepto:"Tasa por la Radicación de Anuncios y Propaganda Comercial",import: "0"},{concepto:"Contribución a la Seguridad Social",import: "0"},{concepto:"Otros (especificar)",import: "0"}]
-    -const totalSectionF = [{concepto:"Total de tributos pagados",import: "121.860"}]
-    -const dataSectionG = [{incomeNA:{from:0,to:10.000},baseImponible: 121.860, porcentageType: 15, import: 1.500},{incomeNA:{from:10.000,to:20.000},baseImponible: 10.000, porcentageType: 20, import: 2.000},{incomeNA:{from:20.000,to:30.000},baseImponible: 10.000, porcentageType: 30, import: 3.000},{incomeNA:{from:30.000,to:50.000},baseImponible: 20.000, porcentageType: 40, import: 8.000},{incomeNA:{from:50.000,to:null},baseImponible: 401.684, porcentageType: 50, import: 200.842}]
-    -const totalSectionG = {baseImponible: 121.860, import: 1.500}
-    -const dataSectionH = [{enterprise:"", valueHire:null, participation:{porcentage:null, import:null}},{enterprise:"", valueHire:null, participation:{porcentage:null, import:null}},{enterprise:"", valueHire:null, participation:{porcentage:null, import:null}},{enterprise:"", valueHire:null, participation:{porcentage:null, import:null}},{enterprise:"", valueHire:null, participation:{porcentage:null, import:null}},{enterprise:"", valueHire:null, participation:{porcentage:null, import:null}},{enterprise:"", valueHire:null, participation:{porcentage:null, import:null}},{enterprise:"", valueHire:null, participation:{porcentage:null, import:null}},{enterprise:"", valueHire:null, participation:{porcentage:null, import:null}},{enterprise:"", valueHire:null, participation:{porcentage:null, import:null}},]
-    -const totalSectionH = {valueHire: 0, import: 0}
-    -const rowsSectionF = dataSectionF.length+3
-    -const rowsSectionG = dataSectionF.length+2
-    -const rowsSectionH = dataSectionH.length+3
-
     tr(height=25 style="height:14.95pt;border-top: 2pt solid black;")
         td.xl-78(width=23 rowspan=rowsSectionF style="width: 20pt;vertical-align: middle;")
             font.font-8.vertical-text Sección F
@@ -106,7 +96,7 @@ block tBodyContent
             font.font-12= totalSectionG.baseImponible
         td.xl-65(colspan=2 style="background: silver;border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
         td.xl-65(style=`border-right: .5pt solid black; width: 83pt;text-align: center;vertical-align: middle;`)
-            font.font-12= totalSectionG.import
+            font.font-9(style="font-size: 8.5pt;")= totalSectionG.import
         td.xl-75(width=23 style="width:22pt;vertical-align: middle;")
             font.font-8= (50)
     tr(style="border-bottom: 2pt solid black;")

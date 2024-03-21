@@ -7,11 +7,11 @@ export const profileActivityRoutes = [
     route: "/profileActivity",
     controller: ProfileActivityController,
     middlewares: [authMiddleware],
-    action: "create",
+    action: "createProfileActivity",
   },
   {
     method: "get",
-    route: "/profileActivitys",
+    route: "/profileActivities",
     controller: ProfileActivityController,
     middlewares: [authMiddleware],
     action: "all",

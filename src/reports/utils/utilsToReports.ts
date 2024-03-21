@@ -1,7 +1,11 @@
 import * as path from "path";
 import * as moment from "moment";
 import { ENV } from "../../utils/settings/environment";
-import { SupportDocumentPartialType } from "utils/definitions";
+import {
+  ProfileActivityPartialType,
+  SupportDocumentPartialType,
+} from "utils/definitions";
+import { ProfileActivity } from "../../entity/ProfileActivity";
 
 const pugTemplatePath = (template: string) =>
   path.join(__dirname, `../../utils/views/reports/${template}.pug`);
@@ -190,6 +194,45 @@ const clearDuplicatesInArray = <T>(from: T[], to: T[]): T[] => {
   return uniqueElements;
 };
 
+const getIncomeAndExpenseForActivity = async (
+  fiscalYear: number,
+  userId: number,
+  profileId: number
+): Promise<ProfileActivityPartialType[]> => {
+  const infoReportToDataBase: ProfileActivityPartialType[] =
+    await ProfileActivity.createQueryBuilder(`profileActivity`)
+      .select("profileActivity.date_start", "date_start")
+      .addSelect("profileActivity.date_end", "date_end")
+      .addSelect(`activity.description`, `activity`)
+      .addSelect(`activity.code`, `code`)
+      .addSelect(`documents.amount`, `amount`)
+      .addSelect(`documents.date`, `date`)
+      .addSelect(`documents.type_document`, `type`)
+      .leftJoin(`profileActivity.activity`, `activity`)
+      .leftJoin(`profileActivity.supportDocuments`, `documents`)
+      .leftJoin(`profileActivity.profile`, `profile`)
+      .where(`profile.id= :profileId`, { profileId })
+      .andWhere(`profile.user.id= :userId`, { userId })
+      .andWhere(`EXTRACT(year FROM profileActivity.date_start)= :year`, {
+        year: fiscalYear,
+      })
+      .andWhere(`EXTRACT(year FROM profileActivity.date_end)= :year`, {
+        year: fiscalYear,
+      })
+      .orderBy(`date_start`, `ASC`)
+      .addOrderBy(`activity.id`, `ASC`)
+      .groupBy(`activity.id`)
+      .addGroupBy(`activity.code`)
+      .addGroupBy(`documents.type_document`)
+      .addGroupBy(`documents.date`)
+      .addGroupBy(`amount`)
+      .addGroupBy(`date_start`)
+      .addGroupBy(`date_end`)
+      .getRawMany();
+
+  return infoReportToDataBase;
+};
+
 export {
   pugTemplatePath,
   defaultDataArray,
@@ -199,4 +242,5 @@ export {
   getDataToDay,
   getDataExpensesInToMenthArrayToTables,
   clearDuplicatesInArray,
+  getIncomeAndExpenseForActivity,
 };
