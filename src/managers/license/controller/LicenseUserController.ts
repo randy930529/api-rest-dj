@@ -21,7 +21,7 @@ import { CreatePayOrderDTO } from "../dto/request/createPayOrder";
 import { ENV } from "../../../utils/settings/environment";
 import { PayOrderResultDTO } from "../dto/response/payOrderResult";
 import { createFindOptions } from "../../../base/utils/createFindOptions";
-import PAY_NOTIFICATION_URL from "../utils";
+import { PAY_NOTIFICATION_URL, PASSWORD_WS_EXTERNAL_PAYMENT } from "../utils";
 
 export class LicenseUserController extends EntityControllerBase<LicenseUser> {
   constructor() {
@@ -135,11 +135,17 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
         },
       };
 
+      const password = PASSWORD_WS_EXTERNAL_PAYMENT(moment().toDate());
+      const username = ENV.userPayment;
+
       const config = {
         method: "POST",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
+          username,
+          source,
+          password,
         },
         body: JSON.stringify(body),
       };
