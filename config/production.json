@@ -1,17 +1,17 @@
 {
   "app": {
-    "site": "http://production-server",
+    "site": "https://mygestor.conalbert.cu",
     "debug": "production",
     "port": 4000,
-    "emailFrom": "your_dev_email",
+    "emailFrom": "conalbert@nauta.cu",
     "licenseFreeDays": 5,
     "paymentAPKHref": "transfermovil://tm_compra_en_linea",
     "businessMetadata": {
-      "name": "enterprise_name",
-      "source": 1,
-      "address": "enterprise_address",
-      "phone": "enterprise_phone",
-      "email": "enterprise_email"
+      "name": "CONALBERT S.R.L.",
+      "source": 25354,
+      "address": "Avenida Granma, Edificio 41, apartamento 17, Bayamo, Granma, Cuba",
+      "phone": "+5359880105",
+      "email": "conalbert@nauta.cu"
     }
   }
 }

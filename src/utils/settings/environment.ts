@@ -13,6 +13,8 @@ export const ENV = {
 
   //Config external payment
   apiUrlPayment: process.env.API_URL_PAYMENT,
+  userPayment: process.env.USER_WS_EXTERNAL_PAYMENT,
+  seedPayment: process.env.SEED_WS_EXTERNAL_PAYMENT,
 
   //Config data base.
   host: process.env.API_DATABASE_HOST,
