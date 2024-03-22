@@ -13,9 +13,7 @@ export type ProfileActivityPartialType = {
   code: string;
   date_start: Date;
   date_end: Date;
-  amount: string;
-  date: Date;
-  type: string;
+  documents: { amount: number; type: string }[];
 };
 
 export type DataIndexByType =
@@ -26,6 +24,25 @@ export type DataIndexByType =
       [key: number]: number[][];
     }
   | number[][][];
+
+export type DataDJ08Type = {
+  first_name: string;
+  last_name: string;
+  ci: string;
+  nit: string;
+  address: string;
+  activities: ProfileActivityPartialType[];
+  enterprises: { amount: number; import: number; name: string }[];
+  hiredPersons: {
+    date_start: Date;
+    date_end: Date;
+    import: number;
+    first_name: string;
+    last_name: string;
+    ci: string;
+    municipality: string;
+  }[];
+};
 
 export type DataSectionAType = {
   activity: string;

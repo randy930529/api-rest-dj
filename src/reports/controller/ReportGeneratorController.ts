@@ -6,9 +6,9 @@ import { ENV } from "../../utils/settings/environment";
 import {
   clearDuplicatesInArray,
   defaultDataArray,
+  getDJ08Data,
   getDataExpensesInToMenthArrayToTables,
   getDataToDay,
-  getIncomeAndExpenseForActivity,
   pugTemplatePath,
   sumaArray,
   sumaTotal,
@@ -24,7 +24,6 @@ import {
   SupportDocumentPartialType,
   TotalSectionAType,
 } from "../../utils/definitions";
-import { ProfileActivity } from "../../entity/ProfileActivity";
 import { appConfig } from "../../../config";
 
 class ReportGeneratorController extends ReportGenerator {
@@ -539,236 +538,29 @@ class ReportGeneratorController extends ReportGenerator {
     next: NextFunction
   ): Promise<void> {
     try {
-      // const {
-      //   year,
-      //   user,
-      // }: { year: number; user: User } =
-      //   req.body;
+      const { year, user }: { year: number; user: User } = req.body;
 
       this.templatePath = pugTemplatePath("dj08/swornDeclaration");
 
-      const user = { id: 58, email: "user_email@" }; //
-      const year = 2023; //llega por el req.body
-      const { profile } = await SectionState.findOne({
-        relations: {
-          fiscalYear: true,
-          profile: {
-            profileActivity: {
-              activity: true,
-              supportDocuments: true,
-            },
-            profileEnterprise: {
-              enterprise: true,
-            },
-            profileHiredPerson: {
-              hiredPerson: {
-                address: true,
-              },
-            },
-          },
-        },
-        select: {
-          fiscalYear: { year: true },
-          profile: {
-            first_name: true,
-            last_name: true,
-            ci: true,
-            nit: true,
-            address: true,
-            profileActivity: {
-              date_start: true,
-              date_end: true,
-              activity: {
-                code: true,
-                description: true,
-              },
-              supportDocuments: {
-                amount: true,
-                date: true,
-                type_document: true,
-              },
-            },
-            profileEnterprise: {
-              amount: true,
-              import: true,
-              enterprise: {
-                name: true,
-              },
-            },
-            profileHiredPerson: {
-              date_start: true,
-              date_end: true,
-              import: true,
-              hiredPerson: {
-                first_name: true,
-                last_name: true,
-                ci: true,
-                address: {
-                  municipality: true,
-                },
-              },
-            },
-          },
-        },
-        where: { user: { id: user.id }, fiscalYear: { year } },
-      });
+      const dataDJ08 = await getDJ08Data(year, user.id);
+      const {
+        activities,
+        first_name,
+        last_name,
+        ci,
+        nit,
+        address,
+        enterprises,
+        hiredPersons,
+      } = dataDJ08;
 
-      //resul poe
-      // const profileId = 1; // ID del perfil que deseas buscar
-
-      // const profile = await createQueryBuilder(Profile, "profile")
-      //   .leftJoinAndSelect("profile.profileActivity", "profileActivity")
-      //   .leftJoinAndSelect("profileActivity.activity", "activity")
-      //   .leftJoinAndSelect("profile.profileHiredPerson", "profileHiredPerson")
-      //   .leftJoinAndSelect("profileHiredPerson.hiredPerson", "hiredPerson")
-      //   .select([
-      //     "profile.id",
-      //     "profile.first_name",
-      //     "profileActivity.date_start",
-      //     "profileActivity.date_end",
-      //     "activity.description",
-      //     "hiredPerson.first_name",
-      //     "hiredPerson.last_name",
-      //   ])
-      //   .where("profile.id = :profileId", { profileId })
-      //   .getRawOne();
-
-      // // Formatear el resultado en el objeto deseado
-      // const result = {
-      //   id: profile.id,
-      //   first_name: profile.first_name,
-      //   activities: profile.profileActivity.map((pa: any) => ({
-      //     date_start: pa.date_start,
-      //     date_end: pa.date_end,
-      //     description: pa.description,
-      //   })),
-      //   hiredPersons: profile.profileHiredPerson.map((php: any) => ({
-      //     date_start: php.date_start,
-      //     date_end: php.date_end,
-      //     first_name: php.first_name,
-      //     last_name: php.last_name,
-      //   })),
-      // };
-
-      // console.log(result);
-
-      //resul David
-      /**
-      async function getProfileData(profileId: number) {
-        const profileRepository = getRepository(Profile);
-      
-        const profileData = await profileRepository
-          .createQueryBuilder("profile")
-          .leftJoinAndSelect("profile.profileActivity", "profileActivity")
-          .leftJoinAndSelect("profileActivity.activity", "activity")
-          .leftJoinAndSelect("profile.profileHiredPerson", "profileHiredPerson")
-          .leftJoinAndSelect("profileHiredPerson.hiredPerson", "hiredPerson")
-          .where("profile.id = :profileId", { profileId })
-          .getRawOne();
-      
-        const result = {
-          id: profileData.profile_id,
-          first_name: profileData.profile_first_name,
-          activities: profileData.profileActivity.map((pa: any) => ({
-            date_start: pa.date_start,
-            date_end: pa.date_end,
-            description: pa.activity_description,
-          })),
-          hiredPersons: profileData.profileHiredPerson.map((php: any) => ({
-            date_start: php.date_start,
-            date_end: php.date_end,
-            first_name: php.hiredPerson_first_name,
-            last_name: php.hiredPerson_last_name,
-          })),
-        };
-      
-        return result;
-      }*/
-
-      /**
-       async function getProfileData(profileId: number) {
-        const profileRepository = getRepository(Profile);
-
-        const profileData = await profileRepository
-          .createQueryBuilder("profile")
-          .select([
-            "profile.id",
-            "profile.first_name",
-          ])
-          .addSelect([
-            "profileActivity.date_start",
-            "profileActivity.date_end",
-            "activity.description",
-            "profileHiredPerson.date_start",
-            "profileHiredPerson.date_end",
-            "hiredPerson.first_name",
-            "hiredPerson.last_name",
-          ])
-          .leftJoin("profile.profileActivity", "profileActivity")
-          .leftJoin("profileActivity.activity", "activity")
-          .leftJoin("profile.profileHiredPerson", "profileHiredPerson")
-          .leftJoin("profileHiredPerson.hiredPerson", "hiredPerson")
-          .where("profile.id = :profileId", { profileId })
-          .getRawOne();
-
-          const result = {
-            id: profileData.profile_id,
-            first_name: profileData.profile_first_name,
-            activities: profileData.profileActivity.map((pa: any) => ({
-              date_start: pa.profileActivity_date_start,
-              date_end: pa.profileActivity_date_end,
-              description: pa.activity_description,
-            })),
-            hiredPersons: profileData.profileHiredPerson.map((php: any) => ({
-              date_start: php.profileHiredPerson_date_start,
-              date_end: php.profileHiredPerson_date_end,
-              first_name: php.hiredPerson_first_name,
-              last_name: php.hiredPerson_last_name,
-            })),
-          };
-
-          return result;
-        }
-       */
-
-      const dataQuery = await SectionState.createQueryBuilder(`section`)
-        .select(`user.email`, `email`)
-        .addSelect(`profile.first_name`, `first_name`)
-        .addSelect(`profile.last_name`, `last_name`)
-        .addSelect(`profile.ci`, `ci`)
-        .addSelect(`profile.nit`, `nit`)
-        .addSelect(`profile.address`, `address`)
-        .leftJoin(`section.user`, `user`)
-        .leftJoin(`section.profile`, `profile`)
-        .leftJoin(`section.fiscalYear`, `fiscalYear`)
-        .leftJoin(`profile.profileActivity`, `activity`)
-        .leftJoin(`profile.profileEnterprise`, `enterprise`)
-        .leftJoin(`profile.profileHiredPerson`, `hiredPerson`)
-        .where(`user.id= :userId`, { userId: user.id })
-        .andWhere(`fiscalYear.year= :year`, { year })
-        .andWhere(`EXTRACT(year FROM activity.date_start)= :year`, {
-          year,
-        })
-        .andWhere(`EXTRACT(year FROM hiredPerson.date_start)= :year`, {
-          year,
-        })
-        .getRawOne();
-
-      console.log(dataQuery);
-
-      // const fileName = `DJ-08-IP-${year}.pdf`;
+      const fileName = `DJ-08-IP-${year}.pdf`;
 
       const regimen = false; //ver con alberto como se define regimen simplificado Hoja1!O17
       const rectification = false; //ver con alberto
       const dateSigns = { day: 27, month: 4, year: 2023 }; //
 
       const { MEa_By_MFP } = appConfig.accountingConstants;
-
-      const incomeAndExpenseForActivity = await getIncomeAndExpenseForActivity(
-        year,
-        user.id,
-        profile.id
-      );
 
       const dataSectionA = defaultDataArray<DataSectionAType>(9, {
         activity: "",
@@ -778,46 +570,33 @@ class ReportGeneratorController extends ReportGenerator {
       });
       const totalSectionA: TotalSectionAType = { incomes: 0, expenses: 0 };
 
-      const activityIndexByCode = incomeAndExpenseForActivity.reduce<{
-        [key: string]: DataSectionAType;
-      }>((acc, val) => {
-        const index: string | number = val.code;
-        const amount: number = parseFloat(val.amount);
-        const activity = `${index}- ${val.activity}`;
-        const start = [val.date_start.getDay(), val.date_start.getMonth()];
-        const end = [val.date_end.getDay(), val.date_end.getMonth()];
+      for (let i = 0; i < activities.length; i++) {
+        const {
+          code,
+          activity: activityDescriptin,
+          date_start,
+          date_end,
+          documents,
+        } = activities[i];
+        const activity = `${code}- ${activityDescriptin}`;
+        const start = [date_start.getDate(), date_start.getMonth()];
+        const end = [date_end.getDate(), date_end.getMonth()];
+        const income = documents.find((val) => val.type === "i")?.amount || 0;
+        const expense = documents.find((val) => val.type === "g")?.amount || 0;
 
-        if (acc[index]) {
-          val.type === "i"
-            ? (acc[index].income = amount)
-            : (acc[index].expense = amount);
-        } else {
-          let income = 0;
-          let expense = 0;
-          val.type === "i" ? (income = amount) : (expense = amount);
+        const dataToActivity = {
+          activity,
+          period: {
+            start,
+            end,
+          },
+          income,
+          expense,
+        };
 
-          acc[index] = {
-            activity,
-            period: {
-              start,
-              end,
-            },
-            income,
-            expense,
-          };
-        }
-
-        return acc;
-      }, {});
-
-      const activityCodes = Object.keys(activityIndexByCode);
-      for (let i = 0; i < dataSectionA.length; i++) {
-        const activityCode = activityCodes[i];
-        if (!activityCode) break;
-
-        dataSectionA[i] = activityIndexByCode[activityCode];
-        totalSectionA.expenses += activityIndexByCode[activityCode].expense;
-        totalSectionA.incomes += activityIndexByCode[activityCode].income;
+        dataSectionA[i] = dataToActivity;
+        totalSectionA.expenses += expense;
+        totalSectionA.incomes += income;
       }
 
       /**
@@ -1114,69 +893,101 @@ class ReportGeneratorController extends ReportGenerator {
         totalSectionG.import += importe;
       }
 
-      const dataSectionH = [
-        {
-          enterprise: "",
-          valueHire: null,
-          participation: { porcentage: null, import: null },
-        },
-        {
-          enterprise: "",
-          valueHire: null,
-          participation: { porcentage: null, import: null },
-        },
-        {
-          enterprise: "",
-          valueHire: null,
-          participation: { porcentage: null, import: null },
-        },
-        {
-          enterprise: "",
-          valueHire: null,
-          participation: { porcentage: null, import: null },
-        },
-        {
-          enterprise: "",
-          valueHire: null,
-          participation: { porcentage: null, import: null },
-        },
-        {
-          enterprise: "",
-          valueHire: null,
-          participation: { porcentage: null, import: null },
-        },
-        {
-          enterprise: "",
-          valueHire: null,
-          participation: { porcentage: null, import: null },
-        },
-        {
-          enterprise: "",
-          valueHire: null,
-          participation: { porcentage: null, import: null },
-        },
-        {
-          enterprise: "",
-          valueHire: null,
-          participation: { porcentage: null, import: null },
-        },
-        {
-          enterprise: "",
-          valueHire: null,
-          participation: { porcentage: null, import: null },
-        },
-      ];
+      const dataSectionH = defaultDataArray<{
+        enterprise: string;
+        valueHire: any;
+        participation: {
+          porcentage: any;
+          import: any;
+        };
+      }>(10, {
+        enterprise: "",
+        valueHire: null,
+        participation: { porcentage: null, import: null },
+      });
 
       const totalSectionH = { valueHire: 0, import: 0 };
+
+      for (let i = 0; i < enterprises.length; i++) {
+        const { name, amount, import: importIncome } = enterprises[i];
+        const enterprise = name;
+        const valueHire = amount;
+
+        const dataToEnterprise = {
+          enterprise,
+          valueHire,
+          participation: { porcentage: null, import: importIncome },
+        };
+
+        dataSectionH[i] = dataToEnterprise;
+        totalSectionH.valueHire += valueHire;
+        totalSectionH.import += importIncome;
+      }
+
+      const dataSectionI = defaultDataArray<{
+        code: string | string[];
+        fullName: string;
+        period: {
+          from: number[];
+          to: number[];
+        };
+        municipality: string;
+        nit: string | string[];
+        import: number;
+      }>(18, {
+        code: defaultDataArray<string>(3, ""),
+        fullName: "",
+        period: { from: [null, null], to: [null, null] },
+        municipality: "",
+        nit: defaultDataArray<string>(11, ""),
+        import: null,
+      });
+      const totalSectionI = { import: 0 };
+
+      for (let i = 0; i < hiredPersons.length; i++) {
+        const {
+          first_name,
+          date_start,
+          date_end,
+          last_name,
+          municipality,
+          ci,
+          import: importAnnual,
+        } = hiredPersons[i];
+        const fullName = `${first_name} ${last_name}`;
+        const from = [date_start.getDate(), date_start.getMonth()];
+        const to = [date_end.getDate(), date_end.getMonth()];
+
+        const dataToHire = {
+          code: defaultDataArray<string>(3, ""),
+          fullName,
+          period: {
+            from,
+            to,
+          },
+          municipality,
+          nit: ci,
+          import: importAnnual,
+        };
+
+        dataSectionI[i] = dataToHire;
+        totalSectionI.import += importAnnual;
+      }
+
       const rowsSectionF = dataSectionF.length + 3;
       const rowsSectionG = dataSectionF.length + 2;
       const rowsSectionH = dataSectionH.length + 3;
+      const rowsSectionI = dataSectionI.length + 4;
 
       const compiledTemplate = pug.compileFile(this.templatePath);
 
       const htmlContent = compiledTemplate({
         year,
-        ...profile,
+        first_name,
+        last_name,
+        ci,
+        nit,
+        address,
         email: user.email,
         individual: true,
         rectification,
@@ -1196,21 +1007,23 @@ class ReportGeneratorController extends ReportGenerator {
         totalSectionG,
         dataSectionH,
         totalSectionH,
+        dataSectionI,
+        totalSectionI,
         rowsSectionF,
         rowsSectionG,
         rowsSectionH,
+        rowsSectionI,
       });
-      // const pdfBuffer = await this.generatePDF({ htmlContent });
 
-      // res.contentType("application/pdf");
-      // res.setHeader(
-      //   "Content-Disposition",
-      //   `attachment; filename="${fileName || this.defaultFileName}"`
-      // );
-      // res.send(pdfBuffer);
-      res.send(htmlContent);
+      const pdfBuffer = await this.generatePDF({ htmlContent });
+
+      res.contentType("application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${fileName || this.defaultFileName}"`
+      );
+      res.send(pdfBuffer);
     } catch (error) {
-      console.log(error);
       if (res.statusCode === 200) res.status(500);
       next(error);
     }

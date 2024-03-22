@@ -2,7 +2,6 @@ import ReportGeneratorController from "../controller/ReportGeneratorController";
 import { authMiddleware } from "../../auth/middlewares/authMiddleware";
 import { userMiddleware } from "../../auth/middlewares/userMiddleware";
 import { licenseMiddleware } from "../../managers/license/middlewares/licenseMiddleware";
-import { nextFunction } from "../../auth/middlewares/nextMiddleware";
 
 export const reportsRoutes = [
   {
@@ -34,10 +33,10 @@ export const reportsRoutes = [
     action: "generateOperationsExpenseReportAnnual",
   },
   {
-    method: "get",
+    method: "post",
     route: "/report/dj08",
     controller: ReportGeneratorController,
-    middlewares: [nextFunction],
+    middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
     action: "generateDJ08",
   },
 ];

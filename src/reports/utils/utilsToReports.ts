@@ -2,10 +2,11 @@ import * as path from "path";
 import * as moment from "moment";
 import { ENV } from "../../utils/settings/environment";
 import {
+  DataDJ08Type,
   ProfileActivityPartialType,
   SupportDocumentPartialType,
 } from "utils/definitions";
-import { ProfileActivity } from "../../entity/ProfileActivity";
+import { SectionState } from "../../entity/SectionState";
 
 const pugTemplatePath = (template: string) =>
   path.join(__dirname, `../../utils/views/reports/${template}.pug`);
@@ -194,43 +195,95 @@ const clearDuplicatesInArray = <T>(from: T[], to: T[]): T[] => {
   return uniqueElements;
 };
 
-const getIncomeAndExpenseForActivity = async (
-  fiscalYear: number,
-  userId: number,
-  profileId: number
-): Promise<ProfileActivityPartialType[]> => {
-  const infoReportToDataBase: ProfileActivityPartialType[] =
-    await ProfileActivity.createQueryBuilder(`profileActivity`)
-      .select("profileActivity.date_start", "date_start")
-      .addSelect("profileActivity.date_end", "date_end")
-      .addSelect(`activity.description`, `activity`)
-      .addSelect(`activity.code`, `code`)
-      .addSelect(`documents.amount`, `amount`)
-      .addSelect(`documents.date`, `date`)
-      .addSelect(`documents.type_document`, `type`)
-      .leftJoin(`profileActivity.activity`, `activity`)
-      .leftJoin(`profileActivity.supportDocuments`, `documents`)
-      .leftJoin(`profileActivity.profile`, `profile`)
-      .where(`profile.id= :profileId`, { profileId })
-      .andWhere(`profile.user.id= :userId`, { userId })
-      .andWhere(`EXTRACT(year FROM profileActivity.date_start)= :year`, {
-        year: fiscalYear,
-      })
-      .andWhere(`EXTRACT(year FROM profileActivity.date_end)= :year`, {
-        year: fiscalYear,
-      })
-      .orderBy(`date_start`, `ASC`)
-      .addOrderBy(`activity.id`, `ASC`)
-      .groupBy(`activity.id`)
-      .addGroupBy(`activity.code`)
-      .addGroupBy(`documents.type_document`)
-      .addGroupBy(`documents.date`)
-      .addGroupBy(`amount`)
-      .addGroupBy(`date_start`)
-      .addGroupBy(`date_end`)
-      .getRawMany();
+const getDJ08Data = async (
+  year: number,
+  userId: number
+): Promise<DataDJ08Type> => {
+  const dataQuery = await SectionState.createQueryBuilder(`section`)
+    .select([`section.id`])
+    .leftJoin(`section.user`, `user`)
+    .leftJoin(`section.fiscalYear`, `fiscalYear`)
+    .leftJoinAndSelect(`section.profile`, `profile`)
+    .leftJoinAndSelect(
+      `profile.profileActivity`,
+      `activities`,
+      `EXTRACT(year FROM activities.date_start)= :year`,
+      {
+        year,
+      }
+    )
+    .leftJoinAndSelect(`activities.activity`, `activity`)
+    .leftJoinAndSelect(`activities.supportDocuments`, `documents`)
+    .leftJoinAndSelect(`profile.profileEnterprise`, `enterprises`)
+    .leftJoinAndSelect(`enterprises.enterprise`, `enterprise`)
+    .leftJoinAndSelect(
+      `profile.profileHiredPerson`,
+      `hiredPersons`,
+      `EXTRACT(year FROM hiredPersons.date_start)= :year`,
+      {
+        year,
+      }
+    )
+    .leftJoinAndSelect(`hiredPersons.hiredPerson`, `hire`)
+    .leftJoinAndSelect(`hire.address`, `address`)
+    .where(`user.id= :userId`, { userId })
+    .andWhere(`fiscalYear.year= :year`, { year })
+    .limit(9)
+    .getOne();
 
-  return infoReportToDataBase;
+  const {
+    first_name,
+    last_name,
+    ci,
+    nit,
+    address,
+    profileActivity,
+    profileEnterprise,
+    profileHiredPerson,
+  } = dataQuery.profile;
+
+  const activities = profileActivity.map<ProfileActivityPartialType>((pa) => ({
+    ...pa,
+    ...pa.activity,
+    activity: pa.activity.description,
+    documents: pa.supportDocuments.map((sd) => ({
+      ...sd,
+      type: sd.type_document,
+    })),
+  }));
+
+  const enterprises = profileEnterprise.map<{
+    amount: number;
+    import: number;
+    name: string;
+  }>((pe) => ({ ...pe, name: pe.enterprise.name }));
+
+  const hiredPersons = profileHiredPerson.map<{
+    date_start: Date;
+    date_end: Date;
+    import: number;
+    first_name: string;
+    last_name: string;
+    ci: string;
+    municipality: string;
+  }>((hp) => ({
+    ...hp,
+    ...hp.hiredPerson,
+    municipality: hp.hiredPerson.address.municipality,
+  }));
+
+  const result = {
+    first_name,
+    last_name,
+    ci,
+    nit,
+    address,
+    activities,
+    enterprises,
+    hiredPersons,
+  };
+
+  return result;
 };
 
 export {
@@ -242,5 +295,5 @@ export {
   getDataToDay,
   getDataExpensesInToMenthArrayToTables,
   clearDuplicatesInArray,
-  getIncomeAndExpenseForActivity,
+  getDJ08Data,
 };
