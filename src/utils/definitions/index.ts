@@ -73,3 +73,9 @@ export type DataSectionGType = {
   porcentageType: number;
   import: number;
 };
+
+export type AnswerType = {
+  email: string;
+  password: string;
+  repeatPassword: string;
+};
