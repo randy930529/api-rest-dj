@@ -22,6 +22,9 @@ import { ENV } from "../../../utils/settings/environment";
 import { PayOrderResultDTO } from "../dto/response/payOrderResult";
 import { createFindOptions } from "../../../base/utils/createFindOptions";
 import { PAY_NOTIFICATION_URL, PASSWORD_WS_EXTERNAL_PAYMENT } from "../utils";
+/////////////////////////////////////////
+import Email from "../../../utils/email";
+/////////////////////////////////////////
 
 export class LicenseUserController extends EntityControllerBase<LicenseUser> {
   constructor() {
@@ -153,6 +156,18 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       const urlPayOrder = PAY_NOTIFICATION_URL(ENV.apiUrlPayment, "/payOrder");
 
       const tmResponse = await get(new URL(urlPayOrder), config);
+      /**
+       * Para realizar pruebas con el TM
+       */
+      await new Email(Object.assign(new User(), { email: " " }), "")
+        .sendTMResponseLog(
+          tmResponse,
+          "Respuesta de la api-TM: CREAR ORDEN DE PAGO."
+        )
+        .catch((error) => {
+          responseError(res, "Server is not ready to send your messages.");
+        });
+      /////////////////////////////////////////
       const { PayOrderResult }: PayOrderResultDTO =
         (await tmResponse.json()) as unknown as PayOrderResultDTO;
 
