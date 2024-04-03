@@ -8,8 +8,9 @@ import { PayOrderNotificationDTO } from "../dto/request/payOrderNotification.dto
 import { responseError } from "../../../errors/responseError";
 import { PayOrderConfirmDTO } from "../dto/response/payOrderConfirm.dto";
 import { SectionState } from "../../../entity/SectionState";
-import { User } from "../../../entity/User";
-import Email from "../../../utils/email";
+import { NotificationTM, NotiType } from "../../../entity/NotificationTM";
+import { writeFileSync } from "fs";
+import * as path from "path";
 
 export class StateTMBillController extends EntityControllerBase<StateTMBill> {
   constructor() {
@@ -22,11 +23,29 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
       /**
        * Para realizar pruebas con el TM
        */
-      await new Email(Object.assign(new User(), { email: " " }), "")
-        .sendTMRequestLog(req, "Request de la api-TM: NOTIFICACION DE PAGO.")
-        .catch((error) => {
-          responseError(res, "Server is not ready to send your messages.");
-        });
+      const notificacionDTO = NotificationTM.create({
+        type: NotiType.REQ,
+        header: JSON.stringify(req.headers),
+        body: JSON.stringify(req.body),
+      });
+
+      const notificacion = await notificacionDTO.save();
+
+      const filePath = path.join(
+        __dirname,
+        "../../../../public",
+        `json`,
+        `notification.json`
+      );
+
+      writeFileSync(
+        filePath,
+        JSON.stringify({
+          type: notificacion.type,
+          header: JSON.parse(notificacion.header),
+          body: JSON.parse(notificacion.body),
+        })
+      );
       /////////////////////////////////////////
       const fields: PayOrderNotificationDTO = req.body;
       const {
@@ -117,5 +136,9 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
       if (res.statusCode === 200) res.status(500);
       next(error);
     }
+  }
+
+  async allNotifications(req: Request, res: Response, next: NextFunction) {
+    return await NotificationTM.find();
   }
 }

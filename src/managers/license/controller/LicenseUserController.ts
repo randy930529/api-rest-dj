@@ -22,9 +22,9 @@ import { ENV } from "../../../utils/settings/environment";
 import { PayOrderResultDTO } from "../dto/response/payOrderResult";
 import { createFindOptions } from "../../../base/utils/createFindOptions";
 import { PAY_NOTIFICATION_URL, PASSWORD_WS_EXTERNAL_PAYMENT } from "../utils";
-/////////////////////////////////////////
-import Email from "../../../utils/email";
-/////////////////////////////////////////
+import { writeFileSync } from "fs";
+import { NotificationTM, NotiType } from "../../../entity/NotificationTM";
+import * as path from "path";
 
 export class LicenseUserController extends EntityControllerBase<LicenseUser> {
   constructor() {
@@ -159,17 +159,35 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       /**
        * Para realizar pruebas con el TM
        */
-      await new Email(Object.assign(new User(), { email: " " }), "")
-        .sendTMResponseLog(
-          tmResponse,
-          "Respuesta de la api-TM: CREAR ORDEN DE PAGO."
-        )
-        .catch((error) => {
-          responseError(res, "Server is not ready to send your messages.");
-        });
+      const notificacionDTO = NotificationTM.create({
+        type: NotiType.RES,
+        header: JSON.stringify(tmResponse.headers),
+        body: JSON.stringify(tmResponse.body),
+      });
+
+      const notificacion = await notificacionDTO.save();
+
+      const filePath = path.join(
+        __dirname,
+        "../../../../public",
+        `json`,
+        `order.json`
+      );
+
+      const data = await tmResponse.json();
+      console.log(data);
+
+      writeFileSync(
+        filePath,
+        JSON.stringify({
+          type: notificacion.type,
+          header: JSON.parse(notificacion.header),
+          body: data,
+        })
+      );
       /////////////////////////////////////////
       const { PayOrderResult }: PayOrderResultDTO =
-        (await tmResponse.json()) as unknown as PayOrderResultDTO;
+        data as unknown as PayOrderResultDTO;
 
       const successPayOrder = PayOrderResult.Success;
 
@@ -210,6 +228,7 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       res.status(200);
       return { ...resp };
     } catch (error) {
+      console.log(error);
       if (res.statusCode === 200) res.status(500);
       next(error);
     }

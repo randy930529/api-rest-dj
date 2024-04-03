@@ -3,8 +3,6 @@ import { User } from "../entity/User";
 import { ENV } from "./settings/environment";
 import * as pug from "pug";
 import { convert } from "html-to-text";
-import { Response } from "node-fetch";
-import { Request } from "express";
 
 const smtp = {
   host: ENV.emailHost,
@@ -20,7 +18,7 @@ export default class Email {
   constructor(public user: User, public url: string) {
     this.emailUser = user.email.split(" ")[0];
     this.to = user.email;
-    this.from = `Codevo ${ENV.emailFrom}`;
+    this.from = `CA-Mygestor ${ENV.emailFrom}`;
   }
 
   private newTransport() {
@@ -58,57 +56,4 @@ export default class Email {
       `Your password reset token (valid for only ${ENV.tokenLifetime})`
     );
   }
-
-  /**
-   * Para enviar por correo la response del TM
-   */
-  async sendTMResponseLog(response: Response, subject: string) {
-    const { headers, body, status, timeout, url } = response;
-    console.log(response);
-
-    const mailOptions = {
-      from: this.from,
-      to: "randy.delgado@desoft.cu",
-      subject,
-      text: `STATUS: ${status}\n HEADERS: ${JSON.stringify(
-        headers
-      )}\n BODY: ${JSON.stringify(body)}\n TIME: ${timeout}\n URL: ${url}`,
-    };
-
-    const info1 = await this.newTransport().sendMail(mailOptions);
-    mailOptions.to = "jose.lenzano@desoft.cu";
-    const info2 = await this.newTransport().sendMail(mailOptions);
-
-    if (ENV.debug === "development") {
-      console.log(nodemailer.getTestMessageUrl(info1));
-      console.log(nodemailer.getTestMessageUrl(info2));
-    }
-  }
-
-  async sendTMRequestLog(response: Request, subject: string) {
-    const { headers, body, statusCode = 200, url, params, query } = response;
-
-    const mailOptions = {
-      from: this.from,
-      to: "randy.delgado@desoft.cu",
-      subject,
-      text: `STATUS:${statusCode}\n HEADERS: ${JSON.stringify(
-        headers
-      )}\n BODY: ${JSON.stringify(
-        body
-      )}\n URL: ${url}\n PARAMS: ${JSON.stringify(
-        params
-      )}\n QUERY: ${JSON.stringify(query)}`,
-    };
-
-    const info1 = await this.newTransport().sendMail(mailOptions);
-    mailOptions.to = "jose.lenzano@desoft.cu";
-    const info2 = await this.newTransport().sendMail(mailOptions);
-
-    if (ENV.debug === "development") {
-      console.log(nodemailer.getTestMessageUrl(info1));
-      console.log(nodemailer.getTestMessageUrl(info2));
-    }
-  }
-  /////////////////////////////////////////////////////////////////
 }

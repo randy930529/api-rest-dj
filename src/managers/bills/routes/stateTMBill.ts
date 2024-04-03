@@ -47,4 +47,11 @@ export const stateTMBillRoutes = [
   //   middlewares: [authMiddleware],
   //   action: "deleteTMBill",
   // },
+  {
+    method: "get",
+    route: "/log/tm",
+    controller: StateTMBillController,
+    middlewares: [nextFunction],
+    action: "allNotifications",
+  },
 ];
