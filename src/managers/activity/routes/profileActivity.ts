@@ -21,20 +21,20 @@ export const profileActivityRoutes = [
     route: "/profileActivity/:id",
     controller: ProfileActivityController,
     middlewares: [authMiddleware],
-    action: "on",
+    action: "onProfileActivity",
   },
   {
     method: "put",
     route: "/profileActivity",
     controller: ProfileActivityController,
     middlewares: [authMiddleware],
-    action: "update",
+    action: "updateProfileActivity",
   },
   {
     method: "delete",
     route: "/profileActivity/:id",
     controller: ProfileActivityController,
     middlewares: [authMiddleware],
-    action: "delete",
+    action: "deleteProfileActivity",
   },
 ];

@@ -23,20 +23,20 @@ export const activityRoutes = [
     route: "/activity/:id",
     controller: ActivityController,
     middlewares: [authMiddleware],
-    action: "on",
+    action: "onActivity",
   },
   {
     method: "put",
     route: "/activity",
     controller: ActivityController,
     middlewares: [authMiddleware],
-    action: "update",
+    action: "updateActivity",
   },
   {
     method: "delete",
     route: "/activity/:id",
     controller: ActivityController,
     middlewares: [authMiddleware],
-    action: "delete",
+    action: "deleteActivity",
   },
 ];

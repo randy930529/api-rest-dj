@@ -7,7 +7,7 @@ export const profileEnterpriseRoutes = [
     route: "/profile/enterprise",
     controller: ProfileEnterpriseController,
     middlewares: [authMiddleware],
-    action: "create",
+    action: "createProfileEnterprise",
   },
   {
     method: "get",
@@ -21,20 +21,20 @@ export const profileEnterpriseRoutes = [
     route: "/profile/enterprise/:id",
     controller: ProfileEnterpriseController,
     middlewares: [authMiddleware],
-    action: "on",
+    action: "onProfileEnterprise",
   },
   {
     method: "put",
     route: "/profile/enterprise",
     controller: ProfileEnterpriseController,
     middlewares: [authMiddleware],
-    action: "update",
+    action: "updateProfileEnterprise",
   },
   {
     method: "delete",
     route: "/profile/enterprise/:id",
     controller: ProfileEnterpriseController,
     middlewares: [authMiddleware],
-    action: "delete",
+    action: "deleteProfileEnterprise",
   },
 ];

@@ -7,7 +7,7 @@ export const enterpriseRoutes = [
     route: "/enterprise",
     controller: EnterpriseController,
     middlewares: [authMiddleware],
-    action: "create",
+    action: "createEnterprise",
   },
   {
     method: "get",
@@ -21,20 +21,20 @@ export const enterpriseRoutes = [
     route: "/enterprise/:id",
     controller: EnterpriseController,
     middlewares: [authMiddleware],
-    action: "on",
+    action: "onEnterprise",
   },
   {
     method: "put",
     route: "/enterprise",
     controller: EnterpriseController,
     middlewares: [authMiddleware],
-    action: "update",
+    action: "updateEnterprise",
   },
   {
     method: "delete",
     route: "/enterprise/:id",
     controller: EnterpriseController,
     middlewares: [authMiddleware],
-    action: "delete",
+    action: "deleteEnterprise",
   },
 ];
