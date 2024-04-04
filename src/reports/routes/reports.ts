@@ -5,21 +5,21 @@ import { licenseMiddleware } from "../../managers/license/middlewares/licenseMid
 
 export const reportsRoutes = [
   {
-    method: "get",
+    method: "post",
     route: "/report/expense",
     controller: ReportGeneratorController,
     middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
     action: "generateOperationsExpenseReport",
   },
   {
-    method: "get",
+    method: "post",
     route: "/report/income",
     controller: ReportGeneratorController,
     middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
     action: "generateOperationsIncomeReport",
   },
   {
-    method: "get",
+    method: "post",
     route: "/report/income/annual",
     controller: ReportGeneratorController,
     middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
