@@ -6,7 +6,6 @@ import { ColumnNumericTransformer } from "../utils/ColumnNumericTransformer";
 import * as moment from "moment";
 import { ProfileActivity } from "./ProfileActivity";
 import { Profile } from "./Profile";
-import { Activity } from "./Activity";
 
 @Entity()
 export class SupportDocument extends Model {
