@@ -41,19 +41,7 @@ export class SupportDocument extends Model {
   @JoinColumn()
   fiscalYear: FiscalYear;
 
-  @ManyToOne(
-    () => ProfileActivity,
-    (profileEnterprise) => profileEnterprise.profile,
-    { nullable: true }
-  )
+  @ManyToOne(() => ProfileActivity, { nullable: true })
   @JoinColumn()
-  profileActivity_Profile: Profile;
-
-  @ManyToOne(
-    () => ProfileActivity,
-    (profileEnterprise) => profileEnterprise.activity,
-    { nullable: true }
-  )
-  @JoinColumn()
-  profileActivity_Activity: Activity;
+  profileActivity: Profile;
 }

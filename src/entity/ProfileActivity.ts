@@ -22,7 +22,7 @@ export class ProfileActivity extends Model {
 
   @OneToMany(
     () => SupportDocument,
-    (supportDocument) => supportDocument.profileActivity_Activity
+    (supportDocument) => supportDocument.profileActivity
   )
   supportDocuments: SupportDocument[];
 }
