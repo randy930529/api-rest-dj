@@ -59,7 +59,7 @@ export class AccountController extends EntityControllerBase<Account> {
       const fields: Account = req.body;
       const { id } = fields;
 
-      if (!id) responseError(res, "Delete account requiere id valid.", 404);
+      if (!id) responseError(res, "Update account requiere id valid.", 404);
 
       const accountUpdate = await this.update({ id, res }, fields);
 

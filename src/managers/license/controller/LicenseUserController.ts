@@ -198,7 +198,7 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
 
       const payMentUrl = PAY_NOTIFICATION_URL(
         paymentAPKHref,
-        `/tm_compra_en_linea/action?id_transaccion=${PayOrderResult.OrderId}&importe=${tmBill.import}&moneda=CUP&numero_proveedor=${source}`
+        `/tm_compra_en_linea/action?id_transaccion=${licenseKey}&importe=${tmBill.import}&moneda=CUP&numero_proveedor=${source}`
       );
 
       const objectLicenseUser = Object.assign(new LicenseUser(), {

@@ -16,7 +16,7 @@ export const authRoutes = [
     method: "post",
     route: "/login",
     controller: AuthController,
-    middlewares: [authParserMiddleware],
+    middlewares: [nextFunction],
     action: "login",
   },
   {

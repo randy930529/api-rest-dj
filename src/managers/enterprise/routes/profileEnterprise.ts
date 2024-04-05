@@ -11,7 +11,7 @@ export const profileEnterpriseRoutes = [
   },
   {
     method: "get",
-    route: "/profile/enterprises",
+    route: "/profileEnterprises",
     controller: ProfileEnterpriseController,
     middlewares: [authMiddleware],
     action: "all",
