@@ -18,6 +18,7 @@ import { verifyTokenAndRefreshTokenForUserLogin } from "../security/verifyTokenA
 import { userSetPasswordDTO } from "../dto/request/userSetPassword.dto";
 import { FiscalYear } from "../../entity/FiscalYear";
 import { LicenseUser } from "../../entity/LicenseUser";
+import { NotificationTM, NotiType } from "../../entity/NotificationTM";
 
 const transferProtocol: string = "ca-mygestor" as const;
 const ACTIVATION_URL = (appName, uid, token) =>
@@ -63,7 +64,13 @@ export class AuthController {
 
       await new Email(newUser, confirUrl)
         .sendVerificationCode()
-        .catch((error) => {
+        .catch(async (error) => {
+          const notificacionDTO = NotificationTM.create({
+            type: NotiType.SMTP,
+            body: JSON.stringify(error),
+          });
+
+          await notificacionDTO.save();
           responseError(res, "Server is not ready to send your messages.");
         });
 
@@ -245,7 +252,13 @@ export class AuthController {
 
       await new Email(existingUser, confirUrl)
         .sendVerificationCode()
-        .catch((error) => {
+        .catch(async (error) => {
+          const notificacionDTO = NotificationTM.create({
+            type: NotiType.SMTP,
+            body: JSON.stringify(error),
+          });
+
+          await notificacionDTO.save();
           responseError(res, "Server is not ready to send your messages.");
         });
 

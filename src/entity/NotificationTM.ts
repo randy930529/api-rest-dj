@@ -4,6 +4,7 @@ import Model from "./Base";
 export enum NotiType {
   RES = "orden_de_pago",
   REQ = "notificacion_por_pago",
+  SMTP = "fallo_en_envio_de_correo",
 }
 
 @Entity()
