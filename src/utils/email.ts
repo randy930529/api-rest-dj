@@ -9,6 +9,7 @@ const smtp = {
   port: ENV.emailPort,
   secure: ENV.emailSecure,
   auth: ENV.auth,
+  tls: ENV.tls,
 };
 
 export default class Email {
