@@ -9,8 +9,6 @@ import { responseError } from "../../../errors/responseError";
 import { PayOrderConfirmDTO } from "../dto/response/payOrderConfirm.dto";
 import { SectionState } from "../../../entity/SectionState";
 import { NotificationTM, NotiType } from "../../../entity/NotificationTM";
-import { writeFileSync } from "fs";
-import * as path from "path";
 
 export class StateTMBillController extends EntityControllerBase<StateTMBill> {
   constructor() {
@@ -29,23 +27,7 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
         body: JSON.stringify(req.body),
       });
 
-      const notificacion = await notificacionDTO.save();
-
-      const filePath = path.join(
-        __dirname,
-        "../../../../public",
-        `json`,
-        `notification.json`
-      );
-
-      writeFileSync(
-        filePath,
-        JSON.stringify({
-          type: notificacion.type,
-          header: JSON.parse(notificacion.header),
-          body: JSON.parse(notificacion.body),
-        })
-      );
+      await notificacionDTO.save();
       /////////////////////////////////////////
       const fields: PayOrderNotificationDTO = req.body;
       const {

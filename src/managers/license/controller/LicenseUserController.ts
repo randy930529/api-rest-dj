@@ -22,9 +22,7 @@ import { ENV } from "../../../utils/settings/environment";
 import { PayOrderResultDTO } from "../dto/response/payOrderResult";
 import { createFindOptions } from "../../../base/utils/createFindOptions";
 import { PAY_NOTIFICATION_URL, PASSWORD_WS_EXTERNAL_PAYMENT } from "../utils";
-import { writeFileSync } from "fs";
 import { NotificationTM, NotiType } from "../../../entity/NotificationTM";
-import * as path from "path";
 
 export class LicenseUserController extends EntityControllerBase<LicenseUser> {
   constructor() {
@@ -159,32 +157,15 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       /**
        * Para realizar pruebas con el TM
        */
+      const data = await tmResponse.json();
+
       const notificacionDTO = NotificationTM.create({
         type: NotiType.RES,
         header: JSON.stringify(tmResponse.headers),
-        body: JSON.stringify(tmResponse.body),
+        body: data,
       });
 
-      const notificacion = await notificacionDTO.save();
-
-      const filePath = path.join(
-        __dirname,
-        "../../../../public",
-        `json`,
-        `order.json`
-      );
-
-      const data = await tmResponse.json();
-      console.log(data);
-
-      writeFileSync(
-        filePath,
-        JSON.stringify({
-          type: notificacion.type,
-          header: JSON.parse(notificacion.header),
-          body: data,
-        })
-      );
+      await notificacionDTO.save();
       /////////////////////////////////////////
       const { PayOrderResult }: PayOrderResultDTO =
         data as unknown as PayOrderResultDTO;

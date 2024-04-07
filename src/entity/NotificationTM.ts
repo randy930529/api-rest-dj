@@ -1,4 +1,5 @@
-import { PrimaryGeneratedColumn, BaseEntity, Column, Entity } from "typeorm";
+import { Column, Entity } from "typeorm";
+import Model from "./Base";
 
 export enum NotiType {
   RES = "orden_de_pago",
@@ -6,10 +7,7 @@ export enum NotiType {
 }
 
 @Entity()
-export class NotificationTM extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class NotificationTM extends Model {
   @Column({
     type: "enum",
     enum: NotiType,
