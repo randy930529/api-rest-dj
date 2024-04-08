@@ -1,6 +1,7 @@
 import * as inquirer from "inquirer";
 import * as Joi from "joi";
 import * as pg from "pg";
+import * as moment from "moment";
 import { ENV } from "./settings/environment";
 import { AnswerType } from "./definitions";
 import { User, UserRole } from "../entity/User";
@@ -18,18 +19,66 @@ const pool = new pg.Pool({
 const createUser = async (user: User) => {
   try {
     const { email, password, active, role } = user;
-    const query = {
-      text: `INSERT INTO "user"("email", "password", "active", "role") VALUES($1, $2, $3, $4)`,
-      values: [email, password, active, role],
+    const register_date = moment().toDate();
+    let query = {
+      text: `INSERT INTO "user"("email", "password", "active", "role", "register_date") VALUES($1, $2, $3, $4, $5)`,
+      values: [email, password, active, role, register_date],
     };
 
     if (ENV.debug === "development") console.log("> query: ", query.text);
 
     const client = await pool.connect();
     const result = await client.query(query);
-    await client.release();
+    query = {
+      text: `SELECT "User"."id" AS "id", "User"."email" AS "email" FROM "user" "User" WHERE ( ("User"."email" = $1) ) AND ( "User"."email" IN ($1) )`,
+      values: [email],
+    };
 
-    console.log("User create successfully.");
+    if (ENV.debug === "development") console.log("> query: ", query.text);
+
+    const { rows } = await client.query(query);
+
+    query = {
+      text: `INSERT INTO "profile"("userId", "primary") VALUES($1, $2)`,
+      values: [rows[0].id, true],
+    };
+
+    if (ENV.debug === "development") console.log("> query: ", query.text);
+
+    await client.query(query);
+
+    query = {
+      text: `SELECT "Profile"."id" AS "id", "Profile"."userId" AS "user" FROM "profile" "Profile" WHERE ( ("Profile"."userId" = $1) ) AND ( "Profile"."userId" IN ($1) )`,
+      values: [rows[0].id],
+    };
+
+    if (ENV.debug === "development") console.log("> query: ", query.text);
+
+    const { rows: profile } = await client.query(query);
+    const year = moment().year();
+
+    query = {
+      text: `INSERT INTO "fiscal_year"("profileId", "year") VALUES($1, $2)`,
+      values: [profile[0].id, year],
+    };
+
+    if (ENV.debug === "development") console.log("> query: ", query.text);
+
+    await client.query(query);
+
+    query = {
+      text: `INSERT INTO "license_user"("userId", "is_paid","licenseKey") VALUES($1, $2, $3)`,
+      values: [rows[0].id, true, ""],
+    };
+
+    if (ENV.debug === "development") console.log("> query: ", query.text);
+
+    await client.query(query);
+
+    await client.release();
+    await client.end();
+
+    console.info("\n User create successfully.");
     return result;
   } catch (error) {
     throw new Error(error);
