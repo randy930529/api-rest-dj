@@ -300,6 +300,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
         if (!profile)
           responseError(res, "Profile does not exist in this user.", 404);
 
+        toUpdate.profile = profile;
         toUpdate.fiscalYear = profile.fiscalYear[0] || null;
       } else if (fieldToUpdate === "fiscalYear") {
         const fiscalYear = await FiscalYear.findOne({
@@ -319,6 +320,8 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
             "Fiscal year does not exist in this profile.",
             404
           );
+
+        toUpdate.fiscalYear = fiscalYear;
       }
 
       const sectionStateUpdate = await this.repository.save(toUpdate);
