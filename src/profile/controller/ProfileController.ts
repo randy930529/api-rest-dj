@@ -32,7 +32,7 @@ export class ProfileController extends EntityControllerBase<Profile> {
         responseError(
           res,
           "This user excede the max profiles to current licese.",
-          401
+          400
         );
       }
 
