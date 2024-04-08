@@ -67,8 +67,8 @@ const createUser = async (user: User) => {
     await client.query(query);
 
     query = {
-      text: `INSERT INTO "license_user"("userId", "is_paid","licenseKey") VALUES($1, $2, $3)`,
-      values: [rows[0].id, true, ""],
+      text: `INSERT INTO "license_user"("userId", "is_paid") VALUES($1, $2)`,
+      values: [rows[0].id, true],
     };
 
     if (ENV.debug === "development") console.log("> query: ", query.text);

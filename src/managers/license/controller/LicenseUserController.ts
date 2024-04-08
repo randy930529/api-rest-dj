@@ -161,7 +161,7 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
 
       const notificacionDTO = NotificationTM.create({
         type: NotiType.RES,
-        header: JSON.stringify(tmResponse.headers),
+        header: JSON.stringify(config),
         body: data,
       });
 

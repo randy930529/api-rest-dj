@@ -24,6 +24,7 @@ export class LicenseUser extends Model {
   @Column({
     type: "varchar",
     length: 20,
+    default: "",
   })
   licenseKey: string;
 

@@ -281,8 +281,14 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
           401
         );
 
+      let toUpdate = {
+        ...sectionStateToUpdate,
+        [fieldToUpdate]: fields[fieldToUpdate],
+      };
+
       if (fieldToUpdate === "profile") {
         const profile = await Profile.findOne({
+          relations: ["fiscalYear"],
           where: {
             id: fields[fieldToUpdate].id,
             user: {
@@ -293,8 +299,10 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
 
         if (!profile)
           responseError(res, "Profile does not exist in this user.", 404);
+
+        toUpdate.fiscalYear = profile.fiscalYear[0] || null;
       } else if (fieldToUpdate === "fiscalYear") {
-        const profile = await FiscalYear.findOne({
+        const fiscalYear = await FiscalYear.findOne({
           where: {
             id: fields[fieldToUpdate].id,
             profile: {
@@ -305,7 +313,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
           },
         });
 
-        if (!profile)
+        if (!fiscalYear)
           responseError(
             res,
             "Fiscal year does not exist in this profile.",
@@ -313,10 +321,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
           );
       }
 
-      const sectionStateUpdate = await this.repository.save({
-        ...sectionStateToUpdate,
-        [fieldToUpdate]: fields[fieldToUpdate],
-      });
+      const sectionStateUpdate = await this.repository.save(toUpdate);
 
       const sectionState: SectionStateDTO = sectionStateUpdate;
       const resp: BaseResponseDTO = {

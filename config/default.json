@@ -9,7 +9,7 @@
     "paymentAPKHref": "http://localhost:4000/tm_compra_en_linea",
     "businessMetadata": {
       "name": "Desoft",
-      "source": 1,
+      "source": "1",
       "address": "",
       "phone": "",
       "email": ""

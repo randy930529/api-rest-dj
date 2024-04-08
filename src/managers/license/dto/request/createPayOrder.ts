@@ -5,7 +5,7 @@ export type CreatePayOrderDTO = {
     Currency: string | "CUP";
     Description: string;
     ExternalId: string;
-    Source: number;
+    Source: string;
     UrlResponse: string;
     ValidTime: number;
   };

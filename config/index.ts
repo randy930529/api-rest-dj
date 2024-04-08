@@ -33,7 +33,7 @@ type accountingConstantsType = {
 
 type businessMetadataType = {
   name: string;
-  source: number;
+  source: string;
   address: string;
   phone: string;
   email: string;
