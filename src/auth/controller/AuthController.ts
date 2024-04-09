@@ -211,10 +211,12 @@ export class AuthController {
         user.register_date = moment().toDate();
         await this.userRepository.save(user);
         const profile = await this.profileRepository.save(newProfile);
+        const date = moment().startOf("year").toDate();
         const year = moment().year();
 
         const newFiscalYear = this.fiscalYearRepository.create({
           year,
+          date,
           profile,
         });
         await this.fiscalYearRepository.save(newFiscalYear);

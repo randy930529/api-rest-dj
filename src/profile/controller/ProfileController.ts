@@ -1,5 +1,6 @@
 import { AppDataSource } from "../../data-source";
 import { NextFunction, Request, Response } from "express";
+import * as moment from "moment";
 import { Profile } from "../../entity/Profile";
 import { ProfileDTO } from "../dto/request/profile.dto";
 import { responseError } from "../../errors/responseError";
@@ -8,6 +9,7 @@ import { JWT } from "../../auth/security/jwt";
 import { BaseResponseDTO } from "../../auth/dto/response/base.dto";
 import { CreateProfileDTO } from "../dto/response/createProfile.dto";
 import { EntityControllerBase } from "../../base/EntityControllerBase";
+import { FiscalYear } from "../../entity/FiscalYear";
 
 export class ProfileController extends EntityControllerBase<Profile> {
   constructor() {
@@ -36,10 +38,20 @@ export class ProfileController extends EntityControllerBase<Profile> {
         );
       }
 
-      const newProfile = this.repository.create({ ...fields, user });
-      await this.repository.save(newProfile);
+      const newProfileDTO = this.repository.create({ ...fields, user });
+      const newProfile = await this.repository.save(newProfileDTO);
 
-      const profile: CreateProfileDTO = newProfile;
+      const date = moment().startOf("year").toDate();
+      const year = moment().year();
+
+      const newFiscalYear = FiscalYear.create({
+        year,
+        date,
+        profile: newProfile,
+      });
+      await FiscalYear.save(newFiscalYear);
+
+      const profile: CreateProfileDTO = newProfileDTO;
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
