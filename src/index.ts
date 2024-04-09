@@ -9,17 +9,16 @@ import { errorHandler } from "./errors/middlewares/errorHandler";
 import { appConfig } from "../config";
 import * as pug from "pug";
 import * as path from "path";
-// import WebSocketServer from "./utils/websocket";
 
-// //Para provar el envio de correo. Eliminar!
-// import * as nodemailer from "nodemailer";
-// if (appConfig.debug === "development" || appConfig.debug === "staging") {
-//   (async function () {
-//     const credentials = await nodemailer.createTestAccount();
-//     console.log(credentials);
-//   })();
-// }
-// //
+//Para provar el envio de correo. Eliminar!
+import * as nodemailer from "nodemailer";
+if (appConfig.debug === "development" || appConfig.debug === "staging") {
+  (async function () {
+    const credentials = await nodemailer.createTestAccount();
+    console.log(credentials);
+  })();
+}
+//
 
 AppDataSource.initialize()
   .then(async () => {
@@ -28,8 +27,6 @@ AppDataSource.initialize()
     // create express app
     const app = express();
     app.use(bodyParser.json());
-
-    // const wss = new WebSocketServer();
 
     // register express routes from defined application routes
     Routes.forEach((route) => {
@@ -86,10 +83,6 @@ AppDataSource.initialize()
         res.sendFile(filePath);
       }
     );
-
-    // app.on("upgrade",()=>{
-    //   wss.handleUpgrade(request,sochet,head);
-    // })
 
     // TEMPLATE ENGINE
     app.set("view engine", "pug");
