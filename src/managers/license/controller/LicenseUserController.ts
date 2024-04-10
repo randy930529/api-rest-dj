@@ -154,21 +154,21 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       const urlPayOrder = PAY_NOTIFICATION_URL(ENV.apiUrlPayment, "/payOrder");
 
       const tmResponse = await get(new URL(urlPayOrder), config);
+
+      const { PayOrderResult }: PayOrderResultDTO =
+        (await tmResponse.json()) as unknown as PayOrderResultDTO;
+
       /**
        * Para realizar pruebas con el TM
        */
-      const data = await tmResponse.json();
-
       const notificacionDTO = NotificationTM.create({
         type: NotiType.RES,
         header: JSON.stringify(config),
-        body: data,
+        body: JSON.stringify(PayOrderResult),
       });
 
       await notificacionDTO.save();
       /////////////////////////////////////////
-      const { PayOrderResult }: PayOrderResultDTO =
-        data as unknown as PayOrderResultDTO;
 
       const successPayOrder = PayOrderResult.Success;
 
