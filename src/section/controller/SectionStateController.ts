@@ -126,7 +126,15 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
       const id = JWT.getJwtPayloadValueByKey(token, "id");
 
       const existToSectionUser = await this.repository.findOne({
-        relations: ["profile", "fiscalYear", "licenseUser"],
+        relations: {
+          profile: {
+            profileActivity: {
+              activity: true,
+            },
+          },
+          fiscalYear: true,
+          licenseUser: true,
+        },
         where: {
           user: {
             id,
@@ -134,10 +142,27 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
         },
       });
 
-      if (existToSectionUser) return existToSectionUser;
+      if (existToSectionUser) {
+        const { profileActivity } = existToSectionUser.profile;
+        const find_cultural_activity = profileActivity.find(
+          (val) => val.activity.is_culture
+        );
+        const has_cultural_activity = !find_cultural_activity ? false : true;
+
+        if (existToSectionUser.has_cultural_activity != has_cultural_activity) {
+          existToSectionUser.has_cultural_activity = has_cultural_activity;
+          await existToSectionUser.save();
+        }
+
+        return existToSectionUser;
+      }
 
       const currentProfile = await Profile.findOne({
-        relations: ["user", "fiscalYear"],
+        relations: {
+          user: true,
+          fiscalYear: true,
+          profileActivity: { activity: true },
+        },
         where: {
           primary: true,
           user: {
@@ -145,6 +170,17 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
           },
         },
       });
+
+      const { profileActivity } = currentProfile;
+      const find_cultural_activity = profileActivity.find(
+        (val) => val.activity.is_culture
+      );
+      const has_cultural_activity = !find_cultural_activity ? false : true;
+
+      if (existToSectionUser.has_cultural_activity != has_cultural_activity) {
+        existToSectionUser.has_cultural_activity = has_cultural_activity;
+        await existToSectionUser.save();
+      }
 
       const currentLicenseUser = await LicenseUser.find({
         relations: ["user"],

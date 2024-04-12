@@ -1,4 +1,4 @@
-import { Entity, JoinColumn, OneToOne } from "typeorm";
+import { Column, Entity, JoinColumn, OneToOne } from "typeorm";
 import Model from "./Base";
 import { User } from "./User";
 import { Profile } from "./Profile";
@@ -24,4 +24,7 @@ export class SectionState extends Model {
   @OneToOne(() => FiscalYear)
   @JoinColumn()
   fiscalYear: FiscalYear;
+
+  @Column({ default: false })
+  has_cultural_activity: boolean;
 }
