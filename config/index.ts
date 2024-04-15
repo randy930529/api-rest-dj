@@ -46,6 +46,7 @@ interface AppConfig {
   emailFrom: string;
   licenseFreeDays: number;
   validTimeTMBill: number;
+  currencyTMBill: string;
   paymentAPKHref: string;
   businessMetadata: businessMetadataType;
   accountingConstants: accountingConstantsType;

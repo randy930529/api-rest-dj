@@ -17,10 +17,10 @@ export class TMBill extends Model {
   })
   import: number;
 
-  @Column({ type: "varchar", length: 5, default: "cup" })
+  @Column({ type: "varchar", length: 5, default: "CUP" })
   currency: string;
 
-  @Column({ nullable: true, default: "" })
+  @Column({ nullable: true, default: "test" })
   description: string;
 
   @Column({ nullable: true })

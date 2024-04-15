@@ -61,8 +61,13 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       const fields: LicenseUserDTO = req.body;
       const { token } = req.body;
       const licenseId = fields.license.id;
-      const { businessMetadata, site, validTimeTMBill, paymentAPKHref } =
-        appConfig;
+      const {
+        businessMetadata,
+        site,
+        validTimeTMBill,
+        paymentAPKHref,
+        currencyTMBill,
+      } = appConfig;
       const { source } = businessMetadata;
 
       if (!licenseId)
@@ -107,10 +112,14 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
         expirationDate = moment().add(license.days, "d").toDate();
 
       const validDate: Date = moment().add(validTimeTMBill, "s").toDate();
+      const currency = currencyTMBill;
+      const description = "Pago de licensia";
 
       const tmBillDTO = await TMBill.create({
         import: license.import,
         validDate,
+        currency,
+        description,
       });
 
       const stateTMBillDTO = await StateTMBill.create({
