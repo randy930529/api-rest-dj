@@ -5,6 +5,7 @@
     "port": 4000,
     "emailFrom": "conalbert@nauta.cu",
     "licenseFreeDays": 5,
+    "validTimeTMBill": 7200,
     "paymentAPKHref": "transfermovil://tm_compra_en_linea",
     "businessMetadata": {
       "name": "CONALBERT S.R.L.",
