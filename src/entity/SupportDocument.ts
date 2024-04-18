@@ -5,7 +5,6 @@ import { FiscalYear } from "./FiscalYear";
 import { ColumnNumericTransformer } from "../utils/ColumnNumericTransformer";
 import * as moment from "moment";
 import { ProfileActivity } from "./ProfileActivity";
-import { Profile } from "./Profile";
 
 @Entity()
 export class SupportDocument extends Model {
@@ -42,5 +41,5 @@ export class SupportDocument extends Model {
 
   @ManyToOne(() => ProfileActivity, { nullable: true })
   @JoinColumn()
-  profileActivity: Profile;
+  profileActivity: ProfileActivity;
 }

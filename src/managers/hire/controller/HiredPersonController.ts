@@ -124,7 +124,7 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
       if (!hiredPersonToUpdate) responseError(res, "Entity not found.", 404);
 
       if (!hiredPersonToUpdate.address && fieldToUpdate === "address") {
-        const address = await Address.create(fields.address);
+        const address = Address.create(fields.address);
         await address.save();
         fields = { ...fields, address };
       }

@@ -1,5 +1,6 @@
 import { Element } from "../../../../entity/Element";
 import { FiscalYear } from "../../../../entity/FiscalYear";
+import { ProfileActivity } from "../../../../entity/ProfileActivity";
 
 export type SupportDocumentDTO = {
   description: string;
@@ -10,4 +11,5 @@ export type SupportDocumentDTO = {
   is_bank: boolean;
   element: Element;
   fiscalYear: FiscalYear;
+  profileActivity?: ProfileActivity;
 };

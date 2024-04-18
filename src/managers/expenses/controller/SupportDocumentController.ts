@@ -7,6 +7,7 @@ import { responseError } from "../../../errors/responseError";
 import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import { Element } from "../../../entity/Element";
 import { FiscalYear } from "../../../entity/FiscalYear";
+import { ProfileActivity } from "../../../entity/ProfileActivity";
 
 export class SupportDocumentController extends EntityControllerBase<SupportDocument> {
   constructor() {
@@ -41,10 +42,28 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
 
       if (!fiscalYear) responseError(res, "Fiscal year not found.", 404);
 
+      let profileActivity: ProfileActivity = null;
+      if (fields.profileActivity) {
+        const profileActivityId = fields.profileActivity.id;
+        if (!profileActivityId)
+          responseError(
+            res,
+            "Do must provide a valid expense profile activity id.",
+            404
+          );
+
+        profileActivity = await ProfileActivity.findOneBy({
+          id: profileActivityId,
+        });
+        if (!profileActivity)
+          responseError(res, "Profile activity not found.", 404);
+      }
+
       const objectSupportDocument = Object.assign(new SupportDocument(), {
         ...fields,
         element,
         fiscalYear,
+        profileActivity,
       });
 
       const newSupportDocument = await this.create(objectSupportDocument);
