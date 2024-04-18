@@ -1,3 +1,4 @@
+import { ProfileAddress } from "entity/ProfileAddress";
 import { User } from "../../../entity/User";
 
 export type CreateProfileDTO = {
@@ -6,6 +7,6 @@ export type CreateProfileDTO = {
   last_name: string;
   ci: string;
   nit: string;
-  address: string;
+  address?: ProfileAddress;
   user: User;
 };

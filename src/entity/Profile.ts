@@ -14,6 +14,7 @@ import { HiredPerson } from "./HiredPerson";
 import { FiscalYear } from "./FiscalYear";
 import { ProfileEnterprise } from "./ProfileEnterprise";
 import { ProfileActivity } from "./ProfileActivity";
+import { ProfileAddress } from "./ProfileAddress";
 
 @Entity()
 export class Profile extends Model {
@@ -34,11 +35,15 @@ export class Profile extends Model {
   })
   nit: string;
 
-  @Column({ nullable: true })
-  address: string;
+  @ManyToOne(() => ProfileAddress, { nullable: true, cascade: ["update"] })
+  @JoinColumn()
+  address: ProfileAddress;
 
   @Column({ default: false })
   primary: boolean;
+
+  @Column({ type: "varchar", length: 50, nullable: true })
+  run_in_municipality: string;
 
   @ManyToOne(() => User, {
     onDelete: "CASCADE",

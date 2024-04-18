@@ -128,6 +128,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
       const existToSectionUser = await this.repository.findOne({
         relations: {
           profile: {
+            address: { address: true },
             profileActivity: {
               activity: true,
             },

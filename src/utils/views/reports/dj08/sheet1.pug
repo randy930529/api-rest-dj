@@ -78,10 +78,13 @@ block tBodyContent
             font.font-8(style="display: block; text-align: center") Entrecalles
     tr(height=24 style={height:'18.0pt'})
         td.xl-65(width=206 colspan=4 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:155pt")
-            font.font-9= address
+            font.font-9= address && address.street
         td.xl-65(width=73 colspan=4 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:55pt")
+            font.font-9= address && address.number
         td.xl-65(width=77 colspan=4 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:58pt")
+            font.font-9= address && address.apartment
         td.xl-65(width=225 colspan=4 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:169pt")
+            font.font-9= address && address.betweenStreets
     tr(height=19 style={height:'14.85pt'})
         td.xl-65(width=206 colspan=2 style="border-right: .5pt solid black;width:155pt")
             font.font-8(style="display: block; text-align: center") Referencia
@@ -93,9 +96,13 @@ block tBodyContent
             font.font-8(style="display: block; text-align: center") Provincia
     tr(height=19 style={height:'14.85pt'})
         td.xl-65(width=206 colspan=2 style="border-right: .5pt solid black;text-align: center;vertical-align: middle; width:155pt")
+            font.font-9= address && address.ref
         td.xl-65(width=206 colspan=4 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:155pt")
+            font.font-9= address && address.district
         td.xl-65(width=73 colspan=10 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:55pt")
+            font.font-9= address.address && address.address.municipality
         td.xl-65(width=77 colspan=2 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:58pt")
+            font.font-9= address.address && address.address.province
     tr(height=36 style={height:'27.0pt'})
         td.xl-65(width=96 style="border-right: .5pt solid black;width:72pt")
             font.font-11 Código Zona Postal
@@ -107,7 +114,9 @@ block tBodyContent
         +celEnumerate(168, 126, "Municipio donde opera", 9)
     tr(height=19 style={height:'14.85pt'})
         td.xl-65(width=96 style="border-right: .5pt solid black;text-align: center;vertical-align: middle; width:72pt")
+            font.font-9= address && address.postcode
         td.xl-65(width=89 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:67pt")
+            font.font-9= address && address.phoneNumber
         td.xl-65(width=245 colspan=6 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:184pt")
             font.font-9= email
         td.xl-65(width=34 colspan=2 style="border-top:none;border-left:none;width:26pt")

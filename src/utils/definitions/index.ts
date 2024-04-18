@@ -1,3 +1,5 @@
+import { ProfileAddress } from "../../entity/ProfileAddress";
+
 export type SupportDocumentPartialType = {
   amount: string;
   date: Date;
@@ -30,7 +32,7 @@ export type DataDJ08Type = {
   last_name: string;
   ci: string;
   nit: string;
-  address: string;
+  address: ProfileAddress;
   activities: ProfileActivityPartialType[];
   enterprises: { amount: number; import: number; name: string }[];
   hiredPersons: {

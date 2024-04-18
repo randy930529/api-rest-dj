@@ -10,6 +10,7 @@ import { BaseResponseDTO } from "../../auth/dto/response/base.dto";
 import { CreateProfileDTO } from "../dto/response/createProfile.dto";
 import { EntityControllerBase } from "../../base/EntityControllerBase";
 import { FiscalYear } from "../../entity/FiscalYear";
+import { ProfileAddress } from "../../entity/ProfileAddress";
 
 export class ProfileController extends EntityControllerBase<Profile> {
   constructor() {
@@ -89,6 +90,7 @@ export class ProfileController extends EntityControllerBase<Profile> {
       const profileToUpdate = await this.repository.findOne({
         relations: {
           user: true,
+          address: { address: true },
         },
         where: { id },
       });
@@ -100,11 +102,11 @@ export class ProfileController extends EntityControllerBase<Profile> {
           401
         );
 
-      const profileUpdate = this.repository.create({
+      const fieldsToProfileUpdate = this.repository.create({
         ...profileToUpdate,
         ...fields,
       });
-      await this.repository.save(profileUpdate);
+      const profileUpdate = await this.repository.save(fieldsToProfileUpdate);
 
       const profile: ProfileDTO = profileUpdate;
       const resp: BaseResponseDTO = {
@@ -123,8 +125,7 @@ export class ProfileController extends EntityControllerBase<Profile> {
 
   async partialUpdate(req: Request, res: Response, next: NextFunction) {
     try {
-      const fields: ProfileDTO = req.body;
-      console.log(fields);
+      let fields: ProfileDTO = req.body;
       const { id, token } = req.body;
       const userId = JWT.getJwtPayloadValueByKey(token, "id");
 
@@ -136,6 +137,7 @@ export class ProfileController extends EntityControllerBase<Profile> {
       const profileToUpdate = await this.repository.findOne({
         relations: {
           user: true,
+          address: { address: true },
         },
         where: { id },
       });
@@ -151,11 +153,17 @@ export class ProfileController extends EntityControllerBase<Profile> {
           401
         );
 
-      const profileUpdate = {
+      if (!profileToUpdate.address && fieldToUpdate === "address") {
+        const address = ProfileAddress.create(fields.address);
+        await address.save();
+        fields = { ...fields, address };
+      }
+
+      const fieldToProfileUpdate = {
         ...profileToUpdate,
         [fieldToUpdate]: fields[fieldToUpdate],
       };
-      await this.repository.save(profileUpdate);
+      const profileUpdate = await this.repository.save(fieldToProfileUpdate);
 
       const profile: ProfileDTO = profileUpdate;
       const resp: BaseResponseDTO = {

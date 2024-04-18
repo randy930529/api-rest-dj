@@ -204,6 +204,8 @@ const getDJ08Data = async (
     .leftJoin(`section.user`, `user`)
     .leftJoin(`section.fiscalYear`, `fiscalYear`)
     .leftJoinAndSelect(`section.profile`, `profile`)
+    .leftJoinAndSelect(`profile.address`, `profileAddress`)
+    .leftJoinAndSelect(`profileAddress.address`, `address`)
     .leftJoinAndSelect(
       `profile.profileActivity`,
       `activities`,
@@ -225,11 +227,13 @@ const getDJ08Data = async (
       }
     )
     .leftJoinAndSelect(`hiredPersons.hiredPerson`, `hire`)
-    .leftJoinAndSelect(`hire.address`, `address`)
+    .leftJoinAndSelect(`hire.address`, `hireAddress`)
     .where(`user.id= :userId`, { userId })
     .andWhere(`fiscalYear.year= :year`, { year })
     .limit(9)
     .getOne();
+
+  if (!dataQuery.profile) throw new Error("Profile not found.");
 
   const {
     first_name,
