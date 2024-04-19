@@ -5,7 +5,6 @@ import {
   ManyToOne,
   OneToMany,
   BeforeInsert,
-  BeforeUpdate,
 } from "typeorm";
 import Model from "./Base";
 import { User } from "./User";
@@ -35,7 +34,7 @@ export class Profile extends Model {
   })
   nit: string;
 
-  @ManyToOne(() => ProfileAddress, { nullable: true, cascade: ["update"] })
+  @ManyToOne(() => ProfileAddress, { nullable: true, cascade: true })
   @JoinColumn()
   address: ProfileAddress;
 
@@ -76,7 +75,6 @@ export class Profile extends Model {
   profileActivity: ProfileActivity[];
 
   @BeforeInsert()
-  @BeforeUpdate()
   async checkDuplicateProfilesForUser(): Promise<void> {
     const profilesForUserWithSameCi = await Profile.count({
       where: [

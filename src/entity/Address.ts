@@ -1,6 +1,7 @@
 import { Entity, Column, OneToMany, BeforeRemove } from "typeorm";
 import { HiredPerson } from "./HiredPerson";
 import Model from "./Base";
+import { ProfileAddress } from "./ProfileAddress";
 
 @Entity()
 export class Address extends Model {
@@ -13,9 +14,15 @@ export class Address extends Model {
   @Column({ type: "varchar", length: 50, default: "" })
   province: string;
 
-  @Column({ type: "varchar", length: 6 })
+  @Column({ type: "varchar", length: 6, default: "" })
   code: string;
 
   @OneToMany(() => HiredPerson, (hiredPerson) => hiredPerson.address)
   hiredPerson: HiredPerson[];
+
+  @OneToMany(() => ProfileAddress, (profileAddress) => profileAddress.address, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
+  profileAddress: ProfileAddress[];
 }

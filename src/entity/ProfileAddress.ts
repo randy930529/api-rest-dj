@@ -1,6 +1,7 @@
-import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import Model from "./Base";
 import { Address } from "./Address";
+import { Profile } from "./Profile";
 
 @Entity()
 export class ProfileAddress extends Model {
@@ -28,11 +29,26 @@ export class ProfileAddress extends Model {
   @Column({ type: "varchar", length: 8, nullable: true, default: "" })
   phoneNumber: string;
 
-  @ManyToOne(() => Address, { cascade: ["update"] })
+  @ManyToOne(() => Address, { cascade: true })
   @JoinColumn()
   address: Address;
 
+  @OneToMany(() => Profile, (profile) => profile.address, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
+  profiles: Profile[];
+
   toString() {
     return `Call. ${this.street} #${this.number}, Apto. ${this.apartment}, %${this.betweenStreets}, ${this.ref}, ${this.address.municipality}, ${this.address.province}`;
+  }
+
+  toJSON() {
+    return {
+      ...this,
+      address: undefined,
+      municipality: this.address.municipality,
+      province: this.address.province,
+    };
   }
 }

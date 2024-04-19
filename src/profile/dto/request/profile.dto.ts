@@ -1,4 +1,4 @@
-import { ProfileAddress } from "entity/ProfileAddress";
+import { ProfileAddress } from "../../../entity/ProfileAddress";
 
 export type ProfileDTO = {
   first_name: string;

@@ -46,4 +46,18 @@ export const profileRoutes = [
     middlewares: [authMiddleware],
     action: "deleteProfile",
   },
+  {
+    method: "put",
+    route: "/profileAddress",
+    controller: ProfileController,
+    middlewares: [authMiddleware],
+    action: "updateAddress",
+  },
+  {
+    method: "patch",
+    route: "/profileAddress",
+    controller: ProfileController,
+    middlewares: [authMiddleware],
+    action: "partialUpdateAddress",
+  },
 ];
