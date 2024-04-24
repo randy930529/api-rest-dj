@@ -103,10 +103,12 @@ class ReportGeneratorController extends ReportGenerator {
         { length: 31 },
         (_, day) => {
           const expensesGeneralsRecordedToDay: SupportDocumentPartialType[] =
-            expensesGenerals.filter((val) => moment(val.date).date() === day);
+            expensesGenerals.filter(
+              (val) => moment(val.date).date() === day + 1
+            );
 
           const expensesMePDRecordedToDay: SupportDocumentPartialType[] =
-            expensesMePD.filter((val) => moment(val.date).date() === day);
+            expensesMePD.filter((val) => moment(val.date).date() === day + 1);
 
           const expensesGeneralsForDays = getDataToDay<number>(
             expensesGeneralsRecordedToDay,
@@ -158,7 +160,7 @@ class ReportGeneratorController extends ReportGenerator {
         { length: 31 },
         (_, day) => {
           const expensesMeDDRecordedToDay: SupportDocumentPartialType[] =
-            expensesMeDD.filter((val) => moment(val.date).date() === day);
+            expensesMeDD.filter((val) => moment(val.date).date() === day + 1);
 
           let expensesMeDDForDays = defaultDataArray<number>(3, 0);
           for (let i = 0; i < expensesMeDDRecordedToDay.length; i++) {
@@ -276,10 +278,10 @@ class ReportGeneratorController extends ReportGenerator {
         { length: 31 },
         (_, day) => {
           const incomeMeEIRecordedToDay: SupportDocumentPartialType[] =
-            incomeMeEI.filter((val) => moment(val.date).date() === day);
+            incomeMeEI.filter((val) => moment(val.date).date() === day + 1);
 
           const incomeMeIGRecordedToDay: SupportDocumentPartialType[] =
-            incomeMeIG.filter((val) => moment(val.date).date() === day);
+            incomeMeIG.filter((val) => moment(val.date).date() === day + 1);
 
           const toDay = defaultDataArray<number>(3, 0);
 
@@ -362,7 +364,7 @@ class ReportGeneratorController extends ReportGenerator {
         const { month, date, group, amount } = infoReportToDataBase[i];
 
         const index: number = parseInt(month) - 1;
-        const day: number = moment(date).date();
+        const day: number = moment(date).date() - 1;
         const indexGroup: number = group === "ei" ? 1 : 2;
 
         const toDay = [...dataMonths[index][day]].slice(0, -1);
@@ -397,6 +399,7 @@ class ReportGeneratorController extends ReportGenerator {
       );
       res.send(pdfBuffer);
     } catch (error) {
+      console.log(error);
       if (res.statusCode === 200) res.status(500);
       next(error);
     }

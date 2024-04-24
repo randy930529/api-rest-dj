@@ -78,7 +78,7 @@ const getDataExpensesInToMenthArrayToTables = (
     { length: 31 },
     (_, day) => {
       const expensesGeneralsRecordedToDay: SupportDocumentPartialType[] =
-        expensesGenerals.filter((val) => moment(val.date).date() === day);
+        expensesGenerals.filter((val) => moment(val.date).date() === day + 1);
 
       const expensesGeneralsForDays = getDataToDay<number>(
         expensesGeneralsRecordedToDay,
@@ -160,7 +160,7 @@ function getExpensesInToDay(
 ): number[] {
   let nextCol = 0;
   const expensesMeRecordedToDay = expenses.filter(
-    (val) => moment(val.date).date() === day
+    (val) => moment(val.date).date() === day + 1
   );
   let expensesInToDay = defaultDataArray<number>(colCont, 0);
 
