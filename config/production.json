@@ -1,6 +1,6 @@
 {
   "app": {
-    "site": "https://mygestor.conalbert.cu",
+    "site": "https://181.225.233.215:4000",
     "debug": "production",
     "port": 4000,
     "emailFrom": "conalbert@nauta.cu",
