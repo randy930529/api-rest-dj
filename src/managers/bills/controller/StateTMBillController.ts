@@ -40,7 +40,7 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
         Bank,
       } = fields;
 
-      const is_paid = Status === "1";
+      const is_paid = Status === "3";
 
       if (!is_paid) responseError(res, "Payment license user faild.", 404);
 
@@ -109,7 +109,7 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
       const resp: PayOrderConfirmDTO = {
         Success: `${stateTMBillUpdate.success}`,
         Resultmsg: `${Msg}.OK`,
-        Status,
+        Status: "1",
       };
 
       res.status(200);
