@@ -2,10 +2,9 @@ extends ../generic/tableBase
 include ../generic/mixins
 
 mixin setData(dataMatrix=[[]])
-    -const months = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"]
     each val, index in dataMatrix
         tr(height=22 style={height:'16.5pt'})
-            td.xl-71(height=22 style="height:16.5pt;border-top:none;text-align:left")= (months[index])
+            td.xl-71(height=22 style="height:16.5pt;border-top:none")= (index+1)
             +values(val, "xl-71")
             td.xl-66(width=163 style="border-top:none;border-left:none;width:122pt")
     else

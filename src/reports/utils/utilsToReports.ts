@@ -25,7 +25,8 @@ const indexBy = <T extends { id: string | number }>(
 
 const sumaArray = (array1: number[], array2: number[]): number[] =>
   array1.reduce<number[]>((result, val, index) => {
-    return [...result, val + array2[index]];
+    const sum = val + array2[index];
+    return [...result, Number(sum.toFixed(2))];
   }, []);
 
 const sumaTotal = (array: number[]): number =>

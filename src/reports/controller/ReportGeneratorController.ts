@@ -350,26 +350,28 @@ class ReportGeneratorController extends ReportGenerator {
 
       const dataMonths: DataIndexByType = defaultDataArray<number[][]>(
         12,
-        defaultDataArray<number[]>(31, defaultDataArray<number>(4, 0))
+        defaultDataArray<number[]>(31, defaultDataArray<number>(5, 0))
       );
 
       const totalMonths = defaultDataArray<number[]>(
         12,
-        defaultDataArray<number>(4, 0)
+        defaultDataArray<number>(5, 0)
       );
 
-      let totals = defaultDataArray<number>(4, 0);
+      let totals = defaultDataArray<number>(5, 0);
 
       for (let i = 0; i < infoReportToDataBase.length; i++) {
-        const { month, date, group, amount } = infoReportToDataBase[i];
+        const { month, date, is_bank, group, amount } = infoReportToDataBase[i];
 
         const index: number = parseInt(month) - 1;
         const day: number = moment(date).date() - 1;
-        const indexGroup: number = group === "ei" ? 1 : 2;
+        const indexGroup: number = group === "ei" ? 2 : 3;
+        const indexBoxOrBank: number = is_bank ? 1 : 0;
 
         const toDay = [...dataMonths[index][day]].slice(0, -1);
         toDay[indexGroup] = parseFloat(amount);
-        const total: number = sumaTotal(toDay);
+        toDay[indexBoxOrBank] = parseFloat(amount);
+        const total: number = sumaTotal(toDay.slice(2));
         toDay.push(total);
 
         let updatedTotalMonths = [...totalMonths[index]];
@@ -399,7 +401,6 @@ class ReportGeneratorController extends ReportGenerator {
       );
       res.send(pdfBuffer);
     } catch (error) {
-      console.log(error);
       if (res.statusCode === 200) res.status(500);
       next(error);
     }

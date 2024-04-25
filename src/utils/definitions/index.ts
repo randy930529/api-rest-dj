@@ -3,6 +3,7 @@ import { ProfileAddress } from "../../entity/ProfileAddress";
 export type SupportDocumentPartialType = {
   amount: string;
   date: Date;
+  is_bank: boolean;
   elementId: number;
   description: string;
   is_general: boolean;
