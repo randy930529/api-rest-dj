@@ -22,7 +22,7 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
 
       const profile = await getProfileById({ id, res });
 
-      const addressDTO = await Address.create(fields.address);
+      const addressDTO = Address.create(fields.address);
       const address = await addressDTO.save();
 
       const objectHiredPerson = Object.assign(new HiredPerson(), {

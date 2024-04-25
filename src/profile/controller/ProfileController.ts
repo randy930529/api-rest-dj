@@ -41,7 +41,19 @@ export class ProfileController extends EntityControllerBase<Profile> {
         );
       }
 
-      const newProfileDTO = this.repository.create({ ...fields, user });
+      const addressDTO = Address.create(fields.address.address);
+      const address = await addressDTO.save();
+      const profileAddressDTO = ProfileAddress.create({
+        ...fields.address,
+        address,
+      });
+      const profileAddress = await profileAddressDTO.save();
+
+      const newProfileDTO = this.repository.create({
+        ...fields,
+        user,
+        address: profileAddress,
+      });
       const newProfile = await this.repository.save(newProfileDTO);
 
       const date = moment().startOf("year").toDate();
