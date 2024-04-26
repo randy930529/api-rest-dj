@@ -165,7 +165,7 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       const tmResponse = await get(new URL(urlPayOrder), config);
 
       const { PayOrderResult }: PayOrderResultDTO =
-        (await tmResponse.json()) as unknown as PayOrderResultDTO;
+        (await tmResponse) as unknown as PayOrderResultDTO;
 
       /**
        * Para realizar pruebas con el TM
@@ -218,7 +218,6 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       res.status(200);
       return { ...resp };
     } catch (error) {
-      console.log(error);
       if (res.statusCode === 200) res.status(500);
       next(error);
     }

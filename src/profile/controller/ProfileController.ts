@@ -41,7 +41,19 @@ export class ProfileController extends EntityControllerBase<Profile> {
         );
       }
 
-      const addressDTO = Address.create(fields.address.address);
+      let { residence } = fields.address.address;
+      residence =
+        residence ||
+        `Call. ${fields.address.street || ""} #${
+          fields.address.number || ""
+        }, Apto. ${fields.address.apartment || ""}, %${
+          fields.address.betweenStreets || ""
+        }, ${fields.address.ref || ""}`;
+
+      const addressDTO = Address.create({
+        ...fields.address.address,
+        residence,
+      });
       const address = await addressDTO.save();
       const profileAddressDTO = ProfileAddress.create({
         ...fields.address,
