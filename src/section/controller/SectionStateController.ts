@@ -172,17 +172,6 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
         },
       });
 
-      const { profileActivity } = currentProfile;
-      const find_cultural_activity = profileActivity.find(
-        (val) => val.activity.is_culture
-      );
-      const has_cultural_activity = !find_cultural_activity ? false : true;
-
-      if (existToSectionUser.has_cultural_activity != has_cultural_activity) {
-        existToSectionUser.has_cultural_activity = has_cultural_activity;
-        await existToSectionUser.save();
-      }
-
       const currentLicenseUser = await LicenseUser.find({
         relations: ["user"],
         where: {
