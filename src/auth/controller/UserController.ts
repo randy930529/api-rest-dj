@@ -62,7 +62,7 @@ export class UserController {
       const id = JWT.getJwtPayloadValueByKey(token, "id");
       const user = await this.userRepository.findOne({
         relations: {
-          profiles: true,
+          profiles: {address: {address: true}},
           licenseUser: true,
         },
         where: { id },
