@@ -11,10 +11,13 @@ export const PAY_NOTIFICATION_URL = (
 export const PASSWORD_WS_EXTERNAL_PAYMENT = (date: Date): string => {
   const { userPayment, seedPayment } = ENV;
   const { source } = appConfig.businessMetadata;
+  const dateCuba = date.toLocaleString("en-US", {
+    timeZone: "America/Havana",
+  });
 
-  const day = moment(date).date();
-  const month = moment(date).month() + 1;
-  const year = moment(date).year();
+  const day = moment(dateCuba, "M/D/YYYY, h:mm:ss A").date();
+  const month = moment(dateCuba, "M/D/YYYY, h:mm:ss A").month() + 1;
+  const year = moment(dateCuba, "M/D/YYYY, h:mm:ss A").year();
 
   const data = `${userPayment}${day}${month}${year}${seedPayment}${source}`;
 
