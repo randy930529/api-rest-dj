@@ -8,14 +8,14 @@ export const activityRoutes = [
     method: "post",
     route: "/activity",
     controller: ActivityController,
-    middlewares: [authMiddleware],
+    middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
     action: "createActivity",
   },
   {
     method: "get",
     route: "/activities",
     controller: ActivityController,
-    middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
+    middlewares: [authMiddleware],
     action: "all",
   },
   {
@@ -29,14 +29,14 @@ export const activityRoutes = [
     method: "put",
     route: "/activity",
     controller: ActivityController,
-    middlewares: [authMiddleware],
+    middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
     action: "updateActivity",
   },
   {
     method: "delete",
     route: "/activity/:id",
     controller: ActivityController,
-    middlewares: [authMiddleware],
+    middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
     action: "deleteActivity",
   },
 ];
