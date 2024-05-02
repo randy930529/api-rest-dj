@@ -47,8 +47,9 @@ export class ProfileAddress extends Model {
     return {
       ...this,
       address: undefined,
-      municipality: this.address.municipality,
-      province: this.address.province,
+      code: this.address?.code,
+      municipality: this.address?.municipality,
+      province: this.address?.province,
     };
   }
 }
