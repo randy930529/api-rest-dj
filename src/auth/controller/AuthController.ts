@@ -209,7 +209,13 @@ export class AuthController {
 
         user.active = true;
         user.register_date = moment().toDate();
+
+        const newLicenseUser = LicenseUser.create({ is_paid: true, user });
+        const license = await newLicenseUser.save();
+
+        user.end_license = license.expirationDate;
         await this.userRepository.save(user);
+
         const profile = await this.profileRepository.save(newProfile);
         const date = moment().startOf("year").toDate();
         const year = moment().year();
@@ -220,9 +226,6 @@ export class AuthController {
           profile,
         });
         await this.fiscalYearRepository.save(newFiscalYear);
-
-        const newLicenseUser = LicenseUser.create({ is_paid: true, user });
-        await newLicenseUser.save();
       }
 
       res.status(200);
