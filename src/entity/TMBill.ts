@@ -26,8 +26,8 @@ export class TMBill extends Model {
   @Column({ nullable: true })
   orderIdTM: string;
 
-  @Column({ type: "integer", width: 4, nullable: true })
-  bankId: number;
+  @Column({ nullable: true })
+  bankId: string;
 
   @Column({ nullable: true })
   bank: string;

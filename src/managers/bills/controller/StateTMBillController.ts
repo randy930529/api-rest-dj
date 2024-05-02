@@ -84,7 +84,7 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
         tmBill: {
           ...tmBill,
           orderIdTM: TmId,
-          bankId: parseInt(BankId),
+          bankId: BankId,
           bank: Bank,
           phone: Phone,
         },
