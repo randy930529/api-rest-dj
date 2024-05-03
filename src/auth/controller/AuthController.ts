@@ -210,7 +210,11 @@ export class AuthController {
         user.active = true;
         user.register_date = moment().toDate();
 
-        const newLicenseUser = LicenseUser.create({ is_paid: true, user });
+        const newLicenseUser = LicenseUser.create({
+          is_paid: true,
+          user,
+          licenseKey: user.id.toString(),
+        });
         const license = await newLicenseUser.save();
 
         user.end_license = license.expirationDate;
