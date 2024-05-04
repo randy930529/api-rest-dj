@@ -79,7 +79,7 @@ export class TestTMController {
         config
       );
       const resp: PayOrderConfirmDTO =
-        (await tmResponse.json()) as unknown as PayOrderConfirmDTO;
+        (await tmResponse) as unknown as PayOrderConfirmDTO;
 
       if (!resp)
         responseError(res, "Fetch error to connect with api comercio.");
