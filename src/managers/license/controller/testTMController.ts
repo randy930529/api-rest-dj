@@ -61,7 +61,7 @@ export class TestTMController {
         ExternalId: id_transaccion,
         Bank: "BANDEC/BPA",
         BankId: `1234`,
-        Status: "1",
+        Status: "3",
         TmId: "4567",
       };
 
