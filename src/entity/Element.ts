@@ -18,7 +18,7 @@ export class Element extends Model {
   @Column({ default: false })
   is_general: boolean;
 
-  @Column({ type: "char", length: 2, default: "" })
+  @Column({ type: "char", length: 10, default: "" })
   group: string;
 
   @ManyToOne(() => Profile, { nullable: true })
