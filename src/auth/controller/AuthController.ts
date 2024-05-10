@@ -23,7 +23,7 @@ import { appConfig } from "../../../config";
 
 const transferProtocol: string = appConfig.site;
 const ACTIVATION_URL = (appName, uid, token) =>
-  `${appName}://activate/?uid=${uid}&token=${token}`;
+  `${appName}/activate/?uid=${uid}&token=${token}`;
 const RESETPASSWORD_URL = (appName, uid, token) =>
   `${appName}://reset_password/?uid=${uid}&token=${token}`;
 
