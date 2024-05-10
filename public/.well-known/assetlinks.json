@@ -1,0 +1,22 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "cu.grm.mypimeca.camygestor",
+      "sha256_cert_fingerprints": [
+        "02:2D:CB:17:64:A9:F2:31:2B:3F:D0:E8:11:38:96:E5:CA:4C:B5:7B:AD:E8:49:37:2C:EF:CE:DB:85:49:81:B5"
+      ]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "cu.grm.mypimeca.camygestor.dev",
+      "sha256_cert_fingerprints": [
+        "02:2D:CB:17:64:A9:F2:31:2B:3F:D0:E8:11:38:96:E5:CA:4C:B5:7B:AD:E8:49:37:2C:EF:CE:DB:85:49:81:B5"
+      ]
+    }
+  }
+]
