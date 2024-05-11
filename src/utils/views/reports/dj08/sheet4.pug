@@ -7,20 +7,20 @@ mixin setDataToSectionI(data=[], row=0)
                 td.xl-65(style="border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
                     font.font-12= valCode
             td.xl-65(colspan=2 style="border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
-                font.font-12= val.fullName
-            each valFrom in val.period.from
+                font.font-12= (val && val.fullName)
+            each valFrom in val.from
                 td.xl-65(style="border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
                     font.font-12= valFrom
-            each valTo in val.period.to
+            each valTo in val.to
                 td.xl-65(style="border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
                     font.font-12= valTo
             td.xl-65(colspan=2 style="border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
-                font.font-12= val.municipality
+                font.font-12= (val && val.municipality)
             each valNIT in val.nit
                 td.xl-65(style="border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
                     font.font-12= valNIT
             td.xl-65(colspan=3 style=`border-right: .5pt solid black; width: 83pt;text-align: center;vertical-align: middle;`)
-                font.font-12= val.import
+                font.font-12= (val && val.import)
             td.xl-75(width=23 style="width:22pt;vertical-align: middle;")
                 font.font-8= (index+row)
 
@@ -55,7 +55,7 @@ block tBodyContent
         td.xl-65(colspan=22 style="border-top:none;border-left:none;width:58pt;text-align: end;vertical-align: middle;") 
             font.font-8 Total
         td.xl-65(colspan=3 style=`border-right: .5pt solid black; width: 83pt;text-align: center;vertical-align: middle;`)
-            font.font-9(style="font-size:8.5pt")= totalSectionI.import
+            font.font-9(style="font-size:8.5pt")= (totalSectionI && totalSectionI.import)
         td.xl-75(width=23 style="width:22pt;vertical-align: middle;")
             font.font-8= (82)
     tr(style="border-bottom: 2pt solid black;")

@@ -4,9 +4,9 @@ mixin setDataToSectionF(data=[], row=0, align="start")
     each val, index in data
         tr(height=25 style={height:'14.95pt'})
             td.xl-65(width=77 colspan=6 style=`border-top:none;border-left:none;width:58pt;text-align:${align};vertical-align: bottom;`) 
-                font.font-12= val.concepto
+                font.font-12= (val && val.concepto)
             td.xl-65(width=111 colspan=2 style=`border-right: .5pt solid black; width: 83pt;text-align: end;vertical-align: bottom;`)
-                font(class=`${align === "start"?"font-12":"font-9"}` style="font-size: 8.5pt;")= val.import
+                font(class=`${align === "start"?"font-12":"font-9"}` style="font-size: 8.5pt;")= (val && val.import)
             td.xl-75(width=23 style="width:22pt;vertical-align: middle;")
                 font.font-8= (index+row)
 
@@ -14,15 +14,15 @@ mixin setDataToSectionG(data=[], row=0)
     each val, index in data
         tr(height=24 style={height:'14.0pt'})
             td.xl-65(style="border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
-                font.font-12= val.annualsNetIncomes.from
+                font.font-12= (val && val.from)
             td.xl-65(style="border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
-                font.font-12= val.annualsNetIncomes.to
+                font.font-12= (val && val.to)
             td.xl-65(colspan=3 style="border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
-                font.font-12= val.baseImponible
+                font.font-12= (val && val.baseImponible)
             td.xl-65(colspan=2 style="border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
-                font.font-12= val.porcentageType
+                font.font-12= (val && val.porcentageType)
             td.xl-65(style=`border-right: .5pt solid black; width: 83pt;text-align: center;vertical-align: middle;`)
-                font.font-12= val.import
+                font.font-12= (val && val.import)
             td.xl-75(width=23 style="width:22pt;vertical-align: middle;")
                 font.font-8= (index+row)
 
@@ -30,13 +30,13 @@ mixin setDataToSectionH(data=[], row=0)
     each val, index in data
         tr(height=24 style={height:'14.0pt'})
             td.xl-65(colspan=3 style="border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
-                font.font-12= val.enterprise
+                font.font-12= (val && val.enterprise)
             td.xl-65(style="border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
-                font.font-12= val.valueHire
+                font.font-12= (val && val.valueHire)
             td.xl-65(colspan=2 style="border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
-                font.font-12= val.participation.porcentage
+                font.font-12= (val && val.porcentage)
             td.xl-65(colspan=2 style=`border-right: .5pt solid black; width: 83pt;text-align: center;vertical-align: middle;`)
-                font.font-12= val.import
+                font.font-12= (val && val.import)
             td.xl-75(width=23 style="width:22pt;vertical-align: middle;")
                 font.font-8= (index+row)
 
@@ -93,10 +93,10 @@ block tBodyContent
         td.xl-65(colspan=2 style="border-top:none;border-left:none;width:58pt;text-align: end;vertical-align: middle;") 
             font.font-8 Total
         td.xl-65(colspan=3 style="border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
-            font.font-12= totalSectionG.baseImponible
+            font.font-12= (totalSectionG && totalSectionG.baseImponible)
         td.xl-65(colspan=2 style="background: silver;border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
         td.xl-65(style=`border-right: .5pt solid black; width: 83pt;text-align: center;vertical-align: middle;`)
-            font.font-9(style="font-size: 8.5pt;")= totalSectionG.import
+            font.font-9(style="font-size: 8.5pt;")= (totalSectionG && totalSectionG.import)
         td.xl-75(width=23 style="width:22pt;vertical-align: middle;")
             font.font-8= (50)
     tr(style="border-bottom: 2pt solid black;")
@@ -126,10 +126,10 @@ block tBodyContent
         td.xl-65(colspan=3 style="border-top:none;border-left:none;width:58pt;text-align: end;vertical-align: middle;") 
             font.font-8 Total
         td.xl-65(style="border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
-            font.font-12= totalSectionH.valueHire
+            font.font-12= (totalSectionH && totalSectionH.valueHire)
         td.xl-65(colspan=2 style="background: silver;border-top:none;border-left:none;width:58pt;text-align: center;vertical-align: middle;") 
         td.xl-65(colspan=2 style=`border-right: .5pt solid black; width: 83pt;text-align: center;vertical-align: middle;`)
-            font.font-9(style="font-size:8.5pt")= totalSectionH.import
+            font.font-9(style="font-size:8.5pt")= (totalSectionH && totalSectionH.import)
         td.xl-75(width=23 style="width:22pt;vertical-align: middle;")
             font.font-8= (62)
     tr(height=24 style={height:"14.0pt"})

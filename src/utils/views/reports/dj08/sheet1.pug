@@ -27,12 +27,10 @@ block column
     +colGroup(colsArray)
 
 block tHeadContent
-    -const logoONAT = "/img/logo-onat.png"
-
     tr(height=63 style={height:'47.45pt'})
         td.xl-78(colspan=3 height=63 width=208 style="border-bottom: .5pt solid black; height: 47.45pt; width: 156pt")
             div(style="display: flex; align-items: center; justify-content: center; height: 100%;")
-                img(src=`${logoONAT}`, alt="Logo ONAT" width=66 height=54 style="aspect-ratio: 16/9;")
+                include logoONAT
         td.xl-75(colspan=14 width=558 style="border-right:.5pt solid black; border-left:none; width:420pt")
             font.font-9 DECLARACIÓN JURADA
             br
@@ -61,7 +59,7 @@ block tBodyContent
         +celEnumerate(150, 113, "Carné de identidad", 4, 2)
         +celWithWhiteSpace(11, ci)
         td.xl-65(width=168 style="border-right: .5pt solid black;text-align: center;vertical-align: middle; width: 126pt")
-            font.font-9(style="font-size: 15pt;")= `${rectification?"X":""}`
+            font.font-9(style="font-size: 15pt;")= `${is_rectification?"X":""}`
     tr(height=26 style={height:'19.5pt'})
         +celEnumerate(165, 124, "Nombre (s) y apellidos:", 6, 3)
         td.xl-65(width=558 colspan=15 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:420pt")
