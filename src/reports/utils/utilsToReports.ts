@@ -5,8 +5,9 @@ import {
   DataDJ08Type,
   ProfileActivityPartialType,
   SupportDocumentPartialType,
-} from "utils/definitions";
+} from "../../utils/definitions";
 import { SectionState } from "../../entity/SectionState";
+import { Dj08SectionData } from "../../entity/Dj08SectionData";
 
 const pugTemplatePath = (template: string) =>
   path.join(__dirname, `../../utils/views/reports/${template}.pug`);
@@ -291,6 +292,77 @@ const getDJ08Data = async (
   return result;
 };
 
+const toCompleteDataSection = <T>(
+  start: number,
+  section: number,
+  dataSectionArray: T[]
+): T[] => {
+  const defaultElements = {
+    1: {
+      defaultData: {
+        activity: "",
+        period: { start: ["", ""], end: ["", ""] },
+        income: null,
+        expense: null,
+      },
+      to: 9,
+    },
+    7: {
+      defaultData: {
+        from: null,
+        to: null,
+        baseImponible: null,
+        porcentageType: null,
+        import: null,
+      },
+      to: 5,
+    },
+    8: {
+      defaultData: {
+        enterprise: "",
+        valueHire: null,
+        porcentage: null,
+        import: null,
+      },
+      to: 10,
+    },
+    9: {
+      defaultData: {
+        code: defaultDataArray<string>(3, ""),
+        fullName: "",
+        from: [null, null],
+        to: [null, null],
+        municipality: "",
+        nit: defaultDataArray<string>(11, ""),
+        import: null,
+      },
+      to: 18,
+    },
+  };
+
+  const { defaultData, to }: { defaultData: T; to: number } =
+    defaultElements[section];
+
+  for (let i = start; i < to; i++) {
+    dataSectionArray.push(defaultData);
+  }
+
+  return dataSectionArray;
+};
+
+const getDataAndTotalsToDj08Sections = <T1, T2>(
+  data: Dj08SectionData,
+  section: number
+): [T1[], T2] => {
+  const { section_data } = data;
+
+  const dataSection: T1[] = Object.values(section_data[section]["data"] || {});
+  const totalSection: T2 = section_data[section]["totals"];
+
+  toCompleteDataSection(dataSection.length, section, dataSection);
+  return [dataSection, totalSection];
+};
+
 export {
   pugTemplatePath,
   defaultDataArray,
@@ -301,4 +373,6 @@ export {
   getDataExpensesInToMenthArrayToTables,
   clearDuplicatesInArray,
   getDJ08Data,
+  toCompleteDataSection,
+  getDataAndTotalsToDj08Sections,
 };

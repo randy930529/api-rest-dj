@@ -68,12 +68,41 @@ export type DataSectionBType = {
 };
 
 export type DataSectionGType = {
-  annualsNetIncomes: {
-    from: number;
-    to: number;
-  };
+  from: number;
+  to: number;
   baseImponible: number;
   porcentageType: number;
+  import: number;
+};
+
+export type TotalSectionGType = {
+  baseImponible: number;
+  import: number;
+};
+
+export type DataSectionHType = {
+  enterprise: string;
+  valueHire: any;
+  porcentage: any;
+  import: any;
+};
+
+export type TotalSectionHType = {
+  valueHire: number;
+  import: number;
+};
+
+export type DataSectionIType = {
+  code: string | string[];
+  fullName: string;
+  from: number[];
+  to: number[];
+  municipality: string;
+  nit: string | string[];
+  import: number;
+};
+
+export type TotalSectionIType = {
   import: number;
 };
 

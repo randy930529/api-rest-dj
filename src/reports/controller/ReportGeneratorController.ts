@@ -3,10 +3,14 @@ import * as pug from "pug";
 import * as moment from "moment";
 import ReportGenerator from "../../base/ReportGeneratorBase";
 import { ENV } from "../../utils/settings/environment";
+import { User } from "../../entity/User";
+import { DJ08 } from "../../entity/DJ08";
+import { SectionState } from "../../entity/SectionState";
+import { Dj08SectionData, SectionName } from "../../entity/Dj08SectionData";
 import {
   clearDuplicatesInArray,
   defaultDataArray,
-  getDJ08Data,
+  getDataAndTotalsToDj08Sections,
   getDataExpensesInToMenthArrayToTables,
   getDataToDay,
   pugTemplatePath,
@@ -14,17 +18,18 @@ import {
   sumaTotal,
 } from "../utils/utilsToReports";
 
-import { User } from "../../entity/User";
-import { SectionState } from "../../entity/SectionState";
 import {
   DataIndexByType,
   DataSectionAType,
   DataSectionBType,
   DataSectionGType,
+  DataSectionHType,
+  DataSectionIType,
   SupportDocumentPartialType,
   TotalSectionAType,
+  TotalSectionGType,
+  TotalSectionIType,
 } from "../../utils/definitions";
-import { appConfig } from "../../../config";
 
 class ReportGeneratorController extends ReportGenerator {
   private templatePath: string;
@@ -536,95 +541,585 @@ class ReportGeneratorController extends ReportGenerator {
     }
   }
 
+  // async generateDJ08(
+  //   req: Request,
+  //   res: Response,
+  //   next: NextFunction
+  // ): Promise<void> {
+  //   try {
+  //     const { year, user }: { year: number; user: User } = req.body;
+
+  //     this.templatePath = pugTemplatePath("dj08/swornDeclaration");
+
+  //     const dataDJ08 = await getDJ08Data(year, user.id);
+  //     const {
+  //       activities,
+  //       first_name,
+  //       last_name,
+  //       ci,
+  //       nit,
+  //       address,
+  //       enterprises,
+  //       hiredPersons,
+  //     } = dataDJ08;
+
+  //     const fileName = `DJ-08-IP-${year}.pdf`;
+
+  //     const regimen = false; //ver con alberto como se define regimen simplificado Hoja1!O17
+  //     const rectification = false; //ver con alberto
+  //     const dateSigns = { day: 27, month: 4, year: 2023 }; //
+
+  //     const { MEa_By_MFP } = appConfig.accountingConstants;
+
+  //     const dataSectionA = defaultDataArray<DataSectionAType>(9, {
+  //       activity: "",
+  //       period: { start: ["", ""], end: ["", ""] },
+  //       income: null,
+  //       expense: null,
+  //     });
+  //     const totalSectionA: TotalSectionAType = { incomes: 0, expenses: 0 };
+
+  //     for (let i = 0; i < activities.length; i++) {
+  //       const {
+  //         code,
+  //         activity: activityDescriptin,
+  //         date_start,
+  //         date_end,
+  //         documents,
+  //       } = activities[i];
+  //       const activity = `${code}- ${activityDescriptin}`;
+  //       const start = [date_start.getDate(), date_start.getMonth()];
+  //       const end = [date_end.getDate(), date_end.getMonth()];
+  //       const income = documents.find((val) => val.type === "i")?.amount || 0;
+  //       const expense = documents.find((val) => val.type === "g")?.amount || 0;
+
+  //       const dataToActivity = {
+  //         activity,
+  //         period: {
+  //           start,
+  //           end,
+  //         },
+  //         income,
+  //         expense,
+  //       };
+
+  //       dataSectionA[i] = dataToActivity;
+  //       totalSectionA.expenses += expense;
+  //       totalSectionA.incomes += income;
+  //     }
+
+  //     /**
+  //      * @constant
+  //      * F*n-> Filas de Sección B de la DJ-08.
+  //      * F-> fila
+  //      * n->número de fila
+  //      *
+  //      */
+  //     const { F11, F12, F13, F14, F15, F16, F17, F18, F19 } = {
+  //       F11: totalSectionA.incomes,
+  //       F12: MEa_By_MFP,
+  //       F13: totalSectionA.expenses,
+  //       F14: 0, //pendiente hasta la seccion F
+  //       F15: 0, //pendiente hasta la config de los impuestos
+  //       F16: 0,
+  //       F17: 0,
+  //       F18: 0,
+  //       F19: 0,
+  //     };
+  //     const F20 =
+  //       F11 > F12 + F13 + F14 + F15 + F16 + F17 + F18 + F19
+  //         ? F11 - F12 - F13 - F14 - F15 - F16 - F17 - F18 - F19
+  //         : 0;
+
+  //     const dataSectionB: DataSectionBType[] = [
+  //       {
+  //         concepto:
+  //           "Ingresos obtenidos para  liquidación del Impuesto (viene de SECCIÓN A casilla 12 fila 10)",
+  //         import: F11,
+  //       },
+  //       { concepto: "(-) Mínimo Exento Autorizado", import: F12 },
+  //       {
+  //         concepto:
+  //           "(-) Gastos deducibles por el ejercicio de la actividad (viene de SECCIÓN A casilla 13 fila 10)",
+  //         import: F13,
+  //       },
+  //       {
+  //         concepto:
+  //           "(-) Total de tributos pagados asociados a la actividad (viene de SECCIÓN F casilla 18 fila 44)",
+  //         import: F14,
+  //       },
+  //       {
+  //         concepto:
+  //           "(-) Contribución para restauración y preservación de las zonas donde desarrollan su actividad",
+  //         import: F15,
+  //       },
+  //       {
+  //         concepto:
+  //           "(-) Pagos por arrendamiento de bienes a entidades estatales autorizadas",
+  //         import: F16,
+  //       },
+  //       {
+  //         concepto:
+  //           "(-)Importes exonerados por concepto de arrendamiento por asumir gastos de reparaciones",
+  //         import: F17,
+  //       },
+  //       { concepto: "(-)Otros descuentos autorizados", import: F18 },
+  //       {
+  //         concepto: "(-) Bonificacion según aprobacion del MFP",
+  //         import: F19,
+  //       },
+  //       {
+  //         concepto:
+  //           "Base Imponible (filas 11-12-13-14-15-16-17-18-19) pasa a SECCIÓN G, filas de casilla 20. Se distribuye por tramos",
+  //         import: F20,
+  //       },
+  //     ];
+
+  //     /**
+  //      * @constant
+  //      * F*n-> Filas de Sección C de la DJ-08.
+  //      * F-> fila
+  //      * n->número de fila
+  //      *
+  //      */
+  //     const { F21, F22, F23, F24, F25 } = {
+  //       F21: 0, // pendiente hasta la seccion G
+  //       F22: 0, // ir al libro de gastos
+  //       F23: 0,
+  //       F24: 0,
+  //       F25: 0,
+  //     };
+  //     const F26 =
+  //       regimen && totalSectionA.incomes < 200000
+  //         ? 0
+  //         : F21 > F22 + F23 + F24 + F25
+  //         ? F21 - (F22 + F23 + F24 + F25)
+  //         : 0;
+  //     const F27 =
+  //       F22 > 0
+  //         ? 0
+  //         : F21 < F22 + F23 + F24 + F25
+  //         ? (F21 - (F22 + F23 + F24 + F25)) * -1
+  //         : 0;
+
+  //     const dataSectionC: DataSectionBType[] = [
+  //       {
+  //         concepto:
+  //           "Impuesto a pagar según escala progresiva (viene de SECCIÓN G casilla 21 fila 50)",
+  //         import: F21,
+  //       },
+  //       {
+  //         concepto:
+  //           "(-) Total de cuotas mensuales pagadas por el Titular a cuenta del impuesto en el período fiscal",
+  //         import: F22,
+  //       },
+  //       {
+  //         concepto:
+  //           "(-) Otros pagos anticipados o Créditos del ejercicio fiscal anterior",
+  //         import: F23,
+  //       },
+  //       { concepto: "(-) Total de retenciones", import: F24 },
+  //       { concepto: "(-) Bonificaciones autorizadas", import: F25 },
+  //       {
+  //         concepto:
+  //           "Impuesto a pagar (filas 21-22-23-24-25, si el resultado es mayor que cero)",
+  //         import: F26,
+  //       },
+  //       {
+  //         concepto:
+  //           "Total a Devolver (filas 21-22-23-24-25, si el resultado es negativo) (Si es TCP se iguala a cero)",
+  //         import: F27,
+  //       },
+  //     ];
+
+  //     /**
+  //      * @constant
+  //      * F*n-> Filas de Sección D de la DJ-08.
+  //      * F-> fila
+  //      * n->número de fila
+  //      *
+  //      */
+  //     const { F28, F29 } = {
+  //       F28: 0,
+  //       F29: 0,
+  //     };
+  //     const F30 = F28 > F29 ? F28 - F29 : 0;
+  //     const F31 = F28 > F29 ? 0 : F29 - F28;
+
+  //     const dataSectionD = [
+  //       {
+  //         concepto:
+  //           "Impuesto a pagar según Declaración Rectificada (viene de SECCIÓN C fila 26, rebajando el importe que le fue bonificado en la DJ - 08 que esta rectificando)",
+  //         import: F28,
+  //       },
+  //       {
+  //         concepto:
+  //           "(-) Pago del impuesto realizado en la Declaración anterior",
+  //         import: F29,
+  //       },
+  //       {
+  //         concepto:
+  //           "Diferencia Impuesto a Pagar en Declaración Rectificada (si fila 28 es mayor que fila 29)",
+  //         import: F30,
+  //       },
+  //       {
+  //         concepto:
+  //           "Diferencia a devolver por declaración rectificada (si fila 28 es menor que fila 29)",
+  //         import: F31,
+  //       },
+  //     ];
+
+  //     /**
+  //      * @constant
+  //      * F*n-> Filas de Sección E de la DJ-08.
+  //      * F-> fila
+  //      * n->número de fila
+  //      *
+  //      */
+  //     const { F32, F34, F35 } = {
+  //       F32: rectification ? F30 : F26,
+  //       F34: 0,
+  //       F35: 0,
+  //     };
+  //     const F33 = [1, 2].indexOf(dateSigns.month) !== -1 ? (F32 * 5) / 100 : 0;
+  //     const F36 = F32 - F33 - F34 - F35;
+
+  //     const dataSectionE = [
+  //       {
+  //         concepto:
+  //           "IMPUESTO A PAGAR (viene de filas 26 o fila 30 según corresponda: son excluyentes)",
+  //         import: F32,
+  //       },
+  //       {
+  //         concepto:
+  //           "(-) Bonificaciones (se aplican los % autorizados al importe de la fila 32)",
+  //         import: F33,
+  //       },
+  //       {
+  //         concepto:
+  //           "(-) Impuesto pagado en Declaraciones Juradas presentadas en el año fiscal",
+  //         import: F34,
+  //       },
+  //       {
+  //         concepto:
+  //           "(+) Recargo por mora (se aplica al importe de fila 32, si se paga fuera de fecha, si se paga en fecha = 0 )",
+  //         import: F35,
+  //       },
+  //       {
+  //         concepto:
+  //           "TOTAL A PAGAR ( fila 32 – fila 33 - fila 34 + fila 35 según corresponda)",
+  //         import: F36,
+  //       },
+  //     ];
+
+  //     /**
+  //      * @constant
+  //      * F*n-> Filas de Sección F de la DJ-08.
+  //      * F-> fila
+  //      * n->número de fila
+  //      *
+  //      */
+  //     const { F37, F38, F39, F40, F41, F42, F43 } = {
+  //       F37: 0,
+  //       F38: 0,
+  //       F39: 0,
+  //       F40: 0,
+  //       F41: 0,
+  //       F42: 0,
+  //       F43: 0,
+  //     };
+
+  //     const F44 = F37 + F38 + F39 + F40 + F41 + F42 + F43;
+
+  //     const totalSectionF = [
+  //       { concepto: "Total de tributos pagados", import: F44 },
+  //     ];
+
+  //     const dataSectionF = [
+  //       { concepto: "Impuesto sobre las Ventas y/o Servicio", import: F37 },
+  //       { concepto: "", import: F38 },
+  //       {
+  //         concepto: "Impuesto por la Utilización de la Fuerza de Trabajo",
+  //         import: F39,
+  //       },
+  //       { concepto: "Impuesto sobre Documentos", import: F40 },
+  //       {
+  //         concepto: "Tasa por la Radicación de Anuncios y Propaganda Comercial",
+  //         import: F41,
+  //       },
+  //       { concepto: "Contribución a la Seguridad Social", import: F42 },
+  //       { concepto: "Otros (especificar)", import: F43 },
+  //     ];
+
+  //     const constantToSectionG = [
+  //       {
+  //         from: 0,
+  //         to: 10000,
+  //         porcentageType: 15,
+  //       },
+  //       {
+  //         from: 10000,
+  //         to: 20000,
+  //         porcentageType: 20,
+  //       },
+  //       {
+  //         from: 20000,
+  //         to: 30000,
+  //         porcentageType: 30,
+  //       },
+  //       {
+  //         from: 30000,
+  //         to: 50000,
+  //         porcentageType: 40,
+  //       },
+  //       {
+  //         from: 50000,
+  //         to: null,
+  //         porcentageType: 50,
+  //       },
+  //     ];
+
+  //     const dataSectionG: DataSectionGType[] = [];
+  //     const totalSectionG = { baseImponible: 0, import: 0 };
+
+  //     for (let i = 0; i < constantToSectionG.length; i++) {
+  //       const element = constantToSectionG[i];
+  //       const { from, to } = element;
+  //       let baseImponible = 0;
+
+  //       if (to === null) {
+  //         baseImponible = F20 > from ? F20 - totalSectionG.baseImponible : 0;
+  //       } else {
+  //         baseImponible =
+  //           F20 > to ? to - from : F20 - totalSectionG.baseImponible;
+  //       }
+
+  //       const importe = (baseImponible * element.porcentageType) / 100;
+
+  //       const newRow: DataSectionGType = {
+  //         ...element,
+  //         baseImponible,
+  //         import: importe,
+  //       };
+
+  //       dataSectionG.push(newRow);
+  //       totalSectionG.baseImponible += baseImponible;
+  //       totalSectionG.import += importe;
+  //     }
+
+  //     const dataSectionH = defaultDataArray<{
+  //       enterprise: string;
+  //       valueHire: any;
+  //       participation: {
+  //         porcentage: any;
+  //         import: any;
+  //       };
+  //     }>(10, {
+  //       enterprise: "",
+  //       valueHire: null,
+  //       participation: { porcentage: null, import: null },
+  //     });
+
+  //     const totalSectionH = { valueHire: 0, import: 0 };
+
+  //     for (let i = 0; i < enterprises.length; i++) {
+  //       const { name, amount, import: importIncome } = enterprises[i];
+  //       const enterprise = name;
+  //       const valueHire = amount;
+
+  //       const dataToEnterprise = {
+  //         enterprise,
+  //         valueHire,
+  //         participation: { porcentage: null, import: importIncome },
+  //       };
+
+  //       dataSectionH[i] = dataToEnterprise;
+  //       totalSectionH.valueHire += valueHire;
+  //       totalSectionH.import += importIncome;
+  //     }
+
+  //     const dataSectionI = defaultDataArray<{
+  //       code: string | string[];
+  //       fullName: string;
+  //       period: {
+  //         from: number[];
+  //         to: number[];
+  //       };
+  //       municipality: string;
+  //       nit: string | string[];
+  //       import: number;
+  //     }>(18, {
+  //       code: defaultDataArray<string>(3, ""),
+  //       fullName: "",
+  //       period: { from: [null, null], to: [null, null] },
+  //       municipality: "",
+  //       nit: defaultDataArray<string>(11, ""),
+  //       import: null,
+  //     });
+  //     const totalSectionI = { import: 0 };
+
+  //     for (let i = 0; i < hiredPersons.length; i++) {
+  //       const {
+  //         first_name,
+  //         date_start,
+  //         date_end,
+  //         last_name,
+  //         municipality,
+  //         ci,
+  //         import: importAnnual,
+  //       } = hiredPersons[i];
+  //       const fullName = `${first_name} ${last_name}`;
+  //       const from = [date_start.getDate(), date_start.getMonth()];
+  //       const to = [date_end.getDate(), date_end.getMonth()];
+
+  //       const dataToHire = {
+  //         code: defaultDataArray<string>(3, ""),
+  //         fullName,
+  //         period: {
+  //           from,
+  //           to,
+  //         },
+  //         municipality,
+  //         nit: ci,
+  //         import: importAnnual,
+  //       };
+
+  //       dataSectionI[i] = dataToHire;
+  //       totalSectionI.import += importAnnual;
+  //     }
+
+  //     const rowsSectionF = dataSectionF.length + 3;
+  //     const rowsSectionG = dataSectionF.length + 2;
+  //     const rowsSectionH = dataSectionH.length + 3;
+  //     const rowsSectionI = dataSectionI.length + 4;
+
+  //     const compiledTemplate = pug.compileFile(this.templatePath);
+
+  //     const htmlContent = compiledTemplate({
+  //       year,
+  //       first_name,
+  //       last_name,
+  //       ci,
+  //       nit,
+  //       address,
+  //       email: user.email,
+  //       individual: true,
+  //       rectification,
+  //       regimen,
+  //       dateSigns,
+  //       operatesInMunicipality: null,
+  //       dataSectionA,
+  //       totalSectionA,
+  //       dataSectionB,
+  //       dataSectionC,
+  //       dataSectionD,
+  //       dataSectionE,
+  //       totalToPay: F36,
+  //       dataSectionF,
+  //       totalSectionF,
+  //       dataSectionG,
+  //       totalSectionG,
+  //       dataSectionH,
+  //       totalSectionH,
+  //       dataSectionI,
+  //       totalSectionI,
+  //       rowsSectionF,
+  //       rowsSectionG,
+  //       rowsSectionH,
+  //       rowsSectionI,
+  //     });
+
+  //     const pdfBuffer = await this.generatePDF({ htmlContent });
+
+  //     res.contentType("application/pdf");
+  //     res.setHeader(
+  //       "Content-Disposition",
+  //       `attachment; filename="${fileName || this.defaultFileName}"`
+  //     );
+  //     res.send(pdfBuffer);
+  //   } catch (error) {
+  //     if (res.statusCode === 200) res.status(500);
+  //     next(error);
+  //   }
+  // }
   async generateDJ08(
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> {
     try {
-      const { year, user }: { year: number; user: User } = req.body;
+      const {
+        is_rectification = false,
+        user,
+      }: { is_rectification: boolean; user: User } = req.body;
 
       this.templatePath = pugTemplatePath("dj08/swornDeclaration");
 
-      const dataDJ08 = await getDJ08Data(year, user.id);
+      const regimen = false; //ver con alberto como se define regimen simplificado Hoja1!O17
+      const dateSigns = { day: "dd", month: "mm", year: "yyyy" };
+
+      const { profile, fiscalYear } = await SectionState.findOne({
+        select: {
+          profile: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            ci: true,
+            nit: true,
+          },
+          fiscalYear: { id: true, year: true },
+        },
+        relations: {
+          profile: { address: { address: true } },
+          fiscalYear: true,
+        },
+        where: { user: { id: user.id } },
+      });
+
       const {
-        activities,
+        id: profileId,
         first_name,
         last_name,
         ci,
         nit,
         address,
-        enterprises,
-        hiredPersons,
-      } = dataDJ08;
+      } = profile;
+      const { id: fiscalYearId, year } = fiscalYear;
 
       const fileName = `DJ-08-IP-${year}.pdf`;
 
-      const regimen = false; //ver con alberto como se define regimen simplificado Hoja1!O17
-      const rectification = false; //ver con alberto
-      const dateSigns = { day: 27, month: 4, year: 2023 }; //
-
-      const { MEa_By_MFP } = appConfig.accountingConstants;
-
-      const dataSectionA = defaultDataArray<DataSectionAType>(9, {
-        activity: "",
-        period: { start: ["", ""], end: ["", ""] },
-        income: null,
-        expense: null,
+      const data = await DJ08.findOne({
+        relations: ["profile", "dj08SectionData"],
+        where: {
+          fiscalYear: { id: fiscalYearId },
+          profile: { id: profileId },
+        },
       });
-      const totalSectionA: TotalSectionAType = { incomes: 0, expenses: 0 };
 
-      for (let i = 0; i < activities.length; i++) {
-        const {
-          code,
-          activity: activityDescriptin,
-          date_start,
-          date_end,
-          documents,
-        } = activities[i];
-        const activity = `${code}- ${activityDescriptin}`;
-        const start = [date_start.getDate(), date_start.getMonth()];
-        const end = [date_end.getDate(), date_end.getMonth()];
-        const income = documents.find((val) => val.type === "i")?.amount || 0;
-        const expense = documents.find((val) => val.type === "g")?.amount || 0;
+      let dj08SectionData = data?.dj08SectionData.find(
+        (val) => val.is_rectification === is_rectification
+      );
 
-        const dataToActivity = {
-          activity,
-          period: {
-            start,
-            end,
-          },
-          income,
-          expense,
-        };
+      if (is_rectification && !dj08SectionData) {
+        const { section_data: existentSection_data } =
+          data?.dj08SectionData.find((val) => val.is_rectification === false);
 
-        dataSectionA[i] = dataToActivity;
-        totalSectionA.expenses += expense;
-        totalSectionA.incomes += income;
+        const newDataDJ08ToRectification = Dj08SectionData.create({
+          section_data: existentSection_data,
+          is_rectification,
+          dJ08: data,
+        });
+
+        dj08SectionData = await newDataDJ08ToRectification.save();
       }
 
-      /**
-       * @constant
-       * F*n-> Filas de Sección B de la DJ-08.
-       * F-> fila
-       * n->número de fila
-       *
-       */
-      const { F11, F12, F13, F14, F15, F16, F17, F18, F19 } = {
-        F11: totalSectionA.incomes,
-        F12: MEa_By_MFP,
-        F13: totalSectionA.expenses,
-        F14: 0, //pendiente hasta la seccion F
-        F15: 0, //pendiente hasta la config de los impuestos
-        F16: 0,
-        F17: 0,
-        F18: 0,
-        F19: 0,
-      };
-      const F20 =
-        F11 > F12 + F13 + F14 + F15 + F16 + F17 + F18 + F19
-          ? F11 - F12 - F13 - F14 - F15 - F16 - F17 - F18 - F19
-          : 0;
+      const [dataSectionA, totalSectionA] = getDataAndTotalsToDj08Sections<
+        DataSectionAType,
+        TotalSectionAType
+      >(dj08SectionData, SectionName.SECTION_A);
+
+      const { F11, F12, F13, F14, F15, F16, F17, F18, F19, F20 } =
+        data.dj08SectionData[0].section_data[SectionName.SECTION_B]["data"];
 
       const dataSectionB: DataSectionBType[] = [
         {
@@ -670,32 +1165,8 @@ class ReportGeneratorController extends ReportGenerator {
         },
       ];
 
-      /**
-       * @constant
-       * F*n-> Filas de Sección C de la DJ-08.
-       * F-> fila
-       * n->número de fila
-       *
-       */
-      const { F21, F22, F23, F24, F25 } = {
-        F21: 0, // pendiente hasta la seccion G
-        F22: 0, // ir al libro de gastos
-        F23: 0,
-        F24: 0,
-        F25: 0,
-      };
-      const F26 =
-        regimen && totalSectionA.incomes < 200000
-          ? 0
-          : F21 > F22 + F23 + F24 + F25
-          ? F21 - (F22 + F23 + F24 + F25)
-          : 0;
-      const F27 =
-        F22 > 0
-          ? 0
-          : F21 < F22 + F23 + F24 + F25
-          ? (F21 - (F22 + F23 + F24 + F25)) * -1
-          : 0;
+      const { F21, F22, F23, F24, F25, F26, F27 } =
+        data.dj08SectionData[0].section_data[SectionName.SECTION_C]["data"];
 
       const dataSectionC: DataSectionBType[] = [
         {
@@ -727,19 +1198,8 @@ class ReportGeneratorController extends ReportGenerator {
         },
       ];
 
-      /**
-       * @constant
-       * F*n-> Filas de Sección D de la DJ-08.
-       * F-> fila
-       * n->número de fila
-       *
-       */
-      const { F28, F29 } = {
-        F28: 0,
-        F29: 0,
-      };
-      const F30 = F28 > F29 ? F28 - F29 : 0;
-      const F31 = F28 > F29 ? 0 : F29 - F28;
+      const { F28, F29, F30, F31 } =
+        data.dj08SectionData[0].section_data[SectionName.SECTION_D]["data"];
 
       const dataSectionD = [
         {
@@ -764,20 +1224,8 @@ class ReportGeneratorController extends ReportGenerator {
         },
       ];
 
-      /**
-       * @constant
-       * F*n-> Filas de Sección E de la DJ-08.
-       * F-> fila
-       * n->número de fila
-       *
-       */
-      const { F32, F34, F35 } = {
-        F32: rectification ? F30 : F26,
-        F34: 0,
-        F35: 0,
-      };
-      const F33 = [1, 2].indexOf(dateSigns.month) !== -1 ? (F32 * 5) / 100 : 0;
-      const F36 = F32 - F33 - F34 - F35;
+      const { F32, F33, F34, F35, F36 } =
+        data.dj08SectionData[0].section_data[SectionName.SECTION_E]["data"];
 
       const dataSectionE = [
         {
@@ -807,24 +1255,8 @@ class ReportGeneratorController extends ReportGenerator {
         },
       ];
 
-      /**
-       * @constant
-       * F*n-> Filas de Sección F de la DJ-08.
-       * F-> fila
-       * n->número de fila
-       *
-       */
-      const { F37, F38, F39, F40, F41, F42, F43 } = {
-        F37: 0,
-        F38: 0,
-        F39: 0,
-        F40: 0,
-        F41: 0,
-        F42: 0,
-        F43: 0,
-      };
-
-      const F44 = F37 + F38 + F39 + F40 + F41 + F42 + F43;
+      const { F37, F38, F39, F40, F41, F42, F43, F44 } =
+        data.dj08SectionData[0].section_data[SectionName.SECTION_F]["data"];
 
       const totalSectionF = [
         { concepto: "Total de tributos pagados", import: F44 },
@@ -846,137 +1278,20 @@ class ReportGeneratorController extends ReportGenerator {
         { concepto: "Otros (especificar)", import: F43 },
       ];
 
-      const constantToSectionG = [
-        {
-          annualsNetIncomes: { from: 0, to: 10000 },
-          porcentageType: 15,
-        },
-        {
-          annualsNetIncomes: { from: 10000, to: 20000 },
-          porcentageType: 20,
-        },
-        {
-          annualsNetIncomes: { from: 20000, to: 30000 },
-          porcentageType: 30,
-        },
-        {
-          annualsNetIncomes: { from: 30000, to: 50000 },
-          porcentageType: 40,
-        },
-        {
-          annualsNetIncomes: { from: 50000, to: null },
-          porcentageType: 50,
-        },
-      ];
+      const [dataSectionG, totalSectionG] = getDataAndTotalsToDj08Sections<
+        DataSectionGType,
+        TotalSectionGType
+      >(dj08SectionData, SectionName.SECTION_G);
 
-      const dataSectionG: DataSectionGType[] = [];
-      const totalSectionG = { baseImponible: 0, import: 0 };
+      const [dataSectionH, totalSectionH] = getDataAndTotalsToDj08Sections<
+        DataSectionHType,
+        TotalSectionGType
+      >(dj08SectionData, SectionName.SECTION_H);
 
-      for (let i = 0; i < constantToSectionG.length; i++) {
-        const element = constantToSectionG[i];
-        const { from, to } = element.annualsNetIncomes;
-        let baseImponible = 0;
-
-        if (to === null) {
-          baseImponible = F20 > from ? F20 - totalSectionG.baseImponible : 0;
-        } else {
-          baseImponible =
-            F20 > to ? to - from : F20 - totalSectionG.baseImponible;
-        }
-
-        const importe = (baseImponible * element.porcentageType) / 100;
-
-        const newRow: DataSectionGType = {
-          ...element,
-          baseImponible,
-          import: importe,
-        };
-
-        dataSectionG.push(newRow);
-        totalSectionG.baseImponible += baseImponible;
-        totalSectionG.import += importe;
-      }
-
-      const dataSectionH = defaultDataArray<{
-        enterprise: string;
-        valueHire: any;
-        participation: {
-          porcentage: any;
-          import: any;
-        };
-      }>(10, {
-        enterprise: "",
-        valueHire: null,
-        participation: { porcentage: null, import: null },
-      });
-
-      const totalSectionH = { valueHire: 0, import: 0 };
-
-      for (let i = 0; i < enterprises.length; i++) {
-        const { name, amount, import: importIncome } = enterprises[i];
-        const enterprise = name;
-        const valueHire = amount;
-
-        const dataToEnterprise = {
-          enterprise,
-          valueHire,
-          participation: { porcentage: null, import: importIncome },
-        };
-
-        dataSectionH[i] = dataToEnterprise;
-        totalSectionH.valueHire += valueHire;
-        totalSectionH.import += importIncome;
-      }
-
-      const dataSectionI = defaultDataArray<{
-        code: string | string[];
-        fullName: string;
-        period: {
-          from: number[];
-          to: number[];
-        };
-        municipality: string;
-        nit: string | string[];
-        import: number;
-      }>(18, {
-        code: defaultDataArray<string>(3, ""),
-        fullName: "",
-        period: { from: [null, null], to: [null, null] },
-        municipality: "",
-        nit: defaultDataArray<string>(11, ""),
-        import: null,
-      });
-      const totalSectionI = { import: 0 };
-
-      for (let i = 0; i < hiredPersons.length; i++) {
-        const {
-          first_name,
-          date_start,
-          date_end,
-          last_name,
-          municipality,
-          ci,
-          import: importAnnual,
-        } = hiredPersons[i];
-        const fullName = `${first_name} ${last_name}`;
-        const from = [date_start.getDate(), date_start.getMonth()];
-        const to = [date_end.getDate(), date_end.getMonth()];
-
-        const dataToHire = {
-          code: defaultDataArray<string>(3, ""),
-          fullName,
-          period: {
-            from,
-            to,
-          },
-          municipality,
-          nit: ci,
-          import: importAnnual,
-        };
-
-        dataSectionI[i] = dataToHire;
-        totalSectionI.import += importAnnual;
-      }
+      const [dataSectionI, totalSectionI] = getDataAndTotalsToDj08Sections<
+        DataSectionIType,
+        TotalSectionIType
+      >(dj08SectionData, SectionName.SECTION_I);
 
       const rowsSectionF = dataSectionF.length + 3;
       const rowsSectionG = dataSectionF.length + 2;
@@ -994,7 +1309,7 @@ class ReportGeneratorController extends ReportGenerator {
         address,
         email: user.email,
         individual: true,
-        rectification,
+        is_rectification,
         regimen,
         dateSigns,
         operatesInMunicipality: null,
@@ -1028,6 +1343,7 @@ class ReportGeneratorController extends ReportGenerator {
       );
       res.send(pdfBuffer);
     } catch (error) {
+      console.log(error);
       if (res.statusCode === 200) res.status(500);
       next(error);
     }
