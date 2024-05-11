@@ -4,13 +4,20 @@ import { ENV } from "./settings/environment";
 import * as pug from "pug";
 import { convert } from "html-to-text";
 
-const smtp = {
-  host: ENV.emailHost,
-  port: ENV.emailPort,
-  secure: ENV.emailSecure,
-  auth: ENV.auth,
-  tls: ENV.tls,
-};
+const smtp =
+  ENV.debug === "staging"
+    ? {
+        service: "Yahoo",
+        secure: ENV.emailSecure,
+        auth: ENV.auth,
+      }
+    : {
+        host: ENV.emailHost,
+        port: ENV.emailPort,
+        secure: ENV.emailSecure,
+        auth: ENV.auth,
+        tls: ENV.tls,
+      };
 
 export default class Email {
   emailUser: string;
