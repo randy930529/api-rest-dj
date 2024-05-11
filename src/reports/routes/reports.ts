@@ -2,6 +2,7 @@ import ReportGeneratorController from "../controller/ReportGeneratorController";
 import { authMiddleware } from "../../auth/middlewares/authMiddleware";
 import { userMiddleware } from "../../auth/middlewares/userMiddleware";
 import { licenseMiddleware } from "../../managers/license/middlewares/licenseMiddleware";
+import { DJ08Controller } from "../controller/DJ08Controller";
 
 export const reportsRoutes = [
   {
@@ -38,5 +39,12 @@ export const reportsRoutes = [
     controller: ReportGeneratorController,
     middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
     action: "generateDJ08",
+  },
+  {
+    method: "get",
+    route: "/report/dj08/all",
+    controller: DJ08Controller,
+    middlewares: [authMiddleware, userMiddleware],
+    action: "allDJ08",
   },
 ];
