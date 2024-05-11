@@ -23,7 +23,7 @@ class ReportGenerator {
 
       await page.setContent(htmlContent);
 
-      const pdfBuffer = await page.pdf();
+      const pdfBuffer = await page.pdf({ format: "LETTER" });
 
       await page.close();
       await browser.close();
