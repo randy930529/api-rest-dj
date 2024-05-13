@@ -84,7 +84,10 @@ export abstract class EntityControllerBase<TEntity> {
         404
       );
 
-    const entityUpdate = { ...entityToUpdate, ...entity };
+    const entityUpdate = this.repository.create({
+      ...entityToUpdate,
+      ...entity,
+    });
     return await this.repository.save(entityUpdate);
   }
 
