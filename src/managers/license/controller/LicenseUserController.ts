@@ -38,10 +38,9 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
 
       if (user.role !== "admin") {
         const options: FindManyOptions<LicenseUser> = createFindOptions(req);
+        const { where } = options;
 
-        options.where
-          ? (options.where = { ...options.where, user: { id: user.id } })
-          : (options.where = { user: { id: user.id } });
+        options["where"] = { ...where, user: { id: user.id } };
 
         req.query = {
           ...query,

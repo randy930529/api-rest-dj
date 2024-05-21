@@ -19,10 +19,11 @@ import { userSetPasswordDTO } from "../dto/request/userSetPassword.dto";
 import { FiscalYear } from "../../entity/FiscalYear";
 import { LicenseUser } from "../../entity/LicenseUser";
 import { NotificationTM, NotiType } from "../../entity/NotificationTM";
+import { appConfig } from "../../../config";
 
-const transferProtocol: string = "ca-mygestor" as const;
+const transferProtocol: string = appConfig.site;
 const ACTIVATION_URL = (appName, uid, token) =>
-  `${appName}://activate/?uid=${uid}&token=${token}`;
+  `${appName}/activate/?uid=${uid}&token=${token}`;
 const RESETPASSWORD_URL = (appName, uid, token) =>
   `${appName}://reset_password/?uid=${uid}&token=${token}`;
 

@@ -61,7 +61,7 @@ export class TestTMController {
         ExternalId: id_transaccion,
         Bank: "BANDEC/BPA",
         BankId: `1234`,
-        Status: "1",
+        Status: "3",
         TmId: "4567",
       };
 
@@ -79,7 +79,7 @@ export class TestTMController {
         config
       );
       const resp: PayOrderConfirmDTO =
-        (await tmResponse.json()) as unknown as PayOrderConfirmDTO;
+        (await tmResponse) as unknown as PayOrderConfirmDTO;
 
       if (!resp)
         responseError(res, "Fetch error to connect with api comercio.");
