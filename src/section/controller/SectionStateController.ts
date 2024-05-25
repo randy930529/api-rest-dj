@@ -134,7 +134,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
             },
           },
           fiscalYear: true,
-          licenseUser: true,
+          licenseUser: { license: true },
         },
         where: {
           user: {
