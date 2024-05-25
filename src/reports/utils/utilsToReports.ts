@@ -307,6 +307,13 @@ const toCompleteDataSection = <T>(
       },
       to: 9,
     },
+    6: {
+      defaultData: {
+        concepto: "",
+        import: "",
+      },
+      to: 7,
+    },
     7: {
       defaultData: {
         from: null,
@@ -363,6 +370,63 @@ const getDataAndTotalsToDj08Sections = <T1, T2>(
   return [dataSection, totalSection];
 };
 
+const calculeF20ToDj08 = <
+  T extends {
+    [key: string]: number;
+  }
+>(
+  dataSection: T
+): number => {
+  const sumTotal = Object.keys(dataSection).reduce(
+    (sum, key) =>
+      dataSection[key] && key != "F11" && key != "F20"
+        ? sum + dataSection[key]
+        : sum,
+    0
+  );
+
+  return dataSection["F11"] > sumTotal ? dataSection["F11"] - sumTotal : 0;
+};
+
+const calculeF26ToDj08 = <
+  T extends {
+    [key: string]: number;
+  }
+>(
+  dataSection: T
+): number => {
+  const sumTotal = Object.keys(dataSection).reduce(
+    (sum, key) =>
+      dataSection[key] && key != "F21" && key != "F26" && key != "F27"
+        ? sum + dataSection[key]
+        : sum,
+    0
+  );
+
+  return dataSection["F21"] > sumTotal ? dataSection["F21"] - sumTotal : 0;
+};
+
+const calculeF27ToDj08 = <
+  T extends {
+    [key: string]: number;
+  }
+>(
+  dataSection: T
+): number => {
+  const sumTotal =
+    dataSection["F22"] > 0
+      ? 0
+      : Object.keys(dataSection).reduce(
+          (sum, key) =>
+            dataSection[key] && key != "F21" && key != "F26" && key != "F27"
+              ? sum + dataSection[key]
+              : sum,
+          0
+        );
+
+  return dataSection["F21"] > sumTotal ? dataSection["F21"] - sumTotal : 0;
+};
+
 export {
   pugTemplatePath,
   defaultDataArray,
@@ -375,4 +439,7 @@ export {
   getDJ08Data,
   toCompleteDataSection,
   getDataAndTotalsToDj08Sections,
+  calculeF20ToDj08,
+  calculeF26ToDj08,
+  calculeF27ToDj08,
 };

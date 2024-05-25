@@ -31,6 +31,12 @@ type accountingConstantsType = {
   PE_ABOVE_50000?: number;
 };
 
+type ConstantToSectionGType = {
+  from: number;
+  to: number;
+  porcentageType: number;
+}[];
+
 type businessMetadataType = {
   name: string;
   source: string;
@@ -50,6 +56,7 @@ interface AppConfig {
   paymentAPKHref: string;
   businessMetadata: businessMetadataType;
   accountingConstants: accountingConstantsType;
+  constantToSectionG: ConstantToSectionGType;
 }
 
 export const appConfig: AppConfig = config.get("app");

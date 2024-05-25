@@ -1,8 +1,27 @@
-import { Entity, Column, JoinColumn, ManyToOne } from "typeorm";
+import {
+  Entity,
+  Column,
+  JoinColumn,
+  ManyToOne,
+  AfterInsert,
+  AfterUpdate,
+  AfterRemove,
+  BeforeInsert,
+  BeforeUpdate,
+} from "typeorm";
 import Model from "./Base";
 import { HiredPerson } from "./HiredPerson";
 import { Profile } from "./Profile";
 import { ColumnNumericTransformer } from "../utils/ColumnNumericTransformer";
+import { Dj08SectionData, SectionName } from "./Dj08SectionData";
+import {
+  AllDataSectionsDj08Type,
+  DataSectionIType,
+  TotalSectionIType,
+} from "utils/definitions";
+import { SectionState } from "./SectionState";
+import { ProfileActivity } from "./ProfileActivity";
+import { defaultDataArray } from "../reports/utils/utilsToReports";
 
 @Entity()
 export class ProfileHiredPerson extends Model {
@@ -24,7 +43,110 @@ export class ProfileHiredPerson extends Model {
   @JoinColumn()
   profile: Profile;
 
+  @Column({ nullable: true })
+  __profileId__: number;
+
   @ManyToOne(() => HiredPerson)
   @JoinColumn()
   hiredPerson: HiredPerson;
+
+  @ManyToOne(() => ProfileActivity, { nullable: true })
+  @JoinColumn()
+  profileActivity: ProfileActivity;
+
+  toJSON() {
+    return {
+      ...this,
+      __profileId__: undefined,
+    };
+  }
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async up__profileId__(): Promise<void> {
+    if (this.profile) {
+      this.__profileId__ = this.profile.id;
+    }
+  }
+
+  @AfterInsert()
+  @AfterUpdate()
+  @AfterRemove()
+  async updatedDJ08(): Promise<void> {
+    const section = await SectionState.findOne({
+      select: { fiscalYear: { id: true } },
+      relations: ["fiscalYear"],
+      where: { profile: { id: this.__profileId__ } },
+    });
+    const { id: fiscalYearId } = section.fiscalYear;
+
+    const dj08ToUpdate = await Dj08SectionData.findOne({
+      where: {
+        dJ08: {
+          profile: { id: this.__profileId__ },
+          fiscalYear: { id: fiscalYearId },
+        },
+        is_rectification: false,
+      },
+    });
+
+    const hiredPersons = await ProfileHiredPerson.find({
+      select: {
+        hiredPerson: {
+          ci: true,
+          first_name: true,
+          last_name: true,
+          address: { municipality: true },
+        },
+      },
+      relations: {
+        hiredPerson: { address: true },
+        profileActivity: { activity: true },
+      },
+      where: { profile: { id: this.__profileId__ } },
+    });
+
+    const { section_data: sectionDataJSONString } = dj08ToUpdate;
+    const section_data: AllDataSectionsDj08Type = JSON.parse(
+      sectionDataJSONString
+    );
+
+    const newDataSectionI: { [key: string | number]: DataSectionIType } = {};
+    const newTotalSectionI: TotalSectionIType = { import: 0 };
+
+    for (let i = 0; i < hiredPersons.length; i++) {
+      const {
+        profileActivity,
+        hiredPerson,
+        date_start,
+        date_end,
+        import: importAnnual,
+      } = hiredPersons[i];
+      const { ci: nit, first_name, last_name, address } = hiredPerson;
+
+      const code =
+        profileActivity?.activity.code || defaultDataArray<string>(3, "");
+      const fullName = `${first_name} ${last_name}`;
+      const from = [date_start.getDate(), date_start.getMonth()];
+      const to = [date_end.getDate(), date_end.getMonth()];
+      const { municipality } = address;
+
+      const data: DataSectionIType = {
+        code,
+        fullName,
+        from,
+        to,
+        municipality,
+        nit,
+        import: importAnnual,
+      };
+      newDataSectionI[`F${i + 64}`] = data;
+      newTotalSectionI.import += importAnnual;
+    }
+    section_data[SectionName.SECTION_I].data = newDataSectionI;
+    section_data[SectionName.SECTION_I].totals = newTotalSectionI;
+
+    dj08ToUpdate.section_data = JSON.stringify(section_data);
+    await dj08ToUpdate.save();
+  }
 }

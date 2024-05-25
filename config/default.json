@@ -23,6 +23,33 @@
       "PE_20000_30000": 0.3,
       "PE_30000_50000": 0.4,
       "PE_ABOVE_50000": 0.5
-    }
+    },
+    "constantToSectionG": [
+      {
+        "from": 0,
+        "to": 10000,
+        "porcentageType": 15
+      },
+      {
+        "from": 10000,
+        "to": 20000,
+        "porcentageType": 20
+      },
+      {
+        "from": 20000,
+        "to": 30000,
+        "porcentageType": 30
+      },
+      {
+        "from": 30000,
+        "to": 50000,
+        "porcentageType": 40
+      },
+      {
+        "from": 50000,
+        "to": null,
+        "porcentageType": 50
+      }
+    ]
   }
 }

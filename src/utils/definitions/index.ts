@@ -63,7 +63,7 @@ export type TotalSectionAType = {
 };
 
 export type DataSectionBType = {
-  concepto: string;
+  concepto?: string;
   import: number;
 };
 
@@ -82,9 +82,9 @@ export type TotalSectionGType = {
 
 export type DataSectionHType = {
   enterprise: string;
-  valueHire: any;
-  porcentage: any;
-  import: any;
+  valueHire: number;
+  porcentage?: number;
+  import: number;
 };
 
 export type TotalSectionHType = {
@@ -104,6 +104,25 @@ export type DataSectionIType = {
 
 export type TotalSectionIType = {
   import: number;
+};
+
+export type AllDataSectionsDj08Type = {
+  [key: string | number]: {
+    data: {
+      [key: string | number]:
+        | DataSectionAType
+        | DataSectionBType
+        | DataSectionGType
+        | DataSectionHType
+        | DataSectionIType
+        | number;
+    };
+    totals?:
+      | TotalSectionAType
+      | TotalSectionGType
+      | TotalSectionHType
+      | TotalSectionIType;
+  };
 };
 
 export type AnswerType = {
