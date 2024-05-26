@@ -6,6 +6,8 @@ import {
   OneToMany,
   BeforeRemove,
   AfterRemove,
+  BeforeInsert,
+  BeforeUpdate,
 } from "typeorm";
 import Model from "./Base";
 import { Profile } from "./Profile";
@@ -58,6 +60,20 @@ export class HiredPerson extends Model {
   async removeAddress(): Promise<void> {
     if (addressToRemoveRef) {
       addressToRemoveRef.remove();
+    }
+  }
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async checkDuplicatePersonForProfile(): Promise<void> {
+    if (this.ci) {
+      const hiredPersonWithSameCI = await HiredPerson.findOne({
+        where: { profile: { id: this.profile?.id }, ci: this.ci },
+      });
+
+      if (hiredPersonWithSameCI && this.id != hiredPersonWithSameCI?.id) {
+        throw new Error("Only a person hired with the same CI is allowed.");
+      }
     }
   }
 }

@@ -72,7 +72,8 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
         );
 
       const hiredPersonToUpdate = await this.repository.findOne({
-        relations: ["address"],
+        select: { profile: { id: true } },
+        relations: ["address", "profile"],
         where: { id },
       });
 
@@ -84,7 +85,10 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
         fields = { ...fields, address };
       }
 
-      const entityUpdate = { ...hiredPersonToUpdate, ...fields };
+      const entityUpdate = this.repository.create({
+        ...hiredPersonToUpdate,
+        ...fields,
+      });
 
       const hiredPersonUpdate = await this.repository.save(entityUpdate);
 
@@ -117,7 +121,8 @@ export class HiredPersonController extends EntityControllerBase<HiredPerson> {
 
       const fieldToUpdate: string = Object.keys(fields)[1];
       const hiredPersonToUpdate = await this.repository.findOne({
-        relations: ["address"],
+        select: { profile: { id: true } },
+        relations: ["address", "profile"],
         where: { id },
       });
 
