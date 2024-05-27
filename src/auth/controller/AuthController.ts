@@ -20,6 +20,8 @@ import { FiscalYear } from "../../entity/FiscalYear";
 import { LicenseUser } from "../../entity/LicenseUser";
 import { NotificationTM, NotiType } from "../../entity/NotificationTM";
 import { appConfig } from "../../../config";
+import { defaultSectionDataInit } from "../../managers/period/utils";
+import { Dj08SectionData } from "../../entity/Dj08SectionData";
 
 const transferProtocol: string = appConfig.site;
 const ACTIVATION_URL = (appName, uid, token) =>
@@ -225,12 +227,23 @@ export class AuthController {
         const date = moment().startOf("year").toDate();
         const year = moment().year();
 
-        const newFiscalYear = this.fiscalYearRepository.create({
+        const newFiscalYearDTO = this.fiscalYearRepository.create({
           year,
           date,
           profile,
         });
-        await this.fiscalYearRepository.save(newFiscalYear);
+        const newFiscalYear = await this.fiscalYearRepository.save(
+          newFiscalYearDTO
+        );
+
+        const section_data = defaultSectionDataInit();
+
+        const newDj08Data = await Dj08SectionData.create({
+          dJ08: { fiscalYear: newFiscalYear, profile: profile },
+          section_data,
+        });
+
+        await newDj08Data.save();
       }
 
       res.status(200);
