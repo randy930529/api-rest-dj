@@ -7,6 +7,8 @@ import { responseError } from "../../../errors/responseError";
 import getProfileById from "../../../profile/utils/getProfileById";
 import { FiscalYearDTO } from "../dto/request/fiscalYear.dto";
 import { CreateFiscalYearDTO } from "../dto/response/createFiscalYear.dto";
+import { Dj08SectionData } from "../../../entity/Dj08SectionData";
+import { defaultSectionDataInit } from "../utils";
 
 export class FiscalYearController extends EntityControllerBase<FiscalYear> {
   constructor() {
@@ -27,6 +29,15 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
       });
 
       const newFiscalYear = await this.create(objectFiscalYear);
+
+      const section_data = defaultSectionDataInit();
+
+      const newDj08Data = await Dj08SectionData.create({
+        dJ08: { fiscalYear: newFiscalYear, profile: profile },
+        section_data,
+      });
+
+      await newDj08Data.save();
 
       const fiscalYear: CreateFiscalYearDTO = newFiscalYear;
       const resp: BaseResponseDTO = {

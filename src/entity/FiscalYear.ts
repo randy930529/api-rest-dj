@@ -3,14 +3,14 @@ import {
   Column,
   JoinColumn,
   ManyToOne,
-  AfterInsert,
   BeforeRemove,
+  BeforeInsert,
+  BeforeUpdate,
 } from "typeorm";
 import Model from "./Base";
 import { Profile } from "./Profile";
 import * as moment from "moment";
 import { Dj08SectionData } from "./Dj08SectionData";
-import { appConfig } from "../../config";
 
 @Entity()
 export class FiscalYear extends Model {
@@ -27,50 +27,42 @@ export class FiscalYear extends Model {
   @JoinColumn()
   profile: Profile;
 
-  @AfterInsert()
-  async insertNewDJ08WithThisFiscalYearAndProfile(): Promise<void> {
-    const { MEa_By_MFP } = appConfig.accountingConstants;
-    const data = {
-      1: {
-        data: {},
-        totals: {},
-      },
-      2: {
-        data: { F12: MEa_By_MFP },
-      },
-      3: {
-        data: {},
-      },
-      4: {
-        data: {},
-      },
-      5: {
-        data: {},
-      },
-      6: {
-        data: {},
-      },
-      7: {
-        data: {},
-        totals: {},
-      },
-      8: {
-        data: {},
-        totals: {},
-      },
-      9: {
-        data: {},
-        totals: {},
-      },
+  @Column({ nullable: true })
+  __profileId__: number;
+
+  toJSON() {
+    return {
+      ...this,
+      __profileId__: undefined,
     };
-    const section_data = JSON.stringify(data);
+  }
 
-    const newDj08Data = await Dj08SectionData.create({
-      dJ08: { fiscalYear: this, profile: this.profile },
-      section_data,
-    });
+  @BeforeInsert()
+  @BeforeUpdate()
+  async checkDuplicateFiscalYearForProfile(): Promise<void> {
+    if (this.profile) {
+      this.__profileId__ = this.profile.id;
+    }
 
-    newDj08Data.save();
+    const { year, __profileId__: profileId } = this;
+    const month = this.date ? moment(this.date).month() + 1 : 1;
+    const duplicateFiscalYear = await FiscalYear.createQueryBuilder(
+      `fiscalYear`
+    )
+      .select([`fiscalYear.id`])
+      .leftJoin(`fiscalYear.profile`, `profile`)
+      .where(`profile.id= :profileId`, {
+        profileId,
+      })
+      .andWhere(`fiscalYear.year= :year`, { year })
+      .andWhere(`EXTRACT(month FROM fiscalYear.date)= :month`, {
+        month,
+      })
+      .getOne();
+
+    if (duplicateFiscalYear && this.id != duplicateFiscalYear?.id) {
+      throw new Error("Only a fiscal year with same date and year is allowed.");
+    }
   }
 
   @BeforeRemove()
