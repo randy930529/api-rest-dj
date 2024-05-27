@@ -66,6 +66,9 @@ export class SupportDocument extends Model {
   @Column({ nullable: true })
   __fiscalYearId__: number;
 
+  @Column({ nullable: true })
+  __year__: number;
+
   @ManyToOne(() => ProfileActivity, { nullable: true })
   @JoinColumn()
   profileActivity: ProfileActivity;
@@ -74,14 +77,24 @@ export class SupportDocument extends Model {
     return {
       ...this,
       __fiscalYearId__: undefined,
+      __year__: undefined,
     };
   }
 
   @BeforeInsert()
   @BeforeUpdate()
-  async up__fiscalYearId__(): Promise<void> {
+  async up__fiscalYearIdAndyear__(): Promise<void> {
     if (this.fiscalYear) {
       this.__fiscalYearId__ = this.fiscalYear.id;
+      this.__year__ = this.fiscalYear.year;
+    }
+  }
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async checkToDateInToFiscalYear(): Promise<void> {
+    if (this.date && moment(this.date).year() != this.__year__) {
+      throw new Error("Out of date in to fiscal year.");
     }
   }
 
