@@ -62,6 +62,19 @@ export class ProfileActivity extends Model {
     if (this.profile) {
       this.__profileId__ = this.profile.id;
     }
+
+    if (this.activity) {
+      const activityWithSameName = await ProfileActivity.findOne({
+        where: {
+          profile: { id: this.profile?.id },
+          activity: { id: this.activity?.id },
+        },
+      });
+
+      if (activityWithSameName && this.id != activityWithSameName?.id) {
+        throw new Error("Only a activity with the same name is allowed.");
+      }
+    }
   }
 
   @AfterInsert()
