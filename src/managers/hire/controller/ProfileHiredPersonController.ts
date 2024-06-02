@@ -7,6 +7,7 @@ import { responseError } from "../../../errors/responseError";
 import { HiredPerson } from "../../../entity/HiredPerson";
 import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import getProfileById from "../../../profile/utils/getProfileById";
+import { ProfileHiredPersonActivity } from "../../../entity/ProfileHiredPersonActivity";
 
 export class ProfileHiredPersonController extends EntityControllerBase<ProfileHiredPerson> {
   constructor() {
@@ -27,15 +28,11 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       if (!hiredPersonId)
         responseError(res, "Do must provide a valid hired person id.", 404);
 
-      const hiredPersonRepository = AppDataSource.getRepository(HiredPerson);
-
       const profile = await getProfileById({ id: profileId, res });
 
-      const hiredPerson = await hiredPersonRepository.findOneBy({
+      const hiredPerson = await HiredPerson.findOneBy({
         id: hiredPersonId,
       });
-
-      if (!profile) responseError(res, "Profile not found.", 404);
 
       if (!hiredPerson) responseError(res, "Hired person not found.", 404);
 
@@ -43,9 +40,20 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
         ...fields,
         profile,
         hiredPerson,
+        profileHiredPersonActivity: [],
       });
 
       const newProfileHiredPerson = await this.create(objectProfileHiredPerson);
+
+      if (fields.profileHiredPersonActivity) {
+        await fields.profileHiredPersonActivity.map(
+          async (val) =>
+            await ProfileHiredPersonActivity.create({
+              ...val,
+              profileHiredPerson: newProfileHiredPerson,
+            }).save()
+        );
+      }
 
       const profileHiredPerson: ProfileHiredPersonDTO = newProfileHiredPerson;
       const resp: BaseResponseDTO = {
@@ -57,6 +65,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       res.status(200);
       return { ...resp };
     } catch (error) {
+      console.log(error);
       if (res.statusCode === 200) res.status(500);
       next(error);
     }

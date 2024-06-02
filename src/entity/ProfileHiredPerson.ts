@@ -8,6 +8,8 @@ import {
   AfterRemove,
   BeforeInsert,
   BeforeUpdate,
+  Not,
+  OneToMany,
 } from "typeorm";
 import Model from "./Base";
 import { HiredPerson } from "./HiredPerson";
@@ -22,6 +24,8 @@ import {
 import { SectionState } from "./SectionState";
 import { ProfileActivity } from "./ProfileActivity";
 import { defaultDataArray } from "../reports/utils/utilsToReports";
+import * as moment from "moment";
+import { ProfileHiredPersonActivity } from "./ProfileHiredPersonActivity";
 
 @Entity()
 export class ProfileHiredPerson extends Model {
@@ -50,9 +54,15 @@ export class ProfileHiredPerson extends Model {
   @JoinColumn()
   hiredPerson: HiredPerson;
 
-  @ManyToOne(() => ProfileActivity, { nullable: true })
-  @JoinColumn()
-  profileActivity: ProfileActivity;
+  @OneToMany(
+    () => ProfileHiredPersonActivity,
+    (profileHiredPersonActivity) =>
+      profileHiredPersonActivity.profileHiredPerson,
+    {
+      cascade: true,
+    }
+  )
+  profileHiredPersonActivity: ProfileHiredPersonActivity[];
 
   toJSON() {
     return {
@@ -66,6 +76,29 @@ export class ProfileHiredPerson extends Model {
   async up__profileId__(): Promise<void> {
     if (this.profile) {
       this.__profileId__ = this.profile.id;
+    }
+
+    if (this.hiredPerson) {
+      const checkDuplicateHired = await ProfileHiredPerson.findOne({
+        where: {
+          profile: { id: this.__profileId__ },
+          id: this.id && Not(this.id),
+          hiredPerson: { id: this.hiredPerson?.id },
+        },
+      });
+
+      const isDateOverlap =
+        checkDuplicateHired &&
+        moment(checkDuplicateHired.date_start).isBefore(
+          moment(this.date_end)
+        ) &&
+        moment(checkDuplicateHired.date_end).isAfter(moment(this.date_start));
+
+      if (isDateOverlap) {
+        throw new Error(
+          `It is possible that this person is hired for this date.`
+        );
+      }
     }
   }
 
@@ -90,20 +123,24 @@ export class ProfileHiredPerson extends Model {
       },
     });
 
-    const hiredPersons = await ProfileHiredPerson.find({
+    const profileHiredPersonActivity = await ProfileHiredPersonActivity.find({
       select: {
-        hiredPerson: {
-          ci: true,
-          first_name: true,
-          last_name: true,
-          address: { municipality: true },
+        profileHiredPerson: {
+          hiredPerson: {
+            ci: true,
+            first_name: true,
+            last_name: true,
+            address: { municipality: true },
+          },
         },
       },
       relations: {
-        hiredPerson: { address: true },
+        profileHiredPerson: {
+          hiredPerson: { address: true },
+        },
         profileActivity: { activity: true },
       },
-      where: { profile: { id: this.__profileId__ } },
+      where: { profileHiredPerson: { profile: { id: this.__profileId__ } } },
     });
 
     const { section_data: sectionDataJSONString } = dj08ToUpdate;
@@ -112,17 +149,17 @@ export class ProfileHiredPerson extends Model {
     );
 
     const newDataSectionI: { [key: string | number]: DataSectionIType } = {};
-    const newTotalSectionI: TotalSectionIType = { import: 0 };
+    const newTotalSectionI: TotalSectionIType = { import: this.import };
 
-    for (let i = 0; i < hiredPersons.length; i++) {
+    for (let i = 0; i < profileHiredPersonActivity.length; i++) {
       const {
-        profileActivity,
         hiredPerson,
         date_start,
         date_end,
         import: importAnnual,
-      } = hiredPersons[i];
+      } = profileHiredPersonActivity[i]?.profileHiredPerson;
       const { ci: nit, first_name, last_name, address } = hiredPerson;
+      const { profileActivity } = profileHiredPersonActivity[i];
 
       const code =
         profileActivity?.activity.code || defaultDataArray<string>(3, "");
@@ -141,7 +178,6 @@ export class ProfileHiredPerson extends Model {
         import: importAnnual,
       };
       newDataSectionI[`F${i + 64}`] = data;
-      newTotalSectionI.import += importAnnual;
     }
     section_data[SectionName.SECTION_I].data = newDataSectionI;
     section_data[SectionName.SECTION_I].totals = newTotalSectionI;

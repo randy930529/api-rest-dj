@@ -23,6 +23,7 @@ import {
 import * as moment from "moment";
 import { SectionState } from "./SectionState";
 import { calculeF20ToDj08 } from "../reports/utils/utilsToReports";
+import { ProfileHiredPersonActivity } from "./ProfileHiredPersonActivity";
 
 @Entity()
 export class ProfileActivity extends Model {
@@ -48,6 +49,12 @@ export class ProfileActivity extends Model {
     (supportDocument) => supportDocument.profileActivity
   )
   supportDocuments: SupportDocument[];
+
+  @OneToMany(
+    () => ProfileHiredPersonActivity,
+    (profileHiredPersonActivity) => profileHiredPersonActivity.profileActivity
+  )
+  profileHiredPersonActivity: ProfileHiredPersonActivity[];
 
   toJSON() {
     return {

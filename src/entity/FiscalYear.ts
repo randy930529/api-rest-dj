@@ -6,11 +6,13 @@ import {
   BeforeRemove,
   BeforeInsert,
   BeforeUpdate,
+  OneToOne,
 } from "typeorm";
 import Model from "./Base";
 import { Profile } from "./Profile";
 import * as moment from "moment";
 import { Dj08SectionData } from "./Dj08SectionData";
+import { MusicalGroup } from "./MusicalGroup";
 
 @Entity()
 export class FiscalYear extends Model {
@@ -30,6 +32,21 @@ export class FiscalYear extends Model {
   @Column({ nullable: true })
   __profileId__: number;
 
+  @Column({ default: false })
+  declared: boolean;
+
+  @Column({ default: false })
+  individual: boolean;
+
+  @Column({ default: false })
+  regimen: boolean;
+
+  @OneToOne(() => MusicalGroup, (musicalGroup) => musicalGroup.fiscalYear, {
+    cascade: true,
+  })
+  @JoinColumn()
+  musicalGroup: MusicalGroup;
+
   toJSON() {
     return {
       ...this,
@@ -42,6 +59,12 @@ export class FiscalYear extends Model {
   async checkDuplicateFiscalYearForProfile(): Promise<void> {
     if (this.profile) {
       this.__profileId__ = this.profile.id;
+    }
+
+    if (this.individual && !this.musicalGroup) {
+      throw new Error(
+        "Fiscal year marked as individual must have a musical group associated."
+      );
     }
 
     const { year, __profileId__: profileId } = this;
