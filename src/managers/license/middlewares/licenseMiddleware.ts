@@ -18,12 +18,12 @@ export const licenseMiddleware = async (
     const isLicenseExpired = moment().isAfter(end_license);
 
     if (!end_license || isLicenseExpired) {
-      responseError(response, "Current license user is expired.", 401);
+      responseError(response, "Current license user is expired.", 402);
     }
 
     next();
   } catch (error) {
-    return response.status(401).json({
+    return response.status(402).json({
       status: "fail",
       error: {
         message: error.message,
