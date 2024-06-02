@@ -98,9 +98,9 @@ block tBodyContent
         td.xl-65(width=206 colspan=4 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:155pt")
             font.font-9= address && address.district
         td.xl-65(width=73 colspan=10 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:55pt")
-            font.font-9= address.address && address.address.municipality
+            font.font-9= address && address.address && address.address.municipality
         td.xl-65(width=77 colspan=2 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:58pt")
-            font.font-9= address.address && address.address.province
+            font.font-9= address && address.address && address.address.province
     tr(height=36 style={height:'27.0pt'})
         td.xl-65(width=96 style="border-right: .5pt solid black;width:72pt")
             font.font-11 Código Zona Postal
