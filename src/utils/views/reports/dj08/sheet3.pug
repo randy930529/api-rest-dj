@@ -142,9 +142,9 @@ block tBodyContent
             font.font-8 Fila
     tr(height=24 style={height:"14.0pt"})
         td.xl-65(width=609 colspan=5 style="border-top:none;border-left:none;width:456pt;text-align: center;vertical-align: middle;") 
-            font.font-9(style="font-size: 10pt;")
+            font.font-9(style="font-size: 10pt;")= musicalGroup && musicalGroup.description
         td.xl-65(colspan=4 style=`border-right: .5pt solid black; width: 83pt;text-align: center;vertical-align: middle;`)
-            font.font-8
+            font.font-8=musicalGroup && musicalGroup.number_members
         td.xl-75(width=23 style="width:22pt;vertical-align: middle;")
             font.font-8= (63)
     tr(style="border-bottom: 2pt solid black;")
