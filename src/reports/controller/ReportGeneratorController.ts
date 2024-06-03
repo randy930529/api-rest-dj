@@ -549,9 +549,8 @@ class ReportGeneratorController extends ReportGenerator {
     try {
       const {
         is_rectification = false,
-        regimen = false,
         user,
-      }: { is_rectification: boolean; regimen: boolean; user: User } = req.body;
+      }: { is_rectification: boolean; user: User } = req.body;
 
       this.templatePath = pugTemplatePath("dj08/swornDeclaration");
 
@@ -570,11 +569,17 @@ class ReportGeneratorController extends ReportGenerator {
             ci: true,
             nit: true,
           },
-          fiscalYear: { id: true, year: true },
+          fiscalYear: {
+            id: true,
+            year: true,
+            individual: true,
+            regimen: true,
+            musicalGroup: { description: true, number_members: true },
+          },
         },
         relations: {
           profile: { address: { address: true } },
-          fiscalYear: true,
+          fiscalYear: { musicalGroup: true },
         },
         where: { user: { id: user.id } },
       });
@@ -587,7 +592,13 @@ class ReportGeneratorController extends ReportGenerator {
         nit,
         address,
       } = profile;
-      const { id: fiscalYearId, year } = fiscalYear;
+      const {
+        id: fiscalYearId,
+        year,
+        individual,
+        musicalGroup,
+        regimen,
+      } = fiscalYear;
 
       const fileName = `DJ-08-IP-${year}.pdf`;
 
@@ -812,7 +823,8 @@ class ReportGeneratorController extends ReportGenerator {
         nit,
         address,
         email: user.email,
-        individual: true,
+        individual,
+        musicalGroup,
         is_rectification,
         regimen,
         dateSigns,

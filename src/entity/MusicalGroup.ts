@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToOne } from "typeorm";
+import { Column, Entity, OneToOne } from "typeorm";
 import Model from "./Base";
 import { FiscalYear } from "./FiscalYear";
 
@@ -10,9 +10,9 @@ export class MusicalGroup extends Model {
   @Column()
   number_members: number;
 
-  @OneToOne(() => FiscalYear, fiscalYear => fiscalYear.musicalGroup, {
-    onDelete:"CASCADE",
-    onUpdate:"CASCADE"
+  @OneToOne(() => FiscalYear, (fiscalYear) => fiscalYear.musicalGroup, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   })
   fiscalYear: FiscalYear;
 }

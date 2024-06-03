@@ -44,4 +44,11 @@ export const fiscalYearRoutes = [
     middlewares: [authMiddleware],
     action: "deleteFiscalYear",
   },
+  {
+    method: "delete",
+    route: "/musical/group/:fiscalYearId",
+    controller: FiscalYearController,
+    middlewares: [authMiddleware],
+    action: "deleteMusicalGroup",
+  },
 ];

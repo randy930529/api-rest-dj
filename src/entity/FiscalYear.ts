@@ -35,7 +35,7 @@ export class FiscalYear extends Model {
   @Column({ default: false })
   declared: boolean;
 
-  @Column({ default: false })
+  @Column({ default: true })
   individual: boolean;
 
   @Column({ default: false })
@@ -61,9 +61,9 @@ export class FiscalYear extends Model {
       this.__profileId__ = this.profile.id;
     }
 
-    if (this.individual && !this.musicalGroup) {
+    if (!this.individual && !this.musicalGroup) {
       throw new Error(
-        "Fiscal year marked as individual must have a musical group associated."
+        "Fiscal year marked as not individual must have a musical group associated."
       );
     }
 

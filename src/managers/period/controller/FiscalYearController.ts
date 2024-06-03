@@ -9,6 +9,7 @@ import { FiscalYearDTO } from "../dto/request/fiscalYear.dto";
 import { CreateFiscalYearDTO } from "../dto/response/createFiscalYear.dto";
 import { Dj08SectionData } from "../../../entity/Dj08SectionData";
 import { defaultSectionDataInit } from "../utils";
+import { MusicalGroup } from "../../../entity/MusicalGroup";
 
 export class FiscalYearController extends EntityControllerBase<FiscalYear> {
   constructor() {
@@ -22,6 +23,11 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
       const { id } = fields.profile;
 
       const profile = await getProfileById({ id, res });
+
+      fields.musicalGroup =
+        !fields.individual && fields.musicalGroup
+          ? fields.musicalGroup
+          : undefined;
 
       const objectFiscalYear = Object.assign(new FiscalYear(), {
         ...fields,
@@ -71,6 +77,11 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
       const { id } = fields;
 
       if (!id) responseError(res, "Update fiscal year requiere id valid.", 404);
+
+      fields.musicalGroup =
+        !fields.individual && fields.musicalGroup
+          ? fields.musicalGroup
+          : undefined;
 
       const fiscalYearUpdate = await this.update({ id, res }, fields);
 
@@ -137,6 +148,41 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
 
       res.status(204);
       return "Fiscal year has been removed successfully.";
+    } catch (error) {
+      if (res.statusCode === 200) res.status(500);
+      next(error);
+    }
+  }
+
+  async deleteMusicalGroup(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = parseInt(req.params.fiscalYearId);
+
+      if (!id)
+        responseError(
+          res,
+          "Delete the musical group, requiere a fiscal year id valid.",
+          404
+        );
+
+      const fiscalYearToRemoveMusicalGroup = await this.repository.findOne({
+        relations: ["musicalGroup"],
+        where: { id },
+      });
+
+      if (!fiscalYearToRemoveMusicalGroup)
+        responseError(res, "Fiscal year not found.", 404);
+
+      if (fiscalYearToRemoveMusicalGroup.musicalGroup) {
+        const { musicalGroup } = fiscalYearToRemoveMusicalGroup;
+        fiscalYearToRemoveMusicalGroup.musicalGroup = null;
+
+        await this.repository.save(fiscalYearToRemoveMusicalGroup);
+        await musicalGroup.remove();
+      }
+
+      res.status(204);
+      return "Musical group has been removed successfully.";
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);
