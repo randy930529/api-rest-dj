@@ -46,13 +46,12 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       const newProfileHiredPerson = await this.create(objectProfileHiredPerson);
 
       if (fields.profileHiredPersonActivity) {
-        await fields.profileHiredPersonActivity.map(
-          async (val) =>
-            await ProfileHiredPersonActivity.create({
-              ...val,
-              profileHiredPerson: newProfileHiredPerson,
-            }).save()
-        );
+        await fields.profileHiredPersonActivity.map(async (val) => {
+          await ProfileHiredPersonActivity.create({
+            ...val,
+            profileHiredPerson: newProfileHiredPerson,
+          }).save();
+        });
       }
 
       const profileHiredPerson: ProfileHiredPersonDTO = newProfileHiredPerson;
@@ -98,6 +97,18 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
           404
         );
 
+      if (fields.profileHiredPersonActivity) {
+        await fields.profileHiredPersonActivity.map(
+          async (val) =>
+            await ProfileHiredPersonActivity.create({
+              ...val,
+              profileHiredPerson: { id },
+            }).save()
+        );
+        fields.profileHiredPersonActivity = undefined;
+        fields.import = undefined;
+      }
+
       const profileHiredPersonUpdate = await this.update({ id, res }, fields);
 
       const profileHiredPerson: ProfileHiredPersonDTO =
@@ -111,6 +122,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       res.status(201);
       return { ...resp };
     } catch (error) {
+      console.log(error);
       if (res.statusCode === 200) res.status(500);
       next(error);
     }
@@ -177,6 +189,51 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
 
       res.status(204);
       return "Profile hired person has been removed successfully.";
+    } catch (error) {
+      if (res.statusCode === 200) res.status(500);
+      next(error);
+    }
+  }
+
+  async deleteProfileHiredPersonActivity(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const id = parseInt(req.params.id);
+
+      if (!id)
+        responseError(
+          res,
+          "Delete profile hired person activity requiere id valid.",
+          404
+        );
+
+      const profileHiredPersonActivityToRemove =
+        await ProfileHiredPersonActivity.findOne({
+          select: ["profileHiredPerson"],
+          relations: {
+            profileHiredPerson: true,
+          },
+          where: { id },
+        });
+
+      if (!profileHiredPersonActivityToRemove)
+        responseError(res, "ProfileHiredPersonActivity not found.", 404);
+
+      await ProfileHiredPersonActivity.remove(
+        profileHiredPersonActivityToRemove
+      );
+
+      profileHiredPersonActivityToRemove.profileHiredPerson.import -=
+        profileHiredPersonActivityToRemove.annual_cost;
+      await this.repository.save(
+        profileHiredPersonActivityToRemove.profileHiredPerson
+      );
+
+      res.status(204);
+      return "Profile hired person activity has been removed successfully.";
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);

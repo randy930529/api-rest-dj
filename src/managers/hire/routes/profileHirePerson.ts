@@ -44,4 +44,11 @@ export const profileHiredPersonRoutes = [
     middlewares: [authMiddleware],
     action: "deleteProfileHiredPerson",
   },
+  {
+    method: "delete",
+    route: "/profile/hired/person/activity/:id",
+    controller: ProfileHiredPersonController,
+    middlewares: [authMiddleware],
+    action: "deleteProfileHiredPersonActivity",
+  },
 ];

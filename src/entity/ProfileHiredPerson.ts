@@ -126,12 +126,21 @@ export class ProfileHiredPerson extends Model {
     const profileHiredPersonActivity = await ProfileHiredPersonActivity.find({
       select: {
         profileHiredPerson: {
+          id: true,
+          date_start: true,
+          date_end: true,
+          import: true,
           hiredPerson: {
+            id: true,
             ci: true,
             first_name: true,
             last_name: true,
-            address: { municipality: true },
+            address: { id: true, municipality: true },
           },
+        },
+        profileActivity: {
+          id: true,
+          activity: { id: true, code: true},
         },
       },
       relations: {
