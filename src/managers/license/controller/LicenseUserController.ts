@@ -72,9 +72,8 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       if (!licenseId)
         responseError(res, "Do must provide a valid license id.", 404);
 
-      const userId: number = fields.user
-        ? fields.user.id
-        : JWT.getJwtPayloadValueByKey(token, "id");
+      const jwtUserId = JWT.getJwtPayloadValueByKey(token, "id");
+      const userId: number = fields.user ? fields.user.id : jwtUserId;
 
       if (!userId) responseError(res, "Do must provide a valid user id.", 404);
 
@@ -99,12 +98,19 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
           409
         );
 
-      if (!license.public && user.role !== "admin")
-        responseError(
-          res,
-          "User does not have permission to perform this action",
-          401
-        );
+      if (!license.public && fields.user) {
+        const userAdmin = await User.findOne({
+          select: ["id", "role"],
+          where: { id: jwtUserId },
+        });
+
+        if (userAdmin.role !== "admin")
+          responseError(
+            res,
+            "User does not have permission to perform this action.",
+            401
+          );
+      }
 
       let expirationDate: Date;
       if (license.days)

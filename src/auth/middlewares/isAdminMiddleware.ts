@@ -16,7 +16,7 @@ export const isAdminMiddleware = (
     if (user.role !== "admin") {
       responseError(
         response,
-        "User does not have permission to perform this action",
+        "User does not have permission to perform this action.",
         401
       );
     }
