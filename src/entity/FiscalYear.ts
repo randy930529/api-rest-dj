@@ -7,12 +7,15 @@ import {
   BeforeInsert,
   BeforeUpdate,
   OneToOne,
+  OneToMany,
 } from "typeorm";
 import Model from "./Base";
 import { Profile } from "./Profile";
 import * as moment from "moment";
 import { Dj08SectionData } from "./Dj08SectionData";
 import { MusicalGroup } from "./MusicalGroup";
+import { SupportDocument } from "./SupportDocument";
+import { DJ08 } from "./DJ08";
 
 @Entity()
 export class FiscalYear extends Model {
@@ -47,10 +50,21 @@ export class FiscalYear extends Model {
   @JoinColumn()
   musicalGroup: MusicalGroup;
 
+  @OneToMany(
+    () => SupportDocument,
+    (supportDocument) => supportDocument.fiscalYear
+  )
+  supportDocuments: SupportDocument[];
+
+  @OneToMany(() => DJ08, (dj08) => dj08.fiscalYear)
+  dj08: DJ08[];
+
   toJSON() {
     return {
       ...this,
       __profileId__: undefined,
+      supportDocuments: undefined,
+      dj08: undefined,
     };
   }
 

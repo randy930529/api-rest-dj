@@ -126,6 +126,36 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
       const id = JWT.getJwtPayloadValueByKey(token, "id");
 
       const existToSectionUser = await this.repository.findOne({
+        select: {
+          fiscalYear: {
+            id: true,
+            year: true,
+            date: true,
+            general_scheme: true,
+            declared: true,
+            individual: true,
+            regimen: true,
+            created_at: true,
+            updated_at: true,
+            supportDocuments: {
+              id: true,
+              document: true,
+              type_document: true,
+              element: {
+                id: true,
+                group: true,
+              },
+            },
+            dj08: {
+              id: true,
+              dj08SectionData: {
+                id: true,
+                section_data: true,
+                is_rectification: true,
+              },
+            },
+          },
+        },
         relations: {
           profile: {
             address: { address: true },
@@ -133,7 +163,10 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
               activity: true,
             },
           },
-          fiscalYear: true,
+          fiscalYear: {
+            supportDocuments: { element: true },
+            dj08: { dj08SectionData: true },
+          },
           licenseUser: { license: true },
         },
         where: {
@@ -143,20 +176,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
         },
       });
 
-      if (existToSectionUser) {
-        const { profileActivity } = existToSectionUser.profile;
-        const find_cultural_activity = profileActivity.find(
-          (val) => val.activity.is_culture
-        );
-        const has_cultural_activity = !find_cultural_activity ? false : true;
-
-        if (existToSectionUser.has_cultural_activity != has_cultural_activity) {
-          existToSectionUser.has_cultural_activity = has_cultural_activity;
-          await existToSectionUser.save();
-        }
-
-        return existToSectionUser;
-      }
+      if (existToSectionUser) return existToSectionUser;
 
       const currentProfile = await Profile.findOne({
         relations: {
