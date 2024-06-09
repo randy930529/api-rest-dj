@@ -230,6 +230,7 @@ export class AuthController {
         const newFiscalYearDTO = this.fiscalYearRepository.create({
           year,
           date,
+          individual:true,
           profile,
         });
         const newFiscalYear = await this.fiscalYearRepository.save(
