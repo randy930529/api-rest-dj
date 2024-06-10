@@ -60,7 +60,7 @@ export class Profile extends Model {
   hiredPerson: HiredPerson[];
 
   @OneToMany(() => FiscalYear, (fiscalYear) => fiscalYear.profile, {
-    cascade:true
+    cascade: true,
   })
   fiscalYear: FiscalYear[];
 
