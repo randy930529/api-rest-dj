@@ -7,6 +7,7 @@ import { UserDTO } from "../dto/response/auth/user.dto";
 import { BaseResponseDTO } from "../dto/response/base.dto";
 import { UserWhitProfileDTO } from "../dto/response/auth/userWhitProfile.dto";
 import { UserUpdateDTO } from "../dto/request/userUpdate.dto";
+import { SectionState } from "../../entity/SectionState";
 
 export class UserController {
   private userRepository = AppDataSource.getRepository(User);
@@ -62,8 +63,8 @@ export class UserController {
       const id = JWT.getJwtPayloadValueByKey(token, "id");
       const user = await this.userRepository.findOne({
         relations: {
-          profiles: {address: {address: true}},
-          licenseUser: true,
+          profiles: { address: { address: true } },
+          licenseUser: { license: true },
         },
         where: { id },
       });
@@ -94,9 +95,40 @@ export class UserController {
 
     if (!id) responseError(res, "Destroy user requiere user id valid.", 400);
 
-    let userToRemove = await this.userRepository.findOneBy({ id });
+    let userToRemove = await this.userRepository.findOne({
+      select: {
+        licenseUser: { id: true },
+        profiles: {
+          id: true,
+          fiscalYear: { id: true, dj08: { id: true, dj08SectionData: true } },
+        },
+      },
+      relations: {
+        licenseUser: true,
+        profiles: { fiscalYear: { dj08: { dj08SectionData: true } } },
+      },
+      where: { id },
+    });
 
     if (!userToRemove) responseError(res, "This user does not exist.", 400);
+
+    await (
+      await SectionState.findOne({ where: { user: { id: userToRemove.id } } })
+    )?.remove();
+    await userToRemove.licenseUser.map(
+      async (licenseUser) => await licenseUser.remove()
+    );
+
+    await userToRemove.profiles.map(async (profile) => {
+      await profile.fiscalYear.map(async (fiscalYear) => {
+        await fiscalYear.dj08.map(async (dj08) => {
+          await dj08.dj08SectionData.map((val) => val.remove());
+          await dj08.remove();
+        });
+        await fiscalYear.remove();
+      });
+      await profile.remove();
+    });
 
     await this.userRepository.remove(userToRemove);
   }

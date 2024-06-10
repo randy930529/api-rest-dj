@@ -28,7 +28,7 @@ export class FiscalYear extends Model {
   @Column({ default: true })
   general_scheme: boolean;
 
-  @ManyToOne(() => Profile)
+  @ManyToOne(() => Profile, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   @JoinColumn()
   profile: Profile;
 

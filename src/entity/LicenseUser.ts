@@ -40,7 +40,7 @@ export class LicenseUser extends Model {
   @Column({ type: "integer", width: 4, default: 1 })
   max_profiles: number;
 
-  @ManyToOne(() => User, { cascade: ["update"] })
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
   @JoinColumn()
   user: User;
 

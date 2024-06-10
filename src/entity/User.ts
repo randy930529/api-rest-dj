@@ -1,4 +1,4 @@
-import { Entity, Column, OneToMany, Index } from "typeorm";
+import { Entity, Column, OneToMany, Index, BeforeRemove } from "typeorm";
 import { RefreshToken } from "./RefreshToken";
 import Model from "./Base";
 import { LicenseUser } from "./LicenseUser";
@@ -50,7 +50,7 @@ export class User extends Model {
   refresh_tokens: RefreshToken;
 
   @OneToMany(() => LicenseUser, (licenseUser) => licenseUser.user, {
-    onDelete: "CASCADE",
+    cascade: true,
   })
   licenseUser: LicenseUser[];
 

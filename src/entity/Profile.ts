@@ -59,7 +59,9 @@ export class Profile extends Model {
   @OneToMany(() => HiredPerson, (hiredPerson) => hiredPerson.profile)
   hiredPerson: HiredPerson[];
 
-  @OneToMany(() => FiscalYear, (fiscalYear) => fiscalYear.profile)
+  @OneToMany(() => FiscalYear, (fiscalYear) => fiscalYear.profile, {
+    cascade:true
+  })
   fiscalYear: FiscalYear[];
 
   @OneToMany(

@@ -181,7 +181,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
       const currentProfile = await Profile.findOne({
         relations: {
           user: true,
-          fiscalYear: true,
+          fiscalYear: { supportDocuments: true },
           profileActivity: { activity: true },
         },
         where: {
@@ -193,7 +193,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
       });
 
       const currentLicenseUser = await LicenseUser.find({
-        relations: ["user"],
+        relations: ["user", "license"],
         where: {
           is_paid: true,
           user: {
