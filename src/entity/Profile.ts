@@ -66,13 +66,15 @@ export class Profile extends Model {
 
   @OneToMany(
     () => ProfileEnterprise,
-    (profileEnterprise) => profileEnterprise.profile
+    (profileEnterprise) => profileEnterprise.profile,
+    {cascade:["remove"]}
   )
   profileEnterprise: ProfileEnterprise[];
 
   @OneToMany(
     () => ProfileActivity,
-    (profileActivity) => profileActivity.profile
+    (profileActivity) => profileActivity.profile,
+    {cascade:["remove"]}
   )
   profileActivity: ProfileActivity[];
 

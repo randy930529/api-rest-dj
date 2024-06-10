@@ -33,7 +33,7 @@ export class ProfileActivity extends Model {
   @Column()
   date_end: Date;
 
-  @ManyToOne(() => Profile)
+  @ManyToOne(() => Profile, {onDelete:"CASCADE"})
   @JoinColumn()
   profile: Profile;
 

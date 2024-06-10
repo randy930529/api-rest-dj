@@ -43,7 +43,7 @@ export class ProfileEnterprise extends Model {
   @JoinColumn()
   enterprise: Enterprise;
 
-  @ManyToOne(() => Profile, { nullable: true })
+  @ManyToOne(() => Profile, { nullable: true, onDelete:"CASCADE" })
   @JoinColumn()
   profile: Profile;
 
