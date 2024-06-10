@@ -28,6 +28,19 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
       const userId = JWT.getJwtPayloadValueByKey(token, "id");
 
       const existToSectionUser = await this.repository.findOne({
+        relations: {
+          profile: {
+            address: { address: true },
+            profileActivity: {
+              activity: true,
+            },
+          },
+          fiscalYear: {
+            supportDocuments: { element: true },
+            dj08: { dj08SectionData: true },
+          },
+          licenseUser: { license: true },
+        },
         where: {
           user: {
             id: userId,

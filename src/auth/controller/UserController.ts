@@ -101,6 +101,7 @@ export class UserController {
         profiles: {
           id: true,
           fiscalYear: { id: true, dj08: { id: true, dj08SectionData: true } },
+          profileHiredPerson: { id: true },
         },
       },
       relations: {
@@ -121,6 +122,9 @@ export class UserController {
 
     await userToRemove.profiles.map(async (profile) => {
       await profile.fiscalYear.map(async (fiscalYear) => {
+        await profile.profileHiredPerson.map(async (profileHiredPerson) => {
+          await profileHiredPerson.remove();
+        });
         await fiscalYear.dj08.map(async (dj08) => {
           await dj08.dj08SectionData.map((val) => val.remove());
           await dj08.remove();
