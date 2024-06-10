@@ -1,5 +1,6 @@
 import * as express from "express";
 import * as bodyParser from "body-parser";
+import * as cors from "cors";
 import "express-async-errors";
 import validateEnv from "./utils/settings/validateEnv";
 import { Request, Response } from "express";
@@ -27,6 +28,7 @@ AppDataSource.initialize()
     // create express app
     const app = express();
     app.use(bodyParser.json());
+    app.use(cors(appConfig.corsOptions));
 
     // register express routes from defined application routes
     Routes.forEach((route) => {

@@ -3,6 +3,9 @@
     "site": "https://181.225.233.215:4000",
     "debug": "production",
     "port": 4000,
+    "corsOptions": {
+      "origin": ""
+    },
     "emailFrom": "conalbert@nauta.cu",
     "licenseFreeDays": 5,
     "validTimeTMBill": 7200,

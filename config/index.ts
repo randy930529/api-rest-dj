@@ -45,6 +45,13 @@ type businessMetadataType = {
   email: string;
 };
 
+type corsOptionsType = {
+  origin: string;
+  methods?: string;
+  preflightContinue?: boolean;
+  optionsSuccessStatus?: number;
+};
+
 interface AppConfig {
   site: string;
   debug: string;
@@ -57,6 +64,7 @@ interface AppConfig {
   businessMetadata: businessMetadataType;
   accountingConstants: accountingConstantsType;
   constantToSectionG: ConstantToSectionGType;
+  corsOptions: corsOptionsType;
 }
 
 export const appConfig: AppConfig = config.get("app");
