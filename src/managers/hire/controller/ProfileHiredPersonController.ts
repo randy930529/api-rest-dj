@@ -106,7 +106,6 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
             }).save()
         );
         fields.profileHiredPersonActivity = undefined;
-        fields.import = undefined;
       }
 
       const profileHiredPersonUpdate = await this.update({ id, res }, fields);
