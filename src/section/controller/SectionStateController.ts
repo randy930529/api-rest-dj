@@ -181,7 +181,10 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
       const currentProfile = await Profile.findOne({
         relations: {
           user: true,
-          fiscalYear: { supportDocuments: true },
+          fiscalYear: {
+            supportDocuments: true,
+            dj08: { dj08SectionData: true },
+          },
           profileActivity: { activity: true },
         },
         where: {

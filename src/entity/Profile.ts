@@ -56,7 +56,7 @@ export class Profile extends Model {
   )
   profileHiredPerson: ProfileHiredPerson[];
 
-  @OneToMany(() => HiredPerson, (hiredPerson) => hiredPerson.profile)
+  @OneToMany(() => HiredPerson, (hiredPerson) => hiredPerson.profile, {cascade:["remove"]})
   hiredPerson: HiredPerson[];
 
   @OneToMany(() => FiscalYear, (fiscalYear) => fiscalYear.profile, {

@@ -4,7 +4,6 @@ import * as moment from "moment";
 import ReportGenerator from "../../base/ReportGeneratorBase";
 import { ENV } from "../../utils/settings/environment";
 import { User } from "../../entity/User";
-import { DJ08 } from "../../entity/DJ08";
 import { SectionState } from "../../entity/SectionState";
 import { Dj08SectionData, SectionName } from "../../entity/Dj08SectionData";
 import {
@@ -547,10 +546,8 @@ class ReportGeneratorController extends ReportGenerator {
     next: NextFunction
   ): Promise<void> {
     try {
-      const {
-        is_rectification = false,
-        user,
-      }: { is_rectification: boolean; user: User } = req.body;
+      const { declared = false, user }: { declared: boolean; user: User } =
+        req.body;
 
       this.templatePath = pugTemplatePath("dj08/swornDeclaration");
 
@@ -572,6 +569,7 @@ class ReportGeneratorController extends ReportGenerator {
           fiscalYear: {
             id: true,
             year: true,
+            declared: true,
             individual: true,
             regimen: true,
             musicalGroup: { description: true, number_members: true },
@@ -579,7 +577,7 @@ class ReportGeneratorController extends ReportGenerator {
         },
         relations: {
           profile: { address: { address: true } },
-          fiscalYear: { musicalGroup: true },
+          fiscalYear: { musicalGroup: true, dj08: { dj08SectionData: true } },
         },
         where: { user: { id: user.id } },
       });
@@ -593,7 +591,7 @@ class ReportGeneratorController extends ReportGenerator {
         address,
       } = profile;
       const {
-        id: fiscalYearId,
+        // id: fiscalYearId,
         year,
         individual,
         musicalGroup,
@@ -602,37 +600,37 @@ class ReportGeneratorController extends ReportGenerator {
 
       const fileName = `DJ-08-IP-${year}.pdf`;
 
-      const dJ08 = await DJ08.findOne({
-        relations: ["profile", "dj08SectionData"],
-        where: {
-          fiscalYear: { id: fiscalYearId },
-          profile: { id: profileId },
-        },
-      });
+      // const dJ08 = await DJ08.findOne({
+      //   relations: ["profile", "dj08SectionData"],
+      //   where: {
+      //     fiscalYear: { id: fiscalYearId },
+      //     profile: { id: profileId },
+      //   },
+      // });
+      const dJ08 = fiscalYear.dj08[0];
 
       let dj08SectionData = dJ08?.dj08SectionData.find(
-        (val) => val.is_rectification === is_rectification
+        (val) => val.is_rectification === fiscalYear.declared
       );
+      console.log(dj08SectionData);
 
-      if (is_rectification) {
+      if (declared && !fiscalYear.declared && !dj08SectionData) {
         const { section_data: existentSection_data } =
           dJ08?.dj08SectionData.find((val) => val.is_rectification === false);
 
-        if (!dj08SectionData) {
-          const newDataDJ08ToRectification = Dj08SectionData.create({
-            section_data: existentSection_data,
-            is_rectification,
-            dJ08,
-          });
+        const newDataDJ08ToRectification = Dj08SectionData.create({
+          section_data: existentSection_data,
+          is_rectification: declared,
+          dJ08,
+        });
 
-          dj08SectionData = await newDataDJ08ToRectification.save();
-        } else {
-          dj08SectionData.section_data = existentSection_data;
-          dj08SectionData = await dj08SectionData.save();
-        }
+        dj08SectionData = await newDataDJ08ToRectification.save();
+        fiscalYear.declared = true;
+        await fiscalYear.save();
       }
 
       dj08SectionData.section_data = JSON.parse(dj08SectionData.section_data);
+      const { is_rectification } = dj08SectionData;
 
       const [dataSectionA, totalSectionA] = getDataAndTotalsToDj08Sections<
         DataSectionAType,
@@ -722,7 +720,7 @@ class ReportGeneratorController extends ReportGenerator {
       let { F28, F29, F30, F31, F33a, F36a } =
         dj08SectionData.section_data[SectionName.SECTION_D]["data"];
 
-      if (is_rectification) {
+      if (declared) {
         console.log(F26, F33a);
         F28 = (F26 || 0) - F33a;
         F29 = F36a;
@@ -755,7 +753,7 @@ class ReportGeneratorController extends ReportGenerator {
 
       const { F34, F35 } =
         dj08SectionData.section_data[SectionName.SECTION_E]["data"];
-      const F32 = is_rectification ? F30 : F26;
+      const F32 = declared ? F30 : F26;
       const F33 = [1, 2].indexOf(dateSigns.month) !== -1 ? (F32 * 5) / 100 : 0;
 
       const F36 = F32 - F33 - F34 || 0 + F35 || 0;

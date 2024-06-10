@@ -27,7 +27,7 @@ export class HiredPerson extends Model {
   @Column({ type: "varchar", length: 11 })
   ci: string;
 
-  @ManyToOne(() => Profile)
+  @ManyToOne(() => Profile, { onDelete: "CASCADE" })
   @JoinColumn()
   profile: Profile;
 

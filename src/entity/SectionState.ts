@@ -99,9 +99,13 @@ export class SectionState extends Model {
 
     const current_tax_debt = F32 - F33 - F34 || 0 + F35 || 0;
 
+    const expenses_with_document = this.fiscalYear.supportDocuments.length
+      ? 100 - porcentage
+      : 0;
+
     return {
       expenses_without_document: porcentage,
-      expenses_with_document: 100 - porcentage,
+      expenses_with_document,
       has_cultural_activity,
       current_tax_debt,
     };
