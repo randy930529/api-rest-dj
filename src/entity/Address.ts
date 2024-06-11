@@ -23,8 +23,7 @@ export class Address extends Model {
   hiredPerson: HiredPerson[];
 
   @OneToMany(() => ProfileAddress, (profileAddress) => profileAddress.address, {
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
+    cascade: true,
   })
   profileAddress: ProfileAddress[];
 }
