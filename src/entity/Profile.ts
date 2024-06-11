@@ -34,7 +34,11 @@ export class Profile extends Model {
   })
   nit: string;
 
-  @ManyToOne(() => ProfileAddress, { nullable: true, cascade: true })
+  @ManyToOne(() => ProfileAddress, {
+    nullable: true,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   @JoinColumn()
   address: ProfileAddress;
 

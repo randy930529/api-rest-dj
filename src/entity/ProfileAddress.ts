@@ -34,8 +34,7 @@ export class ProfileAddress extends Model {
   address: Address;
 
   @OneToMany(() => Profile, (profile) => profile.address, {
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
+    cascade: true,
   })
   profiles: Profile[];
 
