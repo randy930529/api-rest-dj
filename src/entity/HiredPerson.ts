@@ -40,7 +40,7 @@ export class HiredPerson extends Model {
   )
   profileHiredPerson: ProfileHiredPerson[];
 
-  @ManyToOne(() => Address, { nullable: true, cascade: ["update"] })
+  @ManyToOne(() => Address, { nullable: true, cascade: ["update", "remove"] })
   @JoinColumn()
   address: Address;
 

@@ -52,7 +52,8 @@ export class FiscalYear extends Model {
 
   @OneToMany(
     () => SupportDocument,
-    (supportDocument) => supportDocument.fiscalYear
+    (supportDocument) => supportDocument.fiscalYear,
+    { cascade: ["remove"] }
   )
   supportDocuments: SupportDocument[];
 

@@ -17,7 +17,9 @@ export class Address extends Model {
   @Column({ type: "varchar", length: 6, default: "" })
   code: string;
 
-  @OneToMany(() => HiredPerson, (hiredPerson) => hiredPerson.address)
+  @OneToMany(() => HiredPerson, (hiredPerson) => hiredPerson.address, {
+    onDelete: "CASCADE",
+  })
   hiredPerson: HiredPerson[];
 
   @OneToMany(() => ProfileAddress, (profileAddress) => profileAddress.address, {

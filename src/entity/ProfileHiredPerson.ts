@@ -43,14 +43,14 @@ export class ProfileHiredPerson extends Model {
   })
   import: number;
 
-  @ManyToOne(() => Profile)
+  @ManyToOne(() => Profile, { onDelete: "CASCADE" })
   @JoinColumn()
   profile: Profile;
 
   @Column({ nullable: true })
   __profileId__: number;
 
-  @ManyToOne(() => HiredPerson)
+  @ManyToOne(() => HiredPerson, { onDelete: "CASCADE" })
   @JoinColumn()
   hiredPerson: HiredPerson;
 
@@ -140,7 +140,7 @@ export class ProfileHiredPerson extends Model {
         },
         profileActivity: {
           id: true,
-          activity: { id: true, code: true},
+          activity: { id: true, code: true },
         },
       },
       relations: {

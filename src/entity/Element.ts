@@ -28,7 +28,7 @@ export class Element extends Model {
   @Column({ type: "char", length: 10, default: "" })
   group: string;
 
-  @ManyToOne(() => Profile, { nullable: true })
+  @ManyToOne(() => Profile, { nullable: true, cascade: ["remove"] })
   @JoinColumn()
   profile: Profile;
 
@@ -38,7 +38,8 @@ export class Element extends Model {
 
   @OneToMany(
     () => SupportDocument,
-    (supportDocument) => supportDocument.element
+    (supportDocument) => supportDocument.element,
+    { cascade: ["remove"] }
   )
   supportDocuments: SupportDocument[];
 
@@ -70,7 +71,9 @@ export class Element extends Model {
       });
 
       if (countElementsForProfilePD >= allowedCount) {
-        throw new Error(`Only ${allowedCount} possible elements to deduce are allowed.`);
+        throw new Error(
+          `Only ${allowedCount} possible elements to deduce are allowed.`
+        );
       }
     }
   }

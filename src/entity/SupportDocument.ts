@@ -55,11 +55,11 @@ export class SupportDocument extends Model {
   @Column({ default: false })
   is_bank: boolean;
 
-  @ManyToOne(() => Element)
+  @ManyToOne(() => Element, { onDelete:"CASCADE" })
   @JoinColumn()
   element: Element;
 
-  @ManyToOne(() => FiscalYear)
+  @ManyToOne(() => FiscalYear, { onDelete: "CASCADE" })
   @JoinColumn()
   fiscalYear: FiscalYear;
 

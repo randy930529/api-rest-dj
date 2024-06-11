@@ -52,11 +52,14 @@ export class Profile extends Model {
 
   @OneToMany(
     () => ProfileHiredPerson,
-    (profileHiredPerson) => profileHiredPerson.profile
+    (profileHiredPerson) => profileHiredPerson.profile,
+    { cascade: ["remove"] }
   )
   profileHiredPerson: ProfileHiredPerson[];
 
-  @OneToMany(() => HiredPerson, (hiredPerson) => hiredPerson.profile, {cascade:["remove"]})
+  @OneToMany(() => HiredPerson, (hiredPerson) => hiredPerson.profile, {
+    cascade: ["remove"],
+  })
   hiredPerson: HiredPerson[];
 
   @OneToMany(() => FiscalYear, (fiscalYear) => fiscalYear.profile, {
@@ -67,14 +70,14 @@ export class Profile extends Model {
   @OneToMany(
     () => ProfileEnterprise,
     (profileEnterprise) => profileEnterprise.profile,
-    {cascade:["remove"]}
+    { cascade: ["remove"] }
   )
   profileEnterprise: ProfileEnterprise[];
 
   @OneToMany(
     () => ProfileActivity,
     (profileActivity) => profileActivity.profile,
-    {cascade:["remove"]}
+    { cascade: ["remove"] }
   )
   profileActivity: ProfileActivity[];
 

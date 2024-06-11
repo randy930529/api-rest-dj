@@ -6,11 +6,11 @@ import { Dj08SectionData } from "./Dj08SectionData";
 
 @Entity()
 export class DJ08 extends Model {
-  @ManyToOne(() => Profile)
+  @ManyToOne(() => Profile, { onDelete: "CASCADE" })
   @JoinColumn()
   profile: Profile;
 
-  @ManyToOne(() => FiscalYear)
+  @ManyToOne(() => FiscalYear, { onDelete: "CASCADE" })
   @JoinColumn()
   fiscalYear: FiscalYear;
 

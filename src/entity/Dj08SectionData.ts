@@ -25,7 +25,7 @@ export class Dj08SectionData extends Model {
   })
   section_data: string;
 
-  @ManyToOne(() => DJ08, { cascade: true })
+  @ManyToOne(() => DJ08, { cascade: true, onDelete: "CASCADE" })
   @JoinColumn()
   dJ08: DJ08;
 
