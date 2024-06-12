@@ -16,7 +16,7 @@ export enum SectionName {
 
 @Entity()
 export class Dj08SectionData extends Model {
-  @Column({ default: false })
+  @Column({ default: true })
   is_rectification: boolean;
 
   @Column({

@@ -573,6 +573,14 @@ class ReportGeneratorController extends ReportGenerator {
             individual: true,
             regimen: true,
             musicalGroup: { description: true, number_members: true },
+            dj08: {
+              id: true,
+              dj08SectionData: {
+                id: true,
+                is_rectification: true,
+                section_data: true,
+              },
+            },
           },
         },
         relations: {
@@ -582,55 +590,38 @@ class ReportGeneratorController extends ReportGenerator {
         where: { user: { id: user.id } },
       });
 
-      const {
-        id: profileId,
-        first_name,
-        last_name,
-        ci,
-        nit,
-        address,
-      } = profile;
-      const {
-        // id: fiscalYearId,
-        year,
-        individual,
-        musicalGroup,
-        regimen,
-      } = fiscalYear;
+      const { first_name, last_name, ci, nit, address } = profile;
+      const { year, individual, musicalGroup, regimen } = fiscalYear;
 
       const fileName = `DJ-08-IP-${year}.pdf`;
 
-      // const dJ08 = await DJ08.findOne({
-      //   relations: ["profile", "dj08SectionData"],
-      //   where: {
-      //     fiscalYear: { id: fiscalYearId },
-      //     profile: { id: profileId },
-      //   },
-      // });
       const dJ08 = fiscalYear.dj08[0];
 
-      let dj08SectionData = dJ08?.dj08SectionData.find(
-        (val) => val.is_rectification === fiscalYear.declared
+      const dj08SectionData = dJ08?.dj08SectionData.find(
+        (val) => val.is_rectification === true
       );
       console.log(dj08SectionData);
 
-      if (declared && !fiscalYear.declared && !dj08SectionData) {
-        const { section_data: existentSection_data } =
-          dJ08?.dj08SectionData.find((val) => val.is_rectification === false);
-
-        const newDataDJ08ToRectification = Dj08SectionData.create({
-          section_data: existentSection_data,
-          is_rectification: declared,
+      if (
+        !fiscalYear.declared &&
+        declared === true &&
+        dJ08.dj08SectionData?.length < 2
+      ) {
+        const newDataDJ08ToDeclared = Dj08SectionData.create({
+          section_data: dj08SectionData.section_data,
+          is_rectification: false,
           dJ08,
         });
 
-        dj08SectionData = await newDataDJ08ToRectification.save();
+        await newDataDJ08ToDeclared.save();
         fiscalYear.declared = true;
         await fiscalYear.save();
+        dj08SectionData.is_rectification = false;
       }
 
       dj08SectionData.section_data = JSON.parse(dj08SectionData.section_data);
-      const { is_rectification } = dj08SectionData;
+      const is_rectification =
+        dj08SectionData.is_rectification && declared && fiscalYear.declared;
 
       const [dataSectionA, totalSectionA] = getDataAndTotalsToDj08Sections<
         DataSectionAType,

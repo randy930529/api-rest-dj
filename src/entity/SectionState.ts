@@ -79,7 +79,7 @@ export class SectionState extends Model {
 
     const section_data = JSON.parse(
       this.fiscalYear.dj08[0].dj08SectionData.find(
-        (val) => val.is_rectification == this.fiscalYear.declared
+        (val) => val.is_rectification === true
       ).section_data
     );
 
