@@ -1,7 +1,7 @@
 {
-  "name": "user_acount_dj",
+  "name": "api_rest_dj",
   "version": "0.0.1",
-  "description": "Awesome project developed with TypeORM.",
+  "description": "API-REST-DJ es un api para TCP y tenedores de libro. Gestiona los ingresos y gastos, controla el uso a través de licencias de uso.",
   "type": "commonjs",
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
@@ -48,7 +48,7 @@
     "start": "ts-node src/index.ts",
     "typeorm": "typeorm-ts-node-commonjs",
     "build": "tsc -p .",
-    "migrate": "typeorm-ts-node-commonjs migration:generate ./src/migration/LicenseUserRefactoring -d ./src/data-source.ts",
+    "migrate": "typeorm-ts-node-commonjs migration:generate ./src/migration/Dj08SectionDataRefactoring -d ./src/data-source.ts",
     "db:push": "typeorm-ts-node-commonjs migration:run -d ./src/data-source.ts",
     "createadmin": "ts-node-dev src/utils/commandLine.ts"
   }
