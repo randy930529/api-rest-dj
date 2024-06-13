@@ -261,13 +261,13 @@ export class UserController {
   }
 
   async userMe(req: Request, res: Response, next: NextFunction) {
-    if (req.method == "GET") {
+    if (req.method === "GET") {
       return this.retrieve(req, res, next);
-    } else if (req.method == "PUT") {
+    } else if (req.method === "PUT") {
       return this.update(req, res, next);
-    } else if (req.method == "PATCH") {
+    } else if (req.method === "PATCH") {
       return this.partialUpdate(req, res, next);
-    } else if (req.method == "DELETE") {
+    } else if (req.method === "DELETE") {
       return this.delete(req, res, next);
     }
   }

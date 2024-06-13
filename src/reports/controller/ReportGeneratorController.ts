@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { FindOptionsSelect } from "typeorm";
 import * as pug from "pug";
 import * as moment from "moment";
 import ReportGenerator from "../../base/ReportGeneratorBase";
@@ -59,7 +60,7 @@ class ReportGeneratorController extends ReportGenerator {
 
       this.templatePath = pugTemplatePath("expense/operationsExpenseReport");
       const fileName = `Reporte_de_Gastos_de_Operaciones_${
-        month ? "en_el_mes" : "mensuales"
+        month ? `en_el_mes-${month}` : "mensuales"
       }.pdf`;
 
       const { expenseId_PD } = ENV.group;
@@ -77,12 +78,12 @@ class ReportGeneratorController extends ReportGenerator {
 
       const expensesMePD: SupportDocumentPartialType[] =
         getInfoReportToDataBase.filter(
-          (val) => !val.is_general && val.group === "pd"
+          (val) => !val.is_general && val.group.trim() === "pd"
         );
 
       const expensesMeDD: SupportDocumentPartialType[] =
         getInfoReportToDataBase.filter(
-          (val) => !val.is_general && val.group === "dd"
+          (val) => !val.is_general && val.group.trim() === "dd"
         );
 
       const expensesNameTb1 = defaultDataArray<string>(6, "");
@@ -220,6 +221,7 @@ class ReportGeneratorController extends ReportGenerator {
         dataMatrix,
         dataTotals,
         expensesName,
+        monthIndex: month,
       });
       const pdfBuffer = await this.generatePDF({ htmlContent });
 
@@ -269,11 +271,11 @@ class ReportGeneratorController extends ReportGenerator {
       });
 
       const incomeMeEI = getInfoReportToDataBase.filter(
-        (val) => val.group === "ei"
+        (val) => val.group.trim() === "ei"
       );
 
       const incomeMeIG = getInfoReportToDataBase.filter(
-        (val) => val.group === "ig"
+        (val) => val.group.trim() === "ig"
       );
 
       let totals = defaultDataArray<number>(4, 0);
@@ -473,12 +475,16 @@ class ReportGeneratorController extends ReportGenerator {
 
         const expensesMePD = infoReportToDataBase.filter(
           (val) =>
-            !val.is_general && val.group === "pd" && i === parseInt(val.month)
+            !val.is_general &&
+            val.group.trim() === "pd" &&
+            i === parseInt(val.month)
         );
 
         const expensesMeDD = infoReportToDataBase.filter(
           (val) =>
-            !val.is_general && val.group === "dd" && i === parseInt(val.month)
+            !val.is_general &&
+            val.group.trim() === "dd" &&
+            i === parseInt(val.month)
         );
 
         const [dataTb1, dataTb2, displayName, totalMonth] =
@@ -557,32 +563,35 @@ class ReportGeneratorController extends ReportGenerator {
         year: moment().year(),
       };
 
-      const { profile, fiscalYear } = await SectionState.findOne({
-        select: {
-          profile: {
+      const select: FindOptionsSelect<SectionState> = {
+        profile: {
+          id: true,
+          first_name: true,
+          last_name: true,
+          ci: true,
+          nit: true,
+          run_in_municipality: true,
+        },
+        fiscalYear: {
+          id: true,
+          year: true,
+          declared: true,
+          individual: true,
+          regimen: true,
+          musicalGroup: { description: true, number_members: true },
+          dj08: {
             id: true,
-            first_name: true,
-            last_name: true,
-            ci: true,
-            nit: true,
-          },
-          fiscalYear: {
-            id: true,
-            year: true,
-            declared: true,
-            individual: true,
-            regimen: true,
-            musicalGroup: { description: true, number_members: true },
-            dj08: {
+            dj08SectionData: {
               id: true,
-              dj08SectionData: {
-                id: true,
-                is_rectification: true,
-                section_data: true,
-              },
+              is_rectification: true,
+              section_data: true,
             },
           },
         },
+      };
+
+      const { profile, fiscalYear } = await SectionState.findOne({
+        select,
         relations: {
           profile: { address: { address: true } },
           fiscalYear: { musicalGroup: true, dj08: { dj08SectionData: true } },
@@ -590,7 +599,8 @@ class ReportGeneratorController extends ReportGenerator {
         where: { user: { id: user.id } },
       });
 
-      const { first_name, last_name, ci, nit, address } = profile;
+      const { first_name, last_name, ci, nit, address, run_in_municipality } =
+        profile;
       const { year, individual, musicalGroup, regimen } = fiscalYear;
 
       const fileName = `DJ-08-IP-${year}.pdf`;
@@ -817,7 +827,7 @@ class ReportGeneratorController extends ReportGenerator {
         is_rectification,
         regimen,
         dateSigns,
-        operatesInMunicipality: null,
+        operatesInMunicipality: run_in_municipality,
         dataSectionA,
         totalSectionA,
         dataSectionB,

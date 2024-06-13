@@ -65,12 +65,12 @@ export class SectionState extends Model {
 
     const countExpensesWithoutDocument =
       this.fiscalYear.supportDocuments.filter(
-        (val) => val.type_document == "g" && !val.document
+        (val) => val.type_document === "g" && !val.document
       ).length;
 
     const countExpensesPD =
       this.fiscalYear.supportDocuments.filter(
-        (val) => val.type_document == "g" && val.element.group == "pd        "
+        (val) => val.type_document === "g" && val.element.group.trim() === "pd"
       ).length || 1;
 
     const porcentage = parseFloat(

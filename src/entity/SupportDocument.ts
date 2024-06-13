@@ -125,17 +125,17 @@ export class SupportDocument extends Model {
 
     switch (this.type_document) {
       case "m":
-        const paidTributes = documents.filter((val) => val.element.type == "m");
+        const paidTributes = documents.filter((val) => val.element.type === "m");
 
         const expensesBookTTI19 = paidTributes.reduce(
           (sumTotal, val) =>
-            val.element.group == "tz" ? sumTotal + val.amount : sumTotal,
+            val.element.group.trim() === "tz" ? sumTotal + val.amount : sumTotal,
           0
         );
 
         const expensesBookTTJ19 = paidTributes.reduce(
           (sumTotal, val) =>
-            val.element.group == "cm" ? sumTotal + val.amount : sumTotal,
+            val.element.group.trim() === "cm" ? sumTotal + val.amount : sumTotal,
           0
         );
 
@@ -174,7 +174,7 @@ export class SupportDocument extends Model {
               ? previousObj.sumTotal + document.amount
               : document.amount;
 
-            if (document.element.group == "tp") {
+            if (document.element.group.trim() === "tp") {
               const obj = previousObj
                 ? { ...previousObj, sumTotal }
                 : {
@@ -194,7 +194,7 @@ export class SupportDocument extends Model {
                 concepto: "Total de tributos pagados",
                 import: totals,
               };
-            } else if (document.element.group == "ot") {
+            } else if (document.element.group.trim() === "ot") {
               const obj = {
                 row: "F43",
                 sumTotal,
@@ -224,7 +224,7 @@ export class SupportDocument extends Model {
 
       case "g":
         const expenses = documents.filter(
-          (val) => val.element.type == "g" && val.element.group == "dd"
+          (val) => val.element.type == "g" && val.element.group.trim() === "dd"
         );
 
         const expensesBookTGP19 = expenses.reduce(

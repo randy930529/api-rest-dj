@@ -60,8 +60,8 @@ export class Element extends Model {
       throw new Error("Only a element with the same name are allowed.");
     }
 
-    if ((this.type == "g" && this.group == "pd") || this.group == "dd") {
-      const allowedCount = this.group == "pd" ? 6 : 2;
+    if ((this.type === "g" && this.group.trim() === "pd") || this.group.trim() === "dd") {
+      const allowedCount = this.group.trim() === "pd" ? 6 : 2;
       const countElementsForProfilePD = await Element.count({
         where: {
           profile: { id: this.profile?.id },
