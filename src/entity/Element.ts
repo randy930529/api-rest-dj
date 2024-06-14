@@ -70,7 +70,7 @@ export class Element extends Model {
         },
       });
 
-      if (countElementsForProfilePD >= allowedCount) {
+      if (!this.is_general && countElementsForProfilePD >= allowedCount) {
         throw new Error(
           `Only ${allowedCount} possible elements to deduce are allowed.`
         );
