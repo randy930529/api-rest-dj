@@ -82,7 +82,7 @@ export class ProfileEnterprise extends Model {
           profile: { id: this.__profileId__ },
           fiscalYear: { id: fiscalYearId },
         },
-        is_rectification: false,
+        is_rectification: true,
       },
     });
 
