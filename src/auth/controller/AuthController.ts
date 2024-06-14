@@ -77,6 +77,11 @@ export class AuthController {
           responseError(res, "Server is not ready to send your messages.");
         });
 
+      if (appConfig.debug === "production") {
+        resp.data.confirUrl = undefined;
+        resp.data.token = undefined;
+      }
+
       res.status(201);
       return { ...resp };
     } catch (error) {
@@ -230,7 +235,7 @@ export class AuthController {
         const newFiscalYearDTO = this.fiscalYearRepository.create({
           year,
           date,
-          individual:true,
+          individual: true,
           profile,
         });
         const newFiscalYear = await this.fiscalYearRepository.save(
@@ -285,6 +290,11 @@ export class AuthController {
           await notificacionDTO.save();
           responseError(res, "Server is not ready to send your messages.");
         });
+
+      if (appConfig.debug === "production") {
+        resp.data.confirUrl = undefined;
+        resp.data.token = undefined;
+      }
 
       res.status(201);
       return { ...resp };
@@ -358,6 +368,11 @@ export class AuthController {
         .catch((error) => {
           responseError(res, "Server is not ready to send your messages.");
         });
+
+      if (appConfig.debug === "production") {
+        resp.data.confirUrl = undefined;
+        resp.data.token = undefined;
+      }
 
       res.status(201);
       return { ...resp };
