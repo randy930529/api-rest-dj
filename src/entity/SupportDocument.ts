@@ -105,7 +105,7 @@ export class SupportDocument extends Model {
     const dj08ToUpdate = await Dj08SectionData.findOne({
       where: {
         dJ08: { fiscalYear: { id: this.__fiscalYearId__ } },
-        is_rectification: false,
+        is_rectification: true,
       },
     });
 
