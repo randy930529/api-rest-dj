@@ -156,7 +156,7 @@ export class ProfileHiredPerson extends Model {
     );
 
     const newDataSectionI: { [key: string | number]: DataSectionIType } = {};
-    const newTotalSectionI: TotalSectionIType = { import: this.import };
+    const newTotalSectionI: TotalSectionIType = { import: 0 };
 
     for (let i = 0; i < profileHiredPersonActivity.length; i++) {
       const {
@@ -184,6 +184,7 @@ export class ProfileHiredPerson extends Model {
         import: importAnnual,
       };
       newDataSectionI[`F${i + 64}`] = data;
+      newTotalSectionI.import += importAnnual;
     }
     section_data[SectionName.SECTION_I].data = newDataSectionI;
     section_data[SectionName.SECTION_I].totals = newTotalSectionI;
