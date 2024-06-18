@@ -64,14 +64,26 @@ export class SectionState extends Model {
     const has_cultural_activity = !find_cultural_activity ? false : true;
 
     const countExpensesWithoutDocument =
-      this.fiscalYear.supportDocuments.filter(
-        (val) => val.type_document === "g" && !val.document
-      ).length;
+      this.fiscalYear.supportDocuments.reduce((sumaTotal, val) => {
+        if (
+          val.type_document === "g" &&
+          val.element?.group.trim() === "pd" &&
+          !val.document
+        ) {
+          sumaTotal += val.amount;
+        }
+        return sumaTotal;
+      }, 0);
 
-    const countExpensesPD =
-      this.fiscalYear.supportDocuments.filter(
-        (val) => val.type_document === "g" && val.element.group.trim() === "pd"
-      ).length || 1;
+    const countExpensesPD = this.fiscalYear.supportDocuments.reduce(
+      (sumaTotal, val) => {
+        if (val.type_document === "g" && val.element?.group.trim() === "pd") {
+          sumaTotal += val.amount;
+        }
+        return sumaTotal;
+      },
+      0
+    ) || 1;
 
     const porcentage = parseFloat(
       ((countExpensesWithoutDocument / countExpensesPD) * 100).toFixed(2)
