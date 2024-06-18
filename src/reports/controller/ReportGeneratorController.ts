@@ -603,8 +603,8 @@ class ReportGeneratorController extends ReportGenerator {
         profile;
       const { year, individual, musicalGroup, regimen } = fiscalYear;
 
-      ci.padEnd(11, " ");
-      nit.padEnd(11, " ");
+      ci.padEnd(11);
+      nit.padEnd(11);
 
       const fileName = `DJ-08-IP-${year}.pdf`;
 

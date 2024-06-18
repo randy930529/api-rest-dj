@@ -22,8 +22,6 @@ import {
   TotalSectionIType,
 } from "utils/definitions";
 import { SectionState } from "./SectionState";
-import { ProfileActivity } from "./ProfileActivity";
-import { defaultDataArray } from "../reports/utils/utilsToReports";
 import * as moment from "moment";
 import { ProfileHiredPersonActivity } from "./ProfileHiredPersonActivity";
 
@@ -170,8 +168,7 @@ export class ProfileHiredPerson extends Model {
       const { ci: nit, first_name, last_name, address } = hiredPerson;
       const { profileActivity } = profileHiredPersonActivity[i];
 
-      const code =
-        profileActivity?.activity.code || defaultDataArray<string>(3, "");
+      const code = profileActivity?.activity.code.padEnd(3);
       const fullName = `${first_name} ${last_name}`;
       const from = [date_start.getDate(), date_start.getMonth()];
       const to = [date_end.getDate(), date_end.getMonth()];

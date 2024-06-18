@@ -16,7 +16,7 @@ export class Element extends Model {
   @Column({ type: "varchar", length: 100 })
   description: string;
 
-  @Column({ type: "char", length: 1 })
+  @Column({ type: "char", length: 4, default:"" })
   type: string;
 
   @Column({ default: false })
@@ -27,6 +27,9 @@ export class Element extends Model {
 
   @Column({ type: "char", length: 10, default: "" })
   group: string;
+
+  @Column({ nullable: true })
+  help: string;
 
   @ManyToOne(() => Profile, { nullable: true, cascade: ["remove"] })
   @JoinColumn()
@@ -60,7 +63,10 @@ export class Element extends Model {
       throw new Error("Only a element with the same name are allowed.");
     }
 
-    if ((this.type === "g" && this.group.trim() === "pd") || this.group.trim() === "dd") {
+    if (
+      (this.type === "g" && this.group.trim() === "pd") ||
+      this.group.trim() === "dd"
+    ) {
       const allowedCount = this.group.trim() === "pd" ? 6 : 2;
       const countElementsForProfilePD = await Element.count({
         where: {

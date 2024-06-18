@@ -21,6 +21,9 @@ export class ElementController extends EntityControllerBase<Element> {
       const fields: ElementDTO = req.body;
       const { token } = req.body;
       const { id } = fields.profile;
+      
+      fields.type = fields.type?.toLowerCase();
+      fields.group = fields.group?.toLowerCase();
 
       const userId = JWT.getJwtPayloadValueByKey(token, "id");
 
