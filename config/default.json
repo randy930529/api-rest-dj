@@ -1,5 +1,7 @@
 {
   "app": {
+    "versionAPK": 26,
+    "versionApp": "1.0.0",
     "site": "http://localhost:4000",
     "debug": "development",
     "port": 3000,

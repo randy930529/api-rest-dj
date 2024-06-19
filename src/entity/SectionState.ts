@@ -5,6 +5,7 @@ import { Profile } from "./Profile";
 import { FiscalYear } from "./FiscalYear";
 import { LicenseUser } from "./LicenseUser";
 import { SectionName } from "./Dj08SectionData";
+import { appConfig } from "../../config";
 
 @Entity()
 export class SectionState extends Model {
@@ -30,6 +31,7 @@ export class SectionState extends Model {
   has_cultural_activity: boolean;
 
   toJSON() {
+    const { versionAPK, versionApp } = appConfig;
     const {
       has_cultural_activity,
       expenses_with_document,
@@ -41,6 +43,8 @@ export class SectionState extends Model {
       ...this,
       created_at: undefined,
       updated_at: undefined,
+      versionAPK,
+      versionApp,
       has_cultural_activity,
       expenses_without_document,
       expenses_with_document,
@@ -75,15 +79,13 @@ export class SectionState extends Model {
         return sumaTotal;
       }, 0);
 
-    const countExpensesPD = this.fiscalYear.supportDocuments.reduce(
-      (sumaTotal, val) => {
+    const countExpensesPD =
+      this.fiscalYear.supportDocuments.reduce((sumaTotal, val) => {
         if (val.type_document === "g" && val.element?.group.trim() === "pdgt") {
           sumaTotal += val.amount;
         }
         return sumaTotal;
-      },
-      0
-    ) || 1;
+      }, 0) || 1;
 
     const porcentage = parseFloat(
       ((countExpensesWithoutDocument / countExpensesPD) * 100).toFixed(2)

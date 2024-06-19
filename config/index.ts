@@ -53,6 +53,8 @@ type corsOptionsType = {
 };
 
 interface AppConfig {
+  versionAPK: number;
+  versionApp: string;
   site: string;
   debug: string;
   port: number;
