@@ -64,10 +64,10 @@ export class Element extends Model {
     }
 
     if (
-      (this.type === "g" && this.group.trim() === "pd") ||
-      this.group.trim() === "dd"
+      (this.type === "g" && this.group.trim() === "pdgt") ||
+      this.group.trim() === "ddgt"
     ) {
-      const allowedCount = this.group.trim() === "pd" ? 6 : 2;
+      const allowedCount = this.group.trim() === "pdgt" ? 6 : 2;
       const countElementsForProfilePD = await Element.count({
         where: {
           profile: { id: this.profile?.id },

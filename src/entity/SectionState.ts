@@ -67,7 +67,7 @@ export class SectionState extends Model {
       this.fiscalYear.supportDocuments.reduce((sumaTotal, val) => {
         if (
           val.type_document === "g" &&
-          val.element?.group.trim() === "pd" &&
+          val.element?.group.trim() === "pdgt" &&
           !val.document
         ) {
           sumaTotal += val.amount;
@@ -77,7 +77,7 @@ export class SectionState extends Model {
 
     const countExpensesPD = this.fiscalYear.supportDocuments.reduce(
       (sumaTotal, val) => {
-        if (val.type_document === "g" && val.element?.group.trim() === "pd") {
+        if (val.type_document === "g" && val.element?.group.trim() === "pdgt") {
           sumaTotal += val.amount;
         }
         return sumaTotal;

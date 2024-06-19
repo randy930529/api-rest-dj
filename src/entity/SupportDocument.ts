@@ -224,7 +224,7 @@ export class SupportDocument extends Model {
 
       case "g":
         const expenses = documents.filter(
-          (val) => val.element.type == "g" && val.element.group.trim() === "dd"
+          (val) => val.element.type == "g" && val.element.group.trim() === "ddgt"
         );
 
         const expensesBookTGP19 = expenses.reduce(

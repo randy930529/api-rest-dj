@@ -78,12 +78,12 @@ class ReportGeneratorController extends ReportGenerator {
 
       const expensesMePD: SupportDocumentPartialType[] =
         getInfoReportToDataBase.filter(
-          (val) => !val.is_general && val.group.trim() === "pd"
+          (val) => !val.is_general && val.group.trim() === "pdgt"
         );
 
       const expensesMeDD: SupportDocumentPartialType[] =
         getInfoReportToDataBase.filter(
-          (val) => !val.is_general && val.group.trim() === "dd"
+          (val) => !val.is_general && val.group.trim() === "ddgt"
         );
 
       const expensesNameTb1 = defaultDataArray<string>(6, "");
@@ -476,14 +476,14 @@ class ReportGeneratorController extends ReportGenerator {
         const expensesMePD = infoReportToDataBase.filter(
           (val) =>
             !val.is_general &&
-            val.group.trim() === "pd" &&
+            val.group.trim() === "pdgt" &&
             i === parseInt(val.month)
         );
 
         const expensesMeDD = infoReportToDataBase.filter(
           (val) =>
             !val.is_general &&
-            val.group.trim() === "dd" &&
+            val.group.trim() === "ddgt" &&
             i === parseInt(val.month)
         );
 
