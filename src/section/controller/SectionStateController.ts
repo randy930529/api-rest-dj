@@ -153,6 +153,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
             supportDocuments: {
               id: true,
               document: true,
+              amount:true,
               type_document: true,
               element: {
                 id: true,

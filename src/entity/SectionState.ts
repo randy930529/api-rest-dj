@@ -87,7 +87,7 @@ export class SectionState extends Model {
         return sumaTotal;
       }, 0) || 1;
 
-    const porcentage = parseFloat(
+    const porcentageExpensesWithoutDocument = parseFloat(
       ((countExpensesWithoutDocument / countExpensesPD) * 100).toFixed(2)
     );
 
@@ -114,11 +114,11 @@ export class SectionState extends Model {
     const current_tax_debt = F32 - F33 - F34 || 0 + F35 || 0;
 
     const expenses_with_document = this.fiscalYear.supportDocuments.length
-      ? 100 - porcentage
+      ? parseFloat((100 - porcentageExpensesWithoutDocument).toFixed(2))
       : 0;
 
     return {
-      expenses_without_document: porcentage,
+      expenses_without_document: porcentageExpensesWithoutDocument,
       expenses_with_document,
       has_cultural_activity,
       current_tax_debt,
