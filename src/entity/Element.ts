@@ -16,7 +16,7 @@ export class Element extends Model {
   @Column({ type: "varchar", length: 100 })
   description: string;
 
-  @Column({ type: "char", length: 4, default:"" })
+  @Column({ type: "char", length: 1, default:"" })
   type: string;
 
   @Column({ default: false })
