@@ -320,14 +320,6 @@ class ReportGeneratorController extends ReportGenerator {
       );
       const fileName = `Reporte_de_Operaciones_de_Ingresos_anual.pdf`;
 
-      const { fiscalYear } = await SectionState.findOne({
-        relations: ["fiscalYear"],
-        select: { fiscalYear: { year: true } },
-        where: { user: { id: user.id } },
-      });
-
-      const { year } = fiscalYear;
-
       const infoReportToDataBase = await this.getInfoReportToDataBase({
         userId: user.id,
         type: "i",
@@ -403,14 +395,6 @@ class ReportGeneratorController extends ReportGenerator {
         "expense/operationsExpenseReportAnnual"
       );
       const fileName = `Reporte_de_Operaciones_de_Ingresos_anual.pdf`;
-
-      const { fiscalYear } = await SectionState.findOne({
-        relations: ["fiscalYear"],
-        select: { fiscalYear: { year: true } },
-        where: { user: { id: user.id } },
-      });
-
-      const { year } = fiscalYear;
 
       const infoReportToDataBase = await this.getInfoReportToDataBase({
         userId: user.id,
@@ -519,6 +503,7 @@ class ReportGeneratorController extends ReportGenerator {
       );
       res.send(pdfBuffer);
     } catch (error) {
+      console.log(error)
       if (res.statusCode === 200) res.status(500);
       next(error);
     }

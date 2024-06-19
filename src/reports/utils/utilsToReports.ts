@@ -52,12 +52,12 @@ const getDataToDay = <T>(
   return toDay;
 };
 
-const getDataExpensesInToMenthArrayToTables = (
+const getDataExpensesInToMonthArrayToTables = (
   expensesGenerals: SupportDocumentPartialType[],
   expensesMePD: SupportDocumentPartialType[],
   expensesMeDD: SupportDocumentPartialType[]
 ): (number | string)[][][] => {
-  const { expenseId_PD } = appConfig.group;
+  const { expensePD } = appConfig.group;
 
   const expensesNameTb1 = defaultDataArray<string>(6, "");
   let totalsTb1 = defaultDataArray<number>(13, 0);
@@ -85,7 +85,7 @@ const getDataExpensesInToMenthArrayToTables = (
       const expensesGeneralsForDays = getDataToDay<number>(
         expensesGeneralsRecordedToDay,
         "amount",
-        expenseId_PD,
+        expensePD,
         defaultDataArray<number>(7, 0)
       );
 
@@ -434,7 +434,7 @@ export {
   sumaArray,
   sumaTotal,
   getDataToDay,
-  getDataExpensesInToMenthArrayToTables,
+  getDataExpensesInToMonthArrayToTables as getDataExpensesInToMenthArrayToTables,
   clearDuplicatesInArray,
   getDJ08Data,
   toCompleteDataSection,
