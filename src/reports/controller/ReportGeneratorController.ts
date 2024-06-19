@@ -3,7 +3,6 @@ import { FindOptionsSelect } from "typeorm";
 import * as pug from "pug";
 import * as moment from "moment";
 import ReportGenerator from "../../base/ReportGeneratorBase";
-import { ENV } from "../../utils/settings/environment";
 import { User } from "../../entity/User";
 import { SectionState } from "../../entity/SectionState";
 import { Dj08SectionData, SectionName } from "../../entity/Dj08SectionData";
@@ -30,6 +29,7 @@ import {
   TotalSectionGType,
   TotalSectionIType,
 } from "../../utils/definitions";
+import { appConfig } from "../../../config";
 
 class ReportGeneratorController extends ReportGenerator {
   private templatePath: string;
@@ -51,10 +51,7 @@ class ReportGeneratorController extends ReportGenerator {
     next: NextFunction
   ): Promise<void> {
     try {
-      const {
-        month,
-        user,
-      }: { year: number; month: number | undefined | null; user: User } =
+      const { month, user }: { month: number | undefined | null; user: User } =
         req.body;
 
       this.templatePath = pugTemplatePath("expense/operationsExpenseReport");
@@ -62,7 +59,8 @@ class ReportGeneratorController extends ReportGenerator {
         month ? `en_el_mes-${month}` : "mensuales"
       }.pdf`;
 
-      const { expenseId_PD } = ENV.group;
+      const { expensePD } = appConfig.group;
+      console.log(expensePD);
 
       const getInfoReportToDataBase: SupportDocumentPartialType[] =
         await this.getInfoReportToDataBase({
@@ -116,7 +114,7 @@ class ReportGeneratorController extends ReportGenerator {
           const expensesGeneralsForDays = getDataToDay<number>(
             expensesGeneralsRecordedToDay,
             "amount",
-            expenseId_PD,
+            expensePD,
             defaultDataArray<number>(7, 0)
           );
 
@@ -241,15 +239,12 @@ class ReportGeneratorController extends ReportGenerator {
     next: NextFunction
   ): Promise<void> {
     try {
-      const {
-        month,
-        user,
-      }: { month: number | undefined | null; token: string; user: User } =
+      const { month, user }: { month: number | undefined | null; user: User } =
         req.body;
 
       this.templatePath = pugTemplatePath("income/operationsIncomeReport");
       const fileName = `Reporte_de_Operaciones_de_Ingresos_${
-        month ? `en_el_mes_${month}` : "anual"
+        month ? `en_el_mes_${month}` : "mensuales"
       }.pdf`;
 
       const getInfoReportToDataBase = await this.getInfoReportToDataBase({

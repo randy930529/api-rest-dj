@@ -58,6 +58,9 @@
         "to": null,
         "porcentageType": 50
       }
-    ]
+    ],
+    "group": {
+      "expensePD": ["pdmp", "pdmv", "pdcb", "pdee", "pdrp", "pdog", "ddgt"]
+    }
   }
 }

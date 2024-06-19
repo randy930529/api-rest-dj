@@ -1,6 +1,5 @@
 import * as path from "path";
 import * as moment from "moment";
-import { ENV } from "../../utils/settings/environment";
 import {
   DataDJ08Type,
   ProfileActivityPartialType,
@@ -8,6 +7,7 @@ import {
 } from "../../utils/definitions";
 import { SectionState } from "../../entity/SectionState";
 import { Dj08SectionData } from "../../entity/Dj08SectionData";
+import { appConfig } from "../../../config";
 
 const pugTemplatePath = (template: string) =>
   path.join(__dirname, `../../utils/views/reports/${template}.pug`);
@@ -36,15 +36,15 @@ const sumaTotal = (array: number[]): number =>
 const getDataToDay = <T>(
   documents: SupportDocumentPartialType[],
   data: string,
-  group: number[],
+  group: string[],
   defaultValue: T[]
 ): T[] => {
   const toDay = defaultValue;
   if (!documents.length) return toDay;
 
   for (let i = 0; i < documents.length; i++) {
-    const document: SupportDocumentPartialType = documents[i];
-    const index: number = group.indexOf(document.elementId);
+    const document = documents[i];
+    const index: number = group.indexOf(document.group?.trim());
     const value = parseFloat(document[data]) as unknown as T;
     toDay[index] = value;
   }
@@ -57,7 +57,7 @@ const getDataExpensesInToMenthArrayToTables = (
   expensesMePD: SupportDocumentPartialType[],
   expensesMeDD: SupportDocumentPartialType[]
 ): (number | string)[][][] => {
-  const { expenseId_PD } = ENV.group;
+  const { expenseId_PD } = appConfig.group;
 
   const expensesNameTb1 = defaultDataArray<string>(6, "");
   let totalsTb1 = defaultDataArray<number>(13, 0);

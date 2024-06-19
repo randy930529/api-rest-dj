@@ -52,6 +52,10 @@ type corsOptionsType = {
   optionsSuccessStatus?: number;
 };
 
+type groupType = {
+  [key: string]: string[];
+};
+
 interface AppConfig {
   versionAPK: number;
   versionApp: string;
@@ -67,6 +71,7 @@ interface AppConfig {
   accountingConstants: accountingConstantsType;
   constantToSectionG: ConstantToSectionGType;
   corsOptions: corsOptionsType;
+  group: groupType;
 }
 
 export const appConfig: AppConfig = config.get("app");

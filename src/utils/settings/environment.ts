@@ -35,8 +35,4 @@ export const ENV = {
   tls: {
     rejectUnauthorized: process.env.EMAIL_USING_CERTIFICATE === "true",
   },
-
-  group: {
-    expenseId_PD: [14, 15, 16, 17, 18, 19, 20],
-  },
 };
