@@ -1,5 +1,4 @@
 import puppeteer from "puppeteer";
-import { JWT } from "../auth/security/jwt";
 import { SectionState } from "../entity/SectionState";
 import { SupportDocument } from "../entity/SupportDocument";
 import { SupportDocumentPartialType } from "../utils/definitions";
@@ -35,19 +34,16 @@ class ReportGenerator {
   }
 
   async getInfoReportToDataBase({
-    token,
+    userId,
     type,
-    year,
     month,
   }: {
-    token: string;
+    userId: number;
     type: string;
-    year: number;
     month?: number;
   }): Promise<SupportDocumentPartialType[]> {
-    const userId: number = JWT.getJwtPayloadValueByKey(token, "id");
-
     const existToSectionUser: SectionState = await SectionState.findOne({
+      select: { fiscalYear: { id: true, year: true }, profile: { id: true } },
       relations: ["profile", "fiscalYear"],
       where: {
         user: {
@@ -60,8 +56,9 @@ class ReportGenerator {
 
     const { profile, fiscalYear } = existToSectionUser;
 
-    const profileId: number | string = profile.id;
-    const fiscalYearId: number | string = fiscalYear.id;
+    const profileId = profile.id;
+    const fiscalYearId = fiscalYear.id;
+    const year = fiscalYear.year;
 
     const conditionMonth: string = month
       ? `EXTRACT(month FROM document.date)= :month`

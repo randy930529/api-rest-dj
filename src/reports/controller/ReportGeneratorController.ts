@@ -52,10 +52,9 @@ class ReportGeneratorController extends ReportGenerator {
   ): Promise<void> {
     try {
       const {
-        year,
         month,
-        token,
-      }: { year: number; month: number | undefined | null; token: string } =
+        user,
+      }: { year: number; month: number | undefined | null; user: User } =
         req.body;
 
       this.templatePath = pugTemplatePath("expense/operationsExpenseReport");
@@ -67,9 +66,8 @@ class ReportGeneratorController extends ReportGenerator {
 
       const getInfoReportToDataBase: SupportDocumentPartialType[] =
         await this.getInfoReportToDataBase({
-          token,
+          userId: user.id,
           type: "g",
-          year,
           month,
         });
 
@@ -245,7 +243,6 @@ class ReportGeneratorController extends ReportGenerator {
     try {
       const {
         month,
-        token,
         user,
       }: { month: number | undefined | null; token: string; user: User } =
         req.body;
@@ -255,27 +252,18 @@ class ReportGeneratorController extends ReportGenerator {
         month ? `en_el_mes_${month}` : "anual"
       }.pdf`;
 
-      const { fiscalYear } = await SectionState.findOne({
-        relations: ["fiscalYear"],
-        select: { fiscalYear: { year: true } },
-        where: { user: { id: user.id } },
-      });
-
-      const { year } = fiscalYear;
-
       const getInfoReportToDataBase = await this.getInfoReportToDataBase({
-        token,
+        userId: user?.id,
         type: "i",
-        year,
         month,
       });
 
       const incomeMeEI = getInfoReportToDataBase.filter(
-        (val) => val.group.trim() === "ei"
+        (val) => val.group?.trim() === "igex"
       );
 
       const incomeMeIG = getInfoReportToDataBase.filter(
-        (val) => val.group.trim() === "ig"
+        (val) => val.group?.trim() === "iggv"
       );
 
       let totals = defaultDataArray<number>(4, 0);
@@ -283,19 +271,16 @@ class ReportGeneratorController extends ReportGenerator {
       const incomeForDays: (number | string)[][] = Array.from(
         { length: 31 },
         (_, day) => {
-          const incomeMeEIRecordedToDay: SupportDocumentPartialType[] =
-            incomeMeEI.filter((val) => moment(val.date).date() === day + 1);
+          const incomeMeEIRecordedToDay: SupportDocumentPartialType =
+            incomeMeEI.find((val) => moment(val.date).date() === day + 1);
 
-          const incomeMeIGRecordedToDay: SupportDocumentPartialType[] =
-            incomeMeIG.filter((val) => moment(val.date).date() === day + 1);
+          const incomeMeIGRecordedToDay: SupportDocumentPartialType =
+            incomeMeIG.find((val) => moment(val.date).date() === day + 1);
 
           const toDay = defaultDataArray<number>(3, 0);
 
-          if (incomeMeEIRecordedToDay.length)
-            toDay[1] = parseFloat(incomeMeEIRecordedToDay[0].amount);
-
-          if (incomeMeIGRecordedToDay.length)
-            toDay[2] = parseFloat(incomeMeIGRecordedToDay[0].amount);
+          toDay[1] = parseFloat(incomeMeEIRecordedToDay?.amount) || 0;
+          toDay[2] = parseFloat(incomeMeIGRecordedToDay?.amount) || 0;
 
           const total: number = sumaTotal(toDay);
           toDay.push(total);
@@ -333,7 +318,7 @@ class ReportGeneratorController extends ReportGenerator {
     next: NextFunction
   ): Promise<void> {
     try {
-      const { token, user }: { token: string; user: User } = req.body;
+      const { user }: { token: string; user: User } = req.body;
 
       this.templatePath = pugTemplatePath(
         "income/operationsIncomeReportAnnual"
@@ -349,9 +334,8 @@ class ReportGeneratorController extends ReportGenerator {
       const { year } = fiscalYear;
 
       const infoReportToDataBase = await this.getInfoReportToDataBase({
-        token,
+        userId: user.id,
         type: "i",
-        year,
       });
 
       const dataMonths: DataIndexByType = defaultDataArray<number[][]>(
@@ -418,7 +402,7 @@ class ReportGeneratorController extends ReportGenerator {
     next: NextFunction
   ): Promise<void> {
     try {
-      const { token, user }: { token: string; user: User } = req.body;
+      const { user }: { token: string; user: User } = req.body;
 
       this.templatePath = pugTemplatePath(
         "expense/operationsExpenseReportAnnual"
@@ -434,9 +418,8 @@ class ReportGeneratorController extends ReportGenerator {
       const { year } = fiscalYear;
 
       const infoReportToDataBase = await this.getInfoReportToDataBase({
-        token,
+        userId: user.id,
         type: "g",
-        year,
       });
 
       const dataMonths = <DataIndexByType>{};
