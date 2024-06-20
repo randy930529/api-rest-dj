@@ -33,7 +33,7 @@ AppDataSource.initialize()
     // register express routes from defined application routes
     Routes.forEach((route) => {
       (app as any)[route.method](
-        route.route,
+        `/api/v1${route.route}`,
         route.middlewares,
         (req: Request, res: Response, next: Function) => {
           const result = new (route.controller as any)()[route.action](
@@ -58,7 +58,7 @@ AppDataSource.initialize()
     app.use(errorHandler);
 
     // setup express app here
-    app.get("/", function (req: Request, res: Response, next: Function) {
+    app.get("/api/v1", function (req: Request, res: Response, next: Function) {
       const filePath = `${__dirname}/utils/views/api/index.pug`;
       const options = {
         title: "API-rest dj",
@@ -72,7 +72,7 @@ AppDataSource.initialize()
     app.use(express.static(path.join(__dirname, "../public")));
 
     app.get(
-      "/media/:type/:file",
+      "/api/v1/media/:type/:file",
       function (req: Request, res: Response, next: Function) {
         const { type, file } = req.params;
         const filePath = path.join(
