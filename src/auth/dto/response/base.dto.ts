@@ -1,5 +1,5 @@
-export default abstract class BaseResponseDTO {
+export type BaseResponseDTO = {
   status: string;
   error: { message: string };
   data: {};
-}
+};

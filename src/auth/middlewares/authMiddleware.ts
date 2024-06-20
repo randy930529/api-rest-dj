@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { useResponseError } from "../hooks/useResponseError";
+import { responseError } from "../../errors/responseError";
 import { JWT } from "../security/jwt";
 
 export const authMiddleware = (
@@ -9,20 +9,23 @@ export const authMiddleware = (
 ) => {
   try {
     const { authorization } = request.headers;
+    const { body } = request;
 
     if (!authorization) {
-      useResponseError(response, "Was not provided confirmation token.");
+      responseError(response, "Was not provided confirmation token.");
     }
 
     if (!authorization.toLowerCase().startsWith("bearer")) {
-      useResponseError(response, "Was not provided confirmation scheme.");
+      responseError(response, "Was not provided confirmation scheme.");
     }
 
     const token = authorization.split(" ")[1];
 
     if (!token || !JWT.isTokenValid(token)) {
-      useResponseError(response, "JWT is not valid.");
+      responseError(response, "JWT is not valid.");
     }
+
+    request.body = { ...body, token };
 
     next();
   } catch (error) {

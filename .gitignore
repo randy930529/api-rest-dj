@@ -1,8 +1,28 @@
 .idea/
 .vscode/
-node_modules/
-build/
+.cache/
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+*-lock.json
+
+# production
+/build
+
 tmp/
 temp/
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
 .env
 *.env
+
+# typescript
+*.tsbuildinfo

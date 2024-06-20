@@ -7,6 +7,12 @@
     "outDir": "./build",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "sourceMap": true
-  }
+    "sourceMap": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@entity/": ["./src/entity/*"]
+    }
+  },
+  "exclude": ["node_modules"]
 }

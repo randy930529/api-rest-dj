@@ -1,0 +1,90 @@
+extends ../generic/base
+include ../generic/mixins
+
+mixin setExpensesName(expensesName=[])
+    each val in expensesName
+        td.xl-66(width=69 style="border-top:none;border-left:none; width:47pt")
+            font.font-8= val
+    else
+        td There are no values
+
+mixin setData(dataMatrix=[[]])
+    each val, index in dataMatrix
+        tr(height=17 style={height:'12.75pt'})
+            td.xl-69(height=17 style="height:12.75pt;border-top:none")= (index+1)
+            each val2 in val
+                td.xl-69(style="border-top:none;border-left:none")= val2
+            else
+                td There are no values
+    else
+        td There are no values
+
+mixin setTotals(dataTotals=[], rowName="")
+    tr(height=17 style={height:'12.75pt'})
+        td.xl-69(height=17 style="height:12.75pt;border-top:none")= rowName
+        +values(dataTotals, "xl-69")
+        td.xl-69(height=17 style="height:12.75pt;border-top:none")
+
+mixin setDataTotalsToMonths(dataMatrix=[[]],months=[], tableNumber=0)
+    each val, index in dataMatrix
+        tr(height=17 style={height:'12.75pt'})
+            td.xl-69(height=17 style="height:12.75pt;border-top:none")= (months[index-1])
+            -let data = val[tableNumber]
+            +values(data, "xl-69")
+    else
+        td There are no values
+
+block stylesheet
+    style.
+      table {
+        border-collapse: collapse;
+        table-layout: fixed;
+        width: 655pt;
+      }
+
+      * {
+        font-size: 8.5pt !important;
+      }
+
+      .text-center {
+        text-align: center !important;
+      }
+
+      .text-vertical{
+        text-align: right;
+        vertical-align: bottom;
+      }
+
+block content
+    -let tableWidth = 872
+    -const months = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"]
+    
+    each month, index in months
+        -let expenses = expensesName[index+1].tb1
+        -let data = dataMonths[index+1][0]
+        -let total = totalMonths[index+1][0]
+        include tableExpenseReportMonthTB1
+
+        table.page-next
+        
+        -tableWidth = 879
+        -expenses = expensesName[index+1].tb2
+        -data = dataMonths[index+1][1]
+        -total = totalMonths[index+1][1]
+        include tableExpenseReportMonthTB2
+
+        table.page-next
+    
+    -let expenses = allExpensesName.tb1
+    -let data = totalMonths
+    -let total = totals.tb1
+    
+    include tableExpenseReportMonthTGTb1
+
+    table.page-next
+
+    -tableWidth = 879
+    -expenses = allExpensesName.tb2
+    -data = totalMonths
+    -total = totals.tb2
+    include tableExpenseReportMonthTGTb2

@@ -1,0 +1,66 @@
+{
+  "app": {
+    "versionAPK": 26,
+    "versionApp": "1.0.0",
+    "site": "http://localhost:4000",
+    "debug": "development",
+    "port": 3000,
+    "corsOptions": {
+      "origin": "http://localhost:4000",
+      "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+      "preflightContinue": false,
+      "optionsSuccessStatus": 204
+    },
+    "emailFrom": "admin@localhost",
+    "licenseFreeDays": 7,
+    "validTimeTMBill": 3600,
+    "currencyTMBill": "CUP",
+    "paymentAPKHref": "http://localhost:4000/tm_compra_en_linea",
+    "businessMetadata": {
+      "name": "Desoft",
+      "source": "1",
+      "address": "",
+      "phone": "",
+      "email": ""
+    },
+    "accountingConstants": {
+      "MEa_By_MFP": 39120.0,
+      "PPD_PERCENTAGE": 0.05,
+      "PE_0_10000": 0.15,
+      "PE_10000_20000": 0.2,
+      "PE_20000_30000": 0.3,
+      "PE_30000_50000": 0.4,
+      "PE_ABOVE_50000": 0.5
+    },
+    "constantToSectionG": [
+      {
+        "from": 0,
+        "to": 10000,
+        "porcentageType": 15
+      },
+      {
+        "from": 10000,
+        "to": 20000,
+        "porcentageType": 20
+      },
+      {
+        "from": 20000,
+        "to": 30000,
+        "porcentageType": 30
+      },
+      {
+        "from": 30000,
+        "to": 50000,
+        "porcentageType": 40
+      },
+      {
+        "from": 50000,
+        "to": null,
+        "porcentageType": 50
+      }
+    ],
+    "group": {
+      "expensePD": ["pdmp", "pdmv", "pdcb", "pdee", "pdrp", "pdog", "ddgt"]
+    }
+  }
+}

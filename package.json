@@ -1,13 +1,18 @@
 {
-  "name": "user_acount_dj",
+  "name": "api_rest_dj",
   "version": "0.0.1",
-  "description": "Awesome project developed with TypeORM.",
+  "description": "API-REST-DJ es un api para TCP y tenedores de libro. Gestiona los ingresos y gastos, controla el uso a través de licencias de uso.",
   "type": "commonjs",
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
+    "@types/config": "^3.3.1",
     "@types/express": "^4.17.17",
+    "@types/html-to-text": "^9.0.1",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/node": "^16.11.10",
+    "@types/node-fetch": "^2.6.11",
+    "@types/nodemailer": "^6.4.9",
+    "@types/pug": "^2.0.6",
     "ts-node": "10.7.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "4.5.2"
@@ -15,15 +20,25 @@
   "dependencies": {
     "bcrypt": "^5.1.0",
     "body-parser": "^1.19.1",
+    "config": "^3.3.9",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "dotenv": "^16.3.1",
+    "envalid": "^7.3.1",
     "express": "^4.17.2",
+    "express-async-errors": "^3.1.1",
     "express-jwt-authz": "^2.4.1",
     "express-validator": "^7.0.1",
+    "html-to-text": "^9.0.5",
+    "inquirer": "^8.0.0",
     "joi": "^17.9.2",
     "jsonwebtoken": "^9.0.1",
     "moment": "^2.29.4",
-    "nodemailer": "^6.9.4",
+    "node-fetch": "^2.7.0",
+    "nodemailer": "^6.9.5",
     "pg": "^8.4.0",
+    "pug": "^3.0.2",
+    "puppeteer": "^21.6.0",
     "reflect-metadata": "^0.1.13",
     "typeorm": "0.3.17",
     "uuid": "^9.0.0"
@@ -31,6 +46,10 @@
   "scripts": {
     "dev": "ts-node-dev src/index.ts",
     "start": "ts-node src/index.ts",
-    "typeorm": "typeorm-ts-node-commonjs"
+    "typeorm": "typeorm-ts-node-commonjs",
+    "build": "tsc -p .",
+    "migrate": "typeorm-ts-node-commonjs migration:generate ./src/migration/Dj08SectionDataRefactoring -d ./src/data-source.ts",
+    "db:push": "typeorm-ts-node-commonjs migration:run -d ./src/data-source.ts",
+    "createadmin": "ts-node-dev src/utils/commandLine.ts"
   }
 }

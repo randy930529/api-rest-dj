@@ -7,8 +7,10 @@ import { User } from "../../entity/User";
 import { FindOptionsWhere } from "typeorm";
 import { ENV } from "../../utils/settings/environment";
 
+const { secretKey, tokenLifetime, refreshTokenLifetime } = ENV;
+
 export class JWT {
-  private static privateKey = ENV.secretKey;
+  private static privateKey = secretKey;
   public static refreshTokenRepository =
     AppDataSource.getRepository(RefreshToken);
 
@@ -21,7 +23,7 @@ export class JWT {
     const payload = { id, email };
     const jwtid = uuidv4();
     const subject = `${id}`;
-    const expiresIn = `${ENV.tokenLifetime || "1h"}`;
+    const expiresIn = `${tokenLifetime || "1h"}`;
 
     const options = {
       jwtid,
@@ -43,7 +45,7 @@ export class JWT {
     jwtId: string
   ) {
     const expiry_date = moment()
-      .add(ENV.refreshTokenLifetime || 10, "d")
+      .add(refreshTokenLifetime || 10, "d")
       .toDate();
 
     const refreshToken = this.refreshTokenRepository.create({
@@ -57,10 +59,10 @@ export class JWT {
     return refreshToken.id;
   }
 
-  public static isTokenValid(token: string) {
+  public static isTokenValid(token: string, expiration: boolean = false) {
     try {
       jwt.verify(token, this.privateKey, {
-        ignoreExpiration: false,
+        ignoreExpiration: expiration,
       });
 
       return true;

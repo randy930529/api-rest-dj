@@ -2,16 +2,18 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { ENV } from "./utils/settings/environment";
 
+const { host, port, username, password, database } = ENV;
+
 export const AppDataSource = new DataSource({
   type: "postgres",
-  host: `${ENV.host || "localhost"}`,
-  port: ENV.port || 5432,
-  username: `${ENV.username || "postgres"}`,
-  password: ENV.password,
-  database: ENV.database,
+  host,
+  port,
+  username,
+  password,
+  database,
   synchronize: true,
   logging: true,
-  entities: ["src/entity/**/*.ts"],
-  migrations: ["src/migration/**/*.ts"],
+  entities: [`${__dirname}/entity/**/*{.js,.ts}`],
+  migrations: [`${__dirname}/migration/**/*{.js,.ts}`],
   subscribers: [],
 });

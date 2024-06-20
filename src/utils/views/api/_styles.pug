@@ -1,0 +1,157 @@
+style.
+    /* -------------------------------------
+    GLOBAL RESETS
+    ------------------------------------- */
+    * {
+        font-family: "Glory", sans-serif;
+        color: white;
+    }
+
+    body {
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+        background-color: #1c2431 !important;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    .row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .btn {
+        cursor: pointer;
+        border-radius: 50rem !important;
+        color: #fff;
+        border-color: #198754;
+        transition: background-color 0.3s ease;
+        transition:  border-color 0.3s ease;
+    }
+
+    
+    .btn:hover {
+        border-color: #3ecf8e;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.8);
+    }
+    
+    /* -------------------------------------
+    STYLE
+    MENU SECTION
+    ------------------------------------- */
+    .menu {
+        padding-top: 3rem;
+    }
+    .menu .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: auto;
+        flex-direction: auto;
+        gap: 6px;
+    }
+    .menu .row .menu-items ul {
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+        flex-direction: auto;
+        gap: 6px;
+        list-style: none;
+        padding: 0%;
+    }
+    .menu .row .menu-items ul li {
+        font-weight: lighter;
+    }
+    .menu .row .menu-items ul li:hover {
+        cursor: pointer;
+        text-decoration: underline;
+        font-weight: bold;
+    }
+
+    @media (min-width: 768px) {
+        .menu .logo {
+            width: auto !important;
+        }
+    }
+    .container {
+        max-width: 800px;
+        padding-right: 15px;
+        padding-left: 15px;
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    /* -------------------------------------
+    HEADER SECTION
+    ------------------------------------- */
+    .header {
+        padding-top: 80px;
+        padding-bottom: 130px;
+    }
+    .header .logo {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: auto;
+        padding-bottom: 20px;
+    }
+    .header .logo span {
+        display: block;
+        width: 200px;
+        height: 200px;
+    }
+    .header .info {
+        text-align: center;
+    }
+    .header .info h3 {
+        padding-bottom: 25px;
+        font-weight: 700;
+        font-size: 35px;
+    }
+    .header .info p {
+        padding-bottom: 5px;
+        font-size: 17px;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    .header .info a {
+        padding: 10px 70px;
+        background-color: #65e2d9;
+        background-image: linear-gradient(90deg, #65e2d9, #339ecc);
+    }
+
+    /* -------------------------------------
+    GRADIENT
+    ------------------------------------- */
+    .gradient-text {
+        letter-spacing: 3px;
+        font-size: 96px;
+        background-clip: text;
+        background-size: 200% 100%;
+        -webkit-animation: gradientFlow 1s ease-in-out infinite follow;
+        animation: gradientFlow 1s ease-in-out infinite follow;
+        -webkit-background-clip: text;
+        color: transparent;
+        background-color: #4158D0;
+        background-image: linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);
+    }
+
+    @-webkit-keyframes gradientFlow {
+        from {
+            background-position-x: left;
+        }
+        to {
+            background-position-x: right;
+        }
+    }
+
+    @keyframes gradientFlow {
+        from {
+            background-position-x: left;
+        }
+        to {
+            background-position-x: right;
+        }
+    }

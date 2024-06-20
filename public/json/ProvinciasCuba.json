@@ -1,0 +1,943 @@
+[
+  {
+    "id": 58,
+    "name": "Pinar del Rio",
+    "municipios": [
+      {
+        "id": 1188,
+        "name": "Consolación del Sur",
+        "parent": 58
+      },
+      {
+        "id": 1132,
+        "name": "Guane",
+        "parent": 58
+      },
+      {
+        "id": 1125,
+        "name": "La Palma",
+        "parent": 58
+      },
+      {
+        "id": 1124,
+        "name": "Los Palacios",
+        "parent": 58
+      },
+      {
+        "id": 1186,
+        "name": "Mantua",
+        "parent": 58
+      },
+      {
+        "id": 1182,
+        "name": "Minas de Matahambre",
+        "parent": 58
+      },
+      {
+        "id": 1189,
+        "name": "Pinar del Rio",
+        "parent": 58
+      },
+      {
+        "id": 1165,
+        "name": "Sandino",
+        "parent": 58
+      },
+      {
+        "id": 1133,
+        "name": "San Juan y Martínez",
+        "parent": 58
+      },
+      {
+        "id": 1187,
+        "name": "San Luis",
+        "parent": 58
+      },
+      {
+        "id": 1169,
+        "name": "Viñales",
+        "parent": 58
+      }
+    ]
+  },
+  {
+    "id": 64,
+    "name": "Artemisa",
+    "municipios": [
+      {
+        "id": 1126,
+        "name": "Alquízar",
+        "parent": 64
+      },
+      {
+        "id": 1144,
+        "name": "Artemisa",
+        "parent": 64
+      },
+      {
+        "id": 1127,
+        "name": "Bahía Honda",
+        "parent": 64
+      },
+      {
+        "id": 1129,
+        "name": "Bauta",
+        "parent": 64
+      },
+      {
+        "id": 1060,
+        "name": "Caimito",
+        "parent": 64
+      },
+      {
+        "id": 1136,
+        "name": "Candelaria",
+        "parent": 64
+      },
+      {
+        "id": 1134,
+        "name": "Guanajay",
+        "parent": 64
+      },
+      {
+        "id": 1123,
+        "name": "Güira de Melena",
+        "parent": 64
+      },
+      {
+        "id": 1177,
+        "name": "Mariel",
+        "parent": 64
+      },
+      {
+        "id": 1128,
+        "name": "San Antonio de los Baños",
+        "parent": 64
+      },
+      {
+        "id": 1135,
+        "name": "San Cristóbal",
+        "parent": 64
+      }
+    ]
+  },
+  {
+    "id": 39,
+    "name": "La Habana",
+    "municipios": [
+      {
+        "id": 1033,
+        "name": "Arroyo Naranjo",
+        "parent": 39
+      },
+      {
+        "id": 1026,
+        "name": "Boyeros",
+        "parent": 39
+      },
+      {
+        "id": 1023,
+        "name": "Centro Habana",
+        "parent": 39
+      },
+      {
+        "id": 1034,
+        "name": "Cerro",
+        "parent": 39
+      },
+      {
+        "id": 1031,
+        "name": "Cotorro",
+        "parent": 39
+      },
+      {
+        "id": 1028,
+        "name": "Diez de Octubre",
+        "parent": 39
+      },
+      {
+        "id": 1035,
+        "name": "Guanabacoa",
+        "parent": 39
+      },
+      {
+        "id": 1027,
+        "name": "Habana del Este",
+        "parent": 39
+      },
+      {
+        "id": 1030,
+        "name": "Habana Vieja",
+        "parent": 39
+      },
+      {
+        "id": 1025,
+        "name": "La Lisa",
+        "parent": 39
+      },
+      {
+        "id": 1029,
+        "name": "Marianao",
+        "parent": 39
+      },
+      {
+        "id": 1024,
+        "name": "Playa",
+        "parent": 39
+      },
+      {
+        "id": 1032,
+        "name": "Plaza de la Revolucion",
+        "parent": 39
+      },
+      {
+        "id": 1022,
+        "name": "Regla",
+        "parent": 39
+      },
+      {
+        "id": 1021,
+        "name": "San Miguel del Padrón",
+        "parent": 39
+      }
+    ]
+  },
+  {
+    "id": 59,
+    "name": "Mayabeque",
+    "municipios": [
+      {
+        "id": 1181,
+        "name": "Batabanó",
+        "parent": 59
+      },
+      {
+        "id": 1130,
+        "name": "Bejucal",
+        "parent": 59
+      },
+      {
+        "id": 1153,
+        "name": "Güines",
+        "parent": 59
+      },
+      {
+        "id": 1149,
+        "name": "Jaruco",
+        "parent": 59
+      },
+      {
+        "id": 1178,
+        "name": "Madruga",
+        "parent": 59
+      },
+      {
+        "id": 1152,
+        "name": "Melena del Sur",
+        "parent": 59
+      },
+      {
+        "id": 1154,
+        "name": "Nueva Paz",
+        "parent": 59
+      },
+      {
+        "id": 1131,
+        "name": "Quivicán",
+        "parent": 59
+      },
+      {
+        "id": 1183,
+        "name": "San José de las Lajas",
+        "parent": 59
+      },
+      {
+        "id": 1151,
+        "name": "San Nicolás",
+        "parent": 59
+      },
+      {
+        "id": 1150,
+        "name": "Santa Cruz del Norte",
+        "parent": 59
+      }
+    ]
+  },
+  {
+    "id": 61,
+    "name": "Matanzas",
+    "municipios": [
+      {
+        "id": 1041,
+        "name": "Calimete",
+        "parent": 61
+      },
+      {
+        "id": 1179,
+        "name": "Cárdenas",
+        "parent": 61
+      },
+      {
+        "id": 1184,
+        "name": "Ciénaga de Zapata",
+        "parent": 61
+      },
+      {
+        "id": 1051,
+        "name": "Colón",
+        "parent": 61
+      },
+      {
+        "id": 1057,
+        "name": "Jaguey Grande",
+        "parent": 61
+      },
+      {
+        "id": 1053,
+        "name": "Jovellanos",
+        "parent": 61
+      },
+      {
+        "id": 1055,
+        "name": "Limonar",
+        "parent": 61
+      },
+      {
+        "id": 1058,
+        "name": "Los Arabos",
+        "parent": 61
+      },
+      {
+        "id": 1185,
+        "name": "Martí",
+        "parent": 61
+      },
+      {
+        "id": 1050,
+        "name": "Matanzas",
+        "parent": 61
+      },
+      {
+        "id": 1054,
+        "name": "Pedro Betancourt",
+        "parent": 61
+      },
+      {
+        "id": 1052,
+        "name": "Perico",
+        "parent": 61
+      },
+      {
+        "id": 1056,
+        "name": "Union de Reyes",
+        "parent": 61
+      }
+    ]
+  },
+  {
+    "id": 65,
+    "name": "Villa Clara",
+    "municipios": [
+      {
+        "id": 1037,
+        "name": "Caibarien",
+        "parent": 65
+      },
+      {
+        "id": 1042,
+        "name": "Camajuaní",
+        "parent": 65
+      },
+      {
+        "id": 1046,
+        "name": "Cifuentes",
+        "parent": 65
+      },
+      {
+        "id": 1167,
+        "name": "Corralillo",
+        "parent": 65
+      },
+      {
+        "id": 1166,
+        "name": "Encrucijada",
+        "parent": 65
+      },
+      {
+        "id": 1049,
+        "name": "Manicaragua",
+        "parent": 65
+      },
+      {
+        "id": 1044,
+        "name": "Placetas",
+        "parent": 65
+      },
+      {
+        "id": 1146,
+        "name": "Quemado de Guines",
+        "parent": 65
+      },
+      {
+        "id": 1048,
+        "name": "Ranchuelo",
+        "parent": 65
+      },
+      {
+        "id": 1043,
+        "name": "Remedios",
+        "parent": 65
+      },
+      {
+        "id": 1168,
+        "name": "Sagua la Grande",
+        "parent": 65
+      },
+      {
+        "id": 1045,
+        "name": "Santa Clara",
+        "parent": 65
+      },
+      {
+        "id": 1047,
+        "name": "Santo Domingo",
+        "parent": 65
+      }
+    ]
+  },
+  {
+    "id": 60,
+    "name": "Cienfuegos",
+    "municipios": [
+      {
+        "id": 1137,
+        "name": "Abreus",
+        "parent": 60
+      },
+      {
+        "id": 1138,
+        "name": "Aguada de Pasajeros",
+        "parent": 60
+      },
+      {
+        "id": 1164,
+        "name": "Cienfuegos",
+        "parent": 60
+      },
+      {
+        "id": 1140,
+        "name": "Cruces",
+        "parent": 60
+      },
+      {
+        "id": 1142,
+        "name": "Cumanayagua",
+        "parent": 60
+      },
+      {
+        "id": 1143,
+        "name": "Lajas",
+        "parent": 60
+      },
+      {
+        "id": 1141,
+        "name": "Palmira",
+        "parent": 60
+      },
+      {
+        "id": 1139,
+        "name": "Rodas",
+        "parent": 60
+      }
+    ]
+  },
+  {
+    "id": 62,
+    "name": "Sancti Spiritus",
+    "municipios": [
+      {
+        "id": 1065,
+        "name": "Cabaiguan",
+        "parent": 62
+      },
+      {
+        "id": 1062,
+        "name": "Fomento",
+        "parent": 62
+      },
+      {
+        "id": 1063,
+        "name": "Jatibonico",
+        "parent": 62
+      },
+      {
+        "id": 1064,
+        "name": "La Sierpe",
+        "parent": 62
+      },
+      {
+        "id": 1061,
+        "name": "Sancti Spíritus",
+        "parent": 62
+      },
+      {
+        "id": 1148,
+        "name": "Taguasco",
+        "parent": 62
+      },
+      {
+        "id": 1059,
+        "name": "Trinidad",
+        "parent": 62
+      },
+      {
+        "id": 1147,
+        "name": "Yaguajay",
+        "parent": 62
+      }
+    ]
+  },
+  {
+    "id": 63,
+    "name": "Ciego de Avila",
+    "municipios": [
+      {
+        "id": 1163,
+        "name": "Baraguá",
+        "parent": 63
+      },
+      {
+        "id": 1155,
+        "name": "Bolivia",
+        "parent": 63
+      },
+      {
+        "id": 1162,
+        "name": "Chambas",
+        "parent": 63
+      },
+      {
+        "id": 1156,
+        "name": "Ciego de Avila",
+        "parent": 63
+      },
+      {
+        "id": 1157,
+        "name": "Ciro Redondo",
+        "parent": 63
+      },
+      {
+        "id": 1159,
+        "name": "Florencia",
+        "parent": 63
+      },
+      {
+        "id": 1158,
+        "name": "Majagua",
+        "parent": 63
+      },
+      {
+        "id": 1161,
+        "name": "Morón",
+        "parent": 63
+      },
+      {
+        "id": 1160,
+        "name": "Primero de Enero",
+        "parent": 63
+      },
+      {
+        "id": 1180,
+        "name": "Venezuela",
+        "parent": 63
+      }
+    ]
+  },
+  {
+    "id": 57,
+    "name": "Camaguey",
+    "municipios": [
+      {
+        "id": 1145,
+        "name": "Camaguey",
+        "parent": 57
+      },
+      {
+        "id": 1108,
+        "name": "Carlos Manuel de Cespedes",
+        "parent": 57
+      },
+      {
+        "id": 1171,
+        "name": "Esmeralda",
+        "parent": 57
+      },
+      {
+        "id": 1104,
+        "name": "Florida",
+        "parent": 57
+      },
+      {
+        "id": 1109,
+        "name": "Guáimaro",
+        "parent": 57
+      },
+      {
+        "id": 1107,
+        "name": "Jimaguayú",
+        "parent": 57
+      },
+      {
+        "id": 1106,
+        "name": "Minas",
+        "parent": 57
+      },
+      {
+        "id": 1110,
+        "name": "Najasa",
+        "parent": 57
+      },
+      {
+        "id": 1038,
+        "name": "Nuevitas",
+        "parent": 57
+      },
+      {
+        "id": 1170,
+        "name": "Santa Cruz del Sur",
+        "parent": 57
+      },
+      {
+        "id": 1103,
+        "name": "Sibanicú",
+        "parent": 57
+      },
+      {
+        "id": 1102,
+        "name": "Sierra de Cubitas",
+        "parent": 57
+      },
+      {
+        "id": 1105,
+        "name": "Vertientes",
+        "parent": 57
+      }
+    ]
+  },
+  {
+    "id": 56,
+    "name": "Las Tunas",
+    "municipios": [
+      {
+        "id": 1174,
+        "name": "Amancio",
+        "parent": 56
+      },
+      {
+        "id": 1099,
+        "name": "Colombia",
+        "parent": 56
+      },
+      {
+        "id": 212,
+        "name": "Jesus Menendez",
+        "parent": 56
+      },
+      {
+        "id": 1100,
+        "name": "Jobabo",
+        "parent": 56
+      },
+      {
+        "id": 1097,
+        "name": "Las Tunas",
+        "parent": 56
+      },
+      {
+        "id": 1098,
+        "name": "Majibacoa",
+        "parent": 56
+      },
+      {
+        "id": 1173,
+        "name": "Manatí",
+        "parent": 56
+      },
+      {
+        "id": 1101,
+        "name": "Menéndez",
+        "parent": 56
+      },
+      {
+        "id": 1172,
+        "name": "Puerto Padre",
+        "parent": 56
+      }
+    ]
+  },
+  {
+    "id": 53,
+    "name": "Holguin",
+    "municipios": [
+      {
+        "id": 1090,
+        "name": "Antilla",
+        "parent": 53
+      },
+      {
+        "id": 1086,
+        "name": "Baguano",
+        "parent": 53
+      },
+      {
+        "id": 1089,
+        "name": "Banes",
+        "parent": 53
+      },
+      {
+        "id": 1088,
+        "name": "Cacocum",
+        "parent": 53
+      },
+      {
+        "id": 1096,
+        "name": "Calixto Garcia",
+        "parent": 53
+      },
+      {
+        "id": 1087,
+        "name": "Cueto",
+        "parent": 53
+      },
+      {
+        "id": 1095,
+        "name": "Frank Pais",
+        "parent": 53
+      },
+      {
+        "id": 1094,
+        "name": "Gibara",
+        "parent": 53
+      },
+      {
+        "id": 1092,
+        "name": "Holguín",
+        "parent": 53
+      },
+      {
+        "id": 1176,
+        "name": "Mayari",
+        "parent": 53
+      },
+      {
+        "id": 1175,
+        "name": "Moa",
+        "parent": 53
+      },
+      {
+        "id": 1091,
+        "name": "Rafael Freyre",
+        "parent": 53
+      },
+      {
+        "id": 1067,
+        "name": "Sagua de Tánamo",
+        "parent": 53
+      },
+      {
+        "id": 1093,
+        "name": "Urbano Noris",
+        "parent": 53
+      }
+    ]
+  },
+  {
+    "id": 52,
+    "name": "Granma",
+    "municipios": [
+      {
+        "id": 1111,
+        "name": "Bartolomé Masó",
+        "parent": 52
+      },
+      {
+        "id": 1116,
+        "name": "Bayamo",
+        "parent": 52
+      },
+      {
+        "id": 1121,
+        "name": "Buey Arriba",
+        "parent": 52
+      },
+      {
+        "id": 1114,
+        "name": "Campechuela",
+        "parent": 52
+      },
+      {
+        "id": 1120,
+        "name": "Cauto Cristo",
+        "parent": 52
+      },
+      {
+        "id": 1119,
+        "name": "Guisa",
+        "parent": 52
+      },
+      {
+        "id": 1122,
+        "name": "Jiguaní",
+        "parent": 52
+      },
+      {
+        "id": 1113,
+        "name": "Manzanillo",
+        "parent": 52
+      },
+      {
+        "id": 1117,
+        "name": "Media Luna",
+        "parent": 52
+      },
+      {
+        "id": 1115,
+        "name": "Niquero",
+        "parent": 52
+      },
+      {
+        "id": 1118,
+        "name": "Pilón",
+        "parent": 52
+      },
+      {
+        "id": 1066,
+        "name": "Río Cauto",
+        "parent": 52
+      },
+      {
+        "id": 1112,
+        "name": "Yara",
+        "parent": 52
+      }
+    ]
+  },
+  {
+    "id": 54,
+    "name": "Santiago de Cuba",
+    "municipios": [
+      {
+        "id": 1078,
+        "name": "Contramaestre",
+        "parent": 54
+      },
+      {
+        "id": 1083,
+        "name": "Guamá",
+        "parent": 54
+      },
+      {
+        "id": 1079,
+        "name": "Mella",
+        "parent": 54
+      },
+      {
+        "id": 1084,
+        "name": "Palma Soriano",
+        "parent": 54
+      },
+      {
+        "id": 1080,
+        "name": "San Luis",
+        "parent": 54
+      },
+      {
+        "id": 1068,
+        "name": "Santiago de Cuba",
+        "parent": 54
+      },
+      {
+        "id": 1081,
+        "name": "Segundo Frente",
+        "parent": 54
+      },
+      {
+        "id": 1085,
+        "name": "Songo La Maya",
+        "parent": 54
+      },
+      {
+        "id": 1082,
+        "name": "Tercer Frente",
+        "parent": 54
+      }
+    ]
+  },
+  {
+    "id": 55,
+    "name": "Guantanamo",
+    "municipios": [
+      {
+        "id": 1076,
+        "name": "Baracoa",
+        "parent": 55
+      },
+      {
+        "id": 1039,
+        "name": "Caimanera",
+        "parent": 55
+      },
+      {
+        "id": 1073,
+        "name": "El Salvador",
+        "parent": 55
+      },
+      {
+        "id": 1071,
+        "name": "Guantánamo",
+        "parent": 55
+      },
+      {
+        "id": 1072,
+        "name": "Imias",
+        "parent": 55
+      },
+      {
+        "id": 1069,
+        "name": "Maisí",
+        "parent": 55
+      },
+      {
+        "id": 1075,
+        "name": "Manuel Tames",
+        "parent": 55
+      },
+      {
+        "id": 1077,
+        "name": "Niceto Pérez",
+        "parent": 55
+      },
+      {
+        "id": 1074,
+        "name": "San Antonio del Sur",
+        "parent": 55
+      },
+      {
+        "id": 1070,
+        "name": "Yateras",
+        "parent": 55
+      }
+    ]
+  },
+  {
+    "id": 66,
+    "name": "Municipio Especial Isla de la Juventud",
+    "municipios": [
+      {
+        "id": 1040,
+        "name": "Municipio Especial Isla de la Juventud",
+        "parent": 66
+      }
+    ]
+  }
+]

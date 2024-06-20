@@ -1,5 +1,6 @@
 import { AuthController } from "../controller/AuthController";
 import { authMiddleware } from "../middlewares/authMiddleware";
+import { userMiddleware } from "../middlewares/userMiddleware";
 import { authParserMiddleware } from "../middlewares/authValidatorMiddleware";
 import { nextFunction } from "../middlewares/nextMiddleware";
 
@@ -15,7 +16,7 @@ export const authRoutes = [
     method: "post",
     route: "/login",
     controller: AuthController,
-    middlewares: [authParserMiddleware],
+    middlewares: [nextFunction],
     action: "login",
   },
   {
@@ -29,14 +30,14 @@ export const authRoutes = [
     method: "post",
     route: "/jwt/verify",
     controller: AuthController,
-    middlewares: [nextFunction],
+    middlewares: [authMiddleware],
     action: "jwtVerify",
   },
   {
     method: "post",
     route: "/user/activation",
     controller: AuthController,
-    middlewares: [authMiddleware],
+    middlewares: [authMiddleware, userMiddleware],
     action: "userActivation",
   },
   {
@@ -47,31 +48,10 @@ export const authRoutes = [
     action: "userResendActivation",
   },
   {
-    method: "get",
-    route: "/user/me",
-    controller: AuthController,
-    middlewares: [nextFunction],
-    action: "userMe",
-  },
-  {
-    method: "put",
-    route: "/user/me",
-    controller: AuthController,
-    middlewares: [nextFunction],
-    action: "userMe",
-  },
-  {
-    method: "patch",
-    route: "/user/me",
-    controller: AuthController,
-    middlewares: [nextFunction],
-    action: "userMe",
-  },
-  {
     method: "post",
     route: "/user/set_password",
     controller: AuthController,
-    middlewares: [nextFunction],
+    middlewares: [authMiddleware],
     action: "userSetPassword",
   },
   {
@@ -85,7 +65,7 @@ export const authRoutes = [
     method: "post",
     route: "/user/reset_password_confirm",
     controller: AuthController,
-    middlewares: [nextFunction],
+    middlewares: [authMiddleware, userMiddleware],
     action: "userResetPasswordConfirm",
   },
 ];

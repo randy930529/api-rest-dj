@@ -1,10 +1,10 @@
-import BaseResponseDTO from "../base.dto";
+import { BaseResponseDTO } from "../base.dto";
 import { UserDTO } from "./user.dto";
 
-export class AuthenticationDTO extends BaseResponseDTO {
+export type AuthenticationDTO = BaseResponseDTO & {
   data: {
     token: string;
     refreshToken: string;
     user: UserDTO;
   };
-}
+};

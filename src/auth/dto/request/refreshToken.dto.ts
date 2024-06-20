@@ -1,4 +1,4 @@
-export class RefreshTokenDTO {
-    token: string;
-    refreshToken: string;
-  }
+export type RefreshTokenDTO = {
+  token: string;
+  refreshToken: string;
+};

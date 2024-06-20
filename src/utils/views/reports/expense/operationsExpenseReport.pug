@@ -1,0 +1,66 @@
+extends ../generic/base
+
+mixin setExpensesName(expensesName=[])
+    each val in expensesName
+        td.xl-66(width=69 style="border-top:none;border-left:none; width:47pt")
+            font.font-8= val
+    else
+        td There are no values
+
+mixin setData(dataMatrix=[[]])
+    each val, index in dataMatrix
+        tr(height=17 style={height:'12.75pt'})
+            td.xl-69(height=17 style="height:12.75pt;border-top:none")= (index+1)
+            each val2 in val
+                td.xl-69(style="border-top:none;border-left:none")= val2
+            else
+                td There are no values
+    else
+        td There are no values
+
+mixin setTotals(dataTotals=[])
+    tr(height=17 style={height:'12.75pt'})
+        td.xl-69(height=17 style="height:12.75pt;border-top:none")
+        each val in dataTotals
+            td.xl-69(style="border-top:none;border-left:none")= val
+        else
+            td There are no values
+        td.xl-69(height=17 style="height:12.75pt;border-top:none")
+
+block stylesheet
+    style.
+      table {
+        border-collapse: collapse;
+        table-layout: fixed;
+        width: 655pt;
+      }
+
+      * {
+        font-size: 8.5pt !important;
+      }
+
+      .text-center {
+        text-align: center !important;
+      }
+
+      .text-vertical{
+        text-align: right;
+        vertical-align: bottom;
+      }
+
+block content
+    -let tableWidth = 872
+    -const months = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"]
+    -const month = months[monthIndex-1]
+    -let expenses = expensesName[0]
+    -let data = dataMatrix[0]
+    -let total = dataTotals[0]
+    include tableExpenseReportMonthTB1
+
+    table.page-next
+    
+    -tableWidth = 879
+    -expenses = expensesName[1]
+    -data = dataMatrix[1]
+    -total = dataTotals[1]
+    include tableExpenseReportMonthTB2
