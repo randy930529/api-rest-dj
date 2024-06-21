@@ -13,6 +13,7 @@ export const ENV = {
 
   //Config external payment
   apiUrlPayment: process.env.API_URL_PAYMENT,
+  urlPayNotification: process.env.URL_PAY_NOTIFICATION,
   userPayment: process.env.USER_WS_EXTERNAL_PAYMENT,
   seedPayment: process.env.SEED_WS_EXTERNAL_PAYMENT,
 

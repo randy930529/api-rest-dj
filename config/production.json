@@ -1,12 +1,12 @@
 {
   "app": {
-    "site": "https://181.225.233.215:4000",
+    "site": "https://mygestor.conalbert.cu/api/v1",
     "debug": "production",
     "port": 4000,
     "corsOptions": {
       "origin": ""
     },
-    "emailFrom": "conalbert@nauta.cu",
+    "emailFrom": "conalbert@zoom.cu",
     "licenseFreeDays": 5,
     "validTimeTMBill": 7200,
     "paymentAPKHref": "transfermovil://tm_compra_en_linea",

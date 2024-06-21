@@ -62,12 +62,13 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       const licenseId = fields.license.id;
       const {
         businessMetadata,
-        site,
         validTimeTMBill,
         paymentAPKHref,
         currencyTMBill,
       } = appConfig;
       const { source } = businessMetadata;
+      const site =
+        ENV.debug === "production" ? ENV.urlPayNotification : appConfig.site;
 
       if (!licenseId)
         responseError(res, "Do must provide a valid license id.", 404);
