@@ -29,7 +29,11 @@ export class ProfileAddress extends Model {
   @Column({ type: "varchar", length: 8, nullable: true, default: "" })
   phoneNumber: string;
 
-  @ManyToOne(() => Address, { onDelete: "CASCADE", onUpdate: "CASCADE" })
+  @ManyToOne(() => Address, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+    cascade: ["insert", "update"],
+  })
   @JoinColumn()
   address: Address;
 

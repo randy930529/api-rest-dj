@@ -98,7 +98,10 @@ export class UserController {
 
     let userToRemove = await this.userRepository.findOne({
       select: {
-        licenseUser: { id: true },
+        licenseUser: {
+          id: true,
+          tmBill: { id: true, stateTMBills: { id: true } },
+        },
         profiles: {
           id: true,
           fiscalYear: {
@@ -117,7 +120,7 @@ export class UserController {
         },
       },
       relations: {
-        licenseUser: true,
+        licenseUser: { tmBill: { stateTMBills: true } },
         profiles: {
           fiscalYear: {
             dj08: { dj08SectionData: true },
@@ -141,7 +144,6 @@ export class UserController {
     await userToRemove.licenseUser.map(
       async (licenseUser) => await licenseUser.remove()
     );
-    console.log(userToRemove.profiles);
 
     await userToRemove.profiles?.map(async (profile) => {
       await profile.fiscalYear?.map(async (fiscalYear) => {
@@ -195,9 +197,7 @@ export class UserController {
 
   private async delete(req: Request, res: Response, next: NextFunction) {
     try {
-      const { token } = req.body;
-
-      const id = JWT.getJwtPayloadValueByKey(token, "id");
+      const { id } = req.body.user as User;
 
       await this.destroy(res, id);
 

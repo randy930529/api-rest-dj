@@ -38,6 +38,7 @@ export class Profile extends Model {
     nullable: true,
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
+    cascade: ["insert", "update"],
   })
   @JoinColumn()
   address: ProfileAddress;
