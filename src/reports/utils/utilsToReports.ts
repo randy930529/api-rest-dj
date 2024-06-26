@@ -33,23 +33,26 @@ const sumaArray = (array1: number[], array2: number[]): number[] =>
 const sumaTotal = (array: number[]): number =>
   array.reduce((suma, val) => suma + val, 0);
 
-const getDataToDay = <T>(
+const getDataToDay = (
   documents: SupportDocumentPartialType[],
   data: string,
   group: string[],
-  defaultValue: T[]
-): T[] => {
+  defaultValue: number[],
+  cashInBank: number,
+  cashInBox: number
+): number[] => {
   const toDay = defaultValue;
   if (!documents.length) return toDay;
 
   for (let i = 0; i < documents.length; i++) {
     const document = documents[i];
     const index: number = group.indexOf(document.group?.trim());
-    const value = parseFloat(document[data]) as unknown as T;
-    toDay[index] = value;
+    const value = parseFloat(document[data]);
+    toDay[index] += value;
+    document.is_bank ? (cashInBank += value) : (cashInBox += value);
   }
 
-  return toDay;
+  return [...toDay, cashInBank, cashInBox];
 };
 
 const getDataExpensesInToMonthArrayToTables = (
@@ -82,12 +85,19 @@ const getDataExpensesInToMonthArrayToTables = (
       const expensesGeneralsRecordedToDay: SupportDocumentPartialType[] =
         expensesGenerals.filter((val) => moment(val.date).date() === day + 1);
 
-      const expensesGeneralsForDays = getDataToDay<number>(
+      const expensesGeneralsForDays = getDataToDay(
         expensesGeneralsRecordedToDay,
         "amount",
         expensePD,
-        defaultDataArray<number>(7, 0)
+        defaultDataArray<number>(7, 0),
+        cashInBank[day],
+        cashInBox[day]
       );
+
+      if (expensesGeneralsRecordedToDay.length) {
+        cashInBox[day] += expensesGeneralsForDays.pop();
+        cashInBank[day] += expensesGeneralsForDays.pop();
+      }
 
       const expensesMePDForDays = getExpensesInToDay(
         expensesMePD,
@@ -434,7 +444,7 @@ export {
   sumaArray,
   sumaTotal,
   getDataToDay,
-  getDataExpensesInToMonthArrayToTables as getDataExpensesInToMenthArrayToTables,
+  getDataExpensesInToMonthArrayToTables,
   clearDuplicatesInArray,
   getDJ08Data,
   toCompleteDataSection,

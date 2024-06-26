@@ -10,7 +10,7 @@ import {
   clearDuplicatesInArray,
   defaultDataArray,
   getDataAndTotalsToDj08Sections,
-  getDataExpensesInToMenthArrayToTables,
+  getDataExpensesInToMonthArrayToTables,
   getDataToDay,
   pugTemplatePath,
   sumaArray,
@@ -60,7 +60,6 @@ class ReportGeneratorController extends ReportGenerator {
       }.pdf`;
 
       const { expensePD } = appConfig.group;
-      console.log(expensePD);
 
       const getInfoReportToDataBase: SupportDocumentPartialType[] =
         await this.getInfoReportToDataBase({
@@ -111,29 +110,39 @@ class ReportGeneratorController extends ReportGenerator {
           const expensesMePDRecordedToDay: SupportDocumentPartialType[] =
             expensesMePD.filter((val) => moment(val.date).date() === day + 1);
 
-          const expensesGeneralsForDays = getDataToDay<number>(
+          const expensesGeneralsForDays = getDataToDay(
             expensesGeneralsRecordedToDay,
             "amount",
             expensePD,
-            defaultDataArray<number>(7, 0)
+            defaultDataArray<number>(7, 0),
+            cashInBank[day],
+            cashInBox[day]
           );
+
+          if (expensesGeneralsRecordedToDay.length) {
+            cashInBox[day] += expensesGeneralsForDays.pop();
+            cashInBank[day] += expensesGeneralsForDays.pop();
+          }
 
           let expensesMePDForDays = defaultDataArray<number>(6, 0);
           for (let i = 0; i < expensesMePDRecordedToDay.length; i++) {
             const document: SupportDocumentPartialType =
               expensesMePDRecordedToDay[i];
 
-            const value = document.amount;
+            const value = parseFloat(document.amount);
             const description = document.description;
 
             const insertIn: number = expensesNameTb1.indexOf(description);
+            document.is_bank
+              ? (cashInBank[day] += value)
+              : (cashInBox[day] += value);
 
             if (insertIn === -1) {
               expensesNameTb1[nextCol] = description;
-              expensesMePDForDays[nextCol] = parseFloat(value);
+              expensesMePDForDays[nextCol] += value;
               nextCol++;
             } else {
-              expensesMePDForDays[insertIn] = parseFloat(value);
+              expensesMePDForDays[insertIn] += value;
             }
           }
 
@@ -168,17 +177,20 @@ class ReportGeneratorController extends ReportGenerator {
             const document: SupportDocumentPartialType =
               expensesMeDDRecordedToDay[i];
 
-            const value = document.amount;
+            const value = parseFloat(document.amount);
             const description = document.description;
 
             const insertIn: number = expensesNameTb2.indexOf(description);
+            document.is_bank
+              ? (cashInBank[day] += value)
+              : (cashInBox[day] += value);
 
             if (insertIn === -1) {
-              expensesNameTb1[nextCol] = description;
-              expensesMeDDForDays[nextCol] = parseFloat(value);
+              expensesNameTb2[nextCol] = description;
+              expensesMeDDForDays[nextCol] += value;
               nextCol++;
             } else {
-              expensesMeDDForDays[insertIn] = parseFloat(value);
+              expensesMeDDForDays[insertIn] += value;
             }
           }
 
@@ -476,7 +488,7 @@ class ReportGeneratorController extends ReportGenerator {
         );
 
         const [dataTb1, dataTb2, displayName, totalMonth] =
-          getDataExpensesInToMenthArrayToTables(
+          getDataExpensesInToMonthArrayToTables(
             expensesGenerals,
             expensesMePD,
             expensesMeDD
