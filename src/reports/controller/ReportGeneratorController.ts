@@ -74,12 +74,12 @@ class ReportGeneratorController extends ReportGenerator {
 
       const expensesMePD: SupportDocumentPartialType[] =
         getInfoReportToDataBase.filter(
-          (val) => !val.is_general && val.group.trim() === "pdgt"
+          (val) => !val.is_general && val.group?.trim() === "pdgt"
         );
 
       const expensesMeDD: SupportDocumentPartialType[] =
         getInfoReportToDataBase.filter(
-          (val) => !val.is_general && val.group.trim() === "ddgt"
+          (val) => !val.is_general && val.group?.trim() === "ddgt"
         );
 
       const expensesNameTb1 = defaultDataArray<string>(6, "");
@@ -261,25 +261,51 @@ class ReportGeneratorController extends ReportGenerator {
         (val) => val.group?.trim() === "iggv"
       );
 
-      let totals = defaultDataArray<number>(4, 0);
+      let totals = defaultDataArray<number>(5, 0);
 
       const incomeForDays: (number | string)[][] = Array.from(
         { length: 31 },
         (_, day) => {
-          const incomeMeEIRecordedToDay: SupportDocumentPartialType =
-            incomeMeEI.find((val) => moment(val.date).date() === day + 1);
+          const incomeMeEIRecordedToDay: SupportDocumentPartialType[] =
+            incomeMeEI.filter((val) => moment(val.date).date() === day + 1);
 
-          const incomeMeIGRecordedToDay: SupportDocumentPartialType =
-            incomeMeIG.find((val) => moment(val.date).date() === day + 1);
+          const incomeMeIGRecordedToDay: SupportDocumentPartialType[] =
+            incomeMeIG.filter((val) => moment(val.date).date() === day + 1);
 
-          const toDay = defaultDataArray<number>(3, 0);
+          const toDay = defaultDataArray<number>(4, 0);
 
-          toDay[1] = parseFloat(incomeMeEIRecordedToDay?.amount) || 0;
-          toDay[2] = parseFloat(incomeMeIGRecordedToDay?.amount) || 0;
+          incomeMeEIRecordedToDay?.reduce(
+            (acc, val) => {
+              acc.suma += parseFloat(val.amount);
+              val.is_bank
+                ? (acc.bank += parseFloat(val.amount))
+                : (acc.box += parseFloat(val.amount));
 
-          const total: number = sumaTotal(toDay);
+              toDay[0] = acc.box;
+              toDay[1] = acc.bank;
+              toDay[2] = acc.suma;
+              return acc;
+            },
+            { suma: 0, box: 0, bank: 0 }
+          );
+
+          incomeMeIGRecordedToDay?.reduce(
+            (acc, val) => {
+              acc.suma += parseFloat(val.amount);
+              val.is_bank
+                ? (acc.bank += parseFloat(val.amount))
+                : (acc.box += parseFloat(val.amount));
+
+              toDay[0] = acc.box;
+              toDay[1] = acc.bank;
+              toDay[3] = acc.suma;
+              return acc;
+            },
+            { suma: 0, box: toDay[0], bank: toDay[1] }
+          );
+
+          const total: number = sumaTotal(toDay.slice(2));
           toDay.push(total);
-          toDay[0] = total;
           totals = sumaArray(totals, toDay);
 
           return [...toDay, ""];
@@ -342,7 +368,7 @@ class ReportGeneratorController extends ReportGenerator {
 
         const index: number = parseInt(month) - 1;
         const day: number = moment(date).date() - 1;
-        const indexGroup: number = group === "ei" ? 2 : 3;
+        const indexGroup: number = group === "igex" ? 2 : 3;
         const indexBoxOrBank: number = is_bank ? 1 : 0;
 
         const toDay = [...dataMonths[index][day]].slice(0, -1);
@@ -438,14 +464,14 @@ class ReportGeneratorController extends ReportGenerator {
         const expensesMePD = infoReportToDataBase.filter(
           (val) =>
             !val.is_general &&
-            val.group.trim() === "pdgt" &&
+            val.group?.trim() === "pdgt" &&
             i === parseInt(val.month)
         );
 
         const expensesMeDD = infoReportToDataBase.filter(
           (val) =>
             !val.is_general &&
-            val.group.trim() === "ddgt" &&
+            val.group?.trim() === "ddgt" &&
             i === parseInt(val.month)
         );
 
@@ -503,7 +529,6 @@ class ReportGeneratorController extends ReportGenerator {
       );
       res.send(pdfBuffer);
     } catch (error) {
-      console.log(error)
       if (res.statusCode === 200) res.status(500);
       next(error);
     }
@@ -576,7 +601,6 @@ class ReportGeneratorController extends ReportGenerator {
       const dj08SectionData = dJ08?.dj08SectionData.find(
         (val) => val.is_rectification === true
       );
-      console.log(dj08SectionData);
 
       if (
         !fiscalYear.declared &&
