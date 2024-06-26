@@ -55,13 +55,13 @@ export default class Email {
   }
 
   async sendVerificationCode() {
-    await this.send("verificationCode", "Your account verification code");
+    await this.send("verificationCode", "Código de verificación de tu cuenta");
   }
 
   async sendPasswordResetToken() {
     await this.send(
       "resetPassword",
-      `Your password reset token (valid for only ${ENV.tokenLifetime})`
+      `Token de restablecimiento de contraseña (válido por ${ENV.tokenLifetime})`
     );
   }
 }
