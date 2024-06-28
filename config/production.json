@@ -8,7 +8,7 @@
     },
     "emailFrom": "conalbert@zoom.cu",
     "licenseFreeDays": 5,
-    "validTimeTMBill": 7200,
+    "validTimeTMBill": 43200,
     "paymentAPKHref": "transfermovil://tm_compra_en_linea",
     "businessMetadata": {
       "name": "CONALBERT S.R.L.",
