@@ -68,7 +68,7 @@ export class SectionState extends Model {
     const has_cultural_activity = !find_cultural_activity ? false : true;
 
     const countExpensesWithoutDocument =
-      this.fiscalYear.supportDocuments.reduce((sumaTotal, val) => {
+      this.fiscalYear?.supportDocuments.reduce((sumaTotal, val) => {
         if (
           val.type_document === "g" &&
           val.element?.group.trim() === "pdgt" &&
@@ -80,7 +80,7 @@ export class SectionState extends Model {
       }, 0);
 
     const countExpensesPD =
-      this.fiscalYear.supportDocuments.reduce((sumaTotal, val) => {
+      this.fiscalYear?.supportDocuments.reduce((sumaTotal, val) => {
         if (val.type_document === "g" && val.element?.group.trim() === "pdgt") {
           sumaTotal += val.amount;
         }
@@ -92,9 +92,9 @@ export class SectionState extends Model {
     );
 
     const section_data = JSON.parse(
-      this.fiscalYear.dj08[0].dj08SectionData.find(
+      this.fiscalYear?.dj08[0].dj08SectionData.find(
         (val) => val.is_rectification === true
-      ).section_data
+      )?.section_data
     );
 
     const { F26 } = section_data[SectionName.SECTION_C]["data"];

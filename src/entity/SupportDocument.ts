@@ -9,6 +9,7 @@ import {
   BeforeUpdate,
   BeforeInsert,
   IsNull,
+  Not,
 } from "typeorm";
 import Model from "./Base";
 import { Element } from "./Element";
@@ -55,7 +56,7 @@ export class SupportDocument extends Model {
   @Column({ default: false })
   is_bank: boolean;
 
-  @ManyToOne(() => Element, { onDelete:"CASCADE" })
+  @ManyToOne(() => Element, { onDelete: "CASCADE" })
   @JoinColumn()
   element: Element;
 
@@ -110,13 +111,17 @@ export class SupportDocument extends Model {
     });
 
     const documents = await SupportDocument.find({
-      select: { element: { description: true, group: true } },
+      select: {
+        element: { id: true, description: true, type: true, group: true },
+      },
       relations: ["element"],
       where: {
+        id: Not(this.id),
         fiscalYear: { id: this.__fiscalYearId__ },
         profileActivity: IsNull(),
       },
     });
+    documents.push(this);
 
     const { section_data: sectionDataJSONString } = dj08ToUpdate;
     const section_data: AllDataSectionsDj08Type = JSON.parse(
@@ -125,17 +130,23 @@ export class SupportDocument extends Model {
 
     switch (this.type_document) {
       case "m":
-        const paidTributes = documents.filter((val) => val.element.type === "m");
+        const paidTributes = documents.filter(
+          (val) => val.element.type === "m"
+        );
 
         const expensesBookTTI19 = paidTributes.reduce(
           (sumTotal, val) =>
-            val.element.group.trim() === "tz" ? sumTotal + val.amount : sumTotal,
+            val.element.group.trim() === "tprz"
+              ? sumTotal + val.amount
+              : sumTotal,
           0
         );
 
         const expensesBookTTJ19 = paidTributes.reduce(
           (sumTotal, val) =>
-            val.element.group.trim() === "cm" ? sumTotal + val.amount : sumTotal,
+            val.element.group.trim() === "tpcm"
+              ? sumTotal + val.amount
+              : sumTotal,
           0
         );
 
@@ -224,7 +235,8 @@ export class SupportDocument extends Model {
 
       case "g":
         const expenses = documents.filter(
-          (val) => val.element.type == "g" && val.element.group.trim() === "ddgt"
+          (val) =>
+            val.element.type === "g" && val.element.group?.trim() === "ddgt"
         );
 
         const expensesBookTGP19 = expenses.reduce(
@@ -233,10 +245,40 @@ export class SupportDocument extends Model {
           0
         );
 
-        // Pendiente F19 En esta casilla se ponen las bonificaciones
-        // ( 3%) asociadas a los tributos pagados por canales electrónicos.
-        // (De los tributos  anotados en la sección F)
         section_data[SectionName.SECTION_B].data["F16"] = expensesBookTGP19;
+        break;
+
+      case "o":
+        const group = this.element.group?.trim();
+        const allDocumentToGroup = documents.filter(
+          (val) =>
+            val.element.type === "o" && val.element.group?.trim() === group
+        );
+
+        const upFile = allDocumentToGroup.reduce(
+          (sumaTotal, val) => sumaTotal + val.amount,
+          0
+        );
+
+        const dataSectionB = section_data[SectionName.SECTION_B].data as {
+          [key: string]: number;
+        };
+
+        if (group === "onex") {
+          section_data[SectionName.SECTION_B].data["F17"] = upFile;
+        } else if (group === "onda") {
+          section_data[SectionName.SECTION_B].data["F18"] = upFile;
+        } else if (group === "onfp") {
+          section_data[SectionName.SECTION_B].data["F19"] = upFile;
+        } else if (group === "onpa") {
+          section_data[SectionName.SECTION_C].data["F23"] = upFile;
+        } else if (group === "onrt") {
+          section_data[SectionName.SECTION_C].data["F24"] = upFile;
+        } else if (group === "onbn") {
+          section_data[SectionName.SECTION_C].data["F25"] = upFile;
+        } else if (group === "onde") {
+          section_data[SectionName.SECTION_E].data["F34"] = upFile;
+        }
         break;
 
       default:
