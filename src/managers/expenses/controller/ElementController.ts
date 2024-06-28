@@ -21,7 +21,7 @@ export class ElementController extends EntityControllerBase<Element> {
       const fields: ElementDTO = req.body;
       const { token } = req.body;
       const { id } = fields.profile;
-      
+
       fields.type = fields.type?.toLowerCase();
       fields.group = fields.group?.toLowerCase();
 
@@ -79,6 +79,9 @@ export class ElementController extends EntityControllerBase<Element> {
       const fields: Element = req.body;
       const { id } = fields;
 
+      fields.type = fields.type?.toLowerCase();
+      fields.group = fields.group?.toLowerCase();
+
       if (!id) responseError(res, "Delete element requiere id valid.", 404);
 
       const elementUpdate = await this.update({ id, res }, fields);
@@ -102,6 +105,9 @@ export class ElementController extends EntityControllerBase<Element> {
     try {
       const fields: ElementDTO = req.body;
       const { id } = req.body;
+
+      fields.type = fields.type?.toLowerCase();
+      fields.group = fields.group?.toLowerCase();
 
       if (!id) responseError(res, "Delete element requiere id valid.", 404);
 

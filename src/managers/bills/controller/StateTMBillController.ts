@@ -48,7 +48,7 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
         relations: ["tmBill", "license", "user"],
         select: {
           tmBill: { id: true },
-          license: { days: true, max_profiles: true },
+          license: { id: true, days: true, max_profiles: true },
           user: {
             id: true,
             active: true,
@@ -60,9 +60,10 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
       });
 
       const end_license = licenseUser.user.end_license ?? undefined;
-      const expirationDate = moment(end_license)
-        .add(licenseUser.license.days, "d")
-        .toDate();
+      const expirationDate =
+        end_license && moment(end_license).isBefore(moment())
+          ? moment().add(licenseUser.license.days, "d").toDate()
+          : moment(end_license).add(licenseUser.license.days, "d").toDate();
 
       licenseUser.is_paid = is_paid;
       licenseUser.expirationDate = expirationDate;
@@ -91,7 +92,6 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
       });
 
       const currentSectionState = await SectionState.findOne({
-        relations: ["user"],
         where: {
           user: {
             id: licenseUser.user.id,
@@ -103,6 +103,7 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
 
       currentSectionState.licenseUser = newLicenseUser;
       currentSectionState.save();
+      licenseUser.user.save();
 
       const stateTMBillUpdate = await stateTMBillDTO.save();
 
