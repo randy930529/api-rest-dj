@@ -13,6 +13,8 @@ import { FiscalYear } from "../../entity/FiscalYear";
 import { ProfileAddress } from "../../entity/ProfileAddress";
 import { UpdateProfileAddressDTO } from "../dto/request/updateProfileAddress.dto";
 import { Address } from "../../entity/Address";
+import { defaultSectionDataInit } from "../../managers/period/utils";
+import { Dj08SectionData } from "../../entity/Dj08SectionData";
 
 export class ProfileController extends EntityControllerBase<Profile> {
   constructor() {
@@ -71,15 +73,24 @@ export class ProfileController extends EntityControllerBase<Profile> {
       const date = moment().startOf("year").toDate();
       const year = moment().year();
 
-      const newFiscalYear = FiscalYear.create({
+      const newFiscalYearDTO = FiscalYear.create({
         year,
         date,
-        individual:true,
+        individual: true,
         profile: newProfile,
       });
-      await FiscalYear.save(newFiscalYear);
+      const newFiscalYear = await FiscalYear.save(newFiscalYearDTO);
 
-      const profile: CreateProfileDTO = newProfileDTO;
+      const section_data = defaultSectionDataInit();
+
+      const newDj08Data = await Dj08SectionData.create({
+        dJ08: { fiscalYear: newFiscalYear, profile: newProfile },
+        section_data,
+      });
+
+      await newDj08Data.save();
+
+      const profile: CreateProfileDTO = newProfile;
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,

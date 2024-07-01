@@ -153,7 +153,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
             supportDocuments: {
               id: true,
               document: true,
-              amount:true,
+              amount: true,
               type_document: true,
               element: {
                 id: true,
@@ -297,7 +297,55 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
         fiscalYear: fiscalYear || profile.fiscalYear[0] || null,
       });
 
-      const sectionState: SectionStateDTO = sectionStateUpdate;
+      const existToSectionUser = await this.repository.findOne({
+        select: {
+          fiscalYear: {
+            id: true,
+            year: true,
+            date: true,
+            general_scheme: true,
+            declared: true,
+            individual: true,
+            regimen: true,
+            created_at: true,
+            updated_at: true,
+            supportDocuments: {
+              id: true,
+              document: true,
+              amount: true,
+              type_document: true,
+              element: {
+                id: true,
+                group: true,
+              },
+            },
+            dj08: {
+              id: true,
+              dj08SectionData: {
+                id: true,
+                section_data: true,
+                is_rectification: true,
+              },
+            },
+          },
+        },
+        relations: {
+          profile: {
+            address: { address: true },
+            profileActivity: {
+              activity: true,
+            },
+          },
+          fiscalYear: {
+            supportDocuments: { element: true },
+            dj08: { dj08SectionData: true },
+          },
+          licenseUser: { license: true },
+        },
+        where: { id },
+      });
+
+      const sectionState: SectionStateDTO = existToSectionUser;
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
