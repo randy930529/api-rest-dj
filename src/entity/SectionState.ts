@@ -67,28 +67,31 @@ export class SectionState extends Model {
     );
     const has_cultural_activity = !find_cultural_activity ? false : true;
 
-    const countExpensesWithoutDocument =
-      this.fiscalYear?.supportDocuments.reduce((sumaTotal, val) => {
-        if (
-          val.type_document === "g" &&
-          val.element?.group.trim() === "pdgt" &&
-          !val.document
-        ) {
-          sumaTotal += val.amount;
+    const expensesPDGT = this.fiscalYear?.supportDocuments.filter(
+      (val) => val.type_document === "g" && val.element?.group.trim() === "pdgt"
+    );
+
+    const { sumaTotalExpensesWithoutDocument, sumaTotalExpensesWithDocument } =
+      expensesPDGT.reduce(
+        (sumaTotal, val) => {
+          if (!val.document) {
+            sumaTotal.sumaTotalExpensesWithoutDocument += val.amount;
+          } else {
+            sumaTotal.sumaTotalExpensesWithDocument += val.amount;
+          }
+          return sumaTotal;
+        },
+        {
+          sumaTotalExpensesWithoutDocument: 0,
+          sumaTotalExpensesWithDocument: 0,
         }
-        return sumaTotal;
-      }, 0);
+      );
 
     const countExpensesPD =
-      this.fiscalYear?.supportDocuments.reduce((sumaTotal, val) => {
-        if (val.type_document === "g" && val.element?.group.trim() === "pdgt") {
-          sumaTotal += val.amount;
-        }
-        return sumaTotal;
-      }, 0) || 1;
+      expensesPDGT.reduce((sumaTotal, val) => sumaTotal + val.amount, 0) || 1;
 
     const porcentageExpensesWithoutDocument = parseFloat(
-      ((countExpensesWithoutDocument / countExpensesPD) * 100).toFixed(2)
+      ((sumaTotalExpensesWithoutDocument / countExpensesPD) * 100).toFixed(2)
     );
 
     const section_data = JSON.parse(
@@ -113,13 +116,15 @@ export class SectionState extends Model {
 
     const current_tax_debt = F32 - F33 - F34 || 0 + F35 || 0;
 
-    const expenses_with_document = this.fiscalYear.supportDocuments.length
-      ? parseFloat((100 - porcentageExpensesWithoutDocument).toFixed(2))
+    const porcentageExpensesWithDocument = expensesPDGT.length
+      ? parseFloat(
+          ((sumaTotalExpensesWithDocument / countExpensesPD) * 100).toFixed(2)
+        )
       : 0;
 
     return {
       expenses_without_document: porcentageExpensesWithoutDocument,
-      expenses_with_document,
+      expenses_with_document: porcentageExpensesWithDocument,
       has_cultural_activity,
       current_tax_debt,
     };
