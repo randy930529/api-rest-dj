@@ -4,7 +4,7 @@
     "debug": "staging",
     "port": 4000,
     "corsOptions": {
-      "origin": "https://apkdj.onrender.com"
+      "origin": "https://apkdj-staging.onrender.com"
     },
     "emailFrom": "randy.delgado@desoft.cu",
     "licenseFreeDays": 5,
