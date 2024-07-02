@@ -106,7 +106,16 @@ export class ProfileActivity extends Model {
     });
 
     const profileActivities = await ProfileActivity.find({
-      relations: ["activity", "supportDocuments"],
+      select: {
+        supportDocuments: {
+          id: true,
+          type_document: true,
+          amount: true,
+          element: { id: true, group: true },
+        },
+        activity: { id: true, code: true, description: true },
+      },
+      relations: { activity: true, supportDocuments: { element: true } },
       where: {
         profile: { id: this.__profileId__ },
         supportDocuments: { fiscalYear: { id: fiscalYearId } },
@@ -131,16 +140,22 @@ export class ProfileActivity extends Model {
       const date_end_month = moment(date_end).month() + 1;
       const { income, expense } = activity.supportDocuments.reduce(
         (sumaTotal, val) => {
-          if (val.type_document === "i") {
+          if (
+            val.type_document === "i" &&
+            val.element.group?.trim() === "iggv"
+          ) {
             sumaTotal.income = parseFloat(
               (sumaTotal.income + val.amount).toFixed(2)
             );
-          } else if (val.type_document === "g" && val.element.group?.trim() === "pdgt") {
+          } else if (
+            val.type_document === "g" &&
+            val.element.group?.trim() === "pdgt"
+          ) {
             sumaTotal.expense = parseFloat(
               (sumaTotal.expense + val.amount).toFixed(2)
             );
           }
-          
+
           return sumaTotal;
         },
         { income: 0, expense: 0 }

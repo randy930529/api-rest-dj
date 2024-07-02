@@ -123,6 +123,26 @@ export class SupportDocument extends Model {
     const section_data: AllDataSectionsDj08Type = JSON.parse(
       sectionDataJSONString
     );
+    const profileActivities =
+      this.type_document === "g" || this.type_document === "i"
+        ? await ProfileActivity.find({
+            select: {
+              supportDocuments: {
+                id: true,
+                type_document: true,
+                amount: true,
+                element: { id: true, group: true },
+              },
+              activity: { id: true, code: true, description: true },
+            },
+            relations: { activity: true, supportDocuments: { element: true } },
+            where: {
+              supportDocuments: {
+                fiscalYear: { id: this.__fiscalYearId__ },
+              },
+            },
+          })
+        : [];
 
     switch (this.type_document) {
       case "m":
@@ -253,173 +273,136 @@ export class SupportDocument extends Model {
         break;
 
       case "g":
-        if (this.element.group?.trim() === "pdgt") {
-          const profileActivities = await ProfileActivity.find({
-            relations: ["activity", "supportDocuments"],
-            where: {
-              supportDocuments: {
-                fiscalYear: { id: this.__fiscalYearId__ },
-              },
+        const newDataSectionAG: { [key: string | number]: DataSectionAType } =
+          {};
+        const newTotalSectionAG: TotalSectionAType = {
+          incomes: 0,
+          expenses: 0,
+        };
+
+        for (let i = 0; i < profileActivities.length; i++) {
+          const activity = profileActivities[i];
+          const { date_start, date_end } = activity;
+          const { code, description } = activity.activity;
+          const date_start_day = moment(date_start).date();
+          const date_start_month = moment(date_start).month() + 1;
+          const date_end_day = moment(date_end).date();
+          const date_end_month = moment(date_end).month() + 1;
+          const { income, expense } = activity.supportDocuments.reduce(
+            (sumaTotal, val) => {
+              if (
+                val.type_document === "i" &&
+                val.element.group?.trim() === "iggv"
+              ) {
+                sumaTotal.income = parseFloat(
+                  (sumaTotal.income + val.amount).toFixed(2)
+                );
+              } else if (
+                val.type_document === "g" &&
+                val.element.group?.trim() === "pdgt"
+              ) {
+                sumaTotal.expense = parseFloat(
+                  (sumaTotal.expense + val.amount).toFixed(2)
+                );
+              }
+
+              return sumaTotal;
             },
-          });
-
-          const { section_data: sectionDataJSONString } = dj08ToUpdate;
-          const section_data: AllDataSectionsDj08Type = JSON.parse(
-            sectionDataJSONString
+            { income: 0, expense: 0 }
           );
 
-          const newDataSectionA: { [key: string | number]: DataSectionAType } =
-            {};
-          const newTotalSectionA: TotalSectionAType = {
-            incomes: 0,
-            expenses: 0,
+          const data: DataSectionAType = {
+            activity: `${code} - ${description}`,
+            period: {
+              start: [date_start_day, date_start_month],
+              end: [date_end_day, date_end_month],
+            },
+            income,
+            expense,
           };
-
-          for (let i = 0; i < profileActivities.length; i++) {
-            const activity = profileActivities[i];
-            const { date_start, date_end } = activity;
-            const { code, description } = activity.activity;
-            const date_start_day = moment(date_start).date();
-            const date_start_month = moment(date_start).month() + 1;
-            const date_end_day = moment(date_end).date();
-            const date_end_month = moment(date_end).month() + 1;
-            const { income, expense } = activity.supportDocuments.reduce(
-              (sumaTotal, val) => {
-                if (val.type_document === "i") {
-                  sumaTotal.income = parseFloat(
-                    (sumaTotal.income + val.amount).toFixed(2)
-                  );
-                } else if (
-                  val.type_document === "g" &&
-                  val.element.group?.trim() === "pdgt"
-                ) {
-                  sumaTotal.expense = parseFloat(
-                    (sumaTotal.expense + val.amount).toFixed(2)
-                  );
-                }
-
-                return sumaTotal;
-              },
-              { income: 0, expense: 0 }
-            );
-
-            const data: DataSectionAType = {
-              activity: `${code} - ${description}`,
-              period: {
-                start: [date_start_day, date_start_month],
-                end: [date_end_day, date_end_month],
-              },
-              income,
-              expense,
-            };
-            newDataSectionA[`F${i + 1}`] = data;
-            newTotalSectionA.incomes += income;
-            newTotalSectionA.expenses += expense;
-          }
-          section_data[SectionName.SECTION_A].data = newDataSectionA;
-          section_data[SectionName.SECTION_A].totals = newTotalSectionA;
-          section_data[SectionName.SECTION_B].data["F11"] =
-            newTotalSectionA.incomes;
-          section_data[SectionName.SECTION_B].data["F13"] =
-            newTotalSectionA.expenses;
-
-          const dataSectionB = section_data[SectionName.SECTION_B].data as {
-            [key: string]: number;
-          };
-          section_data[SectionName.SECTION_B].data["F20"] =
-            calculeF20ToDj08(dataSectionB);
-        } else if (this.element.group?.trim() === "ddgt") {
-          const expenses = documents.filter(
-            (val) =>
-              val.element.type === "g" && val.element.group?.trim() === "ddgt"
-          );
-
-          const expensesBookTGP19 = expenses.reduce(
-            (sumaTotal, val) =>
-              val.element.is_general ? sumaTotal + val.amount : sumaTotal,
-            0
-          );
-
-          section_data[SectionName.SECTION_B].data["F16"] = expensesBookTGP19;
+          newDataSectionAG[`F${i + 1}`] = data;
+          newTotalSectionAG.incomes += income;
+          newTotalSectionAG.expenses += expense;
         }
+        section_data[SectionName.SECTION_A].data = newDataSectionAG;
+        section_data[SectionName.SECTION_A].totals = newTotalSectionAG;
+        section_data[SectionName.SECTION_B].data["F11"] =
+          newTotalSectionAG.incomes;
+        section_data[SectionName.SECTION_B].data["F13"] =
+          newTotalSectionAG.expenses;
+
+        const expensesDD = documents.filter(
+          (val) =>
+            val.element.type === "g" && val.element.group?.trim() === "ddgt"
+        );
+
+        const expensesBookTGP19 = expensesDD.reduce(
+          (sumaTotal, val) =>
+            val.element.is_general ? sumaTotal + val.amount : sumaTotal,
+          0
+        );
+
+        section_data[SectionName.SECTION_B].data["F16"] = expensesBookTGP19;
         break;
-      case "i":
-        if (this.profileActivity && this.element.group?.trim() === "iggv") {
-          const profileActivities = await ProfileActivity.find({
-            relations: ["activity", "supportDocuments"],
-            where: {
-              supportDocuments: {
-                fiscalYear: { id: this.__fiscalYearId__ },
-              },
-            },
-          });
 
-          const { section_data: sectionDataJSONString } = dj08ToUpdate;
-          const section_data: AllDataSectionsDj08Type = JSON.parse(
-            sectionDataJSONString
+      case "i":
+        const newDataSectionA: { [key: string | number]: DataSectionAType } =
+          {};
+        const newTotalSectionA: TotalSectionAType = {
+          incomes: 0,
+          expenses: 0,
+        };
+
+        for (let i = 0; i < profileActivities.length; i++) {
+          const activity = profileActivities[i];
+          const { date_start, date_end } = activity;
+          const { code, description } = activity.activity;
+          const date_start_day = moment(date_start).date();
+          const date_start_month = moment(date_start).month() + 1;
+          const date_end_day = moment(date_end).date();
+          const date_end_month = moment(date_end).month() + 1;
+          const { income, expense } = activity.supportDocuments.reduce(
+            (sumaTotal, val) => {
+              if (
+                val.type_document === "i" &&
+                val.element.group?.trim() === "iggv"
+              ) {
+                sumaTotal.income = parseFloat(
+                  (sumaTotal.income + val.amount).toFixed(2)
+                );
+              } else if (
+                val.type_document === "g" &&
+                val.element.group?.trim() === "pdgt"
+              ) {
+                sumaTotal.expense = parseFloat(
+                  (sumaTotal.expense + val.amount).toFixed(2)
+                );
+              }
+
+              return sumaTotal;
+            },
+            { income: 0, expense: 0 }
           );
 
-          const newDataSectionA: { [key: string | number]: DataSectionAType } =
-            {};
-          const newTotalSectionA: TotalSectionAType = {
-            incomes: 0,
-            expenses: 0,
+          const data: DataSectionAType = {
+            activity: `${code} - ${description}`,
+            period: {
+              start: [date_start_day, date_start_month],
+              end: [date_end_day, date_end_month],
+            },
+            income,
+            expense,
           };
-
-          for (let i = 0; i < profileActivities.length; i++) {
-            const activity = profileActivities[i];
-            const { date_start, date_end } = activity;
-            const { code, description } = activity.activity;
-            const date_start_day = moment(date_start).date();
-            const date_start_month = moment(date_start).month() + 1;
-            const date_end_day = moment(date_end).date();
-            const date_end_month = moment(date_end).month() + 1;
-            const { income, expense } = activity.supportDocuments.reduce(
-              (sumaTotal, val) => {
-                if (val.type_document === "i") {
-                  sumaTotal.income = parseFloat(
-                    (sumaTotal.income + val.amount).toFixed(2)
-                  );
-                } else if (
-                  val.type_document === "g" &&
-                  val.element.group?.trim() === "pdgt"
-                ) {
-                  sumaTotal.expense = parseFloat(
-                    (sumaTotal.expense + val.amount).toFixed(2)
-                  );
-                }
-
-                return sumaTotal;
-              },
-              { income: 0, expense: 0 }
-            );
-
-            const data: DataSectionAType = {
-              activity: `${code} - ${description}`,
-              period: {
-                start: [date_start_day, date_start_month],
-                end: [date_end_day, date_end_month],
-              },
-              income,
-              expense,
-            };
-            newDataSectionA[`F${i + 1}`] = data;
-            newTotalSectionA.incomes += income;
-            newTotalSectionA.expenses += expense;
-          }
-          section_data[SectionName.SECTION_A].data = newDataSectionA;
-          section_data[SectionName.SECTION_A].totals = newTotalSectionA;
-          section_data[SectionName.SECTION_B].data["F11"] =
-            newTotalSectionA.incomes;
-          section_data[SectionName.SECTION_B].data["F13"] =
-            newTotalSectionA.expenses;
-
-          const dataSectionB = section_data[SectionName.SECTION_B].data as {
-            [key: string]: number;
-          };
-          section_data[SectionName.SECTION_B].data["F20"] =
-            calculeF20ToDj08(dataSectionB);
+          newDataSectionA[`F${i + 1}`] = data;
+          newTotalSectionA.incomes += income;
+          newTotalSectionA.expenses += expense;
         }
+        section_data[SectionName.SECTION_A].data = newDataSectionA;
+        section_data[SectionName.SECTION_A].totals = newTotalSectionA;
+        section_data[SectionName.SECTION_B].data["F11"] =
+          newTotalSectionA.incomes;
+        section_data[SectionName.SECTION_B].data["F13"] =
+          newTotalSectionA.expenses;
         break;
 
       case "o":
