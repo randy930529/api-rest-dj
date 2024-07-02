@@ -1,6 +1,6 @@
 {
   "app": {
-    "site": "https://api-xvfd.onrender.com",
+    "site": "https://api-xvfd.onrender.com/api/v1",
     "debug": "staging",
     "port": 4000,
     "corsOptions": {
@@ -9,6 +9,6 @@
     "emailFrom": "randy.delgado@desoft.cu",
     "licenseFreeDays": 5,
     "validTimeTMBill": 86400,
-    "paymentAPKHref": "https://api-xvfd.onrender.com"
+    "paymentAPKHref": "https://api-xvfd.onrender.com/api/v1"
   }
 }

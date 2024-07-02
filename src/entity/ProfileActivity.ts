@@ -129,12 +129,22 @@ export class ProfileActivity extends Model {
       const date_start_month = moment(date_start).month() + 1;
       const date_end_day = moment(date_end).date();
       const date_end_month = moment(date_end).month() + 1;
-      const income =
-        activity.supportDocuments.find((val) => val.type_document === "i")
-          ?.amount || 0;
-      const expense =
-        activity.supportDocuments.find((val) => val.type_document === "g")
-          ?.amount || 0;
+      const { income, expense } = activity.supportDocuments.reduce(
+        (sumaTotal, val) => {
+          if (val.type_document === "i") {
+            sumaTotal.income = parseFloat(
+              (sumaTotal.income + val.amount).toFixed(2)
+            );
+          } else if (val.type_document === "g" && val.element.group?.trim() === "pdgt") {
+            sumaTotal.expense = parseFloat(
+              (sumaTotal.expense + val.amount).toFixed(2)
+            );
+          }
+          
+          return sumaTotal;
+        },
+        { income: 0, expense: 0 }
+      );
 
       const data: DataSectionAType = {
         activity: `${code} - ${description}`,

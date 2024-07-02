@@ -21,6 +21,7 @@ import {
   AllDataSectionsDj08Type,
   DataSectionBType,
   DataSectionGType,
+  TotalSectionAType,
   TotalSectionGType,
 } from "../utils/definitions";
 import { calculeF20ToDj08 } from "../reports/utils/utilsToReports";
@@ -251,6 +252,26 @@ export class SupportDocument extends Model {
         break;
 
       case "g":
+        if (this.element.group?.trim() === "pdgt") {
+          const newTotalSectionA = section_data[SectionName.SECTION_A].data
+            ?.totals as unknown as TotalSectionAType;
+
+          const expensesMePD = documents.filter(
+            (val) =>
+              val.type_document === "g" &&
+              val.element.group?.trim() === "pdgt" &&
+              val.profileActivity
+          );
+
+          const expenses = expensesMePD.reduce(
+            (sumaTotal, val) => parseFloat((sumaTotal + val.amount).toFixed(2)),
+            0
+          );
+
+          newTotalSectionA.expenses = expenses;
+          section_data[SectionName.SECTION_A].totals = newTotalSectionA;
+          section_data[SectionName.SECTION_B].data["F13"] = expenses;
+        }
         const expenses = documents.filter(
           (val) =>
             val.element.type === "g" && val.element.group?.trim() === "ddgt"
@@ -263,6 +284,26 @@ export class SupportDocument extends Model {
         );
 
         section_data[SectionName.SECTION_B].data["F16"] = expensesBookTGP19;
+        break;
+      case "i":
+        if (this.profileActivity && this.element.group?.trim() === "iggv") {
+          const newTotalSectionA = section_data[SectionName.SECTION_A].data
+            ?.totals as unknown as TotalSectionAType;
+
+          const incomeMeIG = documents.filter(
+            (val) =>
+              val.element.type === "i" && val.element.group?.trim() === "iggv"
+          );
+
+          const incomes = incomeMeIG.reduce(
+            (sumaTotal, val) => parseFloat((sumaTotal + val.amount).toFixed(2)),
+            0
+          );
+
+          newTotalSectionA.incomes = incomes;
+          section_data[SectionName.SECTION_A].totals = newTotalSectionA;
+          section_data[SectionName.SECTION_B].data["F11"] = incomes;
+        }
         break;
 
       case "o":
