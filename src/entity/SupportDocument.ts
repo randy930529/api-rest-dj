@@ -8,7 +8,6 @@ import {
   AfterRemove,
   BeforeUpdate,
   BeforeInsert,
-  IsNull,
   Not,
 } from "typeorm";
 import Model from "./Base";
@@ -24,11 +23,7 @@ import {
   DataSectionGType,
   TotalSectionGType,
 } from "../utils/definitions";
-import {
-  calculeF20ToDj08,
-  calculeF26ToDj08,
-  calculeF27ToDj08,
-} from "../reports/utils/utilsToReports";
+import { calculeF20ToDj08 } from "../reports/utils/utilsToReports";
 import { appConfig } from "../../config";
 
 @Entity()
@@ -118,7 +113,6 @@ export class SupportDocument extends Model {
       where: {
         id: Not(this.id),
         fiscalYear: { id: this.__fiscalYearId__ },
-        profileActivity: IsNull(),
       },
     });
     documents.push(this);
@@ -133,104 +127,127 @@ export class SupportDocument extends Model {
         const paidTributes = documents.filter(
           (val) => val.element.type === "m"
         );
-
-        const expensesBookTTI19 = paidTributes.reduce(
-          (sumTotal, val) =>
-            val.element.group.trim() === "tprz"
-              ? sumTotal + val.amount
-              : sumTotal,
-          0
-        );
-
-        const expensesBookTTJ19 = paidTributes.reduce(
-          (sumTotal, val) =>
-            val.element.group.trim() === "tpcm"
-              ? sumTotal + val.amount
-              : sumTotal,
-          0
-        );
-
-        section_data[SectionName.SECTION_B].data["F15"] = expensesBookTTI19;
-        section_data[SectionName.SECTION_C].data["F22"] = expensesBookTTJ19;
-
-        const dataSectionC = section_data[SectionName.SECTION_C].data as {
-          [key: string]: number;
-        };
-        section_data[SectionName.SECTION_C].data["F26"] =
-          calculeF26ToDj08(dataSectionC);
-        section_data[SectionName.SECTION_C].data["F27"] =
-          calculeF27ToDj08(dataSectionC);
-
         const dataSectionF = section_data[SectionName.SECTION_F].data as {
           [key: string]: DataSectionBType;
         };
-        paidTributes.reduce<{
-          [id: string | number]:
-            | number
-            | {
-                row: string;
-                sumTotal: number;
-                concepto: string;
-              };
-        }>(
-          (objIndexById, document) => {
-            const previousObj = objIndexById[document.id] as {
-              row: string;
-              sumTotal: number;
-              concepto: string;
-            };
-            const count = objIndexById["count"] as number;
-            const totals = (objIndexById["totals"] as number) + document.amount;
-            const sumTotal = previousObj
-              ? previousObj.sumTotal + document.amount
-              : document.amount;
 
-            if (document.element.group.trim() === "tp") {
-              const obj = previousObj
-                ? { ...previousObj, sumTotal }
-                : {
-                    row: `F${count}`,
-                    sumTotal,
-                    concepto: document.element.description,
-                  };
+        if (this.element.group?.trim() === "tprz") {
+          const expensesBookTTI19 = paidTributes.reduce(
+            (sumTotal, val) =>
+              val.element.group.trim() === "tprz"
+                ? sumTotal + val.amount
+                : sumTotal,
+            0
+          );
+          section_data[SectionName.SECTION_B].data["F15"] = expensesBookTTI19;
+        } else if (this.element.group?.trim() === "tpcm") {
+          const expensesBookTTJ19 = paidTributes.reduce(
+            (sumTotal, val) =>
+              val.element.group.trim() === "tpcm"
+                ? sumTotal + val.amount
+                : sumTotal,
+            0
+          );
 
-              objIndexById["count"] = previousObj ? count : count + 1;
-              objIndexById["totals"] = totals;
-              objIndexById[document.id] = obj;
-              dataSectionF[obj.row] = {
-                import: sumTotal,
-                concepto: obj.concepto,
-              };
-              dataSectionF["F44"] = {
-                concepto: "Total de tributos pagados",
-                import: totals,
-              };
-            } else if (document.element.group.trim() === "ot") {
-              const obj = {
-                row: "F43",
-                sumTotal,
-                concepto: document.description,
-              };
+          section_data[SectionName.SECTION_C].data["F22"] = expensesBookTTJ19;
+        } else if (this.element.group?.trim() === "tpsv") {
+          const expensesBookTTB19 = paidTributes.reduce(
+            (sumTotal, val) =>
+              val.element.group.trim() === "tpsv"
+                ? sumTotal + val.amount
+                : sumTotal,
+            0
+          );
 
-              objIndexById[document.id] = obj;
-              objIndexById["totals"] = totals;
-              dataSectionF[obj.row] = {
-                import: sumTotal,
-                concepto: obj.concepto,
-              };
-              dataSectionF["F44"] = {
-                concepto: "Total de tributos pagados",
-                import: totals,
-              };
-            }
+          dataSectionF["F37"] = {
+            import: expensesBookTTB19,
+          };
+          dataSectionF["F38"] = {
+            import: null,
+          };
+        } else if (this.element.group?.trim() === "tpft") {
+          const expensesBookTTC19 = paidTributes.reduce(
+            (sumTotal, val) =>
+              val.element.group.trim() === "tpft"
+                ? sumTotal + val.amount
+                : sumTotal,
+            0
+          );
 
-            return objIndexById;
-          },
-          { count: 37, totals: 0 }
+          dataSectionF["F39"] = {
+            import: expensesBookTTC19,
+          };
+        } else if (this.element.group?.trim() === "tpdc") {
+          const expensesBookTTD19 = paidTributes.reduce(
+            (sumTotal, val) =>
+              val.element.group.trim() === "tpdc"
+                ? sumTotal + val.amount
+                : sumTotal,
+            0
+          );
+
+          dataSectionF["F40"] = {
+            import: expensesBookTTD19,
+          };
+        } else if (this.element.group?.trim() === "tpdc") {
+          const expensesBookTTD19 = paidTributes.reduce(
+            (sumTotal, val) =>
+              val.element.group.trim() === "tpdc"
+                ? sumTotal + val.amount
+                : sumTotal,
+            0
+          );
+
+          dataSectionF["F40"] = {
+            import: expensesBookTTD19,
+          };
+        } else if (this.element.group?.trim() === "tpan") {
+          const expensesBookTTE19 = paidTributes.reduce(
+            (sumTotal, val) =>
+              val.element.group.trim() === "tpan"
+                ? sumTotal + val.amount
+                : sumTotal,
+            0
+          );
+
+          dataSectionF["F41"] = {
+            import: expensesBookTTE19,
+          };
+        } else if (this.element.group?.trim() === "tpcs") {
+          const expensesBookTTF19 = paidTributes.reduce(
+            (sumTotal, val) =>
+              val.element.group.trim() === "tpcs"
+                ? sumTotal + val.amount
+                : sumTotal,
+            0
+          );
+
+          dataSectionF["F42"] = {
+            import: expensesBookTTF19,
+          };
+        } else if (this.element.group?.trim() === "tpot") {
+          const expensesBookTTG19 = paidTributes.reduce(
+            (sumTotal, val) =>
+              val.element.group.trim() === "tpot"
+                ? sumTotal + val.amount
+                : sumTotal,
+            0
+          );
+
+          dataSectionF["F43"] = {
+            import: expensesBookTTG19,
+          };
+        }
+
+        const importF44 = Object.values(dataSectionF).reduce(
+          (sumaTotal, val) => sumaTotal + val.import,
+          0
         );
+        dataSectionF["F44"] = {
+          import: importF44,
+        };
         section_data[SectionName.SECTION_F].data = dataSectionF;
-        section_data[SectionName.SECTION_B].data["F14"] =
-          dataSectionF["F44"].import;
+        section_data[SectionName.SECTION_B].data["F14"] = importF44;
         break;
 
       case "g":
@@ -259,10 +276,6 @@ export class SupportDocument extends Model {
           (sumaTotal, val) => sumaTotal + val.amount,
           0
         );
-
-        const dataSectionB = section_data[SectionName.SECTION_B].data as {
-          [key: string]: number;
-        };
 
         if (group === "onex") {
           section_data[SectionName.SECTION_B].data["F17"] = upFile;

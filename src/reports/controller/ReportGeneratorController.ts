@@ -687,8 +687,21 @@ class ReportGeneratorController extends ReportGenerator {
         },
       ];
 
-      const { F21, F22, F23, F24, F25, F26, F27 } =
+      const { F21, F22, F23, F24, F25 } =
         dj08SectionData.section_data[SectionName.SECTION_C]["data"];
+
+      const F26 =
+        regimen && totalSectionA.incomes < 200000
+          ? 0
+          : F21 > F22 + F23 + F24 + F25
+          ? F21 - (F22 + F23 + F24 + F25)
+          : 0;
+      const F27 =
+        F22 > 0
+          ? 0
+          : F21 < F22 + F23 + F24 + F25
+          ? (F21 - (F22 + F23 + F24 + F25)) * -1
+          : 0;
 
       const dataSectionC: DataSectionBType[] = [
         {
@@ -789,10 +802,40 @@ class ReportGeneratorController extends ReportGenerator {
         },
       ];
 
-      const [dataSectionF, totalSectionF] = getDataAndTotalsToDj08Sections<
-        DataSectionBType,
-        DataSectionBType
-      >(dj08SectionData, SectionName.SECTION_F);
+      const sectionFData =
+        dj08SectionData.section_data[SectionName.SECTION_F]["data"];
+
+      const totalSectionF = [
+        {
+          concepto: "Total de tributos pagados",
+          import: sectionFData.F44?.import,
+        },
+      ];
+
+      const dataSectionF = [
+        {
+          concepto: "Impuesto sobre las Ventas y/o Servicio",
+          import: sectionFData.F37?.import,
+        },
+        { concepto: "", import: sectionFData.F38?.import },
+        {
+          concepto: "Impuesto por la Utilización de la Fuerza de Trabajo",
+          import: sectionFData.F39?.import,
+        },
+        {
+          concepto: "Impuesto sobre Documentos",
+          import: sectionFData.F40?.import,
+        },
+        {
+          concepto: "Tasa por la Radicación de Anuncios y Propaganda Comercial",
+          import: sectionFData.F41?.import,
+        },
+        {
+          concepto: "Contribución a la Seguridad Social",
+          import: sectionFData.F42?.import,
+        },
+        { concepto: "Otros", import: sectionFData.F43?.import },
+      ];
 
       const [dataSectionG, totalSectionG] = getDataAndTotalsToDj08Sections<
         DataSectionGType,
