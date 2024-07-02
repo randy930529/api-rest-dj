@@ -471,8 +471,8 @@ export class SupportDocument extends Model {
 
       const newRow: DataSectionGType = {
         ...val,
-        baseImponible,
-        import: importe,
+        baseImponible: parseFloat(baseImponible.toFixed(2)),
+        import: parseFloat(importe.toFixed(2)),
       };
 
       dataSectionG[`F${count}`] = newRow;

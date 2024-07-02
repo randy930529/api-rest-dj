@@ -395,7 +395,11 @@ const calculeF20ToDj08 = <
     0
   );
 
-  return dataSection["F11"] > sumTotal ? dataSection["F11"] - sumTotal : 0;
+  return parseFloat(
+    (dataSection["F11"] > sumTotal ? dataSection["F11"] - sumTotal : 0).toFixed(
+      2
+    )
+  );
 };
 
 const calculeF26ToDj08 = <
