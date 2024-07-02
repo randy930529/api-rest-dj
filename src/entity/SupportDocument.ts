@@ -467,12 +467,14 @@ export class SupportDocument extends Model {
           F20 > to ? to - from : F20 - (totalSectionG?.baseImponible || 0);
       }
 
-      const importe = (baseImponible * porcentageType) / 100;
+      const importe = parseFloat(
+        ((baseImponible * porcentageType) / 100).toFixed(2)
+      );
 
       const newRow: DataSectionGType = {
         ...val,
         baseImponible: parseFloat(baseImponible.toFixed(2)),
-        import: parseFloat(importe.toFixed(2)),
+        import: importe,
       };
 
       dataSectionG[`F${count}`] = newRow;
