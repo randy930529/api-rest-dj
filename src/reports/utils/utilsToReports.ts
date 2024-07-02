@@ -31,7 +31,7 @@ const sumaArray = (array1: number[], array2: number[]): number[] =>
   }, []);
 
 const sumaTotal = (array: number[]): number =>
-  array.reduce((suma, val) => suma + val, 0);
+  array.reduce((suma, val) => parseFloat((suma + val).toFixed(2)), 0);
 
 const getDataToDay = (
   documents: SupportDocumentPartialType[],
