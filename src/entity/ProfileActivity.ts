@@ -145,14 +145,14 @@ export class ProfileActivity extends Model {
             val.element.group?.trim() === "iggv"
           ) {
             sumaTotal.income = parseFloat(
-              (sumaTotal.income + val.amount).toFixed(2)
+              (sumaTotal.income + val.amount).toFixed()
             );
           } else if (
             val.type_document === "g" &&
             val.element.group?.trim() === "pdgt"
           ) {
             sumaTotal.expense = parseFloat(
-              (sumaTotal.expense + val.amount).toFixed(2)
+              (sumaTotal.expense + val.amount).toFixed()
             );
           }
 

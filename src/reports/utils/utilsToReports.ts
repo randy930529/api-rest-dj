@@ -396,9 +396,10 @@ const calculeF20ToDj08 = <
   );
 
   return parseFloat(
-    (dataSection["F11"] > sumTotal ? dataSection["F11"] - sumTotal : 0).toFixed(
-      2
-    )
+    (dataSection["F11"] > sumTotal
+      ? dataSection["F11"] - sumTotal
+      : 0
+    ).toFixed()
   );
 };
 

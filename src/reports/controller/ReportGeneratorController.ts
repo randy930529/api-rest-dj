@@ -737,7 +737,6 @@ class ReportGeneratorController extends ReportGenerator {
         dj08SectionData.section_data[SectionName.SECTION_D]["data"];
 
       if (declared) {
-        console.log(F26, F33a);
         F28 = (F26 || 0) - F33a;
         F29 = F36a;
         F30 = F28 > F29 ? F28 - F29 : 0;
@@ -770,7 +769,10 @@ class ReportGeneratorController extends ReportGenerator {
       const { F34, F35 } =
         dj08SectionData.section_data[SectionName.SECTION_E]["data"];
       const F32 = declared ? F30 : F26;
-      const F33 = [1, 2].indexOf(dateSigns.month) !== -1 ? (F32 * 5) / 100 : 0;
+      const F33 =
+        [1, 2].indexOf(dateSigns.month) !== -1
+          ? parseFloat(((F32 * 5) / 100).toFixed())
+          : 0;
 
       const F36 = F32 - F33 - F34 || 0 + F35 || 0;
 

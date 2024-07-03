@@ -270,7 +270,7 @@ export class SupportDocument extends Model {
         const importF44 = parseFloat(
           Object.values(dataSectionF)
             .reduce((sumaTotal, val) => sumaTotal + val.import, 0)
-            .toFixed(2)
+            .toFixed()
         );
         dataSectionF["F44"] = {
           import: importF44,
@@ -302,14 +302,14 @@ export class SupportDocument extends Model {
                 val.element.group?.trim() === "iggv"
               ) {
                 sumaTotal.income = parseFloat(
-                  (sumaTotal.income + val.amount).toFixed(2)
+                  (sumaTotal.income + val.amount).toFixed()
                 );
               } else if (
                 val.type_document === "g" &&
                 val.element.group?.startsWith("pd")
               ) {
                 sumaTotal.expense = parseFloat(
-                  (sumaTotal.expense + val.amount).toFixed(2)
+                  (sumaTotal.expense + val.amount).toFixed()
                 );
               }
 
@@ -351,7 +351,7 @@ export class SupportDocument extends Model {
         );
 
         section_data[SectionName.SECTION_B].data["F16"] = parseFloat(
-          expensesBookTGP19.toFixed(2)
+          expensesBookTGP19.toFixed()
         );
         break;
 
@@ -378,14 +378,14 @@ export class SupportDocument extends Model {
                 val.element.group?.trim() === "iggv"
               ) {
                 sumaTotal.income = parseFloat(
-                  (sumaTotal.income + val.amount).toFixed(2)
+                  (sumaTotal.income + val.amount).toFixed()
                 );
               } else if (
                 val.type_document === "g" &&
                 val.element.group?.startsWith("pd")
               ) {
                 sumaTotal.expense = parseFloat(
-                  (sumaTotal.expense + val.amount).toFixed(2)
+                  (sumaTotal.expense + val.amount).toFixed()
                 );
               }
 
