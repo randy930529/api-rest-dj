@@ -477,12 +477,12 @@ export class SupportDocument extends Model {
       }
 
       const importe = parseFloat(
-        ((baseImponible * porcentageType) / 100).toFixed(2)
+        ((baseImponible * porcentageType) / 100).toFixed()
       );
 
       const newRow: DataSectionGType = {
         ...val,
-        baseImponible: parseFloat(baseImponible.toFixed(2)),
+        baseImponible: parseFloat(baseImponible.toFixed()),
         import: importe,
       };
 
