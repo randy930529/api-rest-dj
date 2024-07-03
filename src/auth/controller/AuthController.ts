@@ -38,6 +38,7 @@ export class AuthController {
     try {
       const fields: RegisterDTO = req.body;
       const { email, password, repeatPassword } = fields;
+      email.trim();
 
       if (password !== repeatPassword) {
         responseError(res, "Repeat password does not match the password.");
@@ -263,6 +264,7 @@ export class AuthController {
   async userResendActivation(req: Request, res: Response, next: NextFunction) {
     try {
       const { email } = req.body;
+      email.trim();
 
       const existingUser = await this.userRepository.findOneBy({ email });
 
@@ -347,6 +349,7 @@ export class AuthController {
   async userResetPassword(req: Request, res: Response, next: NextFunction) {
     try {
       const { email } = req.body;
+      email.trim();
 
       const existingUser = await this.userRepository.findOneBy({ email });
 
