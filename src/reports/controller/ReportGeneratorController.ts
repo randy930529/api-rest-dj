@@ -380,7 +380,7 @@ class ReportGeneratorController extends ReportGenerator {
 
         const index: number = parseInt(month) - 1;
         const day: number = moment(date).date() - 1;
-        const indexGroup: number = group === "igex" ? 2 : 3;
+        const indexGroup: number = group?.trim() === "igex" ? 2 : 3;
         const indexBoxOrBank: number = is_bank ? 1 : 0;
 
         const toDay = [...dataMonths[index][day]].slice(0, -1);
