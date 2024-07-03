@@ -102,7 +102,31 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       if (!id)
         responseError(res, "Update requiere support document id valid.", 404);
 
-      const supportDocumentUpdate = await this.update({ id, res }, fields);
+      const supportDocumentToUpdate = await this.repository.findOne({
+        select: {
+          element: {
+            id: true,
+            description: true,
+            type: true,
+            group: true,
+            is_general: true,
+          },
+        },
+        relations: ["element"],
+        where: { id },
+      });
+
+      if (!supportDocumentToUpdate)
+        responseError(res, `SUPPORTDOCUMENT not found.`, 404);
+
+      const supportDocumentUpdateDTO = this.repository.create({
+        ...supportDocumentToUpdate,
+        ...fields,
+      });
+
+      const supportDocumentUpdate = await this.repository.save(
+        supportDocumentUpdateDTO
+      );
 
       const supportDocument: SupportDocumentDTO = supportDocumentUpdate;
       const resp: BaseResponseDTO = {

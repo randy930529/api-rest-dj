@@ -109,7 +109,13 @@ export class SupportDocument extends Model {
 
     const documents = await SupportDocument.find({
       select: {
-        element: { id: true, description: true, type: true, group: true },
+        element: {
+          id: true,
+          description: true,
+          type: true,
+          group: true,
+          is_general: true,
+        },
       },
       relations: ["element"],
       where: {
