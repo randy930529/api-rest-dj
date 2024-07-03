@@ -131,7 +131,7 @@ export class SupportDocument extends Model {
                 id: true,
                 type_document: true,
                 amount: true,
-                element: { id: true, group: true },
+                element: { id: true, group: true, is_general: true },
               },
               activity: { id: true, code: true, description: true },
             },
@@ -333,16 +333,19 @@ export class SupportDocument extends Model {
 
         const expensesDD = documents.filter(
           (val) =>
-            val.element.type === "g" && val.element.group?.trim() === "ddgt"
+            val.element.type === "g" &&
+            val.element.is_general &&
+            val.element.group?.trim() === "ddgt"
         );
 
         const expensesBookTGP19 = expensesDD.reduce(
-          (sumaTotal, val) =>
-            val.element.is_general ? sumaTotal + val.amount : sumaTotal,
+          (sumaTotal, val) => sumaTotal + val.amount,
           0
         );
 
-        section_data[SectionName.SECTION_B].data["F16"] = expensesBookTGP19;
+        section_data[SectionName.SECTION_B].data["F16"] = parseFloat(
+          expensesBookTGP19.toFixed(2)
+        );
         break;
 
       case "i":
