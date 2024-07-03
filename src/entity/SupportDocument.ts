@@ -267,9 +267,10 @@ export class SupportDocument extends Model {
           };
         }
 
-        const importF44 = Object.values(dataSectionF).reduce(
-          (sumaTotal, val) => sumaTotal + val.import,
-          0
+        const importF44 = parseFloat(
+          Object.values(dataSectionF)
+            .reduce((sumaTotal, val) => sumaTotal + val.import, 0)
+            .toFixed(2)
         );
         dataSectionF["F44"] = {
           import: importF44,
