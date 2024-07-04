@@ -197,17 +197,16 @@ class ReportGeneratorController extends ReportGenerator {
             }
           }
 
-          const { egresos } =
-            expensesMeNIEIRecordedToDay.reduce(
-              (sumaTotals, val) => {
-                sumaTotals.egresos += parseFloat(val.amount);
-                val.is_bank
-                  ? (sumaTotals.sumaCashInBank += parseFloat(val.amount))
-                  : (sumaTotals.sumeCashInBox += parseFloat(val.amount));
-                return sumaTotals;
-              },
-              { egresos: 0, sumaCashInBank: 0, sumeCashInBox: 0 }
-            );
+          const { egresos } = expensesMeNIEIRecordedToDay.reduce(
+            (sumaTotals, val) => {
+              sumaTotals.egresos += parseFloat(val.amount);
+              val.is_bank
+                ? (sumaTotals.sumaCashInBank += parseFloat(val.amount))
+                : (sumaTotals.sumeCashInBox += parseFloat(val.amount));
+              return sumaTotals;
+            },
+            { egresos: 0, sumaCashInBank: 0, sumeCashInBox: 0 }
+          );
 
           const toDay: number[] = [
             expensesGeneralsForDaysTb2[day],
@@ -781,13 +780,41 @@ class ReportGeneratorController extends ReportGenerator {
         },
       ];
 
-      const { F34, F35 } =
+      const { F34 } =
         dj08SectionData.section_data[SectionName.SECTION_E]["data"];
+
       const F32 = declared ? F30 : F26;
       const F33 =
         [1, 2].indexOf(dateSigns.month) !== -1
           ? parseFloat(((F32 * 5) / 100).toFixed())
           : 0;
+
+      let F35 = 0;
+
+      if (declared) {
+        const limitDate = moment(`${year + 1}-04-30`);
+        const moraDays = moment().isAfter(limitDate)
+          ? moment().dayOfYear() - limitDate.dayOfYear()
+          : 0;
+
+        if (moraDays) {
+          const payToMora = (debit: number, porcentage: number) =>
+            debit * porcentage;
+
+          if (moraDays <= 30) {
+            F35 = payToMora(F32, 0.02);
+          } else if (moraDays > 30 && moraDays <= 60) {
+            F35 = payToMora(F32, 0.05);
+          } else if (moraDays > 60) {
+            const mora = payToMora(F32, 0.001) * moraDays;
+            F35 = payToMora(F32, 0.3);
+
+            if (mora < F35) {
+              F35 = mora;
+            }
+          }
+        }
+      }
 
       const F36 = F32 - F33 - F34 || 0 + F35 || 0;
 
