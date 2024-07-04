@@ -389,7 +389,7 @@ const calculeF20ToDj08 = <
 ): number => {
   const sumTotal = Object.keys(dataSection).reduce(
     (sum, key) =>
-      dataSection[key] && key != "F11" && key != "F20"
+      dataSection[key] && key !== "F11" && key !== "F20"
         ? sum + dataSection[key]
         : sum,
     0
@@ -412,7 +412,7 @@ const calculeF26ToDj08 = <
 ): number => {
   const sumTotal = Object.keys(dataSection).reduce(
     (sum, key) =>
-      dataSection[key] && key != "F21" && key != "F26" && key != "F27"
+      dataSection[key] && key !== "F21" && key !== "F26" && key !== "F27"
         ? sum + dataSection[key]
         : sum,
     0
@@ -433,7 +433,7 @@ const calculeF27ToDj08 = <
       ? 0
       : Object.keys(dataSection).reduce(
           (sum, key) =>
-            dataSection[key] && key != "F21" && key != "F26" && key != "F27"
+            dataSection[key] && key !== "F21" && key !== "F26" && key !== "F27"
               ? sum + dataSection[key]
               : sum,
           0

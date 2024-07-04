@@ -78,7 +78,7 @@ export class ProfileActivity extends Model {
         },
       });
 
-      if (activityWithSameName && this.id != activityWithSameName?.id) {
+      if (activityWithSameName && this.id !== activityWithSameName?.id) {
         throw new Error("Only a activity with the same name is allowed.");
       }
     }

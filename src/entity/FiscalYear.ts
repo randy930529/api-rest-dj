@@ -98,7 +98,7 @@ export class FiscalYear extends Model {
       })
       .getOne();
 
-    if (duplicateFiscalYear && this.id != duplicateFiscalYear?.id) {
+    if (duplicateFiscalYear && this.id !== duplicateFiscalYear?.id) {
       throw new Error("Only a fiscal year with same date and year is allowed.");
     }
   }

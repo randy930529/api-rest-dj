@@ -141,8 +141,8 @@ export class ProfileController extends EntityControllerBase<Profile> {
         );
 
       if (
-        (fields.ci && fields.ci != profileToUpdate.ci) ||
-        (fields.nit && fields.nit != profileToUpdate.nit)
+        (fields.ci && fields.ci !== profileToUpdate.ci) ||
+        (fields.nit && fields.nit !== profileToUpdate.nit)
       ) {
         const profilesForUserWithSameCi = await this.repository.count({
           where: [
@@ -212,8 +212,8 @@ export class ProfileController extends EntityControllerBase<Profile> {
         );
 
       if (
-        (fieldToUpdate === "ci" && fields.ci != profileToUpdate.ci) ||
-        (fieldToUpdate === "nit" && fields.nit != profileToUpdate.nit)
+        (fieldToUpdate === "ci" && fields.ci !== profileToUpdate.ci) ||
+        (fieldToUpdate === "nit" && fields.nit !== profileToUpdate.nit)
       ) {
         const profilesForUserWithSameCi = await this.repository.count({
           where: {

@@ -58,7 +58,7 @@ export class Element extends Model {
 
     if (
       elementForProfileWithSameName &&
-      this.id != elementForProfileWithSameName.id
+      this.id !== elementForProfileWithSameName.id
     ) {
       throw new Error("Only a element with the same name are allowed.");
     }

@@ -91,7 +91,7 @@ export class SupportDocument extends Model {
   @BeforeInsert()
   @BeforeUpdate()
   async checkToDateInToFiscalYear(): Promise<void> {
-    if (this.date && moment(this.date).year() != this.__year__) {
+    if (this.date && moment(this.date).year() !== this.__year__) {
       throw new Error("Out of date in to fiscal year.");
     }
   }
@@ -268,7 +268,7 @@ export class SupportDocument extends Model {
         }
 
         const importF44 = parseFloat(
-          Object.values(dataSectionF)
+          Object.values({ ...dataSectionF, F44: { import: null } })
             .reduce((sumaTotal, val) => sumaTotal + val.import, 0)
             .toFixed()
         );

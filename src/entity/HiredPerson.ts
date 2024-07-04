@@ -71,7 +71,7 @@ export class HiredPerson extends Model {
         where: { profile: { id: this.profile?.id }, ci: this.ci },
       });
 
-      if (hiredPersonWithSameCI && this.id != hiredPersonWithSameCI?.id) {
+      if (hiredPersonWithSameCI && this.id !== hiredPersonWithSameCI?.id) {
         throw new Error("Only a person hired with the same CI is allowed.");
       }
     }
