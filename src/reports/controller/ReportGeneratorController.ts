@@ -81,6 +81,11 @@ class ReportGeneratorController extends ReportGenerator {
           (val) => !val.is_general && val.group?.trim() === "ddgt"
         );
 
+      const expensesMeNIEI: SupportDocumentPartialType[] =
+        getInfoReportToDataBase.filter(
+          (val) => val.is_general && val.group?.trim() === "niei"
+        );
+
       const expensesNameTb1 = defaultDataArray<string>(6, "");
       let totalsTb1 = defaultDataArray<number>(13, 0);
 
@@ -89,11 +94,6 @@ class ReportGeneratorController extends ReportGenerator {
       const expensesGeneralsForDaysTb2 = defaultDataArray<number>(31, 0);
       let nextCol = 0;
 
-      /**
-       * @param
-       * egresos Egresos no incluidos a efectos de impuesto, autorizados por el MFP.
-       */
-      const egresos = defaultDataArray<number>(31, 0);
       const totalsExpensesOperating = defaultDataArray<number>(31, 0);
       const cashInBox = defaultDataArray<number>(31, 0);
       const cashInBank = defaultDataArray<number>(31, 0);
@@ -172,6 +172,9 @@ class ReportGeneratorController extends ReportGenerator {
           const expensesMeDDRecordedToDay: SupportDocumentPartialType[] =
             expensesMeDD.filter((val) => moment(val.date).date() === day + 1);
 
+          const expensesMeNIEIRecordedToDay: SupportDocumentPartialType[] =
+            expensesMeNIEI.filter((val) => moment(val.date).date() === day + 1);
+
           let expensesMeDDForDays = defaultDataArray<number>(3, 0);
           for (let i = 0; i < expensesMeDDRecordedToDay.length; i++) {
             const document: SupportDocumentPartialType =
@@ -194,18 +197,30 @@ class ReportGeneratorController extends ReportGenerator {
             }
           }
 
+          const { egresos } =
+            expensesMeNIEIRecordedToDay.reduce(
+              (sumaTotals, val) => {
+                sumaTotals.egresos += parseFloat(val.amount);
+                val.is_bank
+                  ? (sumaTotals.sumaCashInBank += parseFloat(val.amount))
+                  : (sumaTotals.sumeCashInBox += parseFloat(val.amount));
+                return sumaTotals;
+              },
+              { egresos: 0, sumaCashInBank: 0, sumeCashInBox: 0 }
+            );
+
           const toDay: number[] = [
             expensesGeneralsForDaysTb2[day],
             ...expensesMeDDForDays,
           ];
 
           const total: number = sumaTotal(toDay);
-          const sumaTotalEgresos = total + egresos[day];
+          const sumaTotalEgresos = total + egresos;
           totalsExpensesOperating[day] += sumaTotalEgresos;
           const sumacashInBoxAndBank = cashInBox[day] + cashInBank[day];
           totalPaid[day] += sumacashInBoxAndBank;
           toDay.push(total);
-          toDay.push(egresos[day]);
+          toDay.push(egresos);
           toDay.push(totalsExpensesOperating[day]);
           toDay.push(cashInBox[day]);
           toDay.push(cashInBank[day]);

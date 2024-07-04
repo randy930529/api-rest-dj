@@ -69,15 +69,14 @@ const getDataExpensesInToMonthArrayToTables = (
   let totalsTb2 = defaultDataArray<number>(10, 0);
   const expensesGeneralsForDaysTb2 = defaultDataArray<number>(31, 0);
 
-  /**
-   * @param
-   * egresos Egresos no incluidos a efectos de impuesto, autorizados por el MFP.
-   */
-  const egresos = defaultDataArray<number>(31, 0);
   const totalsExpensesOperating = defaultDataArray<number>(31, 0);
   const cashInBox = defaultDataArray<number>(31, 0);
   const cashInBank = defaultDataArray<number>(31, 0);
   const totalPaid = defaultDataArray<number>(31, 0);
+
+  const expensesMeNIEI = expensesGenerals.filter(
+    (val) => val.group?.trim() === "niei"
+  );
 
   const expensesForDaysTb1: (number | string)[][] = Array.from(
     { length: 31 },
@@ -134,18 +133,33 @@ const getDataExpensesInToMonthArrayToTables = (
         day
       );
 
+      const expensesMeNIEIRecordedToDay = expensesMeNIEI.filter(
+        (val) => moment(val.date).date() === day + 1
+      );
+
+      const { egresos } = expensesMeNIEIRecordedToDay.reduce(
+        (sumaTotals, val) => {
+          sumaTotals.egresos += parseFloat(val.amount);
+          val.is_bank
+            ? (sumaTotals.sumaCashInBank += parseFloat(val.amount))
+            : (sumaTotals.sumeCashInBox += parseFloat(val.amount));
+          return sumaTotals;
+        },
+        { egresos: 0, sumaCashInBank: 0, sumeCashInBox: 0 }
+      );
+
       const toDay: number[] = [
         expensesGeneralsForDaysTb2[day],
         ...expensesMeDDForDays,
       ];
 
       const total: number = sumaTotal(toDay);
-      const sumaTotalEgresos = total + egresos[day];
+      const sumaTotalEgresos = total + egresos;
       totalsExpensesOperating[day] += sumaTotalEgresos;
       const sumacashInBoxAndBank = cashInBox[day] + cashInBank[day];
       totalPaid[day] += sumacashInBoxAndBank;
       toDay.push(total);
-      toDay.push(egresos[day]);
+      toDay.push(egresos);
       toDay.push(totalsExpensesOperating[day]);
       toDay.push(cashInBox[day]);
       toDay.push(cashInBank[day]);

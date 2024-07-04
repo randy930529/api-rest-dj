@@ -68,7 +68,7 @@ export class SectionState extends Model {
     const has_cultural_activity = !find_cultural_activity ? false : true;
 
     const expensesPDGT = this.fiscalYear?.supportDocuments.filter(
-      (val) => val.type_document === "g" && val.element?.group.trim() === "pdgt"
+      (val) => val.type_document === "g" && val.element?.group?.startsWith("pd")
     );
 
     const { sumaTotalExpensesWithoutDocument, sumaTotalExpensesWithDocument } =
