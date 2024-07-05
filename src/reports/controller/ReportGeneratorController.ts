@@ -847,38 +847,40 @@ class ReportGeneratorController extends ReportGenerator {
       ];
 
       const sectionFData =
-        dj08SectionData.section_data[SectionName.SECTION_F]["data"];
+        dj08SectionData.section_data[SectionName.SECTION_F]["data"] as {
+          [key: string]: DataSectionBType;
+        };;
 
       const totalSectionF = [
         {
           concepto: "Total de tributos pagados",
-          import: sectionFData.F44?.import,
+          import: sectionFData.F44?.import?.toFixed(),
         },
       ];
 
       const dataSectionF = [
         {
           concepto: "Impuesto sobre las Ventas y/o Servicio",
-          import: sectionFData.F37?.import,
+          import: sectionFData.F37?.import?.toFixed(),
         },
-        { concepto: "", import: sectionFData.F38?.import },
+        { concepto: "", import: sectionFData.F38?.import?.toFixed() },
         {
           concepto: "Impuesto por la Utilización de la Fuerza de Trabajo",
-          import: sectionFData.F39?.import,
+          import: sectionFData.F39?.import?.toFixed(),
         },
         {
           concepto: "Impuesto sobre Documentos",
-          import: sectionFData.F40?.import,
+          import: sectionFData.F40?.import?.toFixed(),
         },
         {
           concepto: "Tasa por la Radicación de Anuncios y Propaganda Comercial",
-          import: sectionFData.F41?.import,
+          import: sectionFData.F41?.import?.toFixed(),
         },
         {
           concepto: "Contribución a la Seguridad Social",
-          import: sectionFData.F42?.import,
+          import: sectionFData.F42?.import?.toFixed(),
         },
-        { concepto: "Otros", import: sectionFData.F43?.import },
+        { concepto: "Otros", import: sectionFData.F43?.import?.toFixed() },
       ];
 
       const [dataSectionG, totalSectionG] = getDataAndTotalsToDj08Sections<
