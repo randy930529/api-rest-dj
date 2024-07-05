@@ -456,6 +456,22 @@ const calculeF27ToDj08 = <
   return dataSection["F21"] > sumTotal ? dataSection["F21"] - sumTotal : 0;
 };
 
+const calculeMoraDays = (
+  startDate: moment.Moment,
+  endDate: moment.Moment
+): number => {
+  let countMoraDays = 0;
+
+  while (startDate.isBefore(endDate)) {
+    if ([1, 2, 3, 4, 5].indexOf(startDate.weekday()) !== -1) {
+      countMoraDays++;
+    }
+    startDate.add(1, "d");
+  }
+
+  return countMoraDays;
+};
+
 export {
   pugTemplatePath,
   defaultDataArray,
@@ -471,4 +487,5 @@ export {
   calculeF20ToDj08,
   calculeF26ToDj08,
   calculeF27ToDj08,
+  calculeMoraDays,
 };

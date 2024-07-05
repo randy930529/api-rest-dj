@@ -7,6 +7,7 @@ import { User } from "../../entity/User";
 import { SectionState } from "../../entity/SectionState";
 import { Dj08SectionData, SectionName } from "../../entity/Dj08SectionData";
 import {
+  calculeMoraDays,
   clearDuplicatesInArray,
   defaultDataArray,
   getDataAndTotalsToDj08Sections,
@@ -794,24 +795,27 @@ class ReportGeneratorController extends ReportGenerator {
       if (declared) {
         const limitDate = moment(`${year + 1}-04-30`);
         const moraDays = moment().isAfter(limitDate)
-          ? moment().dayOfYear() - limitDate.dayOfYear()
+          ? calculeMoraDays(limitDate, moment())
           : 0;
 
         if (moraDays) {
-          const payToMora = (debit: number, porcentage: number) =>
-            debit * porcentage;
+          const payToMora = (debit: number, porcentage: number, days: number) =>
+            debit * porcentage * days;
 
-          if (moraDays <= 30) {
-            F35 = payToMora(F32, 0.02);
-          } else if (moraDays > 30 && moraDays <= 60) {
-            F35 = payToMora(F32, 0.05);
-          } else if (moraDays > 60) {
-            const mora = payToMora(F32, 0.001) * moraDays;
-            F35 = payToMora(F32, 0.3);
+          F35 += payToMora(F32, 0.02, 30);
+          
+          if (moraDays > 30) {
+            F35 += payToMora(F32, 0.05, 30);
+          }
 
-            if (mora < F35) {
-              F35 = mora;
-            }
+          if (moraDays > 60) {
+            const mora = payToMora(F32, 0.001, moraDays - 60);
+            const topMora = payToMora(F32, 0.3, 1);
+
+            F35 =
+              mora < topMora
+                ? parseFloat((F35 += mora).toFixed())
+                : parseFloat((F35 += topMora).toFixed());
           }
         }
       }
@@ -846,10 +850,11 @@ class ReportGeneratorController extends ReportGenerator {
         },
       ];
 
-      const sectionFData =
-        dj08SectionData.section_data[SectionName.SECTION_F]["data"] as {
-          [key: string]: DataSectionBType;
-        };;
+      const sectionFData = dj08SectionData.section_data[SectionName.SECTION_F][
+        "data"
+      ] as {
+        [key: string]: DataSectionBType;
+      };
 
       const totalSectionF = [
         {
