@@ -422,9 +422,10 @@ export class SupportDocument extends Model {
             val.element.type === "o" && val.element.group?.trim() === group
         );
 
-        const upFile = allDocumentToGroup.reduce(
-          (sumaTotal, val) => sumaTotal + val.amount,
-          0
+        const upFile = parseFloat(
+          allDocumentToGroup
+            .reduce((sumaTotal, val) => sumaTotal + val.amount, 0)
+            .toFixed()
         );
 
         if (group === "onex") {
