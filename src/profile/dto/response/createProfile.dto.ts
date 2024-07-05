@@ -7,6 +7,9 @@ export type CreateProfileDTO = {
   last_name: string;
   ci: string;
   nit: string;
+  primary: boolean;
+  run_in_municipality: string;
+  is_tcp: boolean;
   address?: ProfileAddress;
   user: User;
 };

@@ -49,6 +49,9 @@ export class Profile extends Model {
   @Column({ type: "varchar", length: 50, nullable: true })
   run_in_municipality: string;
 
+  @Column({ default: false })
+  is_tcp: boolean;
+
   @ManyToOne(() => User, {
     onDelete: "CASCADE",
   })
