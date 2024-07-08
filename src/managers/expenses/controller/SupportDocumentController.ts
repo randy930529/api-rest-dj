@@ -122,6 +122,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       const supportDocumentUpdateDTO = this.repository.create({
         ...supportDocumentToUpdate,
         ...fields,
+        __oldGroup__: supportDocumentToUpdate.element?.group.trim(),
       });
 
       const supportDocumentUpdate = await this.repository.save(

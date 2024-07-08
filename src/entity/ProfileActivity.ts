@@ -56,6 +56,9 @@ export class ProfileActivity extends Model {
   )
   profileHiredPersonActivity: ProfileHiredPersonActivity[];
 
+  @Column({ default: false })
+  primary: boolean;
+
   toJSON() {
     return {
       ...this,
@@ -113,7 +116,7 @@ export class ProfileActivity extends Model {
           amount: true,
           element: { id: true, group: true },
         },
-        activity: { id: true, code: true, description: true },
+        activity: { id: true, code: true, description: true, to_tcp: true },
       },
       relations: { activity: true, supportDocuments: { element: true } },
       where: {
@@ -129,15 +132,21 @@ export class ProfileActivity extends Model {
 
     const newDataSectionA: { [key: string | number]: DataSectionAType } = {};
     const newTotalSectionA: TotalSectionAType = { incomes: 0, expenses: 0 };
+    let is_tcp = true;
 
     for (let i = 0; i < profileActivities.length; i++) {
       const activity = profileActivities[i];
       const { date_start, date_end } = activity;
-      const { code, description } = activity.activity;
+      const { code, description, to_tcp } = activity.activity;
       const date_start_day = moment(date_start).date();
       const date_start_month = moment(date_start).month() + 1;
       const date_end_day = moment(date_end).date();
       const date_end_month = moment(date_end).month() + 1;
+
+      if (!to_tcp) {
+        is_tcp = false;
+      }
+
       const { income, expense } = activity.supportDocuments.reduce(
         (sumaTotal, val) => {
           if (
@@ -187,5 +196,7 @@ export class ProfileActivity extends Model {
 
     dj08ToUpdate.section_data = JSON.stringify(section_data);
     await dj08ToUpdate.save();
+
+    Profile.save({ id: this.__profileId__, is_tcp });
   }
 }

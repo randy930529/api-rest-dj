@@ -67,6 +67,9 @@ export class SupportDocument extends Model {
   @Column({ nullable: true })
   __year__: number;
 
+  @Column({ nullable: true })
+  __oldGroup__: string;
+
   @ManyToOne(() => ProfileActivity, { nullable: true })
   @JoinColumn()
   profileActivity: ProfileActivity;
@@ -76,6 +79,7 @@ export class SupportDocument extends Model {
       ...this,
       __fiscalYearId__: undefined,
       __year__: undefined,
+      __oldGroup__: undefined,
     };
   }
 
@@ -152,14 +156,15 @@ export class SupportDocument extends Model {
 
     switch (this.type_document) {
       case "m":
+        let elementGroup = this.element.group?.trim();
         const paidTributes = documents.filter(
-          (val) => val.element.type === "m"
+          (val) => val.type_document === "m"
         );
         const dataSectionF = section_data[SectionName.SECTION_F].data as {
           [key: string]: DataSectionBType;
         };
 
-        if (this.element.group?.trim() === "tprz") {
+        if (elementGroup === "tprz") {
           const expensesBookTTI19 = paidTributes.reduce(
             (sumTotal, val) =>
               val.element.group.trim() === "tprz"
@@ -168,7 +173,7 @@ export class SupportDocument extends Model {
             0
           );
           section_data[SectionName.SECTION_B].data["F15"] = expensesBookTTI19;
-        } else if (this.element.group?.trim() === "tpcm") {
+        } else if (elementGroup === "tpcm") {
           const expensesBookTTJ19 = paidTributes.reduce(
             (sumTotal, val) =>
               val.element.group.trim() === "tpcm"
@@ -178,7 +183,7 @@ export class SupportDocument extends Model {
           );
 
           section_data[SectionName.SECTION_C].data["F22"] = expensesBookTTJ19;
-        } else if (this.element.group?.trim() === "tpsv") {
+        } else if (elementGroup === "tpsv") {
           const expensesBookTTB19 = paidTributes.reduce(
             (sumTotal, val) =>
               val.element.group.trim() === "tpsv"
@@ -193,7 +198,7 @@ export class SupportDocument extends Model {
           dataSectionF["F38"] = {
             import: null,
           };
-        } else if (this.element.group?.trim() === "tpft") {
+        } else if (elementGroup === "tpft") {
           const expensesBookTTC19 = paidTributes.reduce(
             (sumTotal, val) =>
               val.element.group.trim() === "tpft"
@@ -205,7 +210,7 @@ export class SupportDocument extends Model {
           dataSectionF["F39"] = {
             import: expensesBookTTC19,
           };
-        } else if (this.element.group?.trim() === "tpdc") {
+        } else if (elementGroup === "tpdc") {
           const expensesBookTTD19 = paidTributes.reduce(
             (sumTotal, val) =>
               val.element.group.trim() === "tpdc"
@@ -217,7 +222,7 @@ export class SupportDocument extends Model {
           dataSectionF["F40"] = {
             import: expensesBookTTD19,
           };
-        } else if (this.element.group?.trim() === "tpdc") {
+        } else if (elementGroup === "tpdc") {
           const expensesBookTTD19 = paidTributes.reduce(
             (sumTotal, val) =>
               val.element.group.trim() === "tpdc"
@@ -229,7 +234,7 @@ export class SupportDocument extends Model {
           dataSectionF["F40"] = {
             import: expensesBookTTD19,
           };
-        } else if (this.element.group?.trim() === "tpan") {
+        } else if (elementGroup === "tpan") {
           const expensesBookTTE19 = paidTributes.reduce(
             (sumTotal, val) =>
               val.element.group.trim() === "tpan"
@@ -241,7 +246,7 @@ export class SupportDocument extends Model {
           dataSectionF["F41"] = {
             import: expensesBookTTE19,
           };
-        } else if (this.element.group?.trim() === "tpcs") {
+        } else if (elementGroup === "tpcs") {
           const expensesBookTTF19 = paidTributes.reduce(
             (sumTotal, val) =>
               val.element.group.trim() === "tpcs"
@@ -253,7 +258,7 @@ export class SupportDocument extends Model {
           dataSectionF["F42"] = {
             import: expensesBookTTF19,
           };
-        } else if (this.element.group?.trim() === "tpot") {
+        } else if (elementGroup === "tpot") {
           const expensesBookTTG19 = paidTributes.reduce(
             (sumTotal, val) =>
               val.element.group.trim() === "tpot"
@@ -265,6 +270,117 @@ export class SupportDocument extends Model {
           dataSectionF["F43"] = {
             import: expensesBookTTG19,
           };
+        }
+
+        if (elementGroup !== this.__oldGroup__) {
+          elementGroup = this.__oldGroup__;
+          if (elementGroup === "tprz") {
+            const expensesBookTTI19 = paidTributes.reduce(
+              (sumTotal, val) =>
+                val.element.group.trim() === "tprz"
+                  ? sumTotal + val.amount
+                  : sumTotal,
+              0
+            );
+            section_data[SectionName.SECTION_B].data["F15"] = expensesBookTTI19;
+          } else if (elementGroup === "tpcm") {
+            const expensesBookTTJ19 = paidTributes.reduce(
+              (sumTotal, val) =>
+                val.element.group.trim() === "tpcm"
+                  ? sumTotal + val.amount
+                  : sumTotal,
+              0
+            );
+
+            section_data[SectionName.SECTION_C].data["F22"] = expensesBookTTJ19;
+          } else if (elementGroup === "tpsv") {
+            const expensesBookTTB19 = paidTributes.reduce(
+              (sumTotal, val) =>
+                val.element.group.trim() === "tpsv"
+                  ? sumTotal + val.amount
+                  : sumTotal,
+              0
+            );
+
+            dataSectionF["F37"] = {
+              import: expensesBookTTB19,
+            };
+            dataSectionF["F38"] = {
+              import: null,
+            };
+          } else if (elementGroup === "tpft") {
+            const expensesBookTTC19 = paidTributes.reduce(
+              (sumTotal, val) =>
+                val.element.group.trim() === "tpft"
+                  ? sumTotal + val.amount
+                  : sumTotal,
+              0
+            );
+
+            dataSectionF["F39"] = {
+              import: expensesBookTTC19,
+            };
+          } else if (elementGroup === "tpdc") {
+            const expensesBookTTD19 = paidTributes.reduce(
+              (sumTotal, val) =>
+                val.element.group.trim() === "tpdc"
+                  ? sumTotal + val.amount
+                  : sumTotal,
+              0
+            );
+
+            dataSectionF["F40"] = {
+              import: expensesBookTTD19,
+            };
+          } else if (elementGroup === "tpdc") {
+            const expensesBookTTD19 = paidTributes.reduce(
+              (sumTotal, val) =>
+                val.element.group.trim() === "tpdc"
+                  ? sumTotal + val.amount
+                  : sumTotal,
+              0
+            );
+
+            dataSectionF["F40"] = {
+              import: expensesBookTTD19,
+            };
+          } else if (elementGroup === "tpan") {
+            const expensesBookTTE19 = paidTributes.reduce(
+              (sumTotal, val) =>
+                val.element.group.trim() === "tpan"
+                  ? sumTotal + val.amount
+                  : sumTotal,
+              0
+            );
+
+            dataSectionF["F41"] = {
+              import: expensesBookTTE19,
+            };
+          } else if (elementGroup === "tpcs") {
+            const expensesBookTTF19 = paidTributes.reduce(
+              (sumTotal, val) =>
+                val.element.group.trim() === "tpcs"
+                  ? sumTotal + val.amount
+                  : sumTotal,
+              0
+            );
+
+            dataSectionF["F42"] = {
+              import: expensesBookTTF19,
+            };
+          } else if (elementGroup === "tpot") {
+            const expensesBookTTG19 = paidTributes.reduce(
+              (sumTotal, val) =>
+                val.element.group.trim() === "tpot"
+                  ? sumTotal + val.amount
+                  : sumTotal,
+              0
+            );
+
+            dataSectionF["F43"] = {
+              import: expensesBookTTG19,
+            };
+          }
         }
 
         const importF44 = parseFloat(
@@ -340,7 +456,7 @@ export class SupportDocument extends Model {
 
         const expensesDD = documents.filter(
           (val) =>
-            val.element.type === "g" &&
+            val.type_document === "g" &&
             val.element.is_general &&
             val.element.group?.trim() === "ddgt"
         );
@@ -419,7 +535,7 @@ export class SupportDocument extends Model {
         const group = this.element.group?.trim();
         const allDocumentToGroup = documents.filter(
           (val) =>
-            val.element.type === "o" && val.element.group?.trim() === group
+            val.type_document === "o" && val.element.group?.trim() === group
         );
 
         const upFile = parseFloat(
@@ -442,6 +558,36 @@ export class SupportDocument extends Model {
           section_data[SectionName.SECTION_C].data["F25"] = upFile;
         } else if (group === "onde") {
           section_data[SectionName.SECTION_E].data["F34"] = upFile;
+        }
+
+        if (group !== this.__oldGroup__) {
+          const allDocumentToGroup = documents.filter(
+            (val) =>
+              val.type_document === "o" &&
+              val.element.group?.trim() === this.__oldGroup__
+          );
+
+          const upFile = parseFloat(
+            allDocumentToGroup
+              .reduce((sumaTotal, val) => sumaTotal + val.amount, 0)
+              .toFixed()
+          );
+
+          if (this.__oldGroup__ === "onex") {
+            section_data[SectionName.SECTION_B].data["F17"] = upFile;
+          } else if (this.__oldGroup__ === "onda") {
+            section_data[SectionName.SECTION_B].data["F18"] = upFile;
+          } else if (this.__oldGroup__ === "onfp") {
+            section_data[SectionName.SECTION_B].data["F19"] = upFile;
+          } else if (this.__oldGroup__ === "onpa") {
+            section_data[SectionName.SECTION_C].data["F23"] = upFile;
+          } else if (this.__oldGroup__ === "onrt") {
+            section_data[SectionName.SECTION_C].data["F24"] = upFile;
+          } else if (this.__oldGroup__ === "onbn") {
+            section_data[SectionName.SECTION_C].data["F25"] = upFile;
+          } else if (this.__oldGroup__ === "onde") {
+            section_data[SectionName.SECTION_E].data["F34"] = upFile;
+          }
         }
         break;
 

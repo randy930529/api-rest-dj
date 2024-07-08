@@ -586,6 +586,7 @@ class ReportGeneratorController extends ReportGenerator {
           ci: true,
           nit: true,
           run_in_municipality: true,
+          is_tcp: true,
         },
         fiscalYear: {
           id: true,
@@ -614,8 +615,15 @@ class ReportGeneratorController extends ReportGenerator {
         where: { user: { id: user.id } },
       });
 
-      const { first_name, last_name, ci, nit, address, run_in_municipality } =
-        profile;
+      const {
+        first_name,
+        last_name,
+        ci,
+        nit,
+        address,
+        run_in_municipality,
+        is_tcp,
+      } = profile;
       const { year, individual, musicalGroup, regimen } = fiscalYear;
 
       ci.padEnd(11);
@@ -711,12 +719,14 @@ class ReportGeneratorController extends ReportGenerator {
           : F21 > F22 + F23 + F24 + F25
           ? F21 - (F22 + F23 + F24 + F25)
           : 0;
-      const F27 =
-        F22 > 0
-          ? 0
-          : F21 < F22 + F23 + F24 + F25
-          ? (F21 - (F22 + F23 + F24 + F25)) * -1
-          : 0;
+          
+      const F27 = is_tcp
+        ? 0
+        : F22 > 0
+        ? 0
+        : F21 < F22 + F23 + F24 + F25
+        ? (F21 - (F22 + F23 + F24 + F25)) * -1
+        : 0;
 
       const dataSectionC: DataSectionBType[] = [
         {
@@ -803,7 +813,7 @@ class ReportGeneratorController extends ReportGenerator {
             debit * porcentage * days;
 
           F35 += payToMora(F32, 0.02, 30);
-          
+
           if (moraDays > 30) {
             F35 += payToMora(F32, 0.05, 30);
           }
