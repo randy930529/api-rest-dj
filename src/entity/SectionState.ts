@@ -116,12 +116,17 @@ export class SectionState extends Model {
       SectionName.SECTION_A
     );
 
-    const { F21, F22, F23, F24, F25 } =
-      section_data[SectionName.SECTION_C]["data"];
+    const {
+      F21 = 0,
+      F22 = 0,
+      F23 = 0,
+      F24 = 0,
+      F25 = 0,
+    } = section_data[SectionName.SECTION_C]["data"];
 
-    const { F30 } = section_data[SectionName.SECTION_D]["data"];
+    const { F30 = 0 } = section_data[SectionName.SECTION_D]["data"];
 
-    const { F34 } = section_data[SectionName.SECTION_E]["data"];
+    const { F34 = 0 } = section_data[SectionName.SECTION_E]["data"];
 
     const F26 =
       this.fiscalYear.regimen && totalSectionA.incomes < 200000
@@ -165,7 +170,7 @@ export class SectionState extends Model {
       }
     }
 
-    const current_tax_debt = F32 - F33 - F34 || 0 + F35 || 0;
+    const current_tax_debt = F32 - F33 - F34 + F35;
 
     const porcentageExpensesWithDocument = expensesPDGT.length
       ? parseFloat(

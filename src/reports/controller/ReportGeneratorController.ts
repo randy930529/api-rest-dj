@@ -763,8 +763,14 @@ class ReportGeneratorController extends ReportGenerator {
         },
       ];
 
-      let { F28, F29, F30, F31, F33a, F36a } =
-        dj08SectionData.section_data[SectionName.SECTION_D]["data"];
+      let {
+        F28,
+        F29,
+        F30 = 0,
+        F31,
+        F33a,
+        F36a,
+      } = dj08SectionData.section_data[SectionName.SECTION_D]["data"];
 
       if (declared) {
         F28 = (F26 || 0) - F33a;
