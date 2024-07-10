@@ -710,8 +710,13 @@ class ReportGeneratorController extends ReportGenerator {
         },
       ];
 
-      const { F21, F22, F23, F24, F25 } =
-        dj08SectionData.section_data[SectionName.SECTION_C]["data"];
+      const {
+        F21 = 0,
+        F22 = 0,
+        F23 = 0,
+        F24 = 0,
+        F25 = 0,
+      } = dj08SectionData.section_data[SectionName.SECTION_C]["data"];
 
       const F26 =
         regimen && totalSectionA.incomes < 200000
@@ -719,7 +724,7 @@ class ReportGeneratorController extends ReportGenerator {
           : F21 > F22 + F23 + F24 + F25
           ? F21 - (F22 + F23 + F24 + F25)
           : 0;
-          
+
       const F27 = is_tcp
         ? 0
         : F22 > 0
@@ -791,7 +796,7 @@ class ReportGeneratorController extends ReportGenerator {
         },
       ];
 
-      const { F34 } =
+      const { F34 = 0 } =
         dj08SectionData.section_data[SectionName.SECTION_E]["data"];
 
       const F32 = declared ? F30 : F26;
@@ -830,7 +835,7 @@ class ReportGeneratorController extends ReportGenerator {
         }
       }
 
-      const F36 = F32 - F33 - F34 || 0 + F35 || 0;
+      const F36 = F32 - F33 - F34 + F35;
 
       const dataSectionE = [
         {

@@ -1,4 +1,5 @@
 import { Column, Entity, JoinColumn, OneToOne } from "typeorm";
+import * as moment from "moment";
 import Model from "./Base";
 import { User } from "./User";
 import { Profile } from "./Profile";
@@ -6,6 +7,11 @@ import { FiscalYear } from "./FiscalYear";
 import { LicenseUser } from "./LicenseUser";
 import { SectionName } from "./Dj08SectionData";
 import { appConfig } from "../../config";
+import {
+  calculeMoraDays,
+  getDataAndTotalsToDj08Sections,
+} from "../reports/utils/utilsToReports";
+import { DataSectionAType, TotalSectionAType } from "../utils/definitions";
 
 @Entity()
 export class SectionState extends Model {
@@ -100,19 +106,64 @@ export class SectionState extends Model {
       )?.section_data
     );
 
-    const { F26 } = section_data[SectionName.SECTION_C]["data"];
-    let { F28, F29, F30, F31, F33a, F36a } =
-      section_data[SectionName.SECTION_D]["data"];
+    const [_, totalSectionA] = getDataAndTotalsToDj08Sections<
+      DataSectionAType,
+      TotalSectionAType
+    >(
+      this.fiscalYear?.dj08[0].dj08SectionData.find(
+        (val) => val.is_rectification === true
+      ),
+      SectionName.SECTION_A
+    );
+
+    const { F21, F22, F23, F24, F25 } =
+      section_data[SectionName.SECTION_C]["data"];
+
+    const { F30 } = section_data[SectionName.SECTION_D]["data"];
+
+    const { F34 } = section_data[SectionName.SECTION_E]["data"];
+
+    const F26 =
+      this.fiscalYear.regimen && totalSectionA.incomes < 200000
+        ? 0
+        : F21 > F22 + F23 + F24 + F25
+        ? F21 - (F22 + F23 + F24 + F25)
+        : 0;
+
+    const F32 = this.fiscalYear.declared ? F30 : F26;
+    const F33 =
+      [1, 2].indexOf(moment().month() + 1) !== -1
+        ? parseFloat(((F32 * 5) / 100).toFixed())
+        : 0;
+    let F35 = 0;
 
     if (this.fiscalYear.declared) {
-      F28 = (F26 || 0) - F33a;
-      F29 = F36a;
-      F30 = F28 > F29 ? F28 - F29 : 0;
-      F31 = F28 > F29 ? 0 : F29 - F28;
+      const limitDate = moment(`${this.fiscalYear.year + 1}-04-30`);
+      const moraDays = moment().isAfter(limitDate)
+        ? calculeMoraDays(limitDate, moment())
+        : 0;
+
+      if (moraDays) {
+        const payToMora = (debit: number, porcentage: number, days: number) =>
+          debit * porcentage * days;
+
+        F35 += payToMora(F32, 0.02, 30);
+
+        if (moraDays > 30) {
+          F35 += payToMora(F32, 0.05, 30);
+        }
+
+        if (moraDays > 60) {
+          const mora = payToMora(F32, 0.001, moraDays - 60);
+          const topMora = payToMora(F32, 0.3, 1);
+
+          F35 =
+            mora < topMora
+              ? parseFloat((F35 += mora).toFixed())
+              : parseFloat((F35 += topMora).toFixed());
+        }
+      }
     }
-    const { F34, F35 } = section_data[SectionName.SECTION_E]["data"];
-    const F32 = this.fiscalYear.declared ? F30 : F26;
-    const F33 = (F32 * 5) / 100;
 
     const current_tax_debt = F32 - F33 - F34 || 0 + F35 || 0;
 

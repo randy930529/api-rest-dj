@@ -51,7 +51,7 @@ export const authRoutes = [
     method: "post",
     route: "/user/set_password",
     controller: AuthController,
-    middlewares: [authMiddleware],
+    middlewares: [authMiddleware, userMiddleware],
     action: "userSetPassword",
   },
   {
