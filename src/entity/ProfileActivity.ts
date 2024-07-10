@@ -197,6 +197,10 @@ export class ProfileActivity extends Model {
     dj08ToUpdate.section_data = JSON.stringify(section_data);
     await dj08ToUpdate.save();
 
-    Profile.save({ id: this.__profileId__, is_tcp });
+    const profileToUpdate = await Profile.findOneBy({ id: this.__profileId__ });
+    if (profileToUpdate) {
+      profileToUpdate.is_tcp = is_tcp;
+      profileToUpdate.save();
+    }
   }
 }
