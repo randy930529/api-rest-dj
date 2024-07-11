@@ -47,4 +47,11 @@ export const reportsRoutes = [
     middlewares: [authMiddleware, userMiddleware],
     action: "allDJ08",
   },
+  {
+    method: "put",
+    route: "/dj08",
+    controller: DJ08Controller,
+    middlewares: [authMiddleware, userMiddleware],
+    action: "updateDJ08",
+  },
 ];
