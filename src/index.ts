@@ -72,7 +72,7 @@ AppDataSource.initialize()
     app.use(express.static(path.join(__dirname, "../public")));
 
     app.get(
-      "/api/v1/media/:type/:file",
+      "/media/:type/:file",
       function (req: Request, res: Response, next: Function) {
         const { type, file } = req.params;
         const filePath = path.join(
