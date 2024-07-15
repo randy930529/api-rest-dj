@@ -158,19 +158,22 @@ export class ProfileHiredPerson extends Model {
     const newDataSectionI: { [key: string | number]: DataSectionIType } = {};
     const newTotalSectionI: TotalSectionIType = { import: 0 };
 
-    const profileHiredPersonActivityRemoveDuplicate = profileHiredPersonActivity.reduce<{
-      [key: string]: ProfileHiredPersonActivity;
-    }>((acc, val) => {
-      const code = val.profileActivity.activity.code;
-      if (acc[code]) {
-        acc[code].profileHiredPerson.import += val.profileHiredPerson?.import;
-      } else {
-        acc[code] = val;
-      }
-      return acc;
-    }, {});
+    const profileHiredPersonActivityRemoveDuplicate =
+      profileHiredPersonActivity.reduce<{
+        [key: string]: ProfileHiredPersonActivity;
+      }>((acc, val) => {
+        const code = val.profileActivity.activity.code;
+        if (acc[code]) {
+          acc[code].profileHiredPerson.import += val.profileHiredPerson?.import;
+        } else {
+          acc[code] = val;
+        }
+        return acc;
+      }, {});
 
-    const profileHiredPersonActivityClean = Object.values(profileHiredPersonActivityRemoveDuplicate)
+    const profileHiredPersonActivityClean = Object.values(
+      profileHiredPersonActivityRemoveDuplicate
+    );
 
     for (let i = 0; i < profileHiredPersonActivityClean.length; i++) {
       const {
@@ -184,8 +187,8 @@ export class ProfileHiredPerson extends Model {
 
       const code = profileActivity?.activity.code.padEnd(3);
       const fullName = `${first_name} ${last_name}`;
-      const from = [date_start.getDate(), date_start.getMonth()];
-      const to = [date_end.getDate(), date_end.getMonth()];
+      const from = [date_start.getDate(), date_start.getMonth() + 1];
+      const to = [date_end.getDate(), date_end.getMonth() + 1];
       const { municipality } = address;
 
       const data: DataSectionIType = {
