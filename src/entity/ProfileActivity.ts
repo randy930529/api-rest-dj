@@ -132,19 +132,19 @@ export class ProfileActivity extends Model {
 
     const newDataSectionA: { [key: string | number]: DataSectionAType } = {};
     const newTotalSectionA: TotalSectionAType = { incomes: 0, expenses: 0 };
-    let is_tcp = true;
+    let is_tcp = false;
 
     for (let i = 0; i < profileActivities.length; i++) {
       const activity = profileActivities[i];
-      const { date_start, date_end } = activity;
+      const { date_start, date_end, primary } = activity;
       const { code, description, to_tcp } = activity.activity;
       const date_start_day = moment(date_start).date();
       const date_start_month = moment(date_start).month() + 1;
       const date_end_day = moment(date_end).date();
       const date_end_month = moment(date_end).month() + 1;
 
-      if (!to_tcp) {
-        is_tcp = false;
+      if (primary) {
+        is_tcp = to_tcp;
       }
 
       const { income, expense } = activity.supportDocuments.reduce(
@@ -200,7 +200,7 @@ export class ProfileActivity extends Model {
     const profileToUpdate = await Profile.findOneBy({ id: this.__profileId__ });
     if (profileToUpdate) {
       profileToUpdate.is_tcp = is_tcp;
-      profileToUpdate.save();
+      await profileToUpdate.save();
     }
   }
 }

@@ -158,7 +158,21 @@ export class ProfileHiredPerson extends Model {
     const newDataSectionI: { [key: string | number]: DataSectionIType } = {};
     const newTotalSectionI: TotalSectionIType = { import: 0 };
 
-    for (let i = 0; i < profileHiredPersonActivity.length; i++) {
+    const profileHiredPersonActivityRemoveDuplicate = profileHiredPersonActivity.reduce<{
+      [key: string]: ProfileHiredPersonActivity;
+    }>((acc, val) => {
+      const code = val.profileActivity.activity.code;
+      if (acc[code]) {
+        acc[code].profileHiredPerson.import += val.profileHiredPerson?.import;
+      } else {
+        acc[code] = val;
+      }
+      return acc;
+    }, {});
+
+    const profileHiredPersonActivityClean = Object.values(profileHiredPersonActivityRemoveDuplicate)
+
+    for (let i = 0; i < profileHiredPersonActivityClean.length; i++) {
       const {
         hiredPerson,
         date_start,
