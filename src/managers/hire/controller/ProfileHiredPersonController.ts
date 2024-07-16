@@ -8,6 +8,7 @@ import { HiredPerson } from "../../../entity/HiredPerson";
 import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import getProfileById from "../../../profile/utils/getProfileById";
 import { ProfileHiredPersonActivity } from "../../../entity/ProfileHiredPersonActivity";
+import { In, Not } from "typeorm";
 
 export class ProfileHiredPersonController extends EntityControllerBase<ProfileHiredPerson> {
   constructor() {
@@ -98,13 +99,30 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
         );
 
       if (fields.profileHiredPersonActivity) {
-        await fields.profileHiredPersonActivity.map(
-          async (val) =>
+        const profileHiredPersonActivityIds: number[] = [];
+        
+        for (let i = 0; i < fields.profileHiredPersonActivity.length; i++) {
+          const element = fields.profileHiredPersonActivity[i];
+          const profileHiredPersonActivityId = (
             await ProfileHiredPersonActivity.create({
-              ...val,
+              ...element,
               profileHiredPerson: { id },
             }).save()
-        );
+          ).id;
+
+          if (profileHiredPersonActivityId) {
+            profileHiredPersonActivityIds.push(profileHiredPersonActivityId);
+          }
+        }
+
+        const profileHiredPersonActivityToRemove =
+          await ProfileHiredPersonActivity.find({
+            where: {
+              id: Not(In(profileHiredPersonActivityIds)),
+              profileHiredPerson: { id },
+            },
+          });
+        profileHiredPersonActivityToRemove.forEach(async (val) => val.remove());
         fields.profileHiredPersonActivity = undefined;
       }
 
