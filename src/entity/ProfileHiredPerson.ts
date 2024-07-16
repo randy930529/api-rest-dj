@@ -180,7 +180,6 @@ export class ProfileHiredPerson extends Model {
         hiredPerson,
         date_start,
         date_end,
-        import: importAnnual,
       } = profileHiredPersonActivity[i]?.profileHiredPerson;
       const { ci: nit, first_name, last_name, address } = hiredPerson;
       const { profileActivity, annual_cost } = profileHiredPersonActivity[i];
@@ -201,7 +200,7 @@ export class ProfileHiredPerson extends Model {
         import: annual_cost,
       };
       newDataSectionI[`F${i + 64}`] = data;
-      newTotalSectionI.import += importAnnual;
+      newTotalSectionI.import += annual_cost;
     }
     section_data[SectionName.SECTION_I].data = newDataSectionI;
     section_data[SectionName.SECTION_I].totals = newTotalSectionI;
