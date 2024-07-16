@@ -164,7 +164,7 @@ export class ProfileHiredPerson extends Model {
       }>((acc, val) => {
         const code = val.profileActivity.activity.code;
         if (acc[code]) {
-          acc[code].profileHiredPerson.import += val.profileHiredPerson?.import;
+          acc[code].annual_cost += val.annual_cost;
         } else {
           acc[code] = val;
         }
@@ -183,7 +183,7 @@ export class ProfileHiredPerson extends Model {
         import: importAnnual,
       } = profileHiredPersonActivity[i]?.profileHiredPerson;
       const { ci: nit, first_name, last_name, address } = hiredPerson;
-      const { profileActivity } = profileHiredPersonActivity[i];
+      const { profileActivity, annual_cost } = profileHiredPersonActivity[i];
 
       const code = profileActivity?.activity.code.padEnd(3);
       const fullName = `${first_name} ${last_name}`;
@@ -198,7 +198,7 @@ export class ProfileHiredPerson extends Model {
         to,
         municipality,
         nit,
-        import: importAnnual,
+        import: annual_cost,
       };
       newDataSectionI[`F${i + 64}`] = data;
       newTotalSectionI.import += importAnnual;
