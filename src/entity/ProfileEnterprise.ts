@@ -43,7 +43,7 @@ export class ProfileEnterprise extends Model {
   @JoinColumn()
   enterprise: Enterprise;
 
-  @ManyToOne(() => Profile, { nullable: true, onDelete:"CASCADE" })
+  @ManyToOne(() => Profile, { nullable: true, onDelete: "CASCADE" })
   @JoinColumn()
   profile: Profile;
 
@@ -101,8 +101,24 @@ export class ProfileEnterprise extends Model {
     const newDataSectionH: { [key: string | number]: DataSectionHType } = {};
     const newTotalSectionH: TotalSectionHType = { valueHire: 0, import: 0 };
 
-    for (let i = 0; i < profileEnterprises.length; i++) {
-      const { amount, import: importP, enterprise } = profileEnterprises[i];
+    const profileEnterprisesToRemoveDuplicate = profileEnterprises.reduce<{
+      [key: string | number]: ProfileEnterprise;
+    }>((acc, val) => {
+      if (acc[val.id]) {
+        acc[val.id].amount = val.amount;
+        acc[val.id].import = val.import;
+      } else {
+        acc[val.id] = val;
+      }
+      return acc;
+    }, {});
+
+    const profileEnterprisesClean = Object.values(
+      profileEnterprisesToRemoveDuplicate
+    );
+
+    for (let i = 0; i < profileEnterprisesClean.length; i++) {
+      const { amount, import: importP, enterprise } = profileEnterprisesClean[i];
       const porcentage =
         amount > 0 ? parseFloat(((importP / amount) * 100).toFixed(2)) : null;
 
