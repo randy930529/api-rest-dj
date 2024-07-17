@@ -89,7 +89,7 @@ export class ProfileEnterprise extends Model {
     const profileEnterprises = await ProfileEnterprise.find({
       relations: ["enterprise"],
       where: {
-        profile: { id: 7 },
+        profile: { id: this.__profileId__ },
       },
     });
 
