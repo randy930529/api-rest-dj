@@ -3,8 +3,8 @@ extends ../generic/tableBase
 mixin setDataToSectionA(data=[])
     each val, index in data
         tr(height=30 style={height:'20.9pt'})
-            td.xl-65(width=397 style="border-right: .5pt solid black;width:296pt;")
-                font.font-12(style="display: block; text-align: center")= val.activity
+            td.xl-65(width=397 style="border-right: .5pt solid black;width:296pt;vertical-align: middle;")
+                font.font-12(style="display: block; text-align: start")= val.activity
             td.xl-65(style="border-top:none;border-left:none;width:155pt;vertical-align: middle;")
                 font.font-12(style="display: block; text-align: center")= val.period.start[0]
             td.xl-65(style="border-top:none;border-left:none;width:155pt;vertical-align: middle;")
