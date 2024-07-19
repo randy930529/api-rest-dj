@@ -163,16 +163,22 @@ export class ProfileHiredPerson extends Model {
         [key: string]: ProfileHiredPersonActivity;
       }>((acc, val) => {
         const code = val.profileActivity.activity.code;
-        const profileHiredPersonId = val.profileHiredPerson.id
+        const profileHiredPersonId = val.profileHiredPerson.id;
         if (
-          acc[`
-            ${code}${profileHiredPersonId}`]
+          acc[
+            `
+            ${code}${profileHiredPersonId}`
+          ]
         ) {
-          acc[`
-            ${code}${profileHiredPersonId}`].annual_cost += val.annual_cost;
+          acc[
+            `
+            ${code}${profileHiredPersonId}`
+          ].annual_cost += val.annual_cost;
         } else {
-          acc[`
-            ${code}${profileHiredPersonId}`] = val;
+          acc[
+            `
+            ${code}${profileHiredPersonId}`
+          ] = val;
         }
         return acc;
       }, {});
@@ -180,7 +186,6 @@ export class ProfileHiredPerson extends Model {
     const profileHiredPersonActivityClean = Object.values(
       profileHiredPersonActivityRemoveDuplicate
     );
-    console.log(profileHiredPersonActivity, profileHiredPersonActivityClean);
 
     for (let i = 0; i < profileHiredPersonActivityClean.length; i++) {
       const { hiredPerson, date_start, date_end } =
@@ -192,6 +197,10 @@ export class ProfileHiredPerson extends Model {
       const fullName = `${first_name} ${last_name}`;
       const from = [date_start.getDate(), date_start.getMonth() + 1];
       const to = [date_end.getDate(), date_end.getMonth() + 1];
+      const dataImport = parseFloat(annual_cost.toFixed());
+      const totalImport = parseFloat(
+        (newTotalSectionI.import += annual_cost).toFixed()
+      );
       const { municipality } = address;
 
       const data: DataSectionIType = {
@@ -201,10 +210,10 @@ export class ProfileHiredPerson extends Model {
         to,
         municipality,
         nit,
-        import: annual_cost,
+        import: dataImport,
       };
       newDataSectionI[`F${i + 64}`] = data;
-      newTotalSectionI.import += annual_cost;
+      newTotalSectionI.import = totalImport;
     }
     section_data[SectionName.SECTION_I].data = newDataSectionI;
     section_data[SectionName.SECTION_I].totals = newTotalSectionI;
