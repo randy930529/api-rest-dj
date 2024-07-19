@@ -101,30 +101,39 @@ export class ProfileEnterprise extends Model {
     const newDataSectionH: { [key: string | number]: DataSectionHType } = {};
     const newTotalSectionH: TotalSectionHType = { valueHire: 0, import: 0 };
 
-    const acc: { [key: string]: ProfileEnterprise } = {};
+    const profileEnterprisesRemoveDuplicate = profileEnterprises.reduce<{
+      [key: string]: ProfileEnterprise;
+    }>((acc, val) => {
+      const porcentage =
+        val.amount > 0
+          ? parseFloat(((val.import / val.amount) * 100).toFixed(2))
+          : null;
 
-    for (let i = 0; i < profileEnterprises.length; i++) {
+      const key = `${val.id}${porcentage}`;
+      if (acc[key]) {
+        acc[key].amount += val.amount;
+        acc[key].import += val.import;
+      } else {
+        acc[key] = val;
+      }
+      return acc;
+    }, {});
+
+    const profileEnterprisesClean = Object.values(
+      profileEnterprisesRemoveDuplicate
+    );
+
+    for (let i = 0; i < profileEnterprisesClean.length; i++) {
       const {
         amount,
         import: importP,
         enterprise,
-      } = profileEnterprises[i];
+      } = profileEnterprisesClean[i];
 
       let valueHire = parseFloat(amount.toFixed());
       let importHire = parseFloat(importP.toFixed());
       const porcentage =
         amount > 0 ? parseFloat(((importP / amount) * 100).toFixed(2)) : null;
-
-      const key = `${enterprise.id}${porcentage}`;
-      if (acc[key]) {
-        acc[key].amount += amount;
-        acc[key].import += importP;
-
-        valueHire = acc[key].amount;
-        importHire = acc[key].import;
-      } else {
-        acc[key] = profileEnterprises[i];
-      }
 
       const data: DataSectionHType = {
         enterprise: enterprise.name,
@@ -137,8 +146,6 @@ export class ProfileEnterprise extends Model {
       newTotalSectionH.valueHire += valueHire;
       newTotalSectionH.import += importHire;
     }
-
-    console.log(profileEnterprises, acc)
 
     section_data[SectionName.SECTION_H].data = newDataSectionH;
     section_data[SectionName.SECTION_H].totals = newTotalSectionH;
