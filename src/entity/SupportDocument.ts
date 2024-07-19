@@ -147,12 +147,16 @@ export class SupportDocument extends Model {
             },
             relations: { activity: true, supportDocuments: { element: true } },
             where: {
+              id: Not(this.profileActivity?.id),
               supportDocuments: {
+                type_document: this.type_document,
                 fiscalYear: { id: this.__fiscalYearId__ },
               },
             },
           })
         : [];
+    profileActivities.push(this.profileActivity);
+    console.log(">>>>", profileActivities);
 
     switch (this.type_document) {
       case "m":
