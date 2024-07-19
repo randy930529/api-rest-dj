@@ -163,13 +163,16 @@ export class ProfileHiredPerson extends Model {
         [key: string]: ProfileHiredPersonActivity;
       }>((acc, val) => {
         const code = val.profileActivity.activity.code;
+        const profileHiredPersonId = val.profileHiredPerson.id
         if (
-          acc[code] &&
-          acc[code].profileHiredPerson.id === val.profileHiredPerson.id
+          acc[`
+            ${code}${profileHiredPersonId}`]
         ) {
-          acc[code].annual_cost += val.annual_cost;
+          acc[`
+            ${code}${profileHiredPersonId}`].annual_cost += val.annual_cost;
         } else {
-          acc[code] = val;
+          acc[`
+            ${code}${profileHiredPersonId}`] = val;
         }
         return acc;
       }, {});
