@@ -129,9 +129,7 @@ export class SectionState extends Model {
     const { F34 = 0 } = section_data[SectionName.SECTION_E]["data"];
 
     const F26 =
-      this.fiscalYear.regimen && totalSectionA?.incomes < 200000
-        ? 0
-        : F21 > F22 + F23 + F24 + F25
+        F21 >= F22 + F23 + F24 + F25
         ? F21 - (F22 + F23 + F24 + F25)
         : 0;
 

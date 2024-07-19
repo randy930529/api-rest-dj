@@ -719,13 +719,10 @@ class ReportGeneratorController extends ReportGenerator {
       } = dj08SectionData.section_data[SectionName.SECTION_C]["data"];
 
       const F26 =
-        regimen && totalSectionA?.incomes < 200000
-          ? 0
-          : F21 > F22 + F23 + F24 + F25
-          ? F21 - (F22 + F23 + F24 + F25)
-          : 0;
+        F21 >= F22 + F23 + F24 + F25 ? F21 - (F22 + F23 + F24 + F25) : 0;
 
-      const F27 = is_tcp ? 0 : (F21 - (F22 + F23 + F24 + F25)) * -1;
+      const F27 =
+        F26 === 0 && is_tcp ? 0 : (F21 - (F22 + F23 + F24 + F25)) * -1;
 
       const dataSectionC: DataSectionBType[] = [
         {
