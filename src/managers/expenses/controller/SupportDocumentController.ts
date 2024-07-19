@@ -54,7 +54,10 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
 
         profileActivity = await ProfileActivity.findOne({
           select: { activity: { id: true, code: true, description: true } },
-          relations: ["activity", "supportDocuments"],
+          relations: {
+            activity: true,
+            supportDocuments: { element: true, fiscalYear: true },
+          },
           where: { id: profileActivityId },
         });
         if (!profileActivity)

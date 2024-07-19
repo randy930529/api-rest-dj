@@ -149,12 +149,18 @@ export class SupportDocument extends Model {
             where: {
               id: Not(this.profileActivity?.id),
               supportDocuments: {
+                id: Not(this.id),
                 type_document: this.type_document,
                 fiscalYear: { id: this.__fiscalYearId__ },
               },
             },
           })
         : [];
+    const profileActivityIndex = profileActivities.indexOf(
+      this.profileActivity
+    );
+    
+    profileActivities[profileActivityIndex]?.supportDocuments.push(this);
     profileActivities.push(this.profileActivity);
     console.log(">>>>", this, profileActivities);
 
