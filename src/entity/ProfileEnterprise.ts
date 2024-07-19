@@ -105,7 +105,6 @@ export class ProfileEnterprise extends Model {
 
     for (let i = 0; i < profileEnterprises.length; i++) {
       const {
-        id,
         amount,
         import: importP,
         enterprise,
@@ -116,7 +115,7 @@ export class ProfileEnterprise extends Model {
       const porcentage =
         amount > 0 ? parseFloat(((importP / amount) * 100).toFixed(2)) : null;
 
-      const key = `${id}${porcentage}`;
+      const key = `${enterprise.id}${porcentage}`;
       if (acc[key]) {
         acc[key].amount += amount;
         acc[key].import += importP;
