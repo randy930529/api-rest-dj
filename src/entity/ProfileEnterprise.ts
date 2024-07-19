@@ -117,16 +117,31 @@ export class ProfileEnterprise extends Model {
       profileEnterprisesToRemoveDuplicate
     );
 
+    const acc: { [key: string]: ProfileEnterprise } = {};
+
     for (let i = 0; i < profileEnterprisesClean.length; i++) {
       const {
+        id,
         amount,
         import: importP,
         enterprise,
       } = profileEnterprisesClean[i];
-      const valueHire = parseFloat(amount.toFixed());
-      const importHire = parseFloat(importP.toFixed());
+
+      let valueHire = parseFloat(amount.toFixed());
+      let importHire = parseFloat(importP.toFixed());
       const porcentage =
-        amount > 0 ? parseFloat(((importP / amount) * 100).toFixed()) : null;
+        amount > 0 ? parseFloat(((importP / amount) * 100).toFixed(2)) : null;
+
+      const key = `${id}${porcentage}`;
+      if (acc[key]) {
+        acc[key].amount += amount;
+        acc[key].import += importP;
+
+        valueHire = acc[key].amount;
+        importHire = acc[key].import;
+      } else {
+        acc[key] = profileEnterprisesClean[i];
+      }
 
       const data: DataSectionHType = {
         enterprise: enterprise.name,
@@ -139,6 +154,7 @@ export class ProfileEnterprise extends Model {
       newTotalSectionH.valueHire += valueHire;
       newTotalSectionH.import += importHire;
     }
+
     section_data[SectionName.SECTION_H].data = newDataSectionH;
     section_data[SectionName.SECTION_H].totals = newTotalSectionH;
 
