@@ -109,13 +109,14 @@ export class ProfileEnterprise extends Model {
           ? parseFloat(((val.import / val.amount) * 100).toFixed(2))
           : null;
 
-      const key = `${val.id}${porcentage}`;
+      const key = `${val.enterprise.id}${porcentage}`;
       if (acc[key]) {
         acc[key].amount += val.amount;
         acc[key].import += val.import;
       } else {
         acc[key] = val;
       }
+      console.log(acc)
       return acc;
     }, {});
 
