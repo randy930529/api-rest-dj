@@ -134,10 +134,10 @@ export class ProfileEnterprise extends Model {
         import: importHire,
         porcentage,
       };
-      
+
       newDataSectionH[`F${i + 52}`] = data;
-      newTotalSectionH.valueHire += amount;
-      newTotalSectionH.import += importP;
+      newTotalSectionH.valueHire += valueHire;
+      newTotalSectionH.import += importHire;
     }
     section_data[SectionName.SECTION_H].data = newDataSectionH;
     section_data[SectionName.SECTION_H].totals = newTotalSectionH;
