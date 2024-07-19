@@ -163,7 +163,10 @@ export class ProfileHiredPerson extends Model {
         [key: string]: ProfileHiredPersonActivity;
       }>((acc, val) => {
         const code = val.profileActivity.activity.code;
-        if (acc[code]) {
+        if (
+          acc[code] &&
+          acc[code].profileHiredPerson.id === val.profileHiredPerson.id
+        ) {
           acc[code].annual_cost += val.annual_cost;
         } else {
           acc[code] = val;
@@ -174,14 +177,11 @@ export class ProfileHiredPerson extends Model {
     const profileHiredPersonActivityClean = Object.values(
       profileHiredPersonActivityRemoveDuplicate
     );
-    console.log(profileHiredPersonActivity, profileHiredPersonActivityClean)
+    console.log(profileHiredPersonActivity, profileHiredPersonActivityClean);
 
     for (let i = 0; i < profileHiredPersonActivityClean.length; i++) {
-      const {
-        hiredPerson,
-        date_start,
-        date_end,
-      } = profileHiredPersonActivity[i]?.profileHiredPerson;
+      const { hiredPerson, date_start, date_end } =
+        profileHiredPersonActivity[i]?.profileHiredPerson;
       const { ci: nit, first_name, last_name, address } = hiredPerson;
       const { profileActivity, annual_cost } = profileHiredPersonActivity[i];
 
