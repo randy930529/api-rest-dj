@@ -8,6 +8,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  Not,
 } from "typeorm";
 import Model from "./Base";
 import { ColumnNumericTransformer } from "../utils/ColumnNumericTransformer";
@@ -89,9 +90,12 @@ export class ProfileEnterprise extends Model {
     const profileEnterprises = await ProfileEnterprise.find({
       relations: ["enterprise"],
       where: {
+        id: Not(this.id),
         profile: { id: this.__profileId__ },
       },
     });
+
+    profileEnterprises.push(this);
 
     const { section_data: sectionDataJSONString } = dj08ToUpdate;
     const section_data: AllDataSectionsDj08Type = JSON.parse(
@@ -116,7 +120,7 @@ export class ProfileEnterprise extends Model {
       } else {
         acc[key] = val;
       }
-      console.log(acc)
+
       return acc;
     }, {});
 
