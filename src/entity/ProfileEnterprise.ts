@@ -118,16 +118,23 @@ export class ProfileEnterprise extends Model {
     );
 
     for (let i = 0; i < profileEnterprisesClean.length; i++) {
-      const { amount, import: importP, enterprise } = profileEnterprisesClean[i];
+      const {
+        amount,
+        import: importP,
+        enterprise,
+      } = profileEnterprisesClean[i];
+      const valueHire = parseFloat(amount.toFixed());
+      const importHire = parseFloat(importP.toFixed());
       const porcentage =
-        amount > 0 ? parseFloat(((importP / amount) * 100).toFixed(2)) : null;
+        amount > 0 ? parseFloat(((importP / amount) * 100).toFixed()) : null;
 
       const data: DataSectionHType = {
         enterprise: enterprise.name,
-        valueHire: amount,
-        import: importP,
+        valueHire,
+        import: importHire,
         porcentage,
       };
+      
       newDataSectionH[`F${i + 52}`] = data;
       newTotalSectionH.valueHire += amount;
       newTotalSectionH.import += importP;
