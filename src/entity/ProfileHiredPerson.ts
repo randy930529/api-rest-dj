@@ -174,6 +174,7 @@ export class ProfileHiredPerson extends Model {
     const profileHiredPersonActivityClean = Object.values(
       profileHiredPersonActivityRemoveDuplicate
     );
+    console.log(profileHiredPersonActivity, profileHiredPersonActivityClean)
 
     for (let i = 0; i < profileHiredPersonActivityClean.length; i++) {
       const {
