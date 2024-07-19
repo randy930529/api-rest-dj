@@ -156,7 +156,7 @@ export class SupportDocument extends Model {
           })
         : [];
     profileActivities.push(this.profileActivity);
-    console.log(">>>>", profileActivities);
+    console.log(">>>>", this, profileActivities);
 
     switch (this.type_document) {
       case "m":

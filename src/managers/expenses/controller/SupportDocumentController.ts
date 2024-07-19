@@ -52,8 +52,10 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
             404
           );
 
-        profileActivity = await ProfileActivity.findOneBy({
-          id: profileActivityId,
+        profileActivity = await ProfileActivity.findOne({
+          select: { activity: { id: true, code: true, description: true } },
+          relations: ["activity", "supportDocuments"],
+          where: { id: profileActivityId },
         });
         if (!profileActivity)
           responseError(res, "Profile activity not found.", 404);
