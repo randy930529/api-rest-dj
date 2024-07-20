@@ -665,20 +665,32 @@ class ReportGeneratorController extends ReportGenerator {
       totalSectionA.incomes = parseFloat(totalSectionA.incomes.toFixed());
       totalSectionA.expenses = parseFloat(totalSectionA.expenses.toFixed());
 
-      const { F11, F12, F13, F14, F15, F16, F17, F18, F19, F20 } =
-        dj08SectionData.section_data[SectionName.SECTION_B]["data"];
+      const {
+        F11 = 0,
+        F12,
+        F13 = 0,
+        F14,
+        F15,
+        F16,
+        F17,
+        F18,
+        F19,
+        F20,
+      } = dj08SectionData.section_data[SectionName.SECTION_B]["data"] as {
+        [key: string]: number;
+      };
 
       const dataSectionB: DataSectionBType[] = [
         {
           concepto:
             "Ingresos obtenidos para  liquidación del Impuesto (viene de SECCIÓN A casilla 12 fila 10)",
-          import: F11,
+          import: parseFloat(F11.toFixed()),
         },
         { concepto: "(-) Mínimo Exento Autorizado", import: F12 },
         {
           concepto:
             "(-) Gastos deducibles por el ejercicio de la actividad (viene de SECCIÓN A casilla 13 fila 10)",
-          import: F13,
+          import: parseFloat(F13.toFixed()),
         },
         {
           concepto:
