@@ -158,7 +158,6 @@ export class SupportDocument extends Model {
     const profileActivityIndex = profileActivities.findIndex((val) => val.id === this.profileActivity.id);
     
     profileActivities[profileActivityIndex]?.supportDocuments.push(this);
-    console.log(">>>>", this, profileActivities);
 
     switch (this.type_document) {
       case "m":
@@ -495,6 +494,7 @@ export class SupportDocument extends Model {
           const date_end_month = moment(date_end).month() + 1;
           const { income, expense } = activity.supportDocuments.reduce(
             (sumaTotal, val) => {
+              console.log(val)
               if (
                 val.type_document === "i" &&
                 val.element.group?.trim() === "iggv"
