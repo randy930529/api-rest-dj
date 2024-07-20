@@ -147,7 +147,6 @@ export class SupportDocument extends Model {
             },
             relations: { activity: true, supportDocuments: { element: true } },
             where: {
-              id: Not(this.profileActivity?.id),
               supportDocuments: {
                 id: Not(this.id),
                 type_document: this.type_document,
@@ -156,12 +155,9 @@ export class SupportDocument extends Model {
             },
           })
         : [];
-    const profileActivityIndex = profileActivities.indexOf(
-      this.profileActivity
-    );
+    const profileActivityIndex = profileActivities.findIndex((val) => val.id === this.profileActivity.id);
     
     profileActivities[profileActivityIndex]?.supportDocuments.push(this);
-    profileActivities.push(this.profileActivity);
     console.log(">>>>", this, profileActivities);
 
     switch (this.type_document) {
