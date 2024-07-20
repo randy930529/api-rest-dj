@@ -518,8 +518,8 @@ export class SupportDocument extends Model {
               start: [date_start_day, date_start_month],
               end: [date_end_day, date_end_month],
             },
-            income: parseInt(`${income}`),
-            expense: parseInt(`${expense}`),
+            income: parseFloat(income.toFixed()),
+            expense: parseFloat(expense.toFixed()),
           };
 
           newDataSectionA[`F${i + 1}`] = data;
