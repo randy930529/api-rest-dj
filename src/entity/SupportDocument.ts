@@ -149,14 +149,15 @@ export class SupportDocument extends Model {
             where: {
               supportDocuments: {
                 id: Not(this.id),
-                type_document: this.type_document,
                 fiscalYear: { id: this.__fiscalYearId__ },
               },
             },
           })
         : [];
-    const profileActivityIndex = profileActivities.findIndex((val) => val.id === this.profileActivity.id);
-    
+    const profileActivityIndex = profileActivities.findIndex(
+      (val) => val.id === this.profileActivity.id
+    );
+
     profileActivities[profileActivityIndex]?.supportDocuments.push(this);
 
     switch (this.type_document) {
@@ -494,21 +495,16 @@ export class SupportDocument extends Model {
           const date_end_month = moment(date_end).month() + 1;
           const { income, expense } = activity.supportDocuments.reduce(
             (sumaTotal, val) => {
-              console.log(val)
               if (
                 val.type_document === "i" &&
                 val.element.group?.trim() === "iggv"
               ) {
-                sumaTotal.income = parseFloat(
-                  (sumaTotal.income + val.amount).toFixed()
-                );
+                sumaTotal.income = sumaTotal.income + val.amount;
               } else if (
                 val.type_document === "g" &&
                 val.element.group?.startsWith("pd")
               ) {
-                sumaTotal.expense = parseFloat(
-                  (sumaTotal.expense + val.amount).toFixed()
-                );
+                sumaTotal.expense = sumaTotal.expense + val.amount;
               }
 
               return sumaTotal;
@@ -522,9 +518,10 @@ export class SupportDocument extends Model {
               start: [date_start_day, date_start_month],
               end: [date_end_day, date_end_month],
             },
-            income,
-            expense,
+            income: parseInt(`${income}`),
+            expense: parseInt(`${expense}`),
           };
+
           newDataSectionA[`F${i + 1}`] = data;
           newTotalSectionA.incomes += income;
           newTotalSectionA.expenses += expense;
