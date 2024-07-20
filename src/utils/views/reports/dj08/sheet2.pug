@@ -14,9 +14,9 @@ mixin setDataToSectionA(data=[])
             td.xl-65(style="border-top:none;border-left:none;width:55pt; vertical-align: middle;")
                 font.font-12(style="display: block; text-align: center")= val.period.end[1]
             td.xl-65(style="border-top:none;border-left:none;width:58pt;vertical-align: middle;")
-                font.font-12(style="display: block; text-align: end")= val.income
+                font.font-9(style="display: block; text-align: end")= val.income
             td.xl-65(colspan=2 style="border-top:none;border-left:none;width:58pt;vertical-align: middle;")
-                font.font-12(style="display: block; text-align: end")= val.expense
+                font.font-9(style="display: block; text-align: end")= val.expense
             td.xl-75(style="width:22pt;vertical-align: middle;")
                 font.font-8= (index+1)
     else
@@ -86,9 +86,9 @@ block tBodyContent
         td.xl-78(width=521 colspan=5 style="width: 389pt; text-align: end;")
             font.font-9 Total
         td.xl-65(width=77 style="border-top:none;border-left:none;width:58pt;text-align: end;vertical-align: bottom;")
-            font.font-12= (totalSectionA && totalSectionA.incomes)
+            font.font-9= (totalSectionA && totalSectionA.incomes)
         td.xl-65(width=77 colspan=2 style="border-top:none;border-left:none;width:58pt;text-align: end;vertical-align: bottom;")
-            font.font-12= (totalSectionA && totalSectionA.expenses)
+            font.font-9= (totalSectionA && totalSectionA.expenses)
         td.xl-75(width=23 style="width:22pt; vertical-align: middle;")
             font.font-12 10
     +setSections("Sección B","Determinación de la Base Imponible",dataSectionB,11,14)
