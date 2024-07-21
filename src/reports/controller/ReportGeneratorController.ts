@@ -761,7 +761,7 @@ class ReportGeneratorController extends ReportGenerator {
         {
           concepto:
             "Impuesto a pagar (filas 21-22-23-24-25, si el resultado es mayor que cero)",
-          import: regimen && totalSectionA.incomes < 200000 ? 0 : F26,
+          import: F26,
         },
         {
           concepto:
