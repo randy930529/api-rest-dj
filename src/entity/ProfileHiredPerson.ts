@@ -147,8 +147,25 @@ export class ProfileHiredPerson extends Model {
         },
         profileActivity: { activity: true },
       },
-      where: { profileHiredPerson: { profile: { id: this.__profileId__ } } },
+      where: {
+        profileHiredPerson: {
+          id: Not(this.id),
+          profile: { id: this.__profileId__ },
+        },
+      },
     });
+    
+    const profileHiredPersonActivityIndex =
+    profileHiredPersonActivity.findIndex(
+      (val) => val.profileHiredPerson.id === this.id
+    );
+    console.log(this, profileHiredPersonActivity, profileHiredPersonActivityIndex)
+    
+    if (profileHiredPersonActivityIndex !== -1) {
+      profileHiredPersonActivity[
+        profileHiredPersonActivityIndex
+      ].profileHiredPerson = this;
+    }
 
     const { section_data: sectionDataJSONString } = dj08ToUpdate;
     const section_data: AllDataSectionsDj08Type = JSON.parse(
