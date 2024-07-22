@@ -106,16 +106,6 @@ export class SectionState extends Model {
       )?.section_data
     );
 
-    const [_, totalSectionA] = getDataAndTotalsToDj08Sections<
-      DataSectionAType,
-      TotalSectionAType
-    >(
-      this.fiscalYear?.dj08[0].dj08SectionData.find(
-        (val) => val.is_rectification === true
-      ),
-      SectionName.SECTION_A
-    );
-
     const {
       F21 = 0,
       F22 = 0,
@@ -124,14 +114,33 @@ export class SectionState extends Model {
       F25 = 0,
     } = section_data[SectionName.SECTION_C]["data"];
 
-    const { F30 = 0 } = section_data[SectionName.SECTION_D]["data"];
+    let {
+      F28,
+      F29,
+      F30 = 0,
+      F31,
+      F33a,
+      F36a,
+    } = section_data[SectionName.SECTION_D]["data"];
 
     const { F34 = 0 } = section_data[SectionName.SECTION_E]["data"];
 
     const F26 =
-        F21 >= F22 + F23 + F24 + F25
-        ? F21 - (F22 + F23 + F24 + F25)
-        : 0;
+      F21 >= F22 + F23 + F24 + F25 ? F21 - (F22 + F23 + F24 + F25) : 0;
+
+    let toGiveBack = 0;
+
+    if (this.fiscalYear.declared) {
+      F28 = (F26 || 0) - F33a;
+      F29 = F36a;
+      F30 = F28 > F29 ? F28 - F29 : 0;
+      toGiveBack = F28 > F29 ? 0 : F29 - F28;
+    } else {
+      toGiveBack =
+        this.profile.is_tcp || F21 >= F22 + F23 + F24 + F25
+          ? 0
+          : F21 - (F22 + F23 + F24 + F25);
+    }
 
     const F32 = this.fiscalYear.declared ? F30 : F26;
     const F33 =
@@ -168,7 +177,8 @@ export class SectionState extends Model {
       }
     }
 
-    const current_tax_debt = F32 - F33 - F34 + F35;
+    const current_tax_debt =
+      toGiveBack === 0 ? toGiveBack : F32 - F33 - F34 + F35;
 
     const porcentageExpensesWithDocument = expensesPDGT.length
       ? parseFloat(
