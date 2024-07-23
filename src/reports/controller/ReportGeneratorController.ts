@@ -780,7 +780,7 @@ class ReportGeneratorController extends ReportGenerator {
         [key: string]: number;
       };
 
-      if (dj08SectionData.is_rectification && fiscalYear.declared) {
+      if (is_rectification) {
         const dj08SectionDataOld = dJ08?.dj08SectionData.find(
           (val) => val.is_rectification === false
         );
