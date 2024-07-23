@@ -862,14 +862,16 @@ class ReportGeneratorController extends ReportGenerator {
       const F36 = F32 - F33 - F34 + F35;
 
       if (declared && newDataDJ08ToDeclared) {
-        newDataDJ08ToDeclared.section_data[SectionName.SECTION_E]["data"] =
-          JSON.stringify({
-            F32,
-            F33,
-            F34,
-            F35,
-            F36,
-          });
+        const section_data = JSON.parse(newDataDJ08ToDeclared.section_data);
+        section_data[SectionName.SECTION_E]["data"] = {
+          F32,
+          F33,
+          F34,
+          F35,
+          F36,
+        };
+
+        newDataDJ08ToDeclared.section_data = JSON.stringify(section_data);
         await newDataDJ08ToDeclared.save();
       }
 
