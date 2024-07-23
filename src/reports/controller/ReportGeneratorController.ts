@@ -788,9 +788,8 @@ class ReportGeneratorController extends ReportGenerator {
 
       if (is_rectification && dj08SectionDataOld) {
         const { F33: F33a = 0, F36: F36a = 0 } = JSON.parse(
-          dj08SectionDataOld.section_data[SectionName.SECTION_D]["data"]
-        );
-
+          dj08SectionDataOld.section_data
+        )[SectionName.SECTION_D]["data"];
         F28 = (F26 || 0) - F33a;
         F29 = F36a;
         F30 = F28 > F29 ? F28 - F29 : 0;
