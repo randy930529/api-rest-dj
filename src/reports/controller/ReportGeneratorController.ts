@@ -789,7 +789,7 @@ class ReportGeneratorController extends ReportGenerator {
       if (dj08SectionDataOld) {
         const { F33: F33a = 0, F36: F36a = 0 } =
         dj08SectionDataOld.section_data[
-            SectionName.SECTION_E
+            SectionName.SECTION_D
           ]["data"];
 
         F28 = (F26 || 0) - F33a;
