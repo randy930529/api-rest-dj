@@ -637,7 +637,7 @@ class ReportGeneratorController extends ReportGenerator {
         (val) => val.is_rectification === true
       );
 
-      let newDataDJ08ToDeclared: Dj08SectionData
+      let newDataDJ08ToDeclared: Dj08SectionData;
 
       if (
         !fiscalYear.declared &&
@@ -784,13 +784,11 @@ class ReportGeneratorController extends ReportGenerator {
         (val) => val.is_rectification === false
       );
 
-      console.log(is_rectification, dj08SectionDataOld)
+      console.log(is_rectification, dj08SectionDataOld);
 
       if (dj08SectionDataOld) {
         const { F33: F33a = 0, F36: F36a = 0 } =
-        dj08SectionDataOld.section_data[
-            SectionName.SECTION_D
-          ]["data"];
+          dj08SectionDataOld.section_data[SectionName.SECTION_D]["data"];
 
         F28 = (F26 || 0) - F33a;
         F29 = F36a;
@@ -864,13 +862,14 @@ class ReportGeneratorController extends ReportGenerator {
       const F36 = F32 - F33 - F34 + F35;
 
       if (declared && newDataDJ08ToDeclared) {
-        newDataDJ08ToDeclared.section_data[SectionName.SECTION_E]["data"] = {
-          F32,
-          F33,
-          F34,
-          F35,
-          F36,
-        };
+        newDataDJ08ToDeclared.section_data[SectionName.SECTION_E]["data"] =
+          JSON.stringify({
+            F32,
+            F33,
+            F34,
+            F35,
+            F36,
+          });
         await newDataDJ08ToDeclared.save();
       }
 
