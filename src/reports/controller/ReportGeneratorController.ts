@@ -780,10 +780,11 @@ class ReportGeneratorController extends ReportGenerator {
         [key: string]: number;
       };
 
-      if (is_rectification) {
-        const dj08SectionDataOld = dJ08?.dj08SectionData.find(
-          (val) => val.is_rectification === false
-        );
+      const dj08SectionDataOld = dJ08?.dj08SectionData.find(
+        (val) => val.is_rectification === false
+      );
+
+      if (is_rectification && dj08SectionDataOld) {
         const { F33: F33a = 0, F36: F36a = 0 } =
         dj08SectionDataOld.section_data[
             SectionName.SECTION_E
