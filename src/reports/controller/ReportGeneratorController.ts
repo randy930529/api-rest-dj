@@ -784,7 +784,7 @@ class ReportGeneratorController extends ReportGenerator {
         (val) => val.is_rectification === false
       );
 
-      if (is_rectification && dj08SectionDataOld) {
+      if (dj08SectionDataOld) {
         const { F33: F33a = 0, F36: F36a = 0 } =
         dj08SectionDataOld.section_data[
             SectionName.SECTION_E
