@@ -637,18 +637,19 @@ class ReportGeneratorController extends ReportGenerator {
         (val) => val.is_rectification === true
       );
 
+      let newDataDJ08ToDeclared: Dj08SectionData
+
       if (
         !fiscalYear.declared &&
         declared === true &&
         dJ08.dj08SectionData?.length < 2
       ) {
-        const newDataDJ08ToDeclared = Dj08SectionData.create({
+        newDataDJ08ToDeclared = Dj08SectionData.create({
           section_data: dj08SectionData.section_data,
           is_rectification: false,
           dJ08,
         });
 
-        await newDataDJ08ToDeclared.save();
         fiscalYear.declared = true;
         await fiscalYear.save();
         dj08SectionData.is_rectification = false;
@@ -775,11 +776,19 @@ class ReportGeneratorController extends ReportGenerator {
         F29,
         F30 = 0,
         F31,
-        F33a,
-        F36a,
-      } = dj08SectionData.section_data[SectionName.SECTION_D]["data"];
+      } = dj08SectionData.section_data[SectionName.SECTION_D]["data"] as {
+        [key: string]: number;
+      };
 
-      if (declared) {
+      if (dj08SectionData.is_rectification && fiscalYear.declared) {
+        const dj08SectionDataOld = dJ08?.dj08SectionData.find(
+          (val) => val.is_rectification === false
+        );
+        const { F33: F33a = 0, F36: F36a = 0 } =
+        dj08SectionDataOld.section_data[
+            SectionName.SECTION_E
+          ]["data"];
+
         F28 = (F26 || 0) - F33a;
         F29 = F36a;
         F30 = F28 > F29 ? F28 - F29 : 0;
@@ -809,8 +818,9 @@ class ReportGeneratorController extends ReportGenerator {
         },
       ];
 
-      const { F34 = 0 } =
-        dj08SectionData.section_data[SectionName.SECTION_E]["data"];
+      const { F34 = 0 } = dj08SectionData.section_data[SectionName.SECTION_E][
+        "data"
+      ] as { [key: string]: number };
 
       const F32 = declared ? F30 : F26;
       const F33 =
@@ -849,6 +859,17 @@ class ReportGeneratorController extends ReportGenerator {
       }
 
       const F36 = F32 - F33 - F34 + F35;
+
+      if (declared && newDataDJ08ToDeclared) {
+        newDataDJ08ToDeclared.section_data[SectionName.SECTION_E]["data"] = {
+          F32,
+          F33,
+          F34,
+          F35,
+          F36,
+        };
+        await newDataDJ08ToDeclared.save();
+      }
 
       const dataSectionE = [
         {
