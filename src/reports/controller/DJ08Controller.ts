@@ -47,7 +47,7 @@ export class DJ08Controller extends EntityControllerBase<DJ08> {
         responseError(res, "Reset dj08 requiere fiscal year id valid.", 404);
 
       const dj08ToUpdate = await DJ08.findOne({
-        relations: { dj08SectionData: true, fiscalYear: true },
+        relations: { dj08SectionData: true, fiscalYear: {musicalGroup:true} },
         where: { fiscalYear: { id: fields.id } },
       });
 
