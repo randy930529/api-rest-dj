@@ -114,12 +114,7 @@ export class SectionState extends Model {
       F25 = 0,
     } = section_data[SectionName.SECTION_C]["data"];
 
-    let {
-      F28,
-      F29,
-      F30 = 0,
-      F31,
-    } = section_data[SectionName.SECTION_D]["data"];
+    let { F28, F29, F30 = 0 } = section_data[SectionName.SECTION_D]["data"];
 
     const { F34 = 0 } = section_data[SectionName.SECTION_E]["data"];
 
@@ -136,10 +131,11 @@ export class SectionState extends Model {
       const { F33: F33a = 0, F36: F36a = 0 } = JSON.parse(
         dj08SectionDataOld.section_data
       )[SectionName.SECTION_E]["data"];
+
       F28 = (F26 || 0) - F33a;
       F29 = F36a;
-      toGiveBack = F28 > F29 ? 0 : F29 - F28;
-    }else {
+      toGiveBack = F28 > F29 ? 0 : (F29 - F28) * -1;
+    } else {
       toGiveBack =
         this.profile.is_tcp || F21 >= F22 + F23 + F24 + F25
           ? 0
@@ -182,7 +178,7 @@ export class SectionState extends Model {
     }
 
     const current_tax_debt =
-      this.fiscalYear.declared ? toGiveBack : F32 - F33 - F34 + F35;
+      toGiveBack <= 0 ? toGiveBack : F32 - F33 - F34 + F35;
 
     const porcentageExpensesWithDocument = expensesPDGT.length
       ? parseFloat(
