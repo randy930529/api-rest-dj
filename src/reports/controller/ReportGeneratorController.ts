@@ -308,9 +308,9 @@ class ReportGeneratorController extends ReportGenerator {
                 ? (acc.bank += parseFloat(val.amount))
                 : (acc.box += parseFloat(val.amount));
 
-              toDay[0] = acc.box;
-              toDay[1] = acc.bank;
-              toDay[2] = acc.suma;
+              toDay[0] = parseFloat(acc.box.toFixed(2));
+              toDay[1] = parseFloat(acc.bank.toFixed(2));
+              toDay[2] = parseFloat(acc.suma.toFixed(2));
               return acc;
             },
             { suma: 0, box: 0, bank: 0 }
@@ -323,9 +323,9 @@ class ReportGeneratorController extends ReportGenerator {
                 ? (acc.bank += parseFloat(val.amount))
                 : (acc.box += parseFloat(val.amount));
 
-              toDay[0] = acc.box;
-              toDay[1] = acc.bank;
-              toDay[3] = acc.suma;
+              toDay[0] = parseFloat(acc.box.toFixed(2));
+              toDay[1] = parseFloat(acc.bank.toFixed(2));
+              toDay[3] = parseFloat(acc.suma.toFixed(2));
               return acc;
             },
             { suma: 0, box: toDay[0], bank: toDay[1] }
