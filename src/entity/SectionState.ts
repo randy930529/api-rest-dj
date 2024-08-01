@@ -177,8 +177,8 @@ export class SectionState extends Model {
       }
     }
 
-    const current_tax_debt =
-      toGiveBack <= 0 ? toGiveBack : F32 - F33 - F34 + F35;
+    const F36 = F32 - F33 - F34 + F35;
+    const current_tax_debt = F36 > 0 ? F36 : toGiveBack;
 
     const porcentageExpensesWithDocument = expensesPDGT.length
       ? parseFloat(
