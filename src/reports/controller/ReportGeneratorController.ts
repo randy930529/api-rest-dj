@@ -399,8 +399,8 @@ class ReportGeneratorController extends ReportGenerator {
         const indexBoxOrBank: number = is_bank ? 1 : 0;
 
         const toDay = [...dataMonths[index][day]].slice(0, -1);
-        toDay[indexGroup] = parseFloat(amount);
-        toDay[indexBoxOrBank] = parseFloat(amount);
+        toDay[indexGroup] += parseFloat(amount);
+        toDay[indexBoxOrBank] += parseFloat(amount);
         const total: number = sumaTotal(toDay.slice(2));
         toDay.push(total);
 
