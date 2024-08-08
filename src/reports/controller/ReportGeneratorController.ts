@@ -398,9 +398,11 @@ class ReportGeneratorController extends ReportGenerator {
         const indexGroup: number = group?.trim() === "igex" ? 2 : 3;
         const indexBoxOrBank: number = is_bank ? 1 : 0;
 
-        const toDay = [...dataMonths[index][day]].slice(0, -1);
-        toDay[indexGroup] += parseFloat(amount);
-        toDay[indexBoxOrBank] += parseFloat(amount);
+        const updateToDay = dataMonths[index][day];
+        const toDay = defaultDataArray<number>(4, 0)
+
+        toDay[indexGroup] = parseFloat(amount);
+        toDay[indexBoxOrBank] = parseFloat(amount);
         const total: number = sumaTotal(toDay.slice(2));
         toDay.push(total);
 
@@ -411,7 +413,7 @@ class ReportGeneratorController extends ReportGenerator {
         totals = sumaArray(totals, toDay);
 
         const updatedDataMonths = [...dataMonths[index]];
-        updatedDataMonths[day] = toDay;
+        updatedDataMonths[day] = sumaArray(updateToDay, toDay);
         dataMonths[index] = updatedDataMonths;
       }
 
