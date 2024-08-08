@@ -8,6 +8,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  Not,
   OneToMany,
 } from "typeorm";
 import Model from "./Base";
@@ -120,10 +121,13 @@ export class ProfileActivity extends Model {
       },
       relations: { activity: true, supportDocuments: { element: true } },
       where: {
+        id: Not(this.id),
         profile: { id: this.__profileId__ },
         supportDocuments: { fiscalYear: { id: fiscalYearId } },
       },
     });
+
+    profileActivities.push(this);
 
     const { section_data: sectionDataJSONString } = dj08ToUpdate;
     const section_data: AllDataSectionsDj08Type = JSON.parse(
