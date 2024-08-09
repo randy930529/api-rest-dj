@@ -78,7 +78,7 @@ export class ProfileActivity extends Model {
   @BeforeInsert()
   @BeforeUpdate()
   async checkDuplicateProfileActivityPrimary(): Promise<void> {
-    if (this.activity) {
+    if (this.activity && this.primary) {
       const activityPrimary = await ProfileActivity.findOne({
         where: {
           profile: { id: this.profile?.id },

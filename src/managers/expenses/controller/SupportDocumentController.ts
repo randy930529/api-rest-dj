@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { Not } from "typeorm";
 import * as moment from "moment";
 import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { AppDataSource } from "../../../data-source";
@@ -212,7 +211,26 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
           404
         );
 
-      const removeSupportDocument = await this.delete({ id, res });
+      const supportDocumentToRemove = await this.repository.findOne({
+        select: {
+          element: {
+            id: true,
+            description: true,
+            group: true,
+            is_general: true,
+          },
+          profileActivity: { id: true },
+        },
+        relations: { element: true, profileActivity: true },
+        where: { id },
+      });
+
+      if (!supportDocumentToRemove)
+        responseError(res, "Entity SUPPORTDOCUMENT not found.", 404);
+
+      const removeSupportDocument = await this.repository.remove(
+        supportDocumentToRemove
+      );
       await this.updatedDJ08(removeSupportDocument);
 
       res.status(204);
@@ -239,26 +257,6 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       },
     });
 
-    const documents = await SupportDocument.find({
-      select: {
-        element: {
-          id: true,
-          description: true,
-          type: true,
-          group: true,
-          is_general: true,
-        },
-      },
-      relations: ["element"],
-      where: {
-        fiscalYear: { id: supportDocument.__fiscalYearId__ },
-      },
-    });
-
-    if (!up) {
-      documents.push(supportDocument);
-    }
-
     const { section_data: sectionDataJSONString } = dj08ToUpdate;
     const section_data: AllDataSectionsDj08Type = JSON.parse(
       sectionDataJSONString
@@ -272,26 +270,34 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
                 id: true,
                 type_document: true,
                 amount: true,
-                element: { id: true, group: true, is_general: true },
+                element: {
+                  id: true,
+                  description: true,
+                  group: true,
+                  is_general: true,
+                },
               },
               activity: { id: true, code: true, description: true },
             },
             relations: { activity: true, supportDocuments: { element: true } },
             where: {
               supportDocuments: {
-                id: Not(supportDocument.id),
                 fiscalYear: { id: supportDocument.__fiscalYearId__ },
               },
             },
           })
         : [];
 
-    const profileActivityIndex = profileActivities.findIndex(
-      (val) => val.id === supportDocument.profileActivity.id
-    );
+    const documents = profileActivities.reduce<SupportDocument[]>(
+      (documents, activity) => {
+        if (!up && activity.id === supportDocument.profileActivity.id) {
+          activity.supportDocuments.push(supportDocument);
+        }
 
-    profileActivities[profileActivityIndex]?.supportDocuments.push(
-      supportDocument
+        documents = [...documents, ...activity.supportDocuments];
+        return documents;
+      },
+      []
     );
 
     switch (supportDocument.type_document) {
