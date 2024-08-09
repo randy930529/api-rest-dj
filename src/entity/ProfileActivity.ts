@@ -125,8 +125,8 @@ export class ProfileActivity extends Model {
         supportDocuments: { fiscalYear: { id: fiscalYearId } },
       },
     });
-
-    if (this.id === -1) {
+    
+    if (this.id === -1 || !this.supportDocuments) {
       this.supportDocuments = [];
       profileActivities.push(this);
     }
