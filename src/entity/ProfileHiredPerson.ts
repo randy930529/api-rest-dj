@@ -71,7 +71,7 @@ export class ProfileHiredPerson extends Model {
 
   @BeforeInsert()
   @BeforeUpdate()
-  async up__profileId__(): Promise<void> {
+  async checkDuplicateHired(): Promise<void> {
     if (this.profile) {
       this.__profileId__ = this.profile.id;
     }
@@ -94,148 +94,9 @@ export class ProfileHiredPerson extends Model {
 
       if (isDateOverlap) {
         throw new Error(
-          `It is possible that this person is hired for this date.`
+          "Es posible que esta persona es contratada para esta fecha."
         );
       }
     }
   }
-
-  // @AfterInsert()
-  // @AfterUpdate()
-  // @AfterRemove()
-  // async updatedDJ08(): Promise<void> {
-  //   const section = await SectionState.findOne({
-  //     select: { fiscalYear: { id: true } },
-  //     relations: ["fiscalYear"],
-  //     where: { profile: { id: this.__profileId__ } },
-  //   });
-  //   const { id: fiscalYearId } = section.fiscalYear;
-
-  //   const dj08ToUpdate = await Dj08SectionData.findOne({
-  //     where: {
-  //       dJ08: {
-  //         profile: { id: this.__profileId__ },
-  //         fiscalYear: { id: fiscalYearId },
-  //       },
-  //       is_rectification: true,
-  //     },
-  //   });
-
-  //   const profileHiredPersonActivity = await ProfileHiredPersonActivity.find({
-  //     select: {
-  //       profileHiredPerson: {
-  //         id: true,
-  //         date_start: true,
-  //         date_end: true,
-  //         import: true,
-  //         hiredPerson: {
-  //           id: true,
-  //           ci: true,
-  //           first_name: true,
-  //           last_name: true,
-  //           address: { id: true, municipality: true },
-  //         },
-  //       },
-  //       profileActivity: {
-  //         id: true,
-  //         activity: { id: true, code: true },
-  //       },
-  //     },
-  //     relations: {
-  //       profileHiredPerson: {
-  //         hiredPerson: { address: true },
-  //       },
-  //       profileActivity: { activity: true },
-  //     },
-  //     where: {
-  //       profileHiredPerson: {
-  //         id: Not(this.id),
-  //         profile: { id: this.__profileId__ },
-  //       },
-  //     },
-  //   });
-    
-  //   const profileHiredPersonActivityIndex =
-  //   profileHiredPersonActivity.findIndex(
-  //     (val) => val.profileHiredPerson.id === this.id
-  //   );
-  //   console.log(this, profileHiredPersonActivity, profileHiredPersonActivityIndex)
-    
-  //   if (profileHiredPersonActivityIndex !== -1) {
-  //     profileHiredPersonActivity[
-  //       profileHiredPersonActivityIndex
-  //     ].profileHiredPerson = this;
-  //   }
-
-  //   const { section_data: sectionDataJSONString } = dj08ToUpdate;
-  //   const section_data: AllDataSectionsDj08Type = JSON.parse(
-  //     sectionDataJSONString
-  //   );
-
-  //   const newDataSectionI: { [key: string | number]: DataSectionIType } = {};
-  //   const newTotalSectionI: TotalSectionIType = { import: 0 };
-
-  //   const profileHiredPersonActivityRemoveDuplicate =
-  //     profileHiredPersonActivity.reduce<{
-  //       [key: string]: ProfileHiredPersonActivity;
-  //     }>((acc, val) => {
-  //       const code = val.profileActivity.activity.code;
-  //       const profileHiredPersonId = val.profileHiredPerson.id;
-  //       if (
-  //         acc[
-  //           `
-  //           ${code}${profileHiredPersonId}`
-  //         ]
-  //       ) {
-  //         acc[
-  //           `
-  //           ${code}${profileHiredPersonId}`
-  //         ].annual_cost += val.annual_cost;
-  //       } else {
-  //         acc[
-  //           `
-  //           ${code}${profileHiredPersonId}`
-  //         ] = val;
-  //       }
-  //       return acc;
-  //     }, {});
-
-  //   const profileHiredPersonActivityClean = Object.values(
-  //     profileHiredPersonActivityRemoveDuplicate
-  //   );
-
-  //   for (let i = 0; i < profileHiredPersonActivityClean.length; i++) {
-  //     const { hiredPerson, date_start, date_end } =
-  //       profileHiredPersonActivity[i]?.profileHiredPerson;
-  //     const { ci: nit, first_name, last_name, address } = hiredPerson;
-  //     const { profileActivity, annual_cost } = profileHiredPersonActivity[i];
-
-  //     const code = profileActivity?.activity.code.padEnd(3);
-  //     const fullName = `${first_name} ${last_name}`;
-  //     const from = [date_start.getDate(), date_start.getMonth() + 1];
-  //     const to = [date_end.getDate(), date_end.getMonth() + 1];
-  //     const dataImport = parseFloat(annual_cost.toFixed());
-  //     const totalImport = parseFloat(
-  //       (newTotalSectionI.import += annual_cost).toFixed()
-  //     );
-  //     const { municipality } = address;
-
-  //     const data: DataSectionIType = {
-  //       code,
-  //       fullName,
-  //       from,
-  //       to,
-  //       municipality,
-  //       nit,
-  //       import: dataImport,
-  //     };
-  //     newDataSectionI[`F${i + 64}`] = data;
-  //     newTotalSectionI.import = totalImport;
-  //   }
-  //   section_data[SectionName.SECTION_I].data = newDataSectionI;
-  //   section_data[SectionName.SECTION_I].totals = newTotalSectionI;
-
-  //   dj08ToUpdate.section_data = JSON.stringify(section_data);
-  //   await dj08ToUpdate.save();
-  // }
 }

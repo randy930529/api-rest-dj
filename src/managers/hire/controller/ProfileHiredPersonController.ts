@@ -270,6 +270,11 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
     }
   }
 
+  /**
+   * @AfterInsert
+   * @AfterUpdate
+   * @AfterRemove
+   */
   private async updatedDJ08(
     profileHiredPerson: ProfileHiredPerson
   ): Promise<void> {
