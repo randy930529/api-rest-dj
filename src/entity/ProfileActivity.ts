@@ -1,29 +1,16 @@
 import {
-  AfterInsert,
-  AfterRemove,
-  AfterUpdate,
   BeforeInsert,
   BeforeUpdate,
   Column,
   Entity,
   JoinColumn,
   ManyToOne,
-  Not,
   OneToMany,
 } from "typeorm";
 import Model from "./Base";
 import { Profile } from "./Profile";
 import { Activity } from "./Activity";
 import { SupportDocument } from "./SupportDocument";
-import { Dj08SectionData, SectionName } from "./Dj08SectionData";
-import {
-  AllDataSectionsDj08Type,
-  DataSectionAType,
-  TotalSectionAType,
-} from "utils/definitions";
-import * as moment from "moment";
-import { SectionState } from "./SectionState";
-import { calculeF20ToDj08 } from "../reports/utils/utilsToReports";
 import { ProfileHiredPersonActivity } from "./ProfileHiredPersonActivity";
 
 @Entity()
@@ -69,7 +56,7 @@ export class ProfileActivity extends Model {
 
   @BeforeInsert()
   @BeforeUpdate()
-  async up__profileId__(): Promise<void> {
+  async checkDuplicateProfileActivity(): Promise<void> {
     if (this.profile) {
       this.__profileId__ = this.profile.id;
     }
@@ -83,130 +70,25 @@ export class ProfileActivity extends Model {
       });
 
       if (activityWithSameName && this.id !== activityWithSameName?.id) {
-        throw new Error("Only a activity with the same name is allowed.");
+        throw new Error("Sólo una actividad con el mismo nombre es admitida.");
       }
     }
   }
 
-  @AfterInsert()
-  @AfterUpdate()
-  @AfterRemove()
-  async updatedDJ08(): Promise<void> {
-    const section = await SectionState.findOne({
-      select: { fiscalYear: { id: true } },
-      relations: ["fiscalYear"],
-      where: { profile: { id: this.__profileId__ } },
-    });
-    const { id: fiscalYearId } = section.fiscalYear;
-
-    const dj08ToUpdate = await Dj08SectionData.findOne({
-      where: {
-        dJ08: {
-          profile: { id: this.__profileId__ },
-          fiscalYear: { id: fiscalYearId },
+  @BeforeInsert()
+  @BeforeUpdate()
+  async checkDuplicateProfileActivityPrimary(): Promise<void> {
+    if (this.activity) {
+      const activityPrimary = await ProfileActivity.findOne({
+        where: {
+          profile: { id: this.profile?.id },
+          primary: true,
         },
-        is_rectification: true,
-      },
-    });
+      });
 
-    const profileActivities = await ProfileActivity.find({
-      select: {
-        supportDocuments: {
-          id: true,
-          type_document: true,
-          amount: true,
-          element: { id: true, group: true },
-        },
-        activity: { id: true, code: true, description: true, to_tcp: true },
-      },
-      relations: { activity: true, supportDocuments: { element: true } },
-      where: {
-        profile: { id: this.__profileId__ },
-        supportDocuments: { fiscalYear: { id: fiscalYearId } },
-      },
-    });
-    
-    if (this.id === -1 || !this.supportDocuments) {
-      this.supportDocuments = [];
-      profileActivities.push(this);
-    }
-
-    const { section_data: sectionDataJSONString } = dj08ToUpdate;
-    const section_data: AllDataSectionsDj08Type = JSON.parse(
-      sectionDataJSONString
-    );
-
-    const newDataSectionA: { [key: string | number]: DataSectionAType } = {};
-    const newTotalSectionA: TotalSectionAType = { incomes: 0, expenses: 0 };
-    let is_tcp = false;
-
-    for (let i = 0; i < profileActivities.length; i++) {
-      const activity = profileActivities[i];
-      const { date_start, date_end, primary } = activity;
-      const { code, description, to_tcp } = activity.activity;
-      const date_start_day = moment(date_start).date();
-      const date_start_month = moment(date_start).month() + 1;
-      const date_end_day = moment(date_end).date();
-      const date_end_month = moment(date_end).month() + 1;
-
-      if (primary) {
-        is_tcp = to_tcp;
+      if (activityPrimary && this.id !== activityPrimary?.id) {
+        throw new Error("Sólo una actividad principal es admitida.");
       }
-
-      const { income, expense } = activity.supportDocuments.reduce(
-        (sumaTotal, val) => {
-          if (
-            val.type_document === "i" &&
-            val.element.group?.trim() === "iggv"
-          ) {
-            sumaTotal.income = parseFloat(
-              (sumaTotal.income + val.amount).toFixed()
-            );
-          } else if (
-            val.type_document === "g" &&
-            val.element.group?.trim() === "pdgt"
-          ) {
-            sumaTotal.expense = parseFloat(
-              (sumaTotal.expense + val.amount).toFixed()
-            );
-          }
-
-          return sumaTotal;
-        },
-        { income: 0, expense: 0 }
-      );
-
-      const data: DataSectionAType = {
-        activity: `${code} - ${description}`,
-        period: {
-          start: [date_start_day, date_start_month],
-          end: [date_end_day, date_end_month],
-        },
-        income,
-        expense,
-      };
-      newDataSectionA[`F${i + 1}`] = data;
-      newTotalSectionA.incomes += income;
-      newTotalSectionA.expenses += expense;
-    }
-    section_data[SectionName.SECTION_A].data = newDataSectionA;
-    section_data[SectionName.SECTION_A].totals = newTotalSectionA;
-    section_data[SectionName.SECTION_B].data["F11"] = newTotalSectionA.incomes;
-    section_data[SectionName.SECTION_B].data["F13"] = newTotalSectionA.expenses;
-
-    const dataSectionB = section_data[SectionName.SECTION_B].data as {
-      [key: string]: number;
-    };
-    section_data[SectionName.SECTION_B].data["F20"] =
-      calculeF20ToDj08(dataSectionB);
-
-    dj08ToUpdate.section_data = JSON.stringify(section_data);
-    await dj08ToUpdate.save();
-
-    const profileToUpdate = await Profile.findOneBy({ id: this.__profileId__ });
-    if (profileToUpdate) {
-      profileToUpdate.is_tcp = is_tcp;
-      await profileToUpdate.save();
     }
   }
 }
