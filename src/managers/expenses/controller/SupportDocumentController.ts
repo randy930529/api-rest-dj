@@ -256,11 +256,11 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         is_rectification: true,
       },
     });
-
     const { section_data: sectionDataJSONString } = dj08ToUpdate;
     const section_data: AllDataSectionsDj08Type = JSON.parse(
       sectionDataJSONString
     );
+
     const profileActivities =
       supportDocument.type_document === "g" ||
       supportDocument.type_document === "i"
@@ -288,24 +288,43 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
           })
         : [];
 
-    const documents = profileActivities.reduce<SupportDocument[]>(
-      (documents, activity) => {
-        if (!up && activity.id === supportDocument.profileActivity.id) {
-          activity.supportDocuments.push(supportDocument);
-        }
-
-        documents = [...documents, ...activity.supportDocuments];
-        return documents;
-      },
-      []
-    );
+    const documents =
+      supportDocument.type_document === "g" ||
+      supportDocument.type_document === "i"
+        ? profileActivities.reduce<SupportDocument[]>((documents, activity) => {
+            documents = [...documents, ...activity.supportDocuments];
+            return documents;
+          }, [])
+        : (
+            await FiscalYear.findOne({
+              select: {
+                supportDocuments: {
+                  id: true,
+                  type_document: true,
+                  amount: true,
+                  element: {
+                    id: true,
+                    description: true,
+                    type: true,
+                    group: true,
+                    is_general: true,
+                  },
+                },
+              },
+              relations: { supportDocuments: { element: true } },
+              where: {
+                id: supportDocument.__fiscalYearId__,
+                supportDocuments: {
+                  type_document: supportDocument.type_document,
+                },
+              },
+            })
+          ).supportDocuments;
 
     switch (supportDocument.type_document) {
       case "m":
         let elementGroup = supportDocument.element.group?.trim();
-        const paidTributes = documents.filter(
-          (val) => val.type_document === "m"
-        );
+        const paidTributes = documents;
         const dataSectionF = section_data[SectionName.SECTION_F].data as {
           [key: string]: DataSectionBType;
         };
@@ -563,16 +582,12 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
                 val.type_document === "i" &&
                 val.element.group?.trim() === "iggv"
               ) {
-                sumaTotal.income = parseFloat(
-                  (sumaTotal.income + val.amount).toFixed()
-                );
+                sumaTotal.income += parseFloat(val.amount.toFixed());
               } else if (
                 val.type_document === "g" &&
                 val.element.group?.startsWith("pd")
               ) {
-                sumaTotal.expense = parseFloat(
-                  (sumaTotal.expense + val.amount).toFixed()
-                );
+                sumaTotal.expense += parseFloat(val.amount.toFixed());
               }
 
               return sumaTotal;
@@ -639,12 +654,12 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
                 val.type_document === "i" &&
                 val.element.group?.trim() === "iggv"
               ) {
-                sumaTotal.income = sumaTotal.income + val.amount;
+                sumaTotal.income += parseFloat(val.amount.toFixed());
               } else if (
                 val.type_document === "g" &&
                 val.element.group?.startsWith("pd")
               ) {
-                sumaTotal.expense = sumaTotal.expense + val.amount;
+                sumaTotal.expense += parseFloat(val.amount.toFixed());
               }
 
               return sumaTotal;
@@ -658,8 +673,8 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
               start: [date_start_day, date_start_month],
               end: [date_end_day, date_end_month],
             },
-            income: parseFloat(income.toFixed()),
-            expense: parseFloat(expense.toFixed()),
+            income,
+            expense,
           };
 
           newDataSectionA[`F${i + 1}`] = data;
@@ -783,6 +798,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
 
       return count + 1;
     }, 45);
+
     section_data[SectionName.SECTION_G] = {
       data: dataSectionG,
       totals: totalSectionG,
