@@ -665,8 +665,8 @@ class ReportGeneratorController extends ReportGenerator {
         DataSectionAType,
         TotalSectionAType
       >(dj08SectionData, SectionName.SECTION_A);
-      totalSectionA.incomes = parseFloat(totalSectionA.incomes.toFixed());
-      totalSectionA.expenses = parseFloat(totalSectionA.expenses.toFixed());
+      totalSectionA.incomes = parseFloat(totalSectionA.incomes?.toFixed() || "0");
+      totalSectionA.expenses = parseFloat(totalSectionA.expenses?.toFixed() || "0");
 
       const {
         F11 = 0,

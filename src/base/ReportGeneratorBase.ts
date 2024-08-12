@@ -87,6 +87,7 @@ class ReportGenerator {
         .orderBy(`document.date`, `ASC`)
         .addOrderBy(`element.id`, `ASC`)
         .groupBy(`document.date`)
+        .addGroupBy(`document.id`)
         .addGroupBy(`document.is_bank`)
         .addGroupBy(`element.id`)
         .addGroupBy(`element.group`)
