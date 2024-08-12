@@ -399,7 +399,7 @@ class ReportGeneratorController extends ReportGenerator {
         const indexBoxOrBank: number = is_bank ? 1 : 0;
 
         const updateToDay = dataMonths[index][day];
-        const toDay = defaultDataArray<number>(4, 0)
+        const toDay = defaultDataArray<number>(4, 0);
 
         toDay[indexGroup] = parseFloat(amount);
         toDay[indexBoxOrBank] = parseFloat(amount);
@@ -659,14 +659,18 @@ class ReportGeneratorController extends ReportGenerator {
 
       dj08SectionData.section_data = JSON.parse(dj08SectionData.section_data);
       const is_rectification =
-        dj08SectionData.is_rectification && declared && fiscalYear.declared;
+        dj08SectionData.is_rectification && fiscalYear.declared;
 
       const [dataSectionA, totalSectionA] = getDataAndTotalsToDj08Sections<
         DataSectionAType,
         TotalSectionAType
       >(dj08SectionData, SectionName.SECTION_A);
-      totalSectionA.incomes = parseFloat(totalSectionA.incomes?.toFixed() || "0");
-      totalSectionA.expenses = parseFloat(totalSectionA.expenses?.toFixed() || "0");
+      totalSectionA.incomes = parseFloat(
+        totalSectionA.incomes?.toFixed() || "0"
+      );
+      totalSectionA.expenses = parseFloat(
+        totalSectionA.expenses?.toFixed() || "0"
+      );
 
       const {
         F11 = 0,
@@ -787,9 +791,12 @@ class ReportGeneratorController extends ReportGenerator {
       );
 
       if (dj08SectionDataOld) {
-        const { F33: F33a = 0, F36: F36a = 0 } = JSON.parse(
-          dj08SectionDataOld.section_data
-        )[SectionName.SECTION_E]["data"];
+        const { F33: F33a = 0, F36: F36a = 0 } =
+          typeof dj08SectionDataOld.section_data === "string"
+            ? JSON.parse(dj08SectionDataOld.section_data)[
+                SectionName.SECTION_E
+              ]["data"]
+            : dj08SectionDataOld.section_data[SectionName.SECTION_E]["data"];
         F28 = (F26 || 0) - F33a;
         F29 = F36a;
         F30 = F28 > F29 ? F28 - F29 : 0;
