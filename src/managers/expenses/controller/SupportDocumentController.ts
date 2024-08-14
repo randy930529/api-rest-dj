@@ -319,7 +319,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
                 },
               },
             })
-          ).supportDocuments;
+          )?.supportDocuments || [];
 
     switch (supportDocument.type_document) {
       case "m":
