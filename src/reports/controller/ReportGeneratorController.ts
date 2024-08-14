@@ -790,7 +790,7 @@ class ReportGeneratorController extends ReportGenerator {
         (val) => val.is_rectification === false
       );
 
-      if (dj08SectionDataOld) {
+      if (is_rectification && dj08SectionDataOld) {
         const { F33: F33a = 0, F36: F36a = 0 } =
           typeof dj08SectionDataOld.section_data === "string"
             ? JSON.parse(dj08SectionDataOld.section_data)[
@@ -830,7 +830,7 @@ class ReportGeneratorController extends ReportGenerator {
         "data"
       ] as { [key: string]: number };
 
-      const F32 = declared ? F30 : F26;
+      const F32 = is_rectification ? F30 : F26;
       const F33 =
         [1, 2].indexOf(dateSigns.month) !== -1
           ? parseFloat(((F32 * 5) / 100).toFixed())
