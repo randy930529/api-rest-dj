@@ -74,7 +74,6 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       res.status(200);
       return { ...resp };
     } catch (error) {
-      console.log(error);
       if (res.statusCode === 200) res.status(500);
       next(error);
     }
@@ -150,7 +149,6 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       res.status(201);
       return { ...resp };
     } catch (error) {
-      console.log(error);
       if (res.statusCode === 200) res.status(500);
       next(error);
     }
@@ -242,9 +240,9 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
 
       const profileHiredPersonActivityToRemove =
         await ProfileHiredPersonActivity.findOne({
-          select: ["profileHiredPerson"],
+          select: { profileHiredPerson: { id: true, profile: { id: true } } },
           relations: {
-            profileHiredPerson: true,
+            profileHiredPerson: { profile: true },
           },
           where: { id },
         });
@@ -259,6 +257,10 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       profileHiredPersonActivityToRemove.profileHiredPerson.import -=
         profileHiredPersonActivityToRemove.annual_cost;
       await this.repository.save(
+        profileHiredPersonActivityToRemove.profileHiredPerson
+      );
+
+      await this.updatedDJ08(
         profileHiredPersonActivityToRemove.profileHiredPerson
       );
 
@@ -278,17 +280,19 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
   private async updatedDJ08(
     profileHiredPerson: ProfileHiredPerson
   ): Promise<void> {
+    const profileId = profileHiredPerson.__profileId__;
+
     const section = await SectionState.findOne({
       select: { fiscalYear: { id: true } },
       relations: ["fiscalYear"],
-      where: { profile: { id: profileHiredPerson.profile.id } },
+      where: { profile: { id: profileId } },
     });
     const { id: fiscalYearId } = section.fiscalYear;
 
     const dj08ToUpdate = await Dj08SectionData.findOne({
       where: {
         dJ08: {
-          profile: { id: profileHiredPerson.profile.id },
+          profile: { id: profileId },
           fiscalYear: { id: fiscalYearId },
         },
         is_rectification: true,
@@ -323,12 +327,10 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       },
       where: {
         profileHiredPerson: {
-          profile: { id: profileHiredPerson.profile.id },
+          profile: { id: profileId },
         },
       },
     });
-
-    console.log(profileHiredPerson, profileHiredPersonActivity);
 
     const { section_data: sectionDataJSONString } = dj08ToUpdate;
     const section_data: AllDataSectionsDj08Type = JSON.parse(
@@ -344,21 +346,10 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       }>((acc, val) => {
         const code = val.profileActivity.activity.code;
         const profileHiredPersonId = val.profileHiredPerson.id;
-        if (
-          acc[
-            `
-            ${code}${profileHiredPersonId}`
-          ]
-        ) {
-          acc[
-            `
-            ${code}${profileHiredPersonId}`
-          ].annual_cost += val.annual_cost;
+        if (acc[`${code}${profileHiredPersonId}`]) {
+          acc[`${code}${profileHiredPersonId}`].annual_cost += val.annual_cost;
         } else {
-          acc[
-            `
-            ${code}${profileHiredPersonId}`
-          ] = val;
+          acc[`${code}${profileHiredPersonId}`] = val;
         }
         return acc;
       }, {});
@@ -369,9 +360,10 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
 
     for (let i = 0; i < profileHiredPersonActivityClean.length; i++) {
       const { hiredPerson, date_start, date_end } =
-        profileHiredPersonActivity[i]?.profileHiredPerson;
+        profileHiredPersonActivityClean[i]?.profileHiredPerson;
       const { ci: nit, first_name, last_name, address } = hiredPerson;
-      const { profileActivity, annual_cost } = profileHiredPersonActivity[i];
+      const { profileActivity, annual_cost } =
+        profileHiredPersonActivityClean[i];
 
       const code = profileActivity?.activity.code.padEnd(3);
       const fullName = `${first_name} ${last_name}`;

@@ -3,9 +3,6 @@ import {
   Column,
   JoinColumn,
   ManyToOne,
-  AfterInsert,
-  AfterUpdate,
-  AfterRemove,
   BeforeInsert,
   BeforeUpdate,
   Not,
@@ -15,13 +12,6 @@ import Model from "./Base";
 import { HiredPerson } from "./HiredPerson";
 import { Profile } from "./Profile";
 import { ColumnNumericTransformer } from "../utils/ColumnNumericTransformer";
-import { Dj08SectionData, SectionName } from "./Dj08SectionData";
-import {
-  AllDataSectionsDj08Type,
-  DataSectionIType,
-  TotalSectionIType,
-} from "utils/definitions";
-import { SectionState } from "./SectionState";
 import * as moment from "moment";
 import { ProfileHiredPersonActivity } from "./ProfileHiredPersonActivity";
 
