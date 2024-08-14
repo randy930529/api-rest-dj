@@ -134,7 +134,7 @@ export class SectionState extends Model {
 
       F28 = (F26 || 0) - F33a;
       F29 = F36a;
-      toGiveBack = F28 > F29 ? 0 : (F29 - F28) * -1;
+      toGiveBack = F28 - F29;
     } else {
       toGiveBack =
         this.profile.is_tcp || F21 >= F22 + F23 + F24 + F25
