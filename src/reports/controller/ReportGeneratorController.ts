@@ -2,10 +2,12 @@ import { NextFunction, Request, Response } from "express";
 import { FindOptionsSelect } from "typeorm";
 import * as pug from "pug";
 import * as moment from "moment";
+import { appConfig } from "../../../config";
 import ReportGenerator from "../../base/ReportGeneratorBase";
 import { User } from "../../entity/User";
 import { SectionState } from "../../entity/SectionState";
 import { Dj08SectionData, SectionName } from "../../entity/Dj08SectionData";
+import { CreateReportDj08DTO } from "../dto/request/reportDj08.dto";
 import {
   calculeMoraDays,
   clearDuplicatesInArray,
@@ -17,7 +19,6 @@ import {
   sumaArray,
   sumaTotal,
 } from "../utils/utilsToReports";
-
 import {
   DataIndexByType,
   DataSectionAType,
@@ -30,7 +31,6 @@ import {
   TotalSectionGType,
   TotalSectionIType,
 } from "../../utils/definitions";
-import { appConfig } from "../../../config";
 
 class ReportGeneratorController extends ReportGenerator {
   private templatePath: string;
@@ -569,15 +569,15 @@ class ReportGeneratorController extends ReportGenerator {
     next: NextFunction
   ): Promise<void> {
     try {
-      const { declared = false, user }: { declared: boolean; user: User } =
-        req.body;
+      const { declared = false, date, user }: CreateReportDj08DTO = req.body;
 
       this.templatePath = pugTemplatePath("dj08/swornDeclaration");
 
+      const dateDeclare = moment(date);
       const dateSigns = {
-        day: moment().date(),
-        month: moment().month() + 1,
-        year: moment().year(),
+        day: dateDeclare.date(),
+        month: dateDeclare.month() + 1,
+        year: dateDeclare.year(),
       };
 
       const select: FindOptionsSelect<SectionState> = {
