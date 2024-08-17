@@ -5,13 +5,12 @@ import {
   ManyToOne,
   OneToMany,
   BeforeInsert,
+  BeforeUpdate,
 } from "typeorm";
 import Model from "./Base";
 import { User } from "./User";
-import { ProfileHiredPerson } from "./ProfileHiredPerson";
 import { HiredPerson } from "./HiredPerson";
 import { FiscalYear } from "./FiscalYear";
-import { ProfileEnterprise } from "./ProfileEnterprise";
 import { ProfileActivity } from "./ProfileActivity";
 import { ProfileAddress } from "./ProfileAddress";
 
@@ -49,21 +48,11 @@ export class Profile extends Model {
   @Column({ type: "varchar", length: 50, nullable: true })
   run_in_municipality: string;
 
-  @Column({ default: true })
-  is_tcp: boolean;
-
   @ManyToOne(() => User, {
     onDelete: "CASCADE",
   })
   @JoinColumn()
   user: User;
-
-  @OneToMany(
-    () => ProfileHiredPerson,
-    (profileHiredPerson) => profileHiredPerson.profile,
-    { cascade: ["remove"] }
-  )
-  profileHiredPerson: ProfileHiredPerson[];
 
   @OneToMany(() => HiredPerson, (hiredPerson) => hiredPerson.profile, {
     cascade: ["remove"],
@@ -76,20 +65,17 @@ export class Profile extends Model {
   fiscalYear: FiscalYear[];
 
   @OneToMany(
-    () => ProfileEnterprise,
-    (profileEnterprise) => profileEnterprise.profile,
-    { cascade: ["remove"] }
-  )
-  profileEnterprise: ProfileEnterprise[];
-
-  @OneToMany(
     () => ProfileActivity,
     (profileActivity) => profileActivity.profile,
     { cascade: ["remove"] }
   )
   profileActivity: ProfileActivity[];
 
+  @Column({ default: "" })
+  profile_email: string;
+
   @BeforeInsert()
+  @BeforeUpdate()
   async checkDuplicateProfilesForUser(): Promise<void> {
     const profilesForUserWithSameCi = await Profile.count({
       where: [
@@ -99,7 +85,7 @@ export class Profile extends Model {
     });
 
     if (profilesForUserWithSameCi >= 2) {
-      throw new Error("Only two profiles with the same CI are allowed.");
+      throw new Error("Sólo dos perfiles con igual CI son admitidos.");
     }
   }
 }

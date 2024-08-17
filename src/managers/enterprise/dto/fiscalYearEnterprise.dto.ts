@@ -1,9 +1,9 @@
+import { FiscalYear } from "entity/FiscalYear";
 import { Enterprise } from "../../../entity/Enterprise";
-import { Profile } from "../../../entity/Profile";
 
-export type ProfileEnterpriseDTO = {
+export type FiscalYearEnterpriseDTO = {
   amount: number;
   import: number;
   enterprise: Enterprise;
-  profile?: Profile;
+  fiscalYear?: FiscalYear;
 };

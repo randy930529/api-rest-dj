@@ -8,7 +8,6 @@ import { ProfileActivityDTO } from "../dto/request/createProfileActivity.dto";
 import { responseError } from "../../../errors/responseError";
 import getProfileById from "../../../profile/utils/getProfileById";
 import { Activity } from "../../../entity/Activity";
-import { SectionState } from "../../../entity/SectionState";
 import { Dj08SectionData, SectionName } from "../../../entity/Dj08SectionData";
 import {
   AllDataSectionsDj08Type,
@@ -16,7 +15,7 @@ import {
   TotalSectionAType,
 } from "../../../utils/definitions";
 import { calculeF20ToDj08 } from "../../../reports/utils/utilsToReports";
-import { Profile } from "../../../entity/Profile";
+import { FiscalYear } from "../../../entity/FiscalYear";
 
 export class ProfileActivityController extends EntityControllerBase<ProfileActivity> {
   constructor() {
@@ -29,11 +28,13 @@ export class ProfileActivityController extends EntityControllerBase<ProfileActiv
       const fields: ProfileActivityDTO = req.body;
       const profileId = fields.profile.id;
       const activityId = fields.activity.id;
+      const fiscalYearId = fields.fiscalYear.id;
 
       if (!activityId)
         responseError(res, "Do must provide a valid activity id.", 404);
 
       const profile = await getProfileById({ id: profileId, res });
+      const fiscalYear = await FiscalYear.findOneBy({ id: fiscalYearId });
 
       const activity = await Activity.findOneBy({
         id: activityId,
@@ -45,10 +46,11 @@ export class ProfileActivityController extends EntityControllerBase<ProfileActiv
         ...fields,
         profile,
         activity,
+        fiscalYear,
       });
 
       const newProfileActivity = await this.create(objectProfileActivity);
-      await this.updatedDJ08(newProfileActivity, false);
+      await this.updatedDJ08(newProfileActivity);
 
       const resp: BaseResponseDTO = {
         status: "success",
@@ -125,17 +127,9 @@ export class ProfileActivityController extends EntityControllerBase<ProfileActiv
    * @AfterUpdate
    * @AfterRemove
    */
-  private async updatedDJ08(
-    profileActivity: ProfileActivity,
-    up: boolean = true
-  ): Promise<void> {
+  private async updatedDJ08(profileActivity: ProfileActivity): Promise<void> {
     const profileId = profileActivity.__profileId__;
-    const section = await SectionState.findOne({
-      select: { fiscalYear: { id: true } },
-      relations: ["fiscalYear"],
-      where: { profile: { id: profileId } },
-    });
-    const { id: fiscalYearId } = section.fiscalYear;
+    const fiscalYearId = profileActivity.__fiscalYearId__;
 
     const dj08ToUpdate = await Dj08SectionData.findOne({
       where: {
@@ -147,27 +141,41 @@ export class ProfileActivityController extends EntityControllerBase<ProfileActiv
       },
     });
 
-    const profileActivities = await ProfileActivity.find({
-      select: {
-        supportDocuments: {
-          id: true,
-          type_document: true,
-          amount: true,
-          element: { id: true, group: true },
-        },
-        activity: { id: true, code: true, description: true, to_tcp: true },
-      },
-      relations: { activity: true, supportDocuments: { element: true } },
-      where: {
-        profile: { id: profileId },
-        supportDocuments: { fiscalYear: { id: fiscalYearId } },
-      },
-    });
-
-    if (!up) {
-      profileActivity.supportDocuments = [];
-      profileActivities.push(profileActivity);
-    }
+    const profileActivities =
+      (
+        await FiscalYear.findOne({
+          select: {
+            profileActivitis: {
+              id: true,
+              supportDocuments: {
+                id: true,
+                type_document: true,
+                amount: true,
+                element: { id: true, group: true },
+              },
+              activity: {
+                id: true,
+                code: true,
+                description: true,
+                to_tcp: true,
+              },
+            },
+          },
+          relations: {
+            profileActivitis: {
+              activity: true,
+              supportDocuments: { element: true },
+            },
+          },
+          where: {
+            id: fiscalYearId,
+            profile: { id: profileId },
+            profileActivitis: {
+              supportDocuments: { fiscalYear: { id: fiscalYearId } },
+            },
+          },
+        })
+      )?.profileActivitis || [];
 
     const { section_data: sectionDataJSONString } = dj08ToUpdate;
     const section_data: AllDataSectionsDj08Type = JSON.parse(
@@ -180,7 +188,7 @@ export class ProfileActivityController extends EntityControllerBase<ProfileActiv
 
     for (let i = 0; i < profileActivities.length; i++) {
       const activity = profileActivities[i];
-      const { date_start, date_end, primary } = activity;
+      const { date_start, date_end, primary, supportDocuments = [] } = activity;
       const { code, description, to_tcp } = activity.activity;
       const date_start_day = moment(date_start).date();
       const date_start_month = moment(date_start).month() + 1;
@@ -191,21 +199,21 @@ export class ProfileActivityController extends EntityControllerBase<ProfileActiv
         is_tcp = to_tcp;
       }
 
-      const { income, expense } = activity.supportDocuments.reduce(
-        (sumaTotal, val) => {
+      const { income, expense } = supportDocuments.reduce(
+        (sumaTotal, document) => {
           if (
-            val.type_document === "i" &&
-            val.element.group?.trim() === "iggv"
+            document.type_document === "i" &&
+            document.element.group?.trim() === "iggv"
           ) {
             sumaTotal.income = parseFloat(
-              (sumaTotal.income + val.amount).toFixed()
+              (sumaTotal.income + document.amount).toFixed()
             );
           } else if (
-            val.type_document === "g" &&
-            val.element.group?.trim() === "pdgt"
+            document.type_document === "g" &&
+            document.element.group?.trim() === "pdgt"
           ) {
             sumaTotal.expense = parseFloat(
-              (sumaTotal.expense + val.amount).toFixed()
+              (sumaTotal.expense + document.amount).toFixed()
             );
           }
 
@@ -241,10 +249,10 @@ export class ProfileActivityController extends EntityControllerBase<ProfileActiv
     dj08ToUpdate.section_data = JSON.stringify(section_data);
     await dj08ToUpdate.save();
 
-    const profileToUpdate = await Profile.findOneBy({ id: profileId });
-    if (profileToUpdate) {
-      profileToUpdate.is_tcp = is_tcp;
-      await profileToUpdate.save();
+    const fiscalYearToUpdate = await FiscalYear.findOneBy({ id: fiscalYearId });
+    if (fiscalYearToUpdate) {
+      fiscalYearToUpdate.is_tcp = is_tcp;
+      await fiscalYearToUpdate.save();
     }
   }
 }

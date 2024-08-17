@@ -137,7 +137,7 @@ export class SectionState extends Model {
       toGiveBack = F28 - F29;
     } else {
       toGiveBack =
-        this.profile.is_tcp || F21 >= F22 + F23 + F24 + F25
+        this.fiscalYear.is_tcp || F21 >= F22 + F23 + F24 + F25
           ? 0
           : F21 - (F22 + F23 + F24 + F25);
     }

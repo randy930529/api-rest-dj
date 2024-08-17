@@ -1,39 +1,39 @@
-import { ProfileEnterpriseController } from "../controller/ProfileEnterpriseController";
+import { FiscalYearEnterpriseController } from "../controller/FiscalYearEnterpriseController";
 import { authMiddleware } from "../../../auth/middlewares/authMiddleware";
 
-export const profileEnterpriseRoutes = [
+export const fiscalYearEnterpriseRoutes = [
   {
     method: "post",
     route: "/profile/enterprise",
-    controller: ProfileEnterpriseController,
+    controller: FiscalYearEnterpriseController,
     middlewares: [authMiddleware],
     action: "createProfileEnterprise",
   },
   {
     method: "get",
     route: "/profileEnterprises",
-    controller: ProfileEnterpriseController,
+    controller: FiscalYearEnterpriseController,
     middlewares: [authMiddleware],
     action: "all",
   },
   {
     method: "get",
     route: "/profile/enterprise/:id",
-    controller: ProfileEnterpriseController,
+    controller: FiscalYearEnterpriseController,
     middlewares: [authMiddleware],
     action: "onProfileEnterprise",
   },
   {
     method: "put",
     route: "/profile/enterprise",
-    controller: ProfileEnterpriseController,
+    controller: FiscalYearEnterpriseController,
     middlewares: [authMiddleware],
     action: "updateProfileEnterprise",
   },
   {
     method: "delete",
     route: "/profile/enterprise/:id",
-    controller: ProfileEnterpriseController,
+    controller: FiscalYearEnterpriseController,
     middlewares: [authMiddleware],
     action: "deleteProfileEnterprise",
   },

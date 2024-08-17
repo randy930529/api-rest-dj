@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import Model from "./Base";
 import { User } from "./User";
-import { ProfileEnterprise } from "./ProfileEnterprise";
+import { FiscalYearEnterprise } from "./FiscalYearEnterprise";
 
 @Entity()
 export class Enterprise extends Model {
@@ -19,8 +19,8 @@ export class Enterprise extends Model {
   user: User;
 
   @OneToMany(
-    () => ProfileEnterprise,
+    () => FiscalYearEnterprise,
     (profileEnterprise) => profileEnterprise.amount
   )
-  hiredPerson: ProfileEnterprise[];
+  hiredPerson: FiscalYearEnterprise[];
 }

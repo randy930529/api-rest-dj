@@ -588,7 +588,7 @@ class ReportGeneratorController extends ReportGenerator {
           ci: true,
           nit: true,
           run_in_municipality: true,
-          is_tcp: true,
+          profile_email: true,
         },
         fiscalYear: {
           id: true,
@@ -596,6 +596,7 @@ class ReportGeneratorController extends ReportGenerator {
           declared: true,
           individual: true,
           regimen: true,
+          is_tcp: true,
           musicalGroup: { description: true, number_members: true },
           dj08: {
             id: true,
@@ -623,10 +624,10 @@ class ReportGeneratorController extends ReportGenerator {
         ci,
         nit,
         address,
+        profile_email,
         run_in_municipality,
-        is_tcp,
       } = profile;
-      const { year, individual, musicalGroup, regimen } = fiscalYear;
+      const { year, individual, musicalGroup, is_tcp, regimen } = fiscalYear;
 
       ci.padEnd(11);
       nit.padEnd(11);
@@ -977,7 +978,7 @@ class ReportGeneratorController extends ReportGenerator {
         ci,
         nit,
         address,
-        email: user.email,
+        email: profile_email,
         individual,
         musicalGroup,
         is_rectification,

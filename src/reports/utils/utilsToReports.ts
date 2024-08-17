@@ -221,101 +221,6 @@ const clearDuplicatesInArray = <T>(from: T[], to: T[]): T[] => {
   return uniqueElements;
 };
 
-const getDJ08Data = async (
-  year: number,
-  userId: number
-): Promise<DataDJ08Type> => {
-  const dataQuery = await SectionState.createQueryBuilder(`section`)
-    .select([`section.id`])
-    .leftJoin(`section.user`, `user`)
-    .leftJoin(`section.fiscalYear`, `fiscalYear`)
-    .leftJoinAndSelect(`section.profile`, `profile`)
-    .leftJoinAndSelect(`profile.address`, `profileAddress`)
-    .leftJoinAndSelect(`profileAddress.address`, `address`)
-    .leftJoinAndSelect(
-      `profile.profileActivity`,
-      `activities`,
-      `EXTRACT(year FROM activities.date_start)= :year`,
-      {
-        year,
-      }
-    )
-    .leftJoinAndSelect(`activities.activity`, `activity`)
-    .leftJoinAndSelect(`activities.supportDocuments`, `documents`)
-    .leftJoinAndSelect(`profile.profileEnterprise`, `enterprises`)
-    .leftJoinAndSelect(`enterprises.enterprise`, `enterprise`)
-    .leftJoinAndSelect(
-      `profile.profileHiredPerson`,
-      `hiredPersons`,
-      `EXTRACT(year FROM hiredPersons.date_start)= :year`,
-      {
-        year,
-      }
-    )
-    .leftJoinAndSelect(`hiredPersons.hiredPerson`, `hire`)
-    .leftJoinAndSelect(`hire.address`, `hireAddress`)
-    .where(`user.id= :userId`, { userId })
-    .andWhere(`fiscalYear.year= :year`, { year })
-    .limit(9)
-    .getOne();
-
-  if (!dataQuery.profile) throw new Error("Profile not found.");
-
-  const {
-    first_name,
-    last_name,
-    ci,
-    nit,
-    address,
-    profileActivity,
-    profileEnterprise,
-    profileHiredPerson,
-  } = dataQuery.profile;
-
-  const activities = profileActivity.map<ProfileActivityPartialType>((pa) => ({
-    ...pa,
-    ...pa.activity,
-    activity: pa.activity.description,
-    documents: pa.supportDocuments.map((sd) => ({
-      ...sd,
-      type: sd.type_document,
-    })),
-  }));
-
-  const enterprises = profileEnterprise.map<{
-    amount: number;
-    import: number;
-    name: string;
-  }>((pe) => ({ ...pe, name: pe.enterprise.name }));
-
-  const hiredPersons = profileHiredPerson.map<{
-    date_start: Date;
-    date_end: Date;
-    import: number;
-    first_name: string;
-    last_name: string;
-    ci: string;
-    municipality: string;
-  }>((hp) => ({
-    ...hp,
-    ...hp.hiredPerson,
-    municipality: hp.hiredPerson.address.municipality,
-  }));
-
-  const result = {
-    first_name,
-    last_name,
-    ci,
-    nit,
-    address,
-    activities,
-    enterprises,
-    hiredPersons,
-  };
-
-  return result;
-};
-
 const toCompleteDataSection = <T>(
   start: number,
   section: number,
@@ -442,7 +347,6 @@ export {
   getDataToDay,
   getDataExpensesInToMonthArrayToTables,
   clearDuplicatesInArray,
-  getDJ08Data,
   toCompleteDataSection,
   getDataAndTotalsToDj08Sections,
   calculeF20ToDj08,

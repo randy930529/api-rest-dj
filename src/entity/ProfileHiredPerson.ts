@@ -8,12 +8,12 @@ import {
   Not,
   OneToMany,
 } from "typeorm";
+import * as moment from "moment";
 import Model from "./Base";
 import { HiredPerson } from "./HiredPerson";
-import { Profile } from "./Profile";
 import { ColumnNumericTransformer } from "../utils/ColumnNumericTransformer";
-import * as moment from "moment";
 import { ProfileHiredPersonActivity } from "./ProfileHiredPersonActivity";
+import { FiscalYear } from "./FiscalYear";
 
 @Entity()
 export class ProfileHiredPerson extends Model {
@@ -31,12 +31,12 @@ export class ProfileHiredPerson extends Model {
   })
   import: number;
 
-  @ManyToOne(() => Profile, { onDelete: "CASCADE" })
+  @ManyToOne(() => FiscalYear, { onDelete: "CASCADE" })
   @JoinColumn()
-  profile: Profile;
+  fiscalYear: FiscalYear;
 
   @Column({ nullable: true })
-  __profileId__: number;
+  __fiscalYearId__: number;
 
   @ManyToOne(() => HiredPerson, { onDelete: "CASCADE" })
   @JoinColumn()
@@ -55,21 +55,21 @@ export class ProfileHiredPerson extends Model {
   toJSON() {
     return {
       ...this,
-      __profileId__: undefined,
+      __fiscalYearId__: undefined,
     };
   }
 
   @BeforeInsert()
   @BeforeUpdate()
   async checkDuplicateHired(): Promise<void> {
-    if (this.profile) {
-      this.__profileId__ = this.profile.id;
+    if (this.fiscalYear) {
+      this.__fiscalYearId__ = this.fiscalYear.id;
     }
 
     if (this.hiredPerson) {
       const checkDuplicateHired = await ProfileHiredPerson.findOne({
         where: {
-          profile: { id: this.__profileId__ },
+          fiscalYear: { id: this.__fiscalYearId__ },
           id: this.id && Not(this.id),
           hiredPerson: { id: this.hiredPerson?.id },
         },

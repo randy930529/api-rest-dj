@@ -19,7 +19,7 @@ import { testTMRoutes } from "./managers/license/routes/testTM";
 import { activityRoutes } from "./managers/activity/routes/activity";
 import { enterpriseRoutes } from "./managers/enterprise/routes/enterprise";
 import { profileActivityRoutes } from "./managers/activity/routes/profileActivity";
-import { profileEnterpriseRoutes } from "./managers/enterprise/routes/profileEnterprise";
+import { fiscalYearEnterpriseRoutes } from "./managers/enterprise/routes/fiscalYearEnterprise";
 
 export const Routes = [
   ...apiConfigRoutes,
@@ -43,5 +43,5 @@ export const Routes = [
   ...activityRoutes,
   ...enterpriseRoutes,
   ...profileActivityRoutes,
-  ...profileEnterpriseRoutes,
+  ...fiscalYearEnterpriseRoutes,
 ];

@@ -108,14 +108,14 @@ export class UserController {
             id: true,
             dj08: { id: true, dj08SectionData: true },
             supportDocuments: { id: true, element: { id: true } },
+            profileHiredPerson: {
+              id: true,
+              profileHiredPersonActivity: { id: true },
+            },
+            fiscalYearEnterprise: { id: true },
           },
           address: { id: true, address: { id: true } },
-          profileHiredPerson: {
-            id: true,
-            profileHiredPersonActivity: { id: true },
-          },
           hiredPerson: { id: true },
-          profileEnterprise: { id: true },
           profileActivity: { id: true },
         },
       },
@@ -125,11 +125,11 @@ export class UserController {
           fiscalYear: {
             dj08: { dj08SectionData: true },
             supportDocuments: { element: true },
+            profileHiredPerson: { profileHiredPersonActivity: true },
+            fiscalYearEnterprise: true,
           },
           address: { address: true },
-          profileHiredPerson: { profileHiredPersonActivity: true },
           hiredPerson: true,
-          profileEnterprise: true,
           profileActivity: true,
         },
       },
@@ -147,13 +147,6 @@ export class UserController {
 
     await userToRemove.profiles?.map(async (profile) => {
       await profile.fiscalYear?.map(async (fiscalYear) => {
-        await profile.profileHiredPerson?.map(async (profileHiredPerson) => {
-          await profileHiredPerson.profileHiredPersonActivity?.map(
-            async (val) => await val.remove()
-          );
-          await profileHiredPerson.remove();
-        });
-
         await profile.hiredPerson?.map(
           async (hiredPerson) => await hiredPerson.remove()
         );
@@ -175,15 +168,22 @@ export class UserController {
           await supportDocument.remove();
         });
 
+        await fiscalYear.profileHiredPerson?.map(async (profileHiredPerson) => {
+          await profileHiredPerson.profileHiredPersonActivity?.map(
+            async (val) => await val.remove()
+          );
+          await profileHiredPerson.remove();
+        });
+
+        await fiscalYear.fiscalYearEnterprise?.map(
+          async (enterprise) => await enterprise.remove()
+        );
+
         await fiscalYear.remove();
       });
 
       await profile.address?.address?.remove();
       await profile.address?.remove();
-
-      await profile.profileEnterprise?.map(
-        async (profileEnterprise) => await profileEnterprise.remove()
-      );
 
       await profile.profileActivity?.map(
         async (profileActivity) => await profileActivity.remove()

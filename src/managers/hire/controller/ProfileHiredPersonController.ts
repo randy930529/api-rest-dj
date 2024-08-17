@@ -1,16 +1,16 @@
 import { NextFunction, Request, Response } from "express";
 import { In, Not } from "typeorm";
-import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { AppDataSource } from "../../../data-source";
+import { EntityControllerBase } from "../../../base/EntityControllerBase";
+import { responseError } from "../../../errors/responseError";
+import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import { ProfileHiredPerson } from "../../../entity/ProfileHiredPerson";
 import { ProfileHiredPersonDTO } from "../dto/request/profileHiredPerson.dto";
-import { responseError } from "../../../errors/responseError";
 import { HiredPerson } from "../../../entity/HiredPerson";
-import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
-import getProfileById from "../../../profile/utils/getProfileById";
 import { ProfileHiredPersonActivity } from "../../../entity/ProfileHiredPersonActivity";
 import { Dj08SectionData, SectionName } from "../../../entity/Dj08SectionData";
 import { SectionState } from "../../../entity/SectionState";
+import { FiscalYear } from "../../../entity/FiscalYear";
 import {
   AllDataSectionsDj08Type,
   DataSectionIType,
@@ -30,13 +30,15 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
   ) {
     try {
       const fields: ProfileHiredPersonDTO = req.body;
-      const profileId = fields.profile.id;
+      const fiscalYearId = fields.fiscalYear.id;
       const hiredPersonId = fields.hiredPerson.id;
 
       if (!hiredPersonId)
         responseError(res, "Do must provide a valid hired person id.", 404);
 
-      const profile = await getProfileById({ id: profileId, res });
+      const fiscalYear = await FiscalYear.findOneBy({ id: fiscalYearId });
+
+      if (!fiscalYear) responseError(res, "Fiscal year not found.", 404);
 
       const hiredPerson = await HiredPerson.findOneBy({
         id: hiredPersonId,
@@ -46,7 +48,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
 
       const objectProfileHiredPerson = Object.assign(new ProfileHiredPerson(), {
         ...fields,
-        profile,
+        fiscalYear,
         hiredPerson,
         profileHiredPersonActivity: [],
       });
@@ -240,9 +242,11 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
 
       const profileHiredPersonActivityToRemove =
         await ProfileHiredPersonActivity.findOne({
-          select: { profileHiredPerson: { id: true, profile: { id: true } } },
+          select: {
+            profileHiredPerson: { id: true, fiscalYear: { id: true } },
+          },
           relations: {
-            profileHiredPerson: { profile: true },
+            profileHiredPerson: { fiscalYear: true },
           },
           where: { id },
         });
@@ -280,14 +284,13 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
   private async updatedDJ08(
     profileHiredPerson: ProfileHiredPerson
   ): Promise<void> {
-    const profileId = profileHiredPerson.__profileId__;
-
+    const fiscalYearId = profileHiredPerson.__fiscalYearId__;
     const section = await SectionState.findOne({
-      select: { fiscalYear: { id: true } },
-      relations: ["fiscalYear"],
-      where: { profile: { id: profileId } },
+      select: { profile: { id: true } },
+      relations: ["profile"],
+      where: { fiscalYear: { id: fiscalYearId } },
     });
-    const { id: fiscalYearId } = section.fiscalYear;
+    const profileId = section.profile?.id;
 
     const dj08ToUpdate = await Dj08SectionData.findOne({
       where: {
@@ -327,7 +330,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       },
       where: {
         profileHiredPerson: {
-          profile: { id: profileId },
+          fiscalYear: { id: fiscalYearId },
         },
       },
     });

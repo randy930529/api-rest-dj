@@ -16,6 +16,9 @@ import { Dj08SectionData } from "./Dj08SectionData";
 import { MusicalGroup } from "./MusicalGroup";
 import { SupportDocument } from "./SupportDocument";
 import { DJ08 } from "./DJ08";
+import { FiscalYearEnterprise } from "./FiscalYearEnterprise";
+import { ProfileActivity } from "./ProfileActivity";
+import { ProfileHiredPerson } from "./ProfileHiredPerson";
 
 @Entity()
 export class FiscalYear extends Model {
@@ -60,6 +63,30 @@ export class FiscalYear extends Model {
   @OneToMany(() => DJ08, (dj08) => dj08.fiscalYear)
   dj08: DJ08[];
 
+  @OneToMany(
+    () => FiscalYearEnterprise,
+    (fiscalYearEnterprise) => fiscalYearEnterprise.fiscalYear,
+    { cascade: ["remove"] }
+  )
+  fiscalYearEnterprise: FiscalYearEnterprise[];
+
+  @OneToMany(
+    () => ProfileHiredPerson,
+    (profileHiredPerson) => profileHiredPerson.fiscalYear,
+    { cascade: ["remove"] }
+  )
+  profileHiredPerson: ProfileHiredPerson[];
+
+  @OneToMany(
+    () => ProfileActivity,
+    (profileActivity) => profileActivity.fiscalYear,
+    { cascade: ["remove"] }
+  )
+  profileActivitis: ProfileActivity[];
+
+  @Column({ default: true })
+  is_tcp: boolean;
+
   toJSON() {
     return {
       ...this,
@@ -78,7 +105,7 @@ export class FiscalYear extends Model {
 
     if (!this.individual && !this.musicalGroup) {
       throw new Error(
-        "Fiscal year marked as not individual must have a musical group associated."
+        "El año fiscal marcado como no individual debe tener un grupo musical asociado."
       );
     }
 
@@ -99,7 +126,7 @@ export class FiscalYear extends Model {
       .getOne();
 
     if (duplicateFiscalYear && this.id !== duplicateFiscalYear?.id) {
-      throw new Error("Only a fiscal year with same date and year is allowed.");
+      throw new Error("Sólo un año fiscal con misma fecha y año es admitido.");
     }
   }
 

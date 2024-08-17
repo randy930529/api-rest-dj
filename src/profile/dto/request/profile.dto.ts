@@ -8,7 +8,6 @@ export type ProfileDTO = {
   nit: string;
   primary: boolean;
   run_in_municipality: string;
-  is_tcp: boolean;
   address: ProfileAddress;
   user: User;
 };
