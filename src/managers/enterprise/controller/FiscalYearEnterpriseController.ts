@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { AppDataSource } from "../../../data-source";
 import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { FiscalYearEnterprise } from "../../../entity/FiscalYearEnterprise";
-import { FiscalYearEnterpriseDTO } from "../dto/fiscalYearEnterprise.dto";
+import { FiscalYearEnterpriseDTO } from "../dto/request/fiscalYearEnterprise.dto";
 import { Enterprise } from "../../../entity/Enterprise";
 import { responseError } from "../../../errors/responseError";
 import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";

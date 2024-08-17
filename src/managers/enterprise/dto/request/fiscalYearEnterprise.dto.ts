@@ -1,5 +1,5 @@
 import { FiscalYear } from "entity/FiscalYear";
-import { Enterprise } from "../../../entity/Enterprise";
+import { Enterprise } from "../../../../entity/Enterprise";
 
 export type FiscalYearEnterpriseDTO = {
   amount: number;
