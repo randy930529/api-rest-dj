@@ -6,6 +6,7 @@ import { ENV } from "./settings/environment";
 import { AnswerType } from "./definitions";
 import { User, UserRole } from "../entity/User";
 import { PasswordHash } from "../auth/security/passwordHash";
+import { defaultSectionDataInit } from "../managers/period/utils";
 
 const { host, port, username: user, password, database } = ENV;
 const pool = new pg.Pool({
@@ -20,9 +21,10 @@ const createUser = async (user: User) => {
   try {
     const { email, password, active, role } = user;
     const register_date = moment().toDate();
+    const end_license = moment().add(1, "y");
     let query = {
-      text: `INSERT INTO "user"("email", "password", "active", "role", "register_date") VALUES($1, $2, $3, $4, $5)`,
-      values: [email, password, active, role, register_date],
+      text: `INSERT INTO "user"("email", "password", "active", "role", "register_date", "end_license") VALUES($1, $2, $3, $4, $5, $6)`,
+      values: [email, password, active, role, register_date, end_license],
     };
 
     if (ENV.debug === "development") console.log("> query: ", query.text);
@@ -36,11 +38,11 @@ const createUser = async (user: User) => {
 
     if (ENV.debug === "development") console.log("> query: ", query.text);
 
-    const { rows } = await client.query(query);
+    const { rows: userQ } = await client.query(query);
 
     query = {
       text: `INSERT INTO "profile"("userId", "primary") VALUES($1, $2)`,
-      values: [rows[0].id, true],
+      values: [userQ[0].id, true],
     };
 
     if (ENV.debug === "development") console.log("> query: ", query.text);
@@ -49,7 +51,7 @@ const createUser = async (user: User) => {
 
     query = {
       text: `SELECT "Profile"."id" AS "id", "Profile"."userId" AS "user" FROM "profile" "Profile" WHERE ( ("Profile"."userId" = $1) ) AND ( "Profile"."userId" IN ($1) )`,
-      values: [rows[0].id],
+      values: [userQ[0].id],
     };
 
     if (ENV.debug === "development") console.log("> query: ", query.text);
@@ -67,8 +69,46 @@ const createUser = async (user: User) => {
     await client.query(query);
 
     query = {
-      text: `INSERT INTO "license_user"("userId", "is_paid") VALUES($1, $2)`,
-      values: [rows[0].id, true],
+      text: `SELECT "FiscalYear"."id" AS "id", "FiscalYear"."profileId" AS "fiscalYear" FROM "fiscal_year" "FiscalYear" WHERE ( ("FiscalYear"."profileId" = $1) ) AND ( "FiscalYear"."profileId" IN ($1) )`,
+      values: [profile[0].id],
+    };
+
+    if (ENV.debug === "development") console.log("> query: ", query.text);
+
+    const { rows: fiscalYear } = await client.query(query);
+
+    const licenseKey = userQ[0].id.toString();
+    query = {
+      text: `INSERT INTO "license_user"("userId", "is_paid", "licenseKey") VALUES($1, $2, $3)`,
+      values: [userQ[0].id, true, licenseKey],
+    };
+
+    if (ENV.debug === "development") console.log("> query: ", query.text);
+
+    await client.query(query);
+
+    query = {
+      text: `INSERT INTO "dj08"("profileId", "fiscalYearId") VALUES($1, $2)`,
+      values: [profile[0].id, fiscalYear[0].id],
+    };
+
+    if (ENV.debug === "development") console.log("> query: ", query.text);
+
+    await client.query(query);
+
+    query = {
+      text: `SELECT "Dj08"."id" AS "id", "Dj08"."fiscalYearId" AS "fiscalYear" FROM "dj08" "Dj08" WHERE ( ("Dj08"."fiscalYearId" = $1) ) AND ( "Dj08"."fiscalYearId" IN ($1) )`,
+      values: [fiscalYear[0].id],
+    };
+
+    if (ENV.debug === "development") console.log("> query: ", query.text);
+
+    const { rows: dj08 } = await client.query(query);
+
+    const section_data = JSON.stringify(defaultSectionDataInit());
+    query = {
+      text: `INSERT INTO "dj08_section_data"("dJ08Id", "section_data", "is_rectification") VALUES($1, $2, $3)`,
+      values: [dj08[0].id, section_data, true],
     };
 
     if (ENV.debug === "development") console.log("> query: ", query.text);
