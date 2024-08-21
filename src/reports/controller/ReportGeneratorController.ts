@@ -9,6 +9,7 @@ import { SectionState } from "../../entity/SectionState";
 import { Dj08SectionData, SectionName } from "../../entity/Dj08SectionData";
 import { CreateReportDj08DTO } from "../dto/request/reportDj08.dto";
 import {
+  calculateMora,
   calculeMoraDays,
   clearDuplicatesInArray,
   defaultDataArray,
@@ -846,24 +847,7 @@ class ReportGeneratorController extends ReportGenerator {
           : 0;
 
         if (moraDays) {
-          const payToMora = (debit: number, porcentage: number, days: number) =>
-            debit * porcentage * days;
-
-          F35 += payToMora(F32, 0.02, 30);
-
-          if (moraDays > 30) {
-            F35 += payToMora(F32, 0.05, 30);
-          }
-
-          if (moraDays > 60) {
-            const mora = payToMora(F32, 0.001, moraDays - 60);
-            const topMora = payToMora(F32, 0.3, 1);
-
-            F35 =
-              mora < topMora
-                ? parseFloat((F35 += mora).toFixed())
-                : parseFloat((F35 += topMora).toFixed());
-          }
+          F35 = calculateMora(F32, F35, moraDays);
         }
       }
 

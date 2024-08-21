@@ -338,6 +338,23 @@ const calculeMoraDays = (
   return countMoraDays;
 };
 
+const calculateMora = (F32: number, F35: number, moraDays: number) => {
+  const payToMora = (debit: number, porcentage: number, days: number = 1) =>
+    parseFloat((debit * porcentage * days).toFixed());
+
+  if (moraDays <= 30) {
+    return F35 + payToMora(F32, 0.02);
+  } else if (moraDays > 30 && moraDays <= 60) {
+    return F35 + payToMora(F32, 0.05);
+  } else if (moraDays > 60) {
+    const mora = payToMora(F32, 0.001, moraDays);
+    const topMora = payToMora(F32, 0.3);
+
+    return mora <= topMora ? F35 + mora : F35 + topMora;
+  }
+  return 0;
+};
+
 export {
   pugTemplatePath,
   defaultDataArray,
@@ -351,4 +368,5 @@ export {
   getDataAndTotalsToDj08Sections,
   calculeF20ToDj08,
   calculeMoraDays,
+  calculateMora,
 };
