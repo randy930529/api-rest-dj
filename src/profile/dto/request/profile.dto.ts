@@ -8,6 +8,7 @@ export type ProfileDTO = {
   nit: string;
   primary: boolean;
   run_in_municipality: string;
+  profile_email?: string;
   address: ProfileAddress;
   user: User;
 };

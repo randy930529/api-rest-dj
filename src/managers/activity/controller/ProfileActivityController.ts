@@ -141,41 +141,39 @@ export class ProfileActivityController extends EntityControllerBase<ProfileActiv
       },
     });
 
-    const profileActivities =
-      (
-        await FiscalYear.findOne({
-          select: {
-            profileActivitis: {
-              id: true,
-              supportDocuments: {
-                id: true,
-                type_document: true,
-                amount: true,
-                element: { id: true, group: true },
-              },
-              activity: {
-                id: true,
-                code: true,
-                description: true,
-                to_tcp: true,
-              },
-            },
+    const fiscalYearToUpdate = await FiscalYear.findOne({
+      select: {
+        profileActivitis: {
+          id: true,
+          primary: true,
+          date_start: true,
+          date_end: true,
+          supportDocuments: {
+            id: true,
+            type_document: true,
+            amount: true,
+            element: { id: true, group: true },
           },
-          relations: {
-            profileActivitis: {
-              activity: true,
-              supportDocuments: { element: true },
-            },
+          activity: {
+            id: true,
+            code: true,
+            description: true,
+            to_tcp: true,
           },
-          where: {
-            id: fiscalYearId,
-            profile: { id: profileId },
-            profileActivitis: {
-              supportDocuments: { fiscalYear: { id: fiscalYearId } },
-            },
-          },
-        })
-      )?.profileActivitis || [];
+        },
+      },
+      relations: {
+        profileActivitis: {
+          activity: true,
+          supportDocuments: { element: true },
+        },
+      },
+      where: {
+        id: fiscalYearId,
+        profile: { id: profileId },
+      },
+    });
+    const profileActivities = fiscalYearToUpdate?.profileActivitis || [];
 
     const { section_data: sectionDataJSONString } = dj08ToUpdate;
     const section_data: AllDataSectionsDj08Type = JSON.parse(
@@ -184,7 +182,6 @@ export class ProfileActivityController extends EntityControllerBase<ProfileActiv
 
     const newDataSectionA: { [key: string | number]: DataSectionAType } = {};
     const newTotalSectionA: TotalSectionAType = { incomes: 0, expenses: 0 };
-    let is_tcp = false;
 
     for (let i = 0; i < profileActivities.length; i++) {
       const activity = profileActivities[i];
@@ -195,8 +192,8 @@ export class ProfileActivityController extends EntityControllerBase<ProfileActiv
       const date_end_day = moment(date_end).date();
       const date_end_month = moment(date_end).month() + 1;
 
-      if (primary) {
-        is_tcp = to_tcp;
+      if (primary && fiscalYearToUpdate?.is_tcp !== to_tcp) {
+        fiscalYearToUpdate.is_tcp = to_tcp;
       }
 
       const { income, expense } = supportDocuments.reduce(
@@ -248,11 +245,6 @@ export class ProfileActivityController extends EntityControllerBase<ProfileActiv
 
     dj08ToUpdate.section_data = JSON.stringify(section_data);
     await dj08ToUpdate.save();
-
-    const fiscalYearToUpdate = await FiscalYear.findOneBy({ id: fiscalYearId });
-    if (fiscalYearToUpdate) {
-      fiscalYearToUpdate.is_tcp = is_tcp;
-      await fiscalYearToUpdate.save();
-    }
+    await fiscalYearToUpdate?.save();
   }
 }
