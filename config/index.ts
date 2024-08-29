@@ -72,6 +72,7 @@ interface AppConfig {
   constantToSectionG: ConstantToSectionGType;
   corsOptions: corsOptionsType;
   group: groupType;
+  tradedDays: string[];
 }
 
 export const appConfig: AppConfig = config.get("app");

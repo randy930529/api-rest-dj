@@ -841,9 +841,10 @@ class ReportGeneratorController extends ReportGenerator {
       let F35 = 0;
 
       if (declared) {
-        const limitDate = moment(`${year + 1}-04-30`);
-        const moraDays = moment().isAfter(limitDate)
-          ? calculeMoraDays(limitDate, moment())
+        const startYear = 2023 + 1;
+        const limitDate = moment(`${startYear}-04-30`);
+        const moraDays = dateDeclare.isAfter(limitDate)
+          ? calculeMoraDays(startYear, limitDate, dateDeclare)
           : 0;
 
         if (moraDays) {

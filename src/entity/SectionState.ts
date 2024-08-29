@@ -67,8 +67,8 @@ export class SectionState extends Model {
    * 3. The current tax debt for DJ-08.
    */
   private toSectionCalculateValues() {
-    const find_cultural_activity = this.profile.profileActivity.find(
-      (val) => val.activity.is_culture
+    const find_cultural_activity = this.fiscalYear?.profileActivities?.find(
+      (val) => val.primary && val.activity.is_culture
     );
     const has_cultural_activity = !find_cultural_activity ? false : true;
 
@@ -126,7 +126,7 @@ export class SectionState extends Model {
       (val) => val.is_rectification === false
     );
 
-    if (this.fiscalYear.declared && dj08SectionDataOld) {
+    if (this.fiscalYear?.declared && dj08SectionDataOld) {
       const { F33: F33a = 0, F36: F36a = 0 } = JSON.parse(
         dj08SectionDataOld.section_data
       )[SectionName.SECTION_E]["data"];
@@ -141,17 +141,19 @@ export class SectionState extends Model {
           : F21 - (F22 + F23 + F24 + F25);
     }
 
-    const F32 = this.fiscalYear.declared ? F30 : F26;
+    const dateDeclare = moment();
+    const F32 = this.fiscalYear?.declared ? F30 : F26;
     const F33 =
-      [1, 2].indexOf(moment().month() + 1) !== -1
+      [1, 2].indexOf(dateDeclare.month() + 1) !== -1
         ? parseFloat(((F32 * 5) / 100).toFixed())
         : 0;
     let F35 = 0;
 
     if (this.fiscalYear.declared) {
-      const limitDate = moment(`${this.fiscalYear.year + 1}-04-30`);
-      const moraDays = moment().isAfter(limitDate)
-        ? calculeMoraDays(limitDate, moment())
+      const startYear = this.fiscalYear.year + 1;
+      const limitDate = moment(`${startYear}-04-30`);
+      const moraDays = dateDeclare.isAfter(limitDate)
+        ? calculeMoraDays(startYear, limitDate, dateDeclare)
         : 0;
 
       if (moraDays) {

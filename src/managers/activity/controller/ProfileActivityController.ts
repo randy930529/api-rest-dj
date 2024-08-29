@@ -143,7 +143,7 @@ export class ProfileActivityController extends EntityControllerBase<ProfileActiv
 
     const fiscalYearToUpdate = await FiscalYear.findOne({
       select: {
-        profileActivitis: {
+        profileActivities: {
           id: true,
           primary: true,
           date_start: true,
@@ -163,7 +163,7 @@ export class ProfileActivityController extends EntityControllerBase<ProfileActiv
         },
       },
       relations: {
-        profileActivitis: {
+        profileActivities: {
           activity: true,
           supportDocuments: { element: true },
         },
@@ -173,7 +173,7 @@ export class ProfileActivityController extends EntityControllerBase<ProfileActiv
         profile: { id: profileId },
       },
     });
-    const profileActivities = fiscalYearToUpdate?.profileActivitis || [];
+    const profileActivities = fiscalYearToUpdate?.profileActivities || [];
 
     const { section_data: sectionDataJSONString } = dj08ToUpdate;
     const section_data: AllDataSectionsDj08Type = JSON.parse(

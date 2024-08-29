@@ -1,11 +1,6 @@
 import * as path from "path";
 import * as moment from "moment";
-import {
-  DataDJ08Type,
-  ProfileActivityPartialType,
-  SupportDocumentPartialType,
-} from "../../utils/definitions";
-import { SectionState } from "../../entity/SectionState";
+import { SupportDocumentPartialType } from "../../utils/definitions";
 import { Dj08SectionData } from "../../entity/Dj08SectionData";
 import { appConfig } from "../../../config";
 
@@ -322,14 +317,31 @@ const calculeF20ToDj08 = <
   );
 };
 
+const calculeTradedDaysOfYear = (
+  year: number,
+  tradedDays: string[] = [...(appConfig?.tradedDays || [])]
+) => {
+  return tradedDays.map((val) => moment(`${year}${val}`).dayOfYear());
+};
+
 const calculeMoraDays = (
+  startYear: number,
   startDate: moment.Moment,
   endDate: moment.Moment
 ): number => {
+  let tradedDaysOfYear = calculeTradedDaysOfYear(startYear);
   let countMoraDays = 0;
 
   while (startDate.isBefore(endDate)) {
-    if ([1, 2, 3, 4, 5].indexOf(startDate.weekday()) !== -1) {
+    if (startYear !== startDate.year()) {
+      startYear = startDate.year();
+      tradedDaysOfYear = calculeTradedDaysOfYear(startYear);
+    }
+
+    if (
+      [0, 6].indexOf(startDate.weekday()) === -1 &&
+      tradedDaysOfYear.indexOf(startDate.dayOfYear()) === -1
+    ) {
       countMoraDays++;
     }
     startDate.add(1, "d");

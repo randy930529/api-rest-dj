@@ -38,6 +38,9 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
           fiscalYear: {
             supportDocuments: { element: true },
             dj08: { dj08SectionData: true },
+            profileActivities: {
+              activity: true,
+            },
           },
           licenseUser: { license: true },
         },
@@ -148,6 +151,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
             declared: true,
             individual: true,
             regimen: true,
+            is_tcp: true,
             created_at: true,
             updated_at: true,
             supportDocuments: {
@@ -180,6 +184,9 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
           fiscalYear: {
             supportDocuments: { element: true },
             dj08: { dj08SectionData: true },
+            profileActivities: {
+              activity: true,
+            },
           },
           licenseUser: { license: true },
         },
@@ -198,6 +205,9 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
           fiscalYear: {
             supportDocuments: true,
             dj08: { dj08SectionData: true },
+            profileActivities: {
+              activity: true,
+            },
           },
           profileActivity: { activity: true },
         },
@@ -280,7 +290,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
       let fiscalYear: FiscalYear;
       if (fields.fiscalYear) {
         fiscalYear = profile.fiscalYear.find(
-          (value: FiscalYear) => value.id === fields.fiscalYear.id
+          (val) => val.id === fields.fiscalYear.id
         );
 
         if (!fiscalYear)
@@ -307,6 +317,7 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
             declared: true,
             individual: true,
             regimen: true,
+            is_tcp: true,
             created_at: true,
             updated_at: true,
             supportDocuments: {
@@ -339,6 +350,9 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
           fiscalYear: {
             supportDocuments: { element: true },
             dj08: { dj08SectionData: true },
+            profileActivities: {
+              activity: true,
+            },
           },
           licenseUser: { license: true },
         },

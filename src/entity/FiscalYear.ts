@@ -82,7 +82,7 @@ export class FiscalYear extends Model {
     (profileActivity) => profileActivity.fiscalYear,
     { cascade: ["remove"] }
   )
-  profileActivitis: ProfileActivity[];
+  profileActivities: ProfileActivity[];
 
   @Column({ default: true })
   is_tcp: boolean;

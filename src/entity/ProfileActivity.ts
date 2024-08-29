@@ -76,7 +76,6 @@ export class ProfileActivity extends Model {
     if (this.activity) {
       const activityWithSameName = await ProfileActivity.findOne({
         where: {
-          profile: { id: this.profile?.id },
           fiscalYear: { id: this.fiscalYear?.id },
           activity: { id: this.activity?.id },
         },
