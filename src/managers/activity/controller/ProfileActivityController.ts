@@ -161,12 +161,16 @@ export class ProfileActivityController extends EntityControllerBase<ProfileActiv
             to_tcp: true,
           },
         },
+        musicalGroup: {
+          id: true,
+        },
       },
       relations: {
         profileActivities: {
           activity: true,
           supportDocuments: { element: true },
         },
+        musicalGroup: true,
       },
       where: {
         id: fiscalYearId,
