@@ -74,13 +74,16 @@ export class Profile extends Model {
   @Column({ default: "" })
   profile_email: string;
 
+  @Column({ nullable: true })
+  currentfiscalYear: Number;
+
   @BeforeInsert()
   @BeforeUpdate()
   async checkDuplicateProfilesForUser(): Promise<void> {
     const profilesForUserWithSameCi = await Profile.count({
       where: [
-        { user: { id: this.user.id }, ci: this.ci },
-        { user: { id: this.user.id }, nit: this.nit },
+        { user: { id: this.user?.id }, ci: this.ci },
+        { user: { id: this.user?.id }, nit: this.nit },
       ],
     });
 
