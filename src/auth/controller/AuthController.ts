@@ -75,7 +75,10 @@ export class AuthController {
           });
 
           await notificacionDTO.save();
-          responseError(res, "Server is not ready to send your messages.");
+          responseError(
+            res,
+            `Problema de comunicación con el correo: Por favor intente más tarde "Reenviar correo" de activación de cuenta.`
+          );
         });
 
       if (appConfig.debug === "production") {
@@ -290,7 +293,10 @@ export class AuthController {
           });
 
           await notificacionDTO.save();
-          responseError(res, "Server is not ready to send your messages.");
+          responseError(
+            res,
+            `Problema de comunicación con el correo: Por favor intente más tarde "Reenviar correo" de activación de cuenta.`
+          );
         });
 
       if (appConfig.debug === "production") {
@@ -369,7 +375,10 @@ export class AuthController {
       await new Email(existingUser, confirUrl)
         .sendPasswordResetToken()
         .catch((error) => {
-          responseError(res, "Server is not ready to send your messages.");
+          responseError(
+            res,
+            `Problema de comunicación con el correo: Por favor intente más tarde restablcer la contraseña.`
+          );
         });
 
       if (appConfig.debug === "production") {
