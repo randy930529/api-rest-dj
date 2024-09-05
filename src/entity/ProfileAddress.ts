@@ -8,7 +8,7 @@ export class ProfileAddress extends Model {
   @Column({ type: "varchar", length: 255, nullable: true, default: "" })
   street: string;
 
-  @Column({ type: "varchar", length: 4, nullable: true, default: "" })
+  @Column({ type: "varchar", length: 10, nullable: true, default: "" })
   number: string;
 
   @Column({ type: "varchar", length: 100, nullable: true, default: "" })
