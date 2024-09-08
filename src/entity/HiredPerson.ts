@@ -72,7 +72,9 @@ export class HiredPerson extends Model {
       });
 
       if (hiredPersonWithSameCI && this.id !== hiredPersonWithSameCI?.id) {
-        throw new Error("Only a person hired with the same CI is allowed.");
+        throw new Error(
+          "Sólo una persona contratada con el mismo CI es admitida."
+        );
       }
     }
   }

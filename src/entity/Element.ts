@@ -16,7 +16,7 @@ export class Element extends Model {
   @Column({ type: "varchar", length: 100 })
   description: string;
 
-  @Column({ type: "char", length: 1, default:"" })
+  @Column({ type: "char", length: 1, default: "" })
   type: string;
 
   @Column({ default: false })
@@ -60,7 +60,7 @@ export class Element extends Model {
       elementForProfileWithSameName &&
       this.id !== elementForProfileWithSameName.id
     ) {
-      throw new Error("Only a element with the same name are allowed.");
+      throw new Error("Sólo un elemento con el mismo nombre es admitido.");
     }
 
     if (
@@ -78,7 +78,9 @@ export class Element extends Model {
 
       if (!this.is_general && countElementsForProfilePD >= allowedCount) {
         throw new Error(
-          `Only ${allowedCount} possible elements to deduce are allowed.`
+          `Se permiten sólo ${allowedCount} elementos ${
+            allowedCount === 2 ? "para deducir" : "posible a deducir"
+          }.`
         );
       }
     }
