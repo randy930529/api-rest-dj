@@ -1,0 +1,43 @@
+
+include ../generic/mixins
+
+mixin setData(dataMatrix=[[]])
+    each val, index in dataMatrix
+        tr(height=21 style="height: 15.75pt; text-align: center")
+            +values(val, "xl-71")
+    else
+        td There are no values
+
+table.page-one(
+    role='presentation'
+    border='0'
+    cellpadding='0'
+    cellspacing='0'
+    style={margin: "72px 68px"}
+)
+
+  block column
+      -let colsArray=[{width:127, style:{width: '95pt'}}, {width:80, style:{width: '60pt'}}, {width:80, style:{width: '60pt'}}]
+      +colGroup(colsArray)
+  tbody
+    block tHeadContent
+        - const tdStyle="border-bottom: .5pt solid black; border-top: none; text-align: center; vertical-align: middle; height:15.75pt"
+        
+        tr(height=59 style={height:'44.25pt'})
+            td.xl-78(colspan=2 height=59 width=207 style="border: .5pt solid black; text-align: center; vertical-align: middle; height: 44.25pt; width: 155pt")
+              font(style="font-weight:700;")= date
+            td.xl-75(width=80 style="border: .5pt solid black; border-left: none; text-align: center; width:60pt")
+                include logoAPK
+        tr(height=27 style={height:'20.25pt'})
+          td(colspan=3 height=27 width=207 style="border: .5pt solid black; text-align: center;height: 20.25pt")
+            font(style="font-weight:700;") Pagos completados
+        tr(height="21" style="height:15.75pt")
+          td(height="21" class="xl71" style=tdStyle)
+            font(style="font-weight:700;") Fecha
+          td(style=tdStyle)
+            font(style="font-weight:700;") Importe
+          td(style=tdStyle)
+            font(style="font-weight:700;") 10%
+
+    block tBodyContent
+        +setData(data)

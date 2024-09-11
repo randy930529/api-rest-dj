@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { FindOptionsSelect } from "typeorm";
+import { Between, FindOptionsSelect } from "typeorm";
 import * as pug from "pug";
 import * as moment from "moment";
 import { appConfig } from "../../../config";
@@ -7,7 +7,9 @@ import ReportGenerator from "../../base/ReportGeneratorBase";
 import { User } from "../../entity/User";
 import { SectionState } from "../../entity/SectionState";
 import { Dj08SectionData, SectionName } from "../../entity/Dj08SectionData";
+import { StateTMBill } from "../../entity/StateTMBill";
 import { CreateReportDj08DTO } from "../dto/request/reportDj08.dto";
+import { CreateReportCompletedPayments } from "../dto/request/completedPayments.dto";
 import {
   calculateMora,
   calculeMoraDays,
@@ -32,6 +34,11 @@ import {
   TotalSectionGType,
   TotalSectionIType,
 } from "../../utils/definitions";
+import {
+  STATE_TMBILL_ORDER,
+  STATE_TMBILL_RELATIONS,
+  STATE_TMBILL_SELECT,
+} from "../utils/query/stateTMBill.fetch";
 
 class ReportGeneratorController extends ReportGenerator {
   private templatePath: string;
@@ -1000,7 +1007,77 @@ class ReportGeneratorController extends ReportGenerator {
       );
       res.send(pdfBuffer);
     } catch (error) {
-      console.log(error);
+      if (res.statusCode === 200) res.status(500);
+      next(error);
+    }
+  }
+
+  async generateCompletedPayments(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { date_start, date_end }: CreateReportCompletedPayments = req.body;
+      const date = `${date_start || "_-_-_"} / ${date_end || "_-_-_"}`;
+      this.templatePath = pugTemplatePath("invoice/tableCompletedPayments");
+      const fileName = `Pagos completados: ${date}.pdf`;
+
+      const dateEnd = new Date(
+        moment(date_end).add(1, "d").format("YYYY-MM-DD")
+      );
+
+      const STATE_TMBILL_WHERE = {
+        success: true,
+        updated_at: Between(date_start, dateEnd),
+      };
+      const completedPayments = await StateTMBill.find({
+        select: STATE_TMBILL_SELECT,
+        relations: STATE_TMBILL_RELATIONS,
+        where: STATE_TMBILL_WHERE,
+        order: STATE_TMBILL_ORDER,
+      });
+
+      const dataPayments = completedPayments.reduce<{
+        data: (string | number)[][];
+        sumaTotalPayment: number;
+        sumaTotalx10: number;
+      }>(
+        (payments, val) => {
+          const { import: amount = 0 } = val.tmBill || {};
+          const calculex10 = parseFloat(((amount * 10) / 100).toFixed());
+          const payment = [
+            `${moment(val.updated_at).format("D/M/YYYY")}`,
+            amount,
+            calculex10,
+          ];
+
+          payments.sumaTotalPayment += amount;
+          payments.sumaTotalx10 += calculex10;
+          payments.data.push(payment);
+          return payments;
+        },
+        { data: [], sumaTotalPayment: 0, sumaTotalx10: 0 }
+      );
+
+      const data = dataPayments.data;
+      data.push([
+        "Total  ",
+        dataPayments.sumaTotalPayment,
+        dataPayments.sumaTotalx10,
+      ]);
+
+      const compiledTemplate = pug.compileFile(this.templatePath);
+      const htmlContent = compiledTemplate({ date, data });
+      const pdfBuffer = await this.generatePDF({ htmlContent });
+
+      res.contentType("application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${fileName || this.defaultFileName}"`
+      );
+      res.send(pdfBuffer);
+    } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);
     }

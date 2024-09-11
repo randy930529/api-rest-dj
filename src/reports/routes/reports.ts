@@ -54,4 +54,11 @@ export const reportsRoutes = [
     middlewares: [authMiddleware, userMiddleware],
     action: "updateDJ08",
   },
+  {
+    method: "post",
+    route: "/completed/payments",
+    controller: ReportGeneratorController,
+    middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
+    action: "generateCompletedPayments",
+  },
 ];
