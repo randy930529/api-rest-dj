@@ -19,6 +19,7 @@ import { DJ08 } from "./DJ08";
 import { FiscalYearEnterprise } from "./FiscalYearEnterprise";
 import { ProfileActivity } from "./ProfileActivity";
 import { ProfileHiredPerson } from "./ProfileHiredPerson";
+import { SectionState } from "./SectionState";
 
 @Entity()
 export class FiscalYear extends Model {
@@ -127,6 +128,32 @@ export class FiscalYear extends Model {
 
     if (duplicateFiscalYear && this.id !== duplicateFiscalYear?.id) {
       throw new Error("Sólo un año fiscal con misma fecha y año es admitido.");
+    }
+  }
+
+  @BeforeRemove()
+  async checkIfRemoveTheLastFiscalYear(): Promise<void> {
+    const countFiscalYear = await FiscalYear.count({
+      where: { profile: { id: this.profile?.id } },
+    });
+
+    if (countFiscalYear < 2) {
+      throw new Error(
+        "No es admitido eliminar el útmo año fiscal del perfil actual."
+      );
+    }
+  }
+
+  @BeforeRemove()
+  async checkNotRemoveSectionFiscalYear(): Promise<void> {
+    const sectionFiscalYear = await SectionState.findOne({
+      where: { fiscalYear: { id: this.id } },
+    });
+
+    if (sectionFiscalYear) {
+      throw new Error(
+        "No es admitido eliminar el año fiscal activo en la sección, antes cambie de año fiscal."
+      );
     }
   }
 

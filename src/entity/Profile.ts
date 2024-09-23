@@ -6,6 +6,7 @@ import {
   OneToMany,
   BeforeInsert,
   BeforeUpdate,
+  BeforeRemove,
 } from "typeorm";
 import Model from "./Base";
 import { User } from "./User";
@@ -13,6 +14,7 @@ import { HiredPerson } from "./HiredPerson";
 import { FiscalYear } from "./FiscalYear";
 import { ProfileActivity } from "./ProfileActivity";
 import { ProfileAddress } from "./ProfileAddress";
+import { SectionState } from "./SectionState";
 
 @Entity()
 export class Profile extends Model {
@@ -89,6 +91,26 @@ export class Profile extends Model {
 
     if (profilesForUserWithSameCi >= 2) {
       throw new Error("Sólo dos perfiles con igual CI son admitidos.");
+    }
+  }
+
+  @BeforeRemove()
+  async checkNotRemovePrimaryProfile(): Promise<void> {
+    if (this.primary === true) {
+      throw new Error("No es admitido eliminar el perfil primario.");
+    }
+  }
+
+  @BeforeRemove()
+  async checkNotRemoveSectionProfile(): Promise<void> {
+    const sectionProfile = await SectionState.findOne({
+      where: { profile: { id: this.id } },
+    });
+
+    if (sectionProfile) {
+      throw new Error(
+        "No es admitido eliminar el perfil activo en la sección, antes cambie de perfil."
+      );
     }
   }
 }

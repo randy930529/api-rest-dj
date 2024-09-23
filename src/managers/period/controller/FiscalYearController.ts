@@ -9,7 +9,10 @@ import { FiscalYearDTO } from "../dto/request/fiscalYear.dto";
 import { CreateFiscalYearDTO } from "../dto/response/createFiscalYear.dto";
 import { Dj08SectionData } from "../../../entity/Dj08SectionData";
 import { defaultSectionDataInit } from "../utils";
-import { MusicalGroup } from "../../../entity/MusicalGroup";
+import {
+  DELETE_FISCAL_YEAR_RELATIONS,
+  DELETE_FISCAL_YEAR_SELECT,
+} from "../utils/query/deleteFiscalYear.fetch";
 
 export class FiscalYearController extends EntityControllerBase<FiscalYear> {
   constructor() {
@@ -144,7 +147,15 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
 
       if (!id) responseError(res, "Delete fiscal year requiere id valid.", 404);
 
-      await this.delete({ id, res });
+      const DELETE_FISCAL_YEAR_WHERE = { id };
+      await this.deleteOptions(
+        {
+          select: DELETE_FISCAL_YEAR_SELECT,
+          relations: DELETE_FISCAL_YEAR_RELATIONS,
+          where: DELETE_FISCAL_YEAR_WHERE,
+        },
+        res
+      );
 
       res.status(204);
       return "Fiscal year has been removed successfully.";

@@ -1,6 +1,6 @@
 {
   "app": {
-    "versionAPK": 53,
+    "versionAPK": 54,
     "versionApp": "1.0.1",
     "site": "https://mygestor.conalbert.cu/api/v1",
     "debug": "production",
