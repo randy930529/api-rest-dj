@@ -8,7 +8,6 @@ import { AppDataSource } from "./data-source";
 import { Routes } from "./router";
 import { errorHandler } from "./errors/middlewares/errorHandler";
 import { appConfig } from "../config";
-import * as pug from "pug";
 import * as path from "path";
 
 //Para provar el envio de correo. Eliminar!
@@ -33,7 +32,7 @@ AppDataSource.initialize()
     // register express routes from defined application routes
     Routes.forEach((route) => {
       (app as any)[route.method](
-        `/api/v1${route.route}`,
+        route.route,
         route.middlewares,
         (req: Request, res: Response, next: Function) => {
           const result = new (route.controller as any)()[route.action](
@@ -58,33 +57,7 @@ AppDataSource.initialize()
     app.use(errorHandler);
 
     // setup express app here
-    app.get("/api/v1", function (req: Request, res: Response, next: Function) {
-      const filePath = `${__dirname}/utils/views/api/index.pug`;
-      const options = {
-        title: "API-rest dj",
-        url: "logo.empresa",
-      };
-      const html = pug.renderFile(filePath, options);
-
-      res.send(html);
-    });
-
     app.use(express.static(path.join(__dirname, "../public")));
-
-    app.get(
-      "/media/:type/:file",
-      function (req: Request, res: Response, next: Function) {
-        const { type, file } = req.params;
-        const filePath = path.join(
-          __dirname,
-          "../public",
-          `${type ? `${type}/` : ``}`,
-          file
-        );
-
-        res.sendFile(filePath);
-      }
-    );
 
     // TEMPLATE ENGINE
     app.set("view engine", "pug");
