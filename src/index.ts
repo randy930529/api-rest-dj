@@ -32,7 +32,7 @@ AppDataSource.initialize()
     // register express routes from defined application routes
     Routes.forEach((route) => {
       (app as any)[route.method](
-        route.route,
+        `/api/v1${route.route}`,
         route.middlewares,
         (req: Request, res: Response, next: Function) => {
           const result = new (route.controller as any)()[route.action](
@@ -58,6 +58,34 @@ AppDataSource.initialize()
 
     // setup express app here
     app.use(express.static(path.join(__dirname, "../public")));
+    app.get(
+      "/media/:type/:file",
+      function (req: Request, res: Response, next: Function) {
+        const { type, file } = req.params;
+        const filePath = path.join(
+          __dirname,
+          "../public",
+          `${type ? `${type}/` : ``}`,
+          file
+        );
+
+        res.sendFile(filePath);
+      }
+    );
+
+    // setup site web here
+    app.use(express.static(path.join(__dirname, "../public/web")));
+    app.get("/*", function (req: Request, res: Response, next: Function) {
+      const { type = "web", file = "index.html" } = req.params;
+      const filePath = path.join(
+        __dirname,
+        "../public",
+        `${type ? `${type}/` : ``}`,
+        file
+      );
+
+      res.sendFile(filePath);
+    });
 
     // TEMPLATE ENGINE
     app.set("view engine", "pug");
