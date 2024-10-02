@@ -6,7 +6,7 @@ import { Element } from "../../../entity/Element";
 import { responseError } from "../../../errors/responseError";
 import getProfileById from "../../../profile/utils/getProfileById";
 import { ElementDTO } from "../dto/request/element.dto";
-import { CreateElementDTO } from "../dto/response/createElement.dto";
+import { CreateElementDTO } from "../dto/response/createdElement.dto";
 import { JWT } from "../../../auth/security/jwt";
 import { User } from "../../../entity/User";
 
