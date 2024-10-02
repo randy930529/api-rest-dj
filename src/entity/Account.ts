@@ -1,8 +1,16 @@
-import { Entity, Column, JoinColumn, ManyToOne } from "typeorm";
+import { Entity, Column, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import Model from "./Base";
 import { Profile } from "./Profile";
 import { Element } from "./Element";
+import { Currency } from "./StateTMBill";
 
+export enum AccountType {
+  ACTIVO = "a",
+  PASIVO = "p",
+  PATRIMONIO = "t",
+  GASTOS = "g",
+  INGRESO = "i",
+}
 @Entity()
 export class Account extends Model {
   @Column({ type: "varchar", length: 20 })
@@ -11,11 +19,15 @@ export class Account extends Model {
   @Column({ type: "varchar", length: 120 })
   description: string;
 
-  @Column({ type: "char", length: 1 })
-  type: string;
+  @Column({
+    type: "enum",
+    enum: AccountType,
+    default: AccountType.ACTIVO,
+  })
+  type: AccountType;
 
-  @Column({ type: "varchar", length: 120 })
-  moneda: string;
+  @Column({ type: "enum", enum: Currency, default: Currency.CUP })
+  moneda: Currency;
 
   @Column({ default: false })
   acreedor: boolean;
@@ -24,7 +36,6 @@ export class Account extends Model {
   @JoinColumn()
   profile: Profile;
 
-  @ManyToOne(() => Element, (element) => element.account)
-  @JoinColumn()
+  @OneToMany(() => Element, (element) => element.account)
   elements: Element[];
 }

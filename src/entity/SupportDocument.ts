@@ -5,6 +5,9 @@ import {
   ManyToOne,
   BeforeUpdate,
   BeforeInsert,
+  AfterRemove,
+  OneToOne,
+  MoreThan,
 } from "typeorm";
 import Model from "./Base";
 import * as moment from "moment";
@@ -12,6 +15,7 @@ import { Element } from "./Element";
 import { FiscalYear } from "./FiscalYear";
 import { ProfileActivity } from "./ProfileActivity";
 import { ColumnNumericTransformer } from "../utils/ColumnNumericTransformer";
+import { Voucher } from "./Voucher";
 
 @Entity()
 export class SupportDocument extends Model {
@@ -59,6 +63,9 @@ export class SupportDocument extends Model {
   @JoinColumn()
   profileActivity: ProfileActivity;
 
+  @OneToOne(() => Voucher, (voucher) => voucher.supportDocument)
+  voucher: Voucher;
+
   toJSON() {
     return {
       ...this,
@@ -83,5 +90,23 @@ export class SupportDocument extends Model {
     if (this.date && moment(this.date).year() !== this.__year__) {
       throw new Error("Fuera del rango de fecha para el año fiscal.");
     }
+  }
+
+  @AfterRemove()
+  async updateVoucherNumber(): Promise<void> {
+    const voucherToUpdateNumber = await Voucher.find({
+      where: {
+        supportDocument: {
+          __fiscalYearId__: this.__fiscalYearId__,
+        },
+        number: MoreThan(this.voucher?.number),
+      },
+    });
+
+    voucherToUpdateNumber.forEach((val) => {
+      val.number--;
+    });
+
+    await Voucher.save(voucherToUpdateNumber);
   }
 }

@@ -1,4 +1,4 @@
-import { Entity, Column, OneToOne, JoinColumn, ManyToOne } from "typeorm";
+import { Entity, Column, JoinColumn, ManyToOne } from "typeorm";
 import Model from "./Base";
 import { Account } from "./Account";
 import { Voucher } from "./Voucher";
@@ -22,11 +22,11 @@ export class VoucherDetail extends Model {
   })
   haber: number;
 
-  @ManyToOne(() => Voucher)
+  @ManyToOne(() => Voucher, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   @JoinColumn()
   voucher: Voucher;
 
-  @OneToOne(() => Account)
+  @ManyToOne(() => Account)
   @JoinColumn()
   account: Account;
 }
