@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import * as moment from "moment";
 import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { AppDataSource } from "../../../data-source";
+import { appConfig } from "../../../../config";
 import { SupportDocument } from "../../../entity/SupportDocument";
 import { CreateSupportDocumentDTO } from "../dto/request/createSupportDocument.dto";
 import { CreatedSupportDocumentDTO } from "../dto/response/createdSupportDocument.dto";
@@ -14,8 +15,8 @@ import { Dj08SectionData, SectionName } from "../../../entity/Dj08SectionData";
 import { Voucher } from "../../../entity/Voucher";
 import { VoucherDetail } from "../../../entity/VoucherDetail";
 import { Account } from "../../../entity/Account";
+import { Mayor } from "../../../entity/Mayor";
 import { calculeF20ToDj08 } from "../../../reports/utils/utilsToReports";
-import { appConfig } from "../../../../config";
 import {
   AllDataSectionsDj08Type,
   DataSectionAType,
@@ -40,6 +41,7 @@ import {
   FISCAL_YEAR_RELATIONS,
   FISCAL_YEAR_SELECT,
 } from "../utils/query/fiscalYear.fetch";
+import { CreateMayorDTO } from "../dto/request/createMayor.dto";
 
 export class SupportDocumentController extends EntityControllerBase<SupportDocument> {
   constructor() {
@@ -790,6 +792,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         type_document: type,
         is_bank,
         amount,
+        fiscalYear,
       } = supportDocument;
       const { group, account } = supportDocument.element;
       const isMethodCreate = !supportDocument.voucher;
@@ -876,10 +879,47 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         ];
       }
 
-      await voucher.save();
+      const resultVoucher = await voucher.save();
+      resultVoucher.voucherDetails.forEach(async (voucherDetail) => {
+        await this.createBalanceBigger({
+          id: voucherDetail.mayor?.id,
+          date,
+          fiscalYear,
+          voucherDetail,
+        });
+      });
     } catch (error) {
       console.log("ERROR EN CUADRE: ", error.message);
       return error.message;
     }
+  }
+
+  private async createBalanceBigger(
+    fieldsMayor: CreateMayorDTO
+  ): Promise<void> {
+    const { account, debe, haber } = fieldsMayor.voucherDetail;
+    const fiscalYearId = fieldsMayor.fiscalYear.id;
+    const { id: accountId, acreedor } = account;
+
+    const MAYOR_WHERE = {
+      account: { id: accountId },
+      fiscalYear: { id: fiscalYearId },
+    };
+    const previousBalanceBigger = (
+      await Mayor.find({
+        where: MAYOR_WHERE,
+        order: { account: { id: "DESC" }, date: "DESC" },
+      })
+    )[0];
+
+    const saldo =
+      (previousBalanceBigger?.saldo || 0) +
+      (acreedor ? haber - debe : debe - haber);
+
+    await Mayor.create({
+      ...fieldsMayor,
+      saldo,
+      account,
+    }).save();
   }
 }

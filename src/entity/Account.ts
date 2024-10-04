@@ -27,7 +27,7 @@ export class Account extends Model {
   type: AccountType;
 
   @Column({ type: "enum", enum: Currency, default: Currency.CUP })
-  moneda: Currency;
+  currency: Currency;
 
   @Column({ default: false })
   acreedor: boolean;

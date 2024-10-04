@@ -8,8 +8,9 @@ export const SUPPORT_DOCUMENT_SELECT: FindOptionsSelect<SupportDocument> = {
     type: true,
     group: true,
     is_general: true,
-    account: { id: true },
+    account: { id: true, acreedor: true },
   },
+  fiscalYear: { id: true },
   profileActivity: { id: true },
   voucher: {
     id: true,
@@ -18,7 +19,10 @@ export const SUPPORT_DOCUMENT_SELECT: FindOptionsSelect<SupportDocument> = {
       id: true,
       debe: true,
       haber: true,
-      account: { id: true },
+      account: { id: true, acreedor: true },
+      mayor: {
+        id: true,
+      },
     },
   },
 };
@@ -26,6 +30,7 @@ export const SUPPORT_DOCUMENT_SELECT: FindOptionsSelect<SupportDocument> = {
 export const SUPPORT_DOCUMENT_RELATIONS: FindOptionsRelations<SupportDocument> =
   {
     element: { account: true },
+    fiscalYear: true,
     profileActivity: true,
-    voucher: { voucherDetails: true },
+    voucher: { voucherDetails: { account: true, mayor: true } },
   };
