@@ -130,3 +130,42 @@ export type AnswerType = {
   password: string;
   repeatPassword: string;
 };
+
+export type AccountingVoucherType = {
+  accounting: {
+    code: string;
+    description: string;
+    debe: number;
+    haber: number;
+  }[];
+  totalDebe: number;
+  totalHaber: number;
+};
+
+export type DataVoucherReportType = AccountingVoucherType & {
+  fullName: string;
+  nit: string;
+  printedDate: string | Date;
+  number: number;
+  descriptionVoucher: string;
+  accountingDate: string | Date;
+};
+
+export type AccountingMayorType = {
+  accounting: {
+    date: string | Date;
+    detail: string;
+    debe: number;
+    haber: number;
+    saldo: number;
+  }[];
+  totalDebe: number;
+  totalHaber: number;
+};
+
+export type MayorReportType = AccountingMayorType & {
+  fullName: string;
+  nit: string;
+  printedDate: string;
+  accountCode: string;
+};

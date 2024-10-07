@@ -1,0 +1,83 @@
+mixin setData(data=[])
+    each val in data
+        tr(height=20 style={height:'15.0pt'})
+            td.xl-65(colspan=2 height=20 style="height:15.0pt")=val.code
+            td.xl-65(colspan=3 height=20 style="height:15.0pt")=val.description
+            td.xl-65(colspan=2 height=20 style="height:15.0pt")=(val.debe?val.debe:"")
+            td.xl-65(colspan=2 height=20 style="height:15.0pt")=(val.haber?val.haber:"")
+    else
+        td(colspan=9) There are no values
+
+table.page-one(
+    role='presentation'
+    border=0
+    cellpadding=0
+    cellspacing=0
+    width=720
+    style="break-inside: auto;border-collapse:collapse;table-layout:fixed;width:540pt;margin:72px 68px;"
+)
+
+  block column
+      col(width="80" span="9" style="width:60pt")
+  tbody(style="font-size: 11.0pt;font-style: normal;font-family: Calibri, sans-serif;")
+    
+    block tHeadContent
+        tr(height=20 style={height:'15.0pt'})
+            td.xl-65(colspan=6 height=20 width=480 style="height:15.0pt;width:360pt") CONTRIBUYENTE: 
+                font(style="font-weight: 700;text-decoration: underline")=fullName
+            td.xl-65(colspan=3 width=240 style="width:180pt") IMPRESO: 
+                font(style="text-decoration: underline")=printedDate
+        tr(height=20 style={height:'15.0pt'})
+            td.xl-65(colspan=6 height=20 width=480 style="height:15.0pt;width:360pt") NIT: 
+                font(style="font-weight: 700;")=nit
+        tr(height=20 style={height:'15.0pt'})
+        tr(height=20 style={height:'15.0pt'})
+            td.xl-65(colspan=9 height=20 style="height:15.0pt;text-align: center") COMPROBANTE No: 
+                font(style="font-weight: 700;text-decoration: underline")=number
+        tr(height=20 style={height:'15.0pt'})
+            td.xl-65(colspan=9 height=20 style="height:15.0pt;text-align: center") FECHA CONTABLE: 
+                font(style="font-weight: 700;")=accountingDate
+        tr(height=20 style={height:'15.0pt'})
+        tr(height=20 style={height:'15.0pt'})
+            td.xl-65(colspan=6 height=20 width=480 style="height:15.0pt;width:360pt") Explicación: 
+                font=descriptionVoucher
+        tr(height=20 style={height:'15.0pt'})
+    
+    block tBodyContent
+        tr(height=20 style={height:'15.0pt'})
+            td.xl-65(colspan=2 height=20 style="font-weight: 700;height:15.0pt") CUENTA
+            td.xl-65(colspan=3 height=20 style="font-weight: 700;height:15.0pt") DESCRIPCION
+            td.xl-65(colspan=2 height=20 style="font-weight: 700;height:15.0pt") DEBE
+            td.xl-65(colspan=2 height=20 style="font-weight: 700;height:15.0pt") HABER
+        +setData(accounting)
+        tr(height=20 style={height:'15.0pt'})
+            td.xl-65(colspan=9 height=20 style="height:15.0pt")
+        tr(height=25 style={height:'18.75pt'})
+            td.xl-65(colspan=5 height=25 style="height:18.75pt")
+            td.xl-65(colspan=2 height=25 style="height:18.75pt;font-weight: 700;font-size: 14.0pt") _______________
+            td.xl-65(colspan=2 height=25 style="height:18.75pt;font-weight: 700;font-size: 14.0pt") _______________
+        tr(height=20 style={height:'15.0pt'})
+            td.xl-65(colspan=2 height=20 style="height:15.0pt")
+            td.xl-65(colspan=3 height=20 style="height:15.0pt") TOTAL
+            td.xl-65(colspan=2 height=20 style="height:15.0pt")=totalDebe
+            td.xl-65(colspan=2 height=20 style="height:15.0pt")=totalHaber
+        tr(height=20 style={height:'15.0pt'})
+            td.xl-65(colspan=4 rowspan=3 height=65 style="font-size: 14.0pt;font-weight: 700;height:48.75pt;vertical-align: bottom") ___________________________________
+            td.xl-65(rowspan=7)
+            td.xl-65(colspan=4 rowspan=3 height=65 style="font-size: 14.0pt;font-weight: 700;height:48.75pt;vertical-align: bottom") ___________________________________
+        tr(height=20 style={height:'15.0pt'})
+        tr(height=25 style={height:'18.75pt'})
+        tr(height=20 style={height:'15.0pt'})
+            td.xl-65(colspan=4 height=20 style="height:15.0pt;text-align: center") CONFECCIONADO POR:
+            td.xl-65(colspan=4 height=20 style="height:15.0pt;text-align: center") APROBADO POR:
+        tr(height=20 style={height:'15.0pt'})
+            td.xl-65(colspan=4 height=20 style="height:15.0pt") Nombre:
+            td.xl-65(colspan=4 height=20 style="height:15.0pt") Nombre: 
+                font(style="font-weight: 700;")=fullName
+        tr(height=20 style={height:'15.0pt'})
+            td.xl-65(colspan=4 height=20 style="height:15.0pt") Fecha:
+            td.xl-65(colspan=4 height=20 style="height:15.0pt") Fecha:
+        tr(height=20 style={height:'15.0pt'})
+            td.xl-65(colspan=4 height=20 style="height:15.0pt") Cargo:
+            td.xl-65(colspan=4 height=20 style="height:15.0pt") Cargo: TITULAR
+        tr(height=20 style={height:'15.0pt'})

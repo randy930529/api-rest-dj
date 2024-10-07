@@ -61,4 +61,18 @@ export const reportsRoutes = [
     middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
     action: "generateCompletedPayments",
   },
+  {
+    method: "post",
+    route: "/report/voucher",
+    controller: ReportGeneratorController,
+    middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
+    action: "generateVoucherReport",
+  },
+  {
+    method: "post",
+    route: "/report/mayor",
+    controller: ReportGeneratorController,
+    middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
+    action: "generateBiggerReport",
+  },
 ];
