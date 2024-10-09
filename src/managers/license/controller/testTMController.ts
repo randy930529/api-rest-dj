@@ -75,7 +75,7 @@ export class TestTMController {
       };
 
       const tmResponse = await get(
-        new URL(`${appConfig.site}/license/payment/notification`),
+        new URL(`${appConfig.site}/api/v1/license/payment/notification`),
         config
       );
       const resp: PayOrderConfirmDTO =
