@@ -132,7 +132,7 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
         tmBill: tmBillDTO,
       });
 
-      const stateTMBillEndPoint = "/api/v1/license/payment/notification";
+      const stateTMBillEndPoint = "/license/payment/notification";
       const UrlResponse = PAY_NOTIFICATION_URL(site, stateTMBillEndPoint);
       const uuid: string = uuidv4();
       const licenseKey: string = uuid.substring(0, 20);
