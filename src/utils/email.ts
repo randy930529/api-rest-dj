@@ -61,7 +61,9 @@ export default class Email {
   async sendPasswordResetToken() {
     await this.send(
       "resetPassword",
-      `Token de restablecimiento de contraseña (válido por ${ENV.tokenLifetime})`
+      `Token de restablecimiento de contraseña (válido por ${
+        ENV.tokenLifetime || ""
+      })`
     );
   }
 }
