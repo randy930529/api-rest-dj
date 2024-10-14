@@ -16,4 +16,11 @@ export const testTMRoutes = [
     middlewares: [nextFunction],
     action: "tmPayInLine",
   },
+  {
+    method: "get",
+    route: "/RestExternalPayment.svc/getStatusOrder/:ExternalId/:Source",
+    controller: TestTMController,
+    middlewares: [nextFunction],
+    action: "getStatusOrder",
+  },
 ];

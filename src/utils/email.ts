@@ -33,8 +33,9 @@ export default class Email {
     return nodemailer.createTransport(smtp);
   }
 
-  private async send(template: string, subject: string) {
+  private async send(template: string, subject: string, options?: any) {
     const html = pug.renderFile(`${__dirname}/views/${template}.pug`, {
+      ...options,
       emailUser: this.emailUser,
       subject,
       url: this.url,
@@ -61,7 +62,20 @@ export default class Email {
   async sendPasswordResetToken() {
     await this.send(
       "resetPassword",
-      `Token de restablecimiento de contraseña (válido por ${ENV.tokenLifetime})`
+      `Token de restablecimiento de contraseña (válido por ${
+        ENV.tokenLifetime || ""
+      })`
+    );
+  }
+
+  async sendVerifyStatusPayment(options: {
+    montoPago: number;
+    fechaPago: Date | string;
+  }) {
+    await this.send(
+      "notifications/verifyStatusPayment",
+      `Confirmación de Verificación de Pago`,
+      options
     );
   }
 }

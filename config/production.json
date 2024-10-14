@@ -2,7 +2,7 @@
   "app": {
     "versionAPK": 54,
     "versionApp": "1.0.1",
-    "site": "https://mygestor.conalbert.cu/api/v1",
+    "site": "https://mygestor.conalbert.cu",
     "debug": "production",
     "port": 4000,
     "corsOptions": {

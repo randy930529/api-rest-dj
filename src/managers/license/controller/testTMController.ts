@@ -1,6 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { CreatePayOrderDTO } from "../dto/request/createPayOrder";
-import { PayOrderResultDTO } from "../dto/response/payOrderResult";
+import {
+  PaymentStatusOrderDTO,
+  PayOrderResultDTO,
+} from "../dto/response/payOrderResult";
 import { PayOrderConfirmDTO } from "../../bills/dto/response/payOrderConfirm.dto";
 import { LicenseUser } from "../../../entity/LicenseUser";
 import { responseError } from "../../../errors/responseError";
@@ -75,7 +78,7 @@ export class TestTMController {
       };
 
       const tmResponse = await get(
-        new URL(`${appConfig.site}/license/payment/notification`),
+        new URL(`${appConfig.site}/api/v1/license/payment/notification`),
         config
       );
       const resp: PayOrderConfirmDTO =
@@ -98,6 +101,32 @@ export class TestTMController {
           Success: false,
           Status: `${res.statusCode}`,
         },
+      };
+    }
+  }
+
+  async getStatusOrder(req: Request, res: Response, next: NextFunction) {
+    try {
+      const resp: PaymentStatusOrderDTO = {
+        GetStatusOrderResult: {
+          Resultmsg: "mensaje",
+          Success: true,
+          BankId: "1235",
+          ExternalId: "d08fcbd7-19a5-4d8d-b",
+          OrderId: 1,
+          Status: "4",
+          TmId: "1",
+          Bank: "BANDEC",
+        },
+      };
+
+      res.status(200);
+      return { ...resp };
+    } catch (error) {
+      if (res.statusCode === 200) res.status(500);
+
+      return {
+        GetStatusOrderResult: { Resultmsg: `${error}`, Success: false },
       };
     }
   }

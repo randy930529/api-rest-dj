@@ -27,7 +27,7 @@ const transferProtocol: string = appConfig.site;
 const ACTIVATION_URL = (appName, uid, token) =>
   `${appName}/activate/?uid=${uid}&token=${token}`;
 const RESETPASSWORD_URL = (appName, uid, token) =>
-  `${appName}://reset_password/?uid=${uid}&token=${token}`;
+  `${appName}/reset_password/?uid=${uid}&token=${token}`;
 
 export class AuthController {
   private userRepository = AppDataSource.getRepository(User);

@@ -14,7 +14,6 @@ import { License } from "../../../entity/License";
 import { CreateLicenseUserDTO } from "../dto/response/createLicenseUserDTO.dto";
 import { TMBill } from "../../../entity/TMBill";
 import { StateTMBill } from "../../../entity/StateTMBill";
-import { stateTMBillRoutes } from "../../bills/routes/stateTMBill";
 import { appConfig } from "../../../../config";
 import { JWT } from "../../../auth/security/jwt";
 import { CreatePayOrderDTO } from "../dto/request/createPayOrder";
@@ -133,7 +132,7 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
         tmBill: tmBillDTO,
       });
 
-      const stateTMBillEndPoint = stateTMBillRoutes[0].route;
+      const stateTMBillEndPoint = "/license/payment/notification";
       const UrlResponse = PAY_NOTIFICATION_URL(site, stateTMBillEndPoint);
       const uuid: string = uuidv4();
       const licenseKey: string = uuid.substring(0, 20);

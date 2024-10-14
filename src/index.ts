@@ -1,14 +1,16 @@
 import * as express from "express";
+import { Request, Response } from "express";
 import * as bodyParser from "body-parser";
 import * as cors from "cors";
+import * as path from "path";
+import * as cron from "node-cron";
 import "express-async-errors";
 import validateEnv from "./utils/settings/validateEnv";
-import { Request, Response } from "express";
 import { AppDataSource } from "./data-source";
 import { Routes } from "./router";
 import { errorHandler } from "./errors/middlewares/errorHandler";
 import { appConfig } from "../config";
-import * as path from "path";
+import verifyPaymentsNotRegistered from "./api/utils";
 
 //Para provar el envio de correo. Eliminar!
 import * as nodemailer from "nodemailer";
@@ -90,6 +92,11 @@ AppDataSource.initialize()
     // TEMPLATE ENGINE
     app.set("view engine", "pug");
     app.set("views", `${__dirname}/utils/views`);
+
+    // setup CRON JOB
+    cron.schedule(appConfig.cronJobTime, async () => {
+      verifyPaymentsNotRegistered();
+    });
 
     // start express server
     app.listen(appConfig.port);
