@@ -13,6 +13,7 @@
     },
     "emailFrom": "admin@localhost",
     "licenseFreeDays": 7,
+    "cronJobTime": "59 23 * * *",
     "validTimeTMBill": 3600,
     "currencyTMBill": "CUP",
     "paymentAPKHref": "http://localhost:4000/tm_compra_en_linea",

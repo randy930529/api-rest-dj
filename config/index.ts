@@ -64,6 +64,7 @@ interface AppConfig {
   port: number;
   emailFrom: string;
   licenseFreeDays: number;
+  cronJobTime: string;
   validTimeTMBill: number;
   currencyTMBill: string;
   paymentAPKHref: string;
