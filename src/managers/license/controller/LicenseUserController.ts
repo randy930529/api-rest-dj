@@ -22,6 +22,8 @@ import { PayOrderResultDTO } from "../dto/response/payOrderResult";
 import { createFindOptions } from "../../../base/utils/createFindOptions";
 import { PAY_NOTIFICATION_URL, PASSWORD_WS_EXTERNAL_PAYMENT } from "../utils";
 import { NotificationTM, NotiType } from "../../../entity/NotificationTM";
+import { checkPaymentWhitTM } from "../../../api/utils";
+import { SectionState } from "../../../entity/SectionState";
 
 export class LicenseUserController extends EntityControllerBase<LicenseUser> {
   constructor() {
@@ -317,6 +319,104 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
 
       res.status(204);
       return "License user has been removed successfully.";
+    } catch (error) {
+      if (res.statusCode === 200) res.status(500);
+      next(error);
+    }
+  }
+
+  async verifyStatusPaymentLicense(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const id = parseInt(req.params.id);
+
+      const licenseUser = await LicenseUser.findOne({
+        relations: {
+          tmBill: { stateTMBills: true },
+          license: true,
+          user: true,
+        },
+        select: {
+          tmBill: { id: true, stateTMBills: { id: true } },
+          license: { id: true, days: true, max_profiles: true },
+          user: {
+            id: true,
+            active: true,
+            end_license: true,
+            max_profiles: true,
+          },
+        },
+        where: { id, user: { active: true } },
+      });
+
+      const resp: BaseResponseDTO = {
+        status: "success",
+        error: undefined,
+        data: { licenseUser },
+      };
+
+      if (licenseUser && !licenseUser.is_paid) {
+        const { licenseKey: externalId } = licenseUser;
+        const { source } = appConfig.businessMetadata;
+
+        const payCompleted = await checkPaymentWhitTM({ externalId, source });
+        if (payCompleted.Success) {
+          const { TmId, BankId, Bank } = payCompleted;
+          const end_license = licenseUser.user.end_license ?? undefined;
+          const expirationDate =
+            end_license && moment(end_license).isBefore(moment())
+              ? moment().add(licenseUser.license.days, "d").toDate()
+              : moment(end_license).add(licenseUser.license.days, "d").toDate();
+
+          licenseUser.is_paid = true;
+          licenseUser.expirationDate = expirationDate;
+          licenseUser.user.end_license = expirationDate;
+          licenseUser.user.max_profiles = Math.max(
+            ...[licenseUser.user.max_profiles, licenseUser.license.max_profiles]
+          );
+          licenseUser.payMentUrl = null;
+
+          licenseUser.tmBill.stateTMBills = licenseUser.tmBill.stateTMBills.map(
+            (val) =>
+              ({
+                ...val,
+                success: true,
+              } as StateTMBill)
+          );
+          licenseUser.tmBill.orderIdTM = TmId;
+          licenseUser.tmBill.bankId = BankId;
+          licenseUser.tmBill.bank = Bank;
+
+          const currentSectionState = await SectionState.findOne({
+            where: {
+              user: {
+                id: licenseUser.user.id,
+              },
+            },
+          });
+
+          if (
+            end_license &&
+            moment(end_license).isBefore(moment(licenseUser.created_at))
+          )
+            currentSectionState.licenseUser = licenseUser;
+
+          const data = await Promise.all([
+            licenseUser.save(),
+            licenseUser.user.save(),
+            ...licenseUser.tmBill.stateTMBills.map((val) => val.save),
+            currentSectionState.save(),
+          ]);
+
+          resp.data["licenseUser"] = data[0];
+        }
+      }
+
+      res.status(200);
+      return { ...resp };
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);

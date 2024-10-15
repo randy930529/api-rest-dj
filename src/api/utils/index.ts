@@ -14,39 +14,39 @@ import {
   STATE_TMBILL_SELECT,
 } from "./query/stateTMBill.fetch";
 
+export async function checkPaymentWhitTM({
+  externalId = ":",
+  source = ":",
+}: {
+  externalId: string;
+  source: string;
+}) {
+  const statePaymentTMEndPoint = `/getStatusOrder/${externalId}/${source}`;
+  const urlStatePayment = PAY_NOTIFICATION_URL(
+    ENV.apiUrlPayment,
+    statePaymentTMEndPoint
+  );
+
+  const config = {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+  };
+
+  const tmResponse: PaymentStatusOrderDTO = await get(
+    new URL(urlStatePayment),
+    config
+  );
+
+  const { GetStatusOrderResult } = tmResponse;
+
+  return GetStatusOrderResult;
+}
+
 export default async function verifyPaymentsNotRegistered() {
   try {
-    async function checkPaymentWhitTM({
-      externalId = ":",
-      source = ":",
-    }: {
-      externalId: string;
-      source: string;
-    }) {
-      const statePaymentTMEndPoint = `/getStatusOrder/${externalId}/${source}`;
-      const urlStatePayment = PAY_NOTIFICATION_URL(
-        ENV.apiUrlPayment,
-        statePaymentTMEndPoint
-      );
-
-      const config = {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      };
-
-      const tmResponse: PaymentStatusOrderDTO = await get(
-        new URL(urlStatePayment),
-        config
-      );
-
-      const { GetStatusOrderResult } = tmResponse;
-
-      return GetStatusOrderResult;
-    }
-
     const STATE_TMBILL_WHERE = {
       success: false,
       tmBill: { licenseUser: { user: { active: true } } },

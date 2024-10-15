@@ -46,4 +46,11 @@ export const licenseUserRoutes = [
     middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
     action: "deleteLicenseUser",
   },
+  {
+    method: "get",
+    route: "/license/user/status/payment/:id",
+    controller: LicenseUserController,
+    middlewares: [authMiddleware],
+    action: "verifyStatusPaymentLicense",
+  },
 ];
