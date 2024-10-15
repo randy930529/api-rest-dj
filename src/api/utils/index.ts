@@ -77,7 +77,9 @@ export default async function verifyPaymentsNotRegistered() {
           licenseUser.expirationDate = expirationDate;
           licenseUser.user.active = true;
           licenseUser.user.end_license = expirationDate;
-          licenseUser.user.max_profiles = licenseUser.license.max_profiles;
+          licenseUser.user.max_profiles = Math.max(
+            ...[licenseUser.user.max_profiles, licenseUser.license.max_profiles]
+          );
           licenseUser.payMentUrl = null;
 
           payment.success = true;
@@ -93,7 +95,11 @@ export default async function verifyPaymentsNotRegistered() {
             },
           });
 
-          currentSectionState.licenseUser = licenseUser;
+          if (
+            end_license &&
+            moment(end_license).isBefore(moment(licenseUser.created_at))
+          )
+            currentSectionState.licenseUser = licenseUser;
 
           Promise.all([
             licenseUser.save(),
