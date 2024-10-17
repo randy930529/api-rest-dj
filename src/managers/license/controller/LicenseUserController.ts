@@ -352,6 +352,9 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
         where: { id, user: { active: true } },
       });
 
+      if (!licenseUser)
+        responseError(res, "License user requiere id valid.", 404);
+
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
@@ -412,6 +415,12 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
           ]);
 
           resp.data["licenseUser"] = data[0];
+
+          res.status(201);
+          return { ...resp };
+        } else {
+          res.status(402);
+          return { ...resp };
         }
       }
 

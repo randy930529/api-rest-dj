@@ -6,7 +6,10 @@ import { appConfig } from "../../../config";
 import { StateTMBill } from "../../entity/StateTMBill";
 import { NotificationTM, NotiType } from "../../entity/NotificationTM";
 import { SectionState } from "../../entity/SectionState";
-import { PAY_NOTIFICATION_URL } from "../../managers/license/utils";
+import {
+  PASSWORD_WS_EXTERNAL_PAYMENT,
+  PAY_NOTIFICATION_URL,
+} from "../../managers/license/utils";
 import { PaymentStatusOrderDTO } from "../../managers/license/dto/response/payOrderResult";
 import {
   STATE_TMBILL_ORDER,
@@ -27,11 +30,17 @@ export async function checkPaymentWhitTM({
     statePaymentTMEndPoint
   );
 
+  const password = PASSWORD_WS_EXTERNAL_PAYMENT(moment().toDate());
+  const username = ENV.userPayment;
+
   const config = {
     method: "GET",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
+      username,
+      source,
+      password,
     },
   };
 
@@ -41,6 +50,18 @@ export async function checkPaymentWhitTM({
   );
 
   const { GetStatusOrderResult } = tmResponse;
+
+  /**
+   * Para realizar pruebas con el TM
+   */
+  const notificacionDTO = NotificationTM.create({
+    type: NotiType.RES_EP,
+    header: `${JSON.stringify(config.headers)}`,
+    body: JSON.stringify(GetStatusOrderResult),
+  });
+
+  await notificacionDTO.save();
+  /////////////////////////////////////////
 
   return GetStatusOrderResult;
 }
@@ -113,12 +134,16 @@ export default async function verifyPaymentsNotRegistered() {
           new Email(licenseUser.user, "")
             .sendVerifyStatusPayment({ fechaPago, montoPago })
             .catch(async (error) => {
+              /**
+               * Para realizar pruebas con el TM
+               */
               const notificacionDTO = NotificationTM.create({
                 type: NotiType.SMTP,
                 body: JSON.stringify(error),
               });
 
               await notificacionDTO.save();
+              /////////////////////////////////////////
             });
         }
       });
