@@ -377,9 +377,6 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
           licenseUser.is_paid = true;
           licenseUser.expirationDate = expirationDate;
           licenseUser.user.end_license = expirationDate;
-          licenseUser.user.max_profiles = Math.max(
-            ...[licenseUser.user.max_profiles, licenseUser.license.max_profiles]
-          );
           licenseUser.payMentUrl = null;
 
           licenseUser.tmBill.stateTMBills = licenseUser.tmBill.stateTMBills.map(
@@ -404,8 +401,15 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
           if (
             end_license &&
             moment(end_license).isBefore(moment(licenseUser.created_at))
-          )
+          ) {
+            licenseUser.user.max_profiles = Math.max(
+              ...[
+                licenseUser.user.max_profiles,
+                licenseUser.license.max_profiles,
+              ]
+            );
             currentSectionState.licenseUser = licenseUser;
+          }
 
           const data = await Promise.all([
             licenseUser.save(),
