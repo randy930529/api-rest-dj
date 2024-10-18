@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import * as moment from "moment";
+import * as ws from "ws";
 import { AppDataSource } from "../../../data-source";
 import { EntityControllerBase } from "../../../base/EntityControllerBase";
+import { socketClients } from "../../../utils/socket";
 import { StateTMBill } from "../../../entity/StateTMBill";
 import { LicenseUser } from "../../../entity/LicenseUser";
 import { PayOrderNotificationDTO } from "../dto/request/payOrderNotification.dto";
@@ -112,6 +114,12 @@ export class StateTMBillController extends EntityControllerBase<StateTMBill> {
         Resultmsg: `${Msg}.OK`,
         Status: "1",
       };
+
+      const userId = licenseUser.user.id;
+      const client = socketClients.get(`${userId}`);
+      if (client && client.readyState === ws.OPEN) {
+        client.send(JSON.stringify({ userId, licenseKey }));
+      }
 
       res.status(200);
       return { ...resp };
