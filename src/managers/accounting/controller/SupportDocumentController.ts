@@ -807,24 +807,38 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         }).save());
 
       const groupTrim = group.trim();
-      let code =
-        (type !== "o" && is_bank) || groupTrim === "omcb" ? "110" : "100";
 
-      const accountDebe =
-        type === "o" && ["omcl", "omlc"].indexOf(groupTrim) === -1
-          ? account
-          : await Account.findOne({
-              where: { code },
-            });
+      let codeDebe =
+        (groupTrim === "omcb" && "110") ||
+        (groupTrim === "ombc" && "100") ||
+        is_bank
+          ? "110"
+          : "100";
+      const accountDebe = await Account.findOne({
+        where: { code: codeDebe },
+      });
+
+      const elementGroupDebe = [
+        "omap",
+        "omlp",
+        "omcp",
+        "omcb",
+        "ombc",
+        "onex",
+        "onfp",
+        "onpa",
+        "onbn",
+      ];
 
       const debe =
-        ((type === "i" || ["ompp", "onrt", "onde"].indexOf(groupTrim) !== -1) &&
+        ((type === "i" || elementGroupDebe.indexOf(groupTrim) !== -1) &&
           amount) ||
         null;
 
       const codeHaber =
         (groupTrim === "omcl" && "520") ||
         (groupTrim === "omlc" && "470") ||
+        (groupTrim === "onrt" && "900-10") ||
         undefined;
       const accountHaber = codeHaber
         ? await Account.findOne({
@@ -832,32 +846,32 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
           })
         : account;
 
+      const elementGroupHaber = [
+        "niei",
+        "ompp",
+        "omrt",
+        "onda",
+        "onde",
+        "omcl",
+        "omlc",
+        "onrt",
+      ];
+
       const haber =
-        ((type !== "i" ||
-          [
-            "omap",
-            "omlp",
-            "omcp",
-            "onex",
-            "onda",
-            "onfp",
-            "onpa",
-            "onrt",
-            "onbn",
-          ].indexOf(groupTrim) !== -1) &&
+        ((type === "g" || type === "m" || elementGroupHaber.indexOf(groupTrim) !== -1) &&
           amount) ||
         null;
 
       const CreateVoucherDetails = [
         VoucherDetail.create({
-          debe: debe || haber,
-          haber: 0,
+          debe: debe || 0,
+          haber: haber || 0,
           voucher,
           account: accountDebe || account,
         }),
         VoucherDetail.create({
-          debe: 0,
-          haber: haber || debe,
+          debe: haber || 0,
+          haber: debe || 0,
           voucher,
           account: accountHaber || account,
         }),
@@ -899,7 +913,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
   ): Promise<void> {
     const { account, debe, haber } = fieldsMayor.voucherDetail;
     const fiscalYearId = fieldsMayor.fiscalYear.id;
-    const { id: accountId, acreedor } = account;
+    const { id: accountId = -1, acreedor } = account || {};
 
     const MAYOR_WHERE = {
       account: { id: accountId },
