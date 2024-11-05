@@ -1,0 +1,76 @@
+extends ../generic/tableAccountingBase
+
+mixin setData(data=[])
+    each val in data
+        tr(height=20 style={height:'15.0pt'})
+            td(colspan=2)=val.code
+            td(colspan=4)=val.detail
+            td
+            td(style=txt_r)=(val.debe?val.debe:"")
+            td
+            td(style=txt_r)=(val.haber?val.haber:"")
+    else
+        td(colspan=10) There are no values
+
+
+block column
+    -const colsArray=[{width:15, style:{width: '11pt'}}, {width:80, style:{width: '60pt'}}, {width:17, style:{width: '13pt'}}, {width:80, style:{width: '60pt'}}]
+    col(width=80 span=6 style="width:60pt")
+    +colGroup(colsArray)
+
+block tHeadContent
+    tr(height=row20.height style=row20.style)
+        td(colspan=7 height=20 width=495 style="width:371pt") CONTRIBUYENTE: 
+            font(style=font7)= fullName
+        td(colspan=3 width=177 style="width:133pt") IMPRESO: 
+            font(style="text-decoration: underline;")=printedDate
+    tr(height=row20.height style=row20.style)
+        td(colspan=10) NIT: 
+            font(style=txt_b)=nit
+    tr(height=row20.height style=row20.style)
+        td(colspan=10 style=txt_ac_b) BALANCE COMPROBACION DE SALDOS
+    tr(height=row20.height style=row20.style)
+        td(colspan=10 style=txt_ac) FECHA CONTABLE: 
+            font(style=txt_ac_b)=accountingDate
+    tr(height=row20.height style=row20.style)
+        td(colspan=10)
+    tr(height=row20.height style=row20.style)
+        td(colspan=2 style=`${xl70}border-right:1pt solid`) CUENTA
+        td(colspan=4 style=`${xl70}border-left:1pt solid`) DESCRIPCION
+        td
+        td(style=`${xl70}${txt_r}`) DEBE
+        td
+        td(style=`${xl70}${txt_r}`) HABER
+block tBodyContent
+    +setData(accounting)
+    tr(height=row20.height style=row20.style)
+        td(colspan=7 height=20)
+        +signatureLine({})
+        td
+        +signatureLine({})
+    tr(height=row20.height style=row20.style)
+        td(colspan=2) 
+        td(colspan=4 style=txt_ac) TOTAL
+        td
+        td(style=txt_r)=totalDebe
+        td
+        td(style=txt_r)=totalHaber
+    tr(height=row20.height style=row20.style)
+        +signatureLine({colspan:4, rowspan:3, height:65, style:"height:48.75pt;"})
+        td(rowspan=7)
+        +signatureLine({colspan:5, rowspan:3})
+    tr(height=row20.height style=row20.style)
+    tr(height=row20.height style=row20.style)
+    tr(height=row20.height style=row20.style)
+        td(colspan=4 style=txt_ac) CONFECCIONADO POR: 
+        td(colspan=5 style=txt_ac) APROBADO POR: 
+    tr(height=row20.height style=row20.style)
+        td(colspan=4) Nombre: 
+        td(colspan=5) Nombre: 
+            font(style=txt_b)=fullName
+    tr(height=row20.height style=row20.style)
+        td(colspan=4) Fecha: 
+        td(colspan=5) Fecha: 
+    tr(height=row20.height style=row20.style)
+        td(colspan=4) Cargo: 
+        td(colspan=5) Cargo: TITULAR

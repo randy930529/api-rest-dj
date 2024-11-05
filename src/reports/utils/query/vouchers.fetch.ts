@@ -8,8 +8,15 @@ export const VOUCHER_SELECT: FindOptionsSelect<Voucher> = {
     haber: true,
     account: { id: true, code: true, description: true },
   },
+  supportDocument: {
+    id: true,
+    type_document: true,
+    document: true,
+    element: { id: true, description: true },
+  },
 };
 
 export const VOUCHER_RELATIONS: FindOptionsRelations<Voucher> = {
   voucherDetails: { account: true },
+  supportDocument: { element: true },
 };

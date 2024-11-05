@@ -6,6 +6,7 @@ import { appConfig } from "../../../../config";
 import { SupportDocument } from "../../../entity/SupportDocument";
 import { CreateSupportDocumentDTO } from "../dto/request/createSupportDocument.dto";
 import { CreatedSupportDocumentDTO } from "../dto/response/createdSupportDocument.dto";
+import { UpdateSupportDocumentDTO } from "../dto/request/updateSupportDocument.dto";
 import { responseError } from "../../../errors/responseError";
 import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import { Element } from "../../../entity/Element";
@@ -42,6 +43,11 @@ import {
   FISCAL_YEAR_SELECT,
 } from "../utils/query/fiscalYear.fetch";
 import { CreateMayorDTO } from "../dto/request/createMayor.dto";
+import {
+  VOUCHER_DETAIL_ORDER,
+  VOUCHER_DETAIL_RELATIONS,
+  VOUCHER_DETAIL_SELECT,
+} from "../utils/query/voucherDetail.fetch";
 
 export class SupportDocumentController extends EntityControllerBase<SupportDocument> {
   constructor() {
@@ -52,67 +58,50 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
   async createSupportDocument(req: Request, res: Response, next: NextFunction) {
     try {
       const fields: CreateSupportDocumentDTO = req.body;
-      const elementId = fields.element.id;
-      const fiscalYearId = fields.fiscalYear.id;
+      const { element, fiscalYear, profileActivity } = fields;
 
-      if (!elementId)
+      if (!element?.id)
         responseError(res, "Do must provide a valid expense element id.", 404);
-
-      if (!fiscalYearId)
+      if (!fiscalYear?.id)
         responseError(res, "Do must provide a valid fiscal yearId id.", 404);
 
-      const ELEMENT_WHERE = {
-        id: elementId,
-      };
-      const element = await Element.findOne({
-        select: ELEMENT_SELECT,
-        relations: ELEMENT_RELATIONS,
-        where: ELEMENT_WHERE,
-      });
+      const [foundElement, foundFiscalYear] = await Promise.all([
+        Element.findOne({
+          select: ELEMENT_SELECT,
+          relations: ELEMENT_RELATIONS,
+          where: { id: element.id },
+        }),
+        FiscalYear.findOneBy({ id: fiscalYear.id }),
+      ]);
 
-      if (!element) responseError(res, "Expense element not found.", 404);
+      if (!foundElement) responseError(res, "Expense element not found.", 404);
+      if (!foundFiscalYear) responseError(res, "Fiscal year not found.", 404);
 
-      const fiscalYear = await FiscalYear.findOneBy({
-        id: fiscalYearId,
-      });
-
-      if (!fiscalYear) responseError(res, "Fiscal year not found.", 404);
-
-      let profileActivity: ProfileActivity = null;
-      if (fields.profileActivity) {
-        const profileActivityId = fields.profileActivity.id;
-        if (!profileActivityId)
-          responseError(
-            res,
-            "Do must provide a valid expense profile activity id.",
-            404
-          );
-
-        profileActivity = await ProfileActivity.findOneBy({
-          id: profileActivityId,
+      let foundProfileActivity: ProfileActivity;
+      if (profileActivity?.id) {
+        foundProfileActivity = await ProfileActivity.findOneBy({
+          id: profileActivity.id,
         });
-        if (!profileActivity)
+        if (!foundProfileActivity)
           responseError(res, "Profile activity not found.", 404);
       }
 
       const objectSupportDocument = Object.assign(new SupportDocument(), {
         ...fields,
-        element,
-        fiscalYear,
-        profileActivity,
+        element: foundElement,
+        fiscalYear: foundFiscalYear,
+        profileActivity: foundProfileActivity,
       });
 
       const newSupportDocument = await this.create(objectSupportDocument);
-      const data = await Promise.all([
+
+      const [cuadreError, updatedDJ08Error] = await Promise.all([
         this.cuadre(newSupportDocument),
         this.updatedDJ08(newSupportDocument),
       ]);
 
-      if (data[0] || data[1]) {
-        req.params.id = newSupportDocument.id.toString();
-        await this.deleteSupportDocument(req, res, next);
-        responseError(res, (data[0] || data[1]) as string, 500);
-      }
+      if (cuadreError || updatedDJ08Error)
+        responseError(res, (cuadreError || updatedDJ08Error) as string, 500);
 
       const supportDocument: CreatedSupportDocumentDTO = newSupportDocument;
       const resp: BaseResponseDTO = {
@@ -142,7 +131,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
 
   async updateSupportDocument(req: Request, res: Response, next: NextFunction) {
     try {
-      const fields: SupportDocument = req.body;
+      const fields: UpdateSupportDocumentDTO = req.body;
       const { id } = req.body;
 
       if (!id)
@@ -166,16 +155,19 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       const supportDocumentUpdate = await this.repository.save(
         supportDocumentUpdateDTO
       );
-      const data = await Promise.all([
+      //Pedir a lensano que incluya estos campos al pedir los documents
+      supportDocumentUpdate.element.account =
+        supportDocumentToUpdate.element.account;
+      supportDocumentUpdate.fiscalYear = supportDocumentToUpdate.fiscalYear;
+      //
+
+      const [cuadreError, updatedDJ08Error] = await Promise.all([
         this.cuadre(supportDocumentUpdate),
         this.updatedDJ08(supportDocumentUpdate),
       ]);
 
-      if (data[0] || data[1]) {
-        req.params.id = supportDocumentUpdate.id.toString();
-        await this.deleteSupportDocument(req, res, next);
-        responseError(res, (data[0] || data[1]) as string, 500);
-      }
+      if (cuadreError || updatedDJ08Error)
+        responseError(res, (cuadreError || updatedDJ08Error) as string, 500);
 
       const supportDocument: CreateSupportDocumentDTO = supportDocumentUpdate;
       const resp: BaseResponseDTO = {
@@ -215,8 +207,26 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       const removeSupportDocument = await this.repository.remove(
         supportDocumentToRemove
       );
-      this.updatedDJ08(removeSupportDocument), res.status(204);
 
+      const [, , updatedDJ08Error] = await Promise.all([
+        this.updateBiggers({
+          id: -1,
+          date: null,
+          fiscalYear: removeSupportDocument.fiscalYear,
+          voucherDetail: removeSupportDocument.voucher.voucherDetails[0],
+        }),
+        this.updateBiggers({
+          id: -1,
+          date: null,
+          fiscalYear: removeSupportDocument.fiscalYear,
+          voucherDetail: removeSupportDocument.voucher.voucherDetails[1],
+        }),
+        this.updatedDJ08(removeSupportDocument),
+      ]);
+
+      if (updatedDJ08Error) responseError(res, updatedDJ08Error, 500);
+
+      res.status(204);
       return "Support document has been removed successfully.";
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
@@ -787,7 +797,6 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
   ): Promise<void | string> {
     try {
       const {
-        description,
         date,
         type_document: type,
         is_bank,
@@ -797,143 +806,229 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       const { group, account } = supportDocument.element;
       const isMethodCreate = !supportDocument.voucher;
 
-      const voucher =
-        supportDocument.voucher ||
-        (await Voucher.create({
-          number: -1,
-          description,
-          date,
-          supportDocument,
-        }).save());
+      if (fiscalYear.run_acounting) {
+        const voucher =
+          supportDocument.voucher ||
+          (await this.createVoucher(supportDocument));
 
-      const groupTrim = group.trim();
+        const groupTrim = group.trim();
+        const [[accountDebe, debe], [accountHaber, haber]] = await Promise.all([
+          this.getDebeDetails(type, groupTrim, is_bank, amount),
+          this.getHaberDetails(type, groupTrim, amount, account),
+        ]);
 
-      let codeDebe =
-        (groupTrim === "omcb" && "110") ||
-        (groupTrim === "ombc" && "100") ||
-        is_bank
-          ? "110"
-          : "100";
-      const accountDebe = await Account.findOne({
-        where: { code: codeDebe },
-      });
-
-      const elementGroupDebe = [
-        "omap",
-        "omlp",
-        "omcp",
-        "omcb",
-        "ombc",
-        "onex",
-        "onfp",
-        "onpa",
-        "onbn",
-      ];
-
-      const debe =
-        ((type === "i" || elementGroupDebe.indexOf(groupTrim) !== -1) &&
-          amount) ||
-        null;
-
-      const codeHaber =
-        (groupTrim === "omcl" && "520") ||
-        (groupTrim === "omlc" && "470") ||
-        (groupTrim === "onrt" && "900-10") ||
-        undefined;
-      const accountHaber = codeHaber
-        ? await Account.findOne({
-            where: { code: codeHaber },
-          })
-        : account;
-
-      const elementGroupHaber = [
-        "niei",
-        "ompp",
-        "omrt",
-        "onda",
-        "onde",
-        "omcl",
-        "omlc",
-        "onrt",
-      ];
-
-      const haber =
-        ((type === "g" || type === "m" || elementGroupHaber.indexOf(groupTrim) !== -1) &&
-          amount) ||
-        null;
-
-      const CreateVoucherDetails = [
-        VoucherDetail.create({
-          debe: debe || 0,
-          haber: haber || 0,
+        const createVoucherDetails = this.createVoucherDetails(
           voucher,
-          account: accountDebe || account,
-        }),
-        VoucherDetail.create({
-          debe: haber || 0,
-          haber: debe || 0,
-          voucher,
-          account: accountHaber || account,
-        }),
-      ];
+          accountDebe,
+          accountHaber,
+          debe,
+          haber
+        );
 
-      if (isMethodCreate) {
-        voucher.voucherDetails = CreateVoucherDetails;
-      } else {
-        const [voucherDetailDebe, voucherDetailHaber] = voucher.voucherDetails;
-        voucher.voucherDetails = [
-          {
-            ...voucherDetailDebe,
-            ...CreateVoucherDetails[0],
-          } as VoucherDetail,
-          {
-            ...voucherDetailHaber,
-            ...CreateVoucherDetails[1],
-          } as VoucherDetail,
-        ];
+        if (isMethodCreate) {
+          voucher.voucherDetails = createVoucherDetails;
+        } else {
+          this.updateVoucherDetails(voucher, createVoucherDetails);
+        }
+
+        const resultVoucher = await voucher.save();
+        for (const voucherDetail of resultVoucher.voucherDetails) {
+          await this.updateBiggers({
+            id: voucherDetail.mayor?.id,
+            date,
+            fiscalYear,
+            voucherDetail,
+          });
+        }
       }
-
-      const resultVoucher = await voucher.save();
-      resultVoucher.voucherDetails.forEach(async (voucherDetail) => {
-        await this.createBalanceBigger({
-          id: voucherDetail.mayor?.id,
-          date,
-          fiscalYear,
-          voucherDetail,
-        });
-      });
     } catch (error) {
       console.log("ERROR EN CUADRE: ", error.message);
       return error.message;
     }
   }
 
-  private async createBalanceBigger(
-    fieldsMayor: CreateMayorDTO
-  ): Promise<void> {
+  private async createVoucher(
+    supportDocument: SupportDocument
+  ): Promise<Voucher> {
+    return await Voucher.create({
+      number: -1,
+      description: supportDocument.description,
+      date: supportDocument.date,
+      supportDocument,
+    }).save();
+  }
+
+  private getDebeCode(group: string, is_bank: boolean): string {
+    return (
+      (group === "omcb" && "110") ||
+      (group === "ombc" && "100") ||
+      (group === "omcl" && "520") ||
+      (is_bank ? "110" : "100")
+    );
+  }
+// en el mov. de largo a corto plazo se debita la cuenta del elemento 520 y se acredita la contraria que es la cuenta 470
+//las cuentas acreedoras aumentan por el haber
+  private getHaberCode(group: string): string {
+    return (
+      (group === "omlc" && "470") ||
+      (group === "onrt" && "900-10")
+    );
+  }
+
+  private calculateDebe(
+    type: string,
+    group: string,
+    amount: number
+  ): number | null {
+    const elementGroupDebe = [
+      "omap",
+      "omlp",
+      "omcp",
+      "omcb",
+      "ombc",
+      "onex",
+      "onfp",
+      "onpa",
+      "onbn",
+    ];
+
+    return type === "i" || elementGroupDebe.includes(group) ? amount : null;
+  }
+
+  private calculateHaber(
+    type: string,
+    group: string,
+    amount: number
+  ): number | null {
+    const elementGroupHaber = [
+      "niei",
+      "ompp",
+      "omrt",
+      "onda",
+      "onde",
+      "omcl",
+      "omlc",
+      "onrt",
+    ];
+
+    return type === "g" || type === "m" || elementGroupHaber.includes(group)
+      ? amount
+      : null;
+  }
+
+  private async getDebeDetails(
+    type: string,
+    group: string,
+    is_bank: boolean,
+    amount: number
+  ): Promise<[Account, number | null]> {
+    const codeDebe = this.getDebeCode(group, is_bank);
+    const accountDebe = await Account.findOne({
+      where: { code: codeDebe },
+    });
+
+    const debe = this.calculateDebe(type, group, amount);
+
+    return [accountDebe, debe];
+  }
+
+  private async getHaberDetails(
+    type: string,
+    group: string,
+    amount: number,
+    defaultAccount: Account
+  ): Promise<[Account, number | null]> {
+    const codeHaber = this.getHaberCode(group);
+    const accountHaber = codeHaber
+      ? await Account.findOne({ where: { code: codeHaber } })
+      : defaultAccount;
+
+    const haber = this.calculateHaber(type, group, amount);
+
+    return [accountHaber, haber];
+  }
+
+  private createVoucherDetails(
+    voucher: Voucher,
+    accountDebe: Account,
+    accountHaber: Account,
+    debe: number | null,
+    haber: number | null
+  ): VoucherDetail[] {
+    return [
+      VoucherDetail.create({
+        debe: debe || 0,
+        haber: haber || 0,
+        voucher,
+        account: accountDebe || accountHaber,
+      }),
+      VoucherDetail.create({
+        debe: haber || 0,
+        haber: debe || 0,
+        voucher,
+        account: accountHaber || accountHaber,
+      }),
+    ];
+  }
+
+  private updateVoucherDetails(
+    voucher: Voucher,
+    createVoucherDetails: VoucherDetail[]
+  ): void {
+    const [voucherDetailDebe, voucherDetailHaber] = voucher.voucherDetails;
+    voucher.voucherDetails = [
+      { ...voucherDetailDebe, ...createVoucherDetails[0] } as VoucherDetail,
+      { ...voucherDetailHaber, ...createVoucherDetails[1] } as VoucherDetail,
+    ];
+  }
+
+  private async updateBiggers(fieldsMayor: CreateMayorDTO): Promise<void> {
     const { account, debe, haber } = fieldsMayor.voucherDetail;
     const fiscalYearId = fieldsMayor.fiscalYear.id;
-    const { id: accountId = -1, acreedor } = account || {};
+    const accountId = account?.id;
 
-    const MAYOR_WHERE = {
+    const [mayorsToUpdate, saldo] = await this.updateBalances(
+      accountId,
+      fiscalYearId
+    );
+
+    fieldsMayor.id ||
+      mayorsToUpdate.push(
+        Mayor.create({
+          ...fieldsMayor,
+          saldo: saldo + debe - haber,
+          account,
+        })
+      );
+
+    await Mayor.save(mayorsToUpdate);
+  }
+
+  private async updateBalances(
+    accountId: number,
+    fiscalYearId: number
+  ): Promise<[Mayor[], number]> {
+    const VOUCHER_DETAIL_WHERE = {
       account: { id: accountId },
-      fiscalYear: { id: fiscalYearId },
+      mayor: { fiscalYear: { id: fiscalYearId } },
     };
-    const previousBalanceBigger = (
-      await Mayor.find({
-        where: MAYOR_WHERE,
-        order: { account: { id: "DESC" }, date: "DESC" },
-      })
-    )[0];
+    const voucherDetailsToBalanceAccount = await VoucherDetail.find({
+      select: VOUCHER_DETAIL_SELECT,
+      relations: VOUCHER_DETAIL_RELATIONS,
+      where: VOUCHER_DETAIL_WHERE,
+      order: VOUCHER_DETAIL_ORDER,
+    });
 
-    const saldo =
-      (previousBalanceBigger?.saldo || 0) +
-      (acreedor ? haber - debe : debe - haber);
-
-    await Mayor.create({
-      ...fieldsMayor,
-      saldo,
-      account,
-    }).save();
+    return voucherDetailsToBalanceAccount.reduce<[Mayor[], number]>(
+      ([mayorsToUpdate, saldo], val) => {
+        saldo += val.debe - val.haber;
+        if (val.mayor.saldo !== saldo) {
+          val.mayor.saldo = saldo;
+          mayorsToUpdate.push(val.mayor);
+        }
+        return [mayorsToUpdate, saldo];
+      },
+      [[], 0]
+    );
   }
 }

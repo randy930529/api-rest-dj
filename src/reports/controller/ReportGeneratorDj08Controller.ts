@@ -4,17 +4,12 @@ import * as pug from "pug";
 import * as moment from "moment";
 import { appConfig } from "../../../config";
 import ReportGenerator from "../../base/ReportGeneratorBase";
-import { responseError } from "../../errors/responseError";
 import { User } from "../../entity/User";
 import { SectionState } from "../../entity/SectionState";
 import { Dj08SectionData, SectionName } from "../../entity/Dj08SectionData";
 import { StateTMBill } from "../../entity/StateTMBill";
-import { Voucher } from "../../entity/Voucher";
-import { Mayor } from "../../entity/Mayor";
 import { CreateReportDj08DTO } from "../dto/request/reportDj08.dto";
 import { CreateReportCompletedPayments } from "../dto/request/completedPayments.dto";
-import { CreateVoucherReport } from "../dto/request/createVoucherReport.dto";
-import { CreateMayorReport } from "../dto/request/createMayorReport.dto";
 import {
   calculateMora,
   calculeMoraDays,
@@ -28,15 +23,12 @@ import {
   sumaTotal,
 } from "../utils/utilsToReports";
 import {
-  AccountingMayorType,
-  AccountingVoucherType,
   DataIndexByType,
   DataSectionAType,
   DataSectionBType,
   DataSectionGType,
   DataSectionHType,
   DataSectionIType,
-  DataVoucherReportType,
   SupportDocumentPartialType,
   TotalSectionAType,
   TotalSectionGType,
@@ -51,21 +43,8 @@ import {
   SECTION_STATE_RELATIONS,
   SECTION_STATE_SELECT,
 } from "../utils/query/dj08SectionState.fetch";
-import {
-  VOUCHER_RELATIONS,
-  VOUCHER_SELECT,
-} from "../utils/query/vouchers.fetch";
-import {
-  SECTION_RELATIONS,
-  SECTION_SELECT,
-} from "../utils/query/voucherReportSection.fetch";
-import {
-  MAYOR_ORDER,
-  MAYOR_RELATIONS,
-  MAYOR_SELECT,
-} from "../utils/query/mayor.fetch";
 
-export default class ReportGeneratorController extends ReportGenerator {
+export default class ReportGeneratorDJ08Controller extends ReportGenerator {
   private templatePath: string;
   private defaultFileName: string;
 
@@ -1063,209 +1042,6 @@ export default class ReportGeneratorController extends ReportGenerator {
 
       const compiledTemplate = pug.compileFile(this.templatePath);
       const htmlContent = compiledTemplate({ date, data });
-      const pdfBuffer = await this.generatePDF({ htmlContent });
-
-      res.contentType("application/pdf");
-      res.setHeader(
-        "Content-Disposition",
-        `attachment; filename="${fileName || this.defaultFileName}"`
-      );
-      res.send(pdfBuffer);
-    } catch (error) {
-      if (res.statusCode === 200) res.status(500);
-      next(error);
-    }
-  }
-
-  async generateVoucherReport(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
-    try {
-      const { rangeDate, rangeVouchers, user }: CreateVoucherReport = req.body;
-      this.templatePath = pugTemplatePath("accounting/voucherBook");
-      const fileName = `Comprobante_[${rangeDate || ""}] - [${
-        rangeVouchers || ""
-      }].pdf`;
-
-      const SECTION_WHERE = { user: { id: user?.id } };
-      const { profile, fiscalYear } = await SectionState.findOne({
-        select: SECTION_SELECT,
-        relations: SECTION_RELATIONS,
-        where: SECTION_WHERE,
-      });
-
-      const [date_start, date_end] = rangeDate || [];
-      const voucherDateWhere = date_end
-        ? {
-            date: Between(date_start, date_end),
-          }
-        : {
-            date: date_start,
-          };
-
-      const [voucher_start, voucher_end] = rangeVouchers || [];
-      const voucherNumbreWhere = voucher_end
-        ? {
-            number: Between(voucher_start, voucher_end),
-          }
-        : {
-            number: voucher_start,
-          };
-
-      const VOUCHER_WHERE = {
-        supportDocument: { fiscalYear: { id: fiscalYear?.id } },
-        date: voucherDateWhere.date,
-        number: voucherNumbreWhere.number,
-      };
-      const vouchers = await Voucher.find({
-        select: VOUCHER_SELECT,
-        relations: VOUCHER_RELATIONS,
-        where: VOUCHER_WHERE,
-      });
-
-      if (!vouchers.length)
-        responseError(
-          res,
-          "No hay valores de comprobantes para el rango espesificado.",
-          404
-        );
-
-      const { first_name = "", last_name = "", nit = "" } = profile || {};
-      const printedDate = moment().format("DD/MM/YYYY");
-      const fullName = `${first_name} ${last_name}`;
-
-      const data = vouchers.map<DataVoucherReportType>(
-        ({ number, description: descriptionVoucher, date, voucherDetails }) => {
-          const accountingDate = moment(date).format("DD/MM/YYYY");
-          const { accounting, totalDebe, totalHaber } =
-            voucherDetails.reduce<AccountingVoucherType>(
-              (acc, { account, debe, haber }) => {
-                const { code, description } = account;
-                acc.accounting.push({
-                  code,
-                  description,
-                  debe: debe,
-                  haber: haber,
-                });
-                acc.totalDebe += debe;
-                acc.totalHaber += haber;
-                return acc;
-              },
-              { accounting: [], totalDebe: 0, totalHaber: 0 }
-            );
-
-          return {
-            fullName,
-            nit,
-            printedDate,
-            number,
-            descriptionVoucher,
-            accountingDate,
-            accounting,
-            totalDebe,
-            totalHaber,
-          };
-        }
-      );
-
-      const compiledTemplate = pug.compileFile(this.templatePath);
-      const htmlContent = compiledTemplate({ data });
-      const pdfBuffer = await this.generatePDF({ htmlContent });
-
-      res.contentType("application/pdf");
-      res.setHeader(
-        "Content-Disposition",
-        `attachment; filename="${fileName || this.defaultFileName}"`
-      );
-      res.send(pdfBuffer);
-    } catch (error) {
-      if (res.statusCode === 200) res.status(500);
-      next(error);
-    }
-  }
-
-  async generateBiggerReport(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
-    try {
-      const { date_start, date_end, account, user }: CreateMayorReport =
-        req.body;
-      const { id: accountId, code, description } = account;
-      this.templatePath = pugTemplatePath("accounting/tableBigger");
-      const fileName = `Mayor de Cuenta_${code}-${description}-[${[
-        date_start,
-        date_end,
-      ]}].pdf`;
-
-      const SECTION_WHERE = { user: { id: user?.id } };
-      const { profile, fiscalYear } = await SectionState.findOne({
-        select: SECTION_SELECT,
-        relations: SECTION_RELATIONS,
-        where: SECTION_WHERE,
-      });
-
-      const MAYOR_WHERE = {
-        fiscalYear: { id: fiscalYear.id },
-        account: { id: accountId },
-        date: Between(date_start, date_end),
-      };
-      const biggers = await Mayor.find({
-        select: MAYOR_SELECT,
-        relations: MAYOR_RELATIONS,
-        where: MAYOR_WHERE,
-        order: MAYOR_ORDER,
-      });
-
-      if (!biggers.length)
-        responseError(
-          res,
-          "No hay valores de comprobantes para el rango espesificado.",
-          404
-        );
-
-      const accountCode = `${code} - ${description?.toUpperCase()}`;
-      const { first_name = "", last_name = "", nit = "" } = profile || {};
-      const printedDate = moment().format("DD/MM/YYYY");
-      const fullName = `${first_name} ${last_name}`;
-
-      const { accounting, totalDebe, totalHaber } =
-        biggers.reduce<AccountingMayorType>(
-          (acc, { date, saldo, is_reference, voucherDetail }) => {
-            const { debe, haber } = voucherDetail;
-            const detail = is_reference
-              ? "Saldo inicial"
-              : `${"Comprobante"} No ${voucherDetail.voucher.number}`;
-
-            acc.accounting.push({
-              detail,
-              date: moment(date).format("DD/MM/YYYY"),
-              debe,
-              haber,
-              saldo,
-            });
-            acc.totalDebe += debe;
-            acc.totalHaber += haber;
-            return acc;
-          },
-          { accounting: [], totalDebe: 0, totalHaber: 0 }
-        );
-
-      const data = {
-        fullName,
-        nit,
-        printedDate,
-        accountCode,
-        accounting,
-        totalDebe,
-        totalHaber,
-      };
-
-      const compiledTemplate = pug.compileFile(this.templatePath);
-      const htmlContent = compiledTemplate(data);
       const pdfBuffer = await this.generatePDF({ htmlContent });
 
       res.contentType("application/pdf");

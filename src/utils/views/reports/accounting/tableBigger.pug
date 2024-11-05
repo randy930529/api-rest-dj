@@ -1,3 +1,7 @@
+include ../generic/mixins
+
+-const row20={height:20, style:"height:15.0pt"}
+
 mixin setData(data=[])
     each val in data
         tr(height=20 style={height:'15.0pt'})
@@ -48,22 +52,22 @@ table.page-one(
             td.xl-65(height=20 style="font-weight: 700;height:15.0pt;text-align: right") HABER
             td.xl-65(height=20 style="font-weight: 700;height:15.0pt;text-align: right") SALDO
         +setData(accounting)
-        tr(height=25 style={height:'18.75pt'})
-            td.xl-65(colspan=5 height=25 style="height:18.75pt")
-            td.xl-65(height=25 style="height:18.75pt;font-weight: 700;font-size: 14.0pt;text-align: right;") ________
-            td.xl-65(height=25 style="height:18.75pt;font-weight: 700;font-size: 14.0pt;text-align: right;") ________
-            td.xl-65(height=25 style="height:18.75pt;font-weight: 700;font-size: 14.0pt;text-align: right;")
-        tr(height=20 style={height:'15.0pt'})
+        tr(height=row20.height style=row20.style)
+            td(colspan=5 height=20)
+            +signatureLine({style:"padding-left: 6pt;"})
+            +signatureLine({style:"padding-left: 6pt;"})
+            td
+        tr(height=row20.height style=row20.style)
             td.xl-65(colspan=2 height=20 style="height:15.0pt")
             td.xl-65(colspan=3 height=20 style="font-weight: 700;height:15.0pt;text-align: center") TOTAL
             td.xl-65(height=20 style="font-weight: 700;height:15.0pt;text-align: right")=totalDebe
             td.xl-65(height=20 style="font-weight: 700;height:15.0pt;text-align: right")=totalHaber
             td.xl-65(height=20 style="height:15.0pt")
-        tr(height=20 style={height:'15.0pt'})
-        tr(height=20 style={height:'15.0pt'})
-            td.xl-65(colspan=4 rowspan=3 height=65 style="font-size: 14.0pt;font-weight: 700;height:48.75pt;vertical-align: bottom") ___________________________________
+        tr(height=row20.height style=row20.style)
+        tr(height=row20.height style=row20.style)
+            +signatureLine({colspan:4, rowspan:3, height:65, style:"height:48.75pt;"})
             td.xl-65(rowspan=7)
-            td.xl-65(colspan=3 rowspan=3 height=65 style="font-size: 14.0pt;font-weight: 700;height:48.75pt;vertical-align: bottom") __________________________
+            +signatureLine({colspan:3, rowspan:3})
         tr(height=20 style={height:'15.0pt'})
         tr(height=25 style={height:'18.75pt'})
         tr(height=20 style={height:'15.0pt'})

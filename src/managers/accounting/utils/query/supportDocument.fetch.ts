@@ -10,7 +10,7 @@ export const SUPPORT_DOCUMENT_SELECT: FindOptionsSelect<SupportDocument> = {
     is_general: true,
     account: { id: true, acreedor: true },
   },
-  fiscalYear: { id: true },
+  fiscalYear: { id: true, run_acounting: true },
   profileActivity: { id: true },
   voucher: {
     id: true,

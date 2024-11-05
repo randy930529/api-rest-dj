@@ -3,6 +3,7 @@ import Model from "./Base";
 import { Profile } from "./Profile";
 import { Element } from "./Element";
 import { Currency } from "./StateTMBill";
+import { Mayor } from "./Mayor";
 
 export enum AccountType {
   ACTIVO = "a",
@@ -38,4 +39,7 @@ export class Account extends Model {
 
   @OneToMany(() => Element, (element) => element.account)
   elements: Element[];
+
+  @OneToMany(() => Mayor, (mayor) => mayor.account)
+  mayors: Mayor[];
 }

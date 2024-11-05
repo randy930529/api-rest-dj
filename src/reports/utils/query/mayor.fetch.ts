@@ -19,6 +19,26 @@ export const MAYOR_RELATIONS: FindOptionsRelations<Mayor> = {
 };
 
 export const MAYOR_ORDER: FindOptionsOrder<Mayor> = {
-  account: { id: "ASC" },
+  voucherDetail: {
+    voucher: { number: "ASC" },
+  },
   date: "ASC",
+};
+
+export const MAYOR_ACCOUNT_SELECT: FindOptionsSelect<Mayor> = {
+  ...MAYOR_SELECT,
+  account: { id: true, code: true, description: true },
+};
+
+export const MAYOR_ACCOUNT_RELATIONS: FindOptionsRelations<Mayor> = {
+  ...MAYOR_RELATIONS,
+  account: true,
+};
+
+export const MAYOR_ACCOUNT_ORDER: FindOptionsOrder<Mayor> = {
+  id:"DESC",
+  voucherDetail: {
+    voucher: { number: "DESC" },
+  },
+  date: "DESC",
 };

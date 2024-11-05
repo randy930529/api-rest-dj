@@ -20,3 +20,8 @@ mixin enumerate(colsArray=[],count=1)
         -count++
     else
         td There are no values
+
+mixin signatureLine({colspan, rowspan, height, style=""})
+    -style+="vertical-align: bottom"
+    td(colspan=colspan rowspan=rowspan height=height style=style)
+        hr(style="margin:0;border-color: black;border-style: solid")

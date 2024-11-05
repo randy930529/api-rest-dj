@@ -147,18 +147,22 @@ export type DataVoucherReportType = AccountingVoucherType & {
   nit: string;
   printedDate: string | Date;
   number: number;
+  documentNumber: string;
   descriptionVoucher: string;
   accountingDate: string | Date;
 };
 
+export type MayorDetailType = {
+  code?: string;
+  date?: string | Date;
+  detail: string;
+  debe: number;
+  haber: number;
+  saldo?: number;
+};
+
 export type AccountingMayorType = {
-  accounting: {
-    date: string | Date;
-    detail: string;
-    debe: number;
-    haber: number;
-    saldo: number;
-  }[];
+  accounting: MayorDetailType[];
   totalDebe: number;
   totalHaber: number;
 };
@@ -168,4 +172,48 @@ export type MayorReportType = AccountingMayorType & {
   nit: string;
   printedDate: string;
   accountCode: string;
+};
+
+interface AssetType {
+  activo: number;
+  caja: number;
+  banco: number;
+  total: number;
+}
+
+interface PassiveType {
+  pasivo: number;
+  lendsShortTerm: number;
+  longTerm: number;
+  lendsLongTerm: number;
+  total: number;
+}
+
+interface PatrimonyType {
+  initSaldo: number;
+  patrimonio: {
+    description: string;
+    amount: number;
+  }[];
+  total: number;
+}
+
+export type DataSituationStateReportType = {
+  asset: AssetType;
+  passive: PassiveType;
+  patrimony: PatrimonyType;
+  total: number;
+};
+
+export type DataYieldStateReportType = {
+  averagePayments: number;
+  capitalPayments: number;
+  utilityOrLost: number;
+  expesesToPayments: Map<
+    string,
+    {
+      description: string;
+      amount: number;
+    }
+  >;
 };

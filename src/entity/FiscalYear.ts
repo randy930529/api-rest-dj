@@ -8,11 +8,12 @@ import {
   BeforeUpdate,
   OneToOne,
   OneToMany,
+  Not,
 } from "typeorm";
 import Model from "./Base";
 import { Profile } from "./Profile";
 import * as moment from "moment";
-import { Dj08SectionData } from "./Dj08SectionData";
+import { Dj08SectionData, SectionName } from "./Dj08SectionData";
 import { MusicalGroup } from "./MusicalGroup";
 import { SupportDocument } from "./SupportDocument";
 import { DJ08 } from "./DJ08";
@@ -20,6 +21,7 @@ import { FiscalYearEnterprise } from "./FiscalYearEnterprise";
 import { ProfileActivity } from "./ProfileActivity";
 import { ProfileHiredPerson } from "./ProfileHiredPerson";
 import { SectionState } from "./SectionState";
+import { Voucher } from "./Voucher";
 
 @Entity()
 export class FiscalYear extends Model {
@@ -32,10 +34,6 @@ export class FiscalYear extends Model {
   @Column({ default: true })
   general_scheme: boolean;
 
-  @ManyToOne(() => Profile, { onDelete: "CASCADE", onUpdate: "CASCADE" })
-  @JoinColumn()
-  profile: Profile;
-
   @Column({ nullable: true })
   __profileId__: number;
 
@@ -47,6 +45,16 @@ export class FiscalYear extends Model {
 
   @Column({ default: false })
   regimen: boolean;
+
+  @Column({ default: true })
+  is_tcp: boolean;
+
+  @Column({ default: false })
+  run_acounting: boolean;
+
+  @ManyToOne(() => Profile, { onDelete: "CASCADE", onUpdate: "CASCADE" })
+  @JoinColumn()
+  profile: Profile;
 
   @OneToOne(() => MusicalGroup, (musicalGroup) => musicalGroup.fiscalYear, {
     cascade: true,
@@ -84,9 +92,6 @@ export class FiscalYear extends Model {
     { cascade: ["remove"] }
   )
   profileActivities: ProfileActivity[];
-
-  @Column({ default: true })
-  is_tcp: boolean;
 
   toJSON() {
     return {
@@ -128,6 +133,34 @@ export class FiscalYear extends Model {
 
     if (duplicateFiscalYear && this.id !== duplicateFiscalYear?.id) {
       throw new Error("Sólo un año fiscal con misma fecha y año es admitido.");
+    }
+  }
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async checkFiscalYearIncomesPrevious(): Promise<void> {
+    const lastFiscalYearIdInProfile = (
+      await FiscalYear.findOne({
+        where: { id: Not(this.id), profile: { id: this.__profileId__ } },
+        order: { id: "DESC" },
+      })
+    )?.id;
+    const dj08SectionData = await Dj08SectionData.findOneBy({
+      dJ08: { fiscalYear: { id: lastFiscalYearIdInProfile } },
+      is_rectification: true,
+    });
+
+    if (dj08SectionData) {
+      const section_data = JSON.parse(dj08SectionData.section_data);
+      const totalIncomesSectionA =
+        section_data[SectionName.SECTION_A]?.totals?.incomes || 0;
+      if (totalIncomesSectionA > 500000) this.run_acounting = true;
+    }
+    if (!this.run_acounting && this.id && this.id !== -1) {
+      const voucherInFiscalYear = await Voucher.findOneBy({
+        supportDocument: { __fiscalYearId__: this.id },
+      });
+      this.run_acounting = !!voucherInFiscalYear;
     }
   }
 
