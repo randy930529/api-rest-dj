@@ -17,6 +17,7 @@ import { Voucher } from "../../../entity/Voucher";
 import { VoucherDetail } from "../../../entity/VoucherDetail";
 import { Account } from "../../../entity/Account";
 import { Mayor } from "../../../entity/Mayor";
+import { SectionState } from "../../../entity/SectionState";
 import { calculeF20ToDj08 } from "../../../reports/utils/utilsToReports";
 import {
   AllDataSectionsDj08Type,
@@ -48,6 +49,11 @@ import {
   VOUCHER_DETAIL_RELATIONS,
   VOUCHER_DETAIL_SELECT,
 } from "../utils/query/voucherDetail.fetch";
+import { SetInitialBalanceDTO } from "../dto/request/setInitialBalance.dto";
+import {
+  SECTION_RELATIONS,
+  SECTION_SELECT,
+} from "../utils/query/fiscalYearToUserSection.fetch";
 
 export class SupportDocumentController extends EntityControllerBase<SupportDocument> {
   constructor() {
@@ -137,6 +143,13 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       if (!id)
         responseError(res, "Update requiere support document id valid.", 404);
 
+      if (!fields.element.account) {
+        fields.element.account = await this.getAccountElement(fields.element);
+
+        if (!fields.element.account)
+          responseError(res, "It is required Account of the Elemento.", 404);
+      }
+
       const supportDocumentToUpdate = await this.repository.findOne({
         select: SUPPORT_DOCUMENT_SELECT,
         relations: SUPPORT_DOCUMENT_RELATIONS,
@@ -155,11 +168,8 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       const supportDocumentUpdate = await this.repository.save(
         supportDocumentUpdateDTO
       );
-      //Pedir a lensano que incluya estos campos al pedir los documents
-      supportDocumentUpdate.element.account =
-        supportDocumentToUpdate.element.account;
+
       supportDocumentUpdate.fiscalYear = supportDocumentToUpdate.fiscalYear;
-      //
 
       const [cuadreError, updatedDJ08Error] = await Promise.all([
         this.cuadre(supportDocumentUpdate),
@@ -228,6 +238,125 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
 
       res.status(204);
       return "Support document has been removed successfully.";
+    } catch (error) {
+      if (res.statusCode === 200) res.status(500);
+      next(error);
+    }
+  }
+
+  async getInitialBalance(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { user } = req.body;
+      const accountId = parseInt(req.params.accountId);
+
+      const SECTION_WHERE = { user: { id: user?.id } };
+      const { fiscalYear } = await SectionState.findOne({
+        select: SECTION_SELECT,
+        relations: SECTION_RELATIONS,
+        where: SECTION_WHERE,
+      });
+
+      const account = await Account.findOneBy({ id: accountId });
+      if (!account) responseError(res, "Account not found.", 404);
+
+      const mayor = await Mayor.findOne({
+        select: {
+          voucherDetail: {
+            id: true,
+            debe: true,
+            haber: true,
+            account: { id: true, code: true },
+          },
+        },
+        relations: { voucherDetail: { account: true } },
+        where: {
+          is_reference: true,
+          fiscalYear: { id: fiscalYear.id },
+          account: { id: accountId },
+        },
+      });
+
+      return mayor
+        ? ({ ...mayor, account, fiscalYear } as Mayor)
+        : Mayor.create({
+            date: moment(`${fiscalYear.year - 1}-12-31`).toDate(),
+            saldo: 0,
+            is_reference: true,
+            voucherDetail: {
+              debe: 0,
+              haber: 0,
+              account,
+            },
+            account,
+            fiscalYear,
+          });
+    } catch (error) {
+      if (res.statusCode === 200) res.status(500);
+      next(error);
+    }
+  }
+
+  async setInitialBalance(req: Request, res: Response, next: NextFunction) {
+    try {
+      const fields: SetInitialBalanceDTO = req.body;
+      const accountId = fields.account.id;
+      const fiscalYearId = fields.fiscalYear.id;
+
+      if (!accountId)
+        responseError(
+          res,
+          "Update initial balance requiere account id valid.",
+          404
+        );
+
+      if (!fiscalYearId)
+        responseError(
+          res,
+          "Update initial balance requiere fiscal year id valid.",
+          404
+        );
+
+      const balanceToSet = await VoucherDetail.findOne({
+        select: {
+          mayor: {
+            id: true,
+            saldo: true,
+          },
+        },
+        relations: { mayor: true },
+        where: {
+          mayor: {
+            id: fields.id,
+            is_reference: true,
+            fiscalYear: { id: fiscalYearId },
+            account: { id: accountId },
+          },
+          account: { id: accountId },
+        },
+      });
+
+      const saldo = fields.voucherDetail.debe - fields.voucherDetail.haber;
+
+      const balanceResult = await VoucherDetail.create({
+        ...(balanceToSet || {}),
+        ...fields.voucherDetail,
+        mayor: { ...(balanceToSet.mayor || {}), ...fields, saldo },
+      });
+      balanceResult.save();
+
+      if (balanceToSet) {
+        this.updateBiggers({ ...balanceResult.mayor });
+      }
+
+      const mayor = balanceResult;
+      const resp: BaseResponseDTO = {
+        status: "success",
+        error: undefined,
+        data: { mayor },
+      };
+
+      res.status(201);
+      return { ...resp };
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);
@@ -807,6 +936,9 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       const isMethodCreate = !supportDocument.voucher;
 
       if (fiscalYear.run_acounting) {
+        if (!account)
+          throw new Error("It is required Account of the Elemento.");
+
         const voucher =
           supportDocument.voucher ||
           (await this.createVoucher(supportDocument));
@@ -860,16 +992,19 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
 
   private getDebeCode(group: string, is_bank: boolean): string {
     return (
-      (group === "omcb" && "110") ||
-      (group === "ombc" && "100") ||
-      (group === "omcl" && "520") ||
+      (group === "omcb" && "100") ||
+      (group === "ombc" && "110") ||
+      (group === "omcl" && "470") ||
+      (group === "omlc" && "520") ||
       (is_bank ? "110" : "100")
     );
   }
-// en el mov. de largo a corto plazo se debita la cuenta del elemento 520 y se acredita la contraria que es la cuenta 470
-//las cuentas acreedoras aumentan por el haber
+
   private getHaberCode(group: string): string {
     return (
+      (group === "omcb" && "110") ||
+      (group === "ombc" && "100") ||
+      (group === "omcl" && "520") ||
       (group === "omlc" && "470") ||
       (group === "onrt" && "900-10")
     );
@@ -1030,5 +1165,15 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       },
       [[], 0]
     );
+  }
+
+  private async getAccountElement(element: Element): Promise<Account> {
+    return (
+      await Element.findOne({
+        select: { account: { id: true, code: true } },
+        relations: { account: true },
+        where: { id: element.id },
+      })
+    )?.account;
   }
 }

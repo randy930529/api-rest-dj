@@ -1,12 +1,13 @@
 import { ElementController } from "../controller/ElementController";
 import { authMiddleware } from "../../../auth/middlewares/authMiddleware";
+import { userMiddleware } from "../../../auth/middlewares/userMiddleware";
 
 export const elementRoutes = [
   {
     method: "post",
     route: "/element",
     controller: ElementController,
-    middlewares: [authMiddleware],
+    middlewares: [authMiddleware, userMiddleware],
     action: "createElement",
   },
   {

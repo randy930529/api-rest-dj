@@ -10,7 +10,7 @@ import { Mayor } from "../../entity/Mayor";
 import { CreateVoucherReport } from "../dto/request/createVoucherReport.dto";
 import { CreateMayorReport } from "../dto/request/createMayorReport.dto";
 import { CreateBalanceReport } from "../dto/request/createBalanceReport.dto";
-import { pugTemplatePath, sumaTotal } from "../utils/utilsToReports";
+import { pugTemplatePath } from "../utils/utilsToReports";
 import {
   AccountingMayorType,
   AccountingVoucherType,
@@ -115,13 +115,17 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
       const fullName = `${first_name} ${last_name}`;
 
       const data = vouchers.map<DataVoucherReportType>(
-        ({ number, description, date, voucherDetails, supportDocument }) => {
+        ({
+          number,
+          description: descriptionVoucher,
+          date,
+          voucherDetails,
+          supportDocument,
+        }) => {
           const accountingDate = moment(date).format("DD/MM/YYYY");
           const { type_document, document: documentNumber } = supportDocument;
-          const descriptionVoucher =
-            type_document === "g"
-              ? supportDocument.element.description
-              : description;
+          const descriptionElement =
+            type_document === "g" && supportDocument.element.description;
 
           const { accounting, totalDebe, totalHaber } =
             voucherDetails.reduce<AccountingVoucherType>(
@@ -147,6 +151,7 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
             number,
             documentNumber,
             descriptionVoucher,
+            descriptionElement,
             accountingDate,
             accounting,
             totalDebe,

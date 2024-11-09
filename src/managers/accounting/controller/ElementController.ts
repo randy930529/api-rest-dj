@@ -1,14 +1,14 @@
 import { NextFunction, Request, Response } from "express";
-import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import { EntityControllerBase } from "../../../base/EntityControllerBase";
-import { AppDataSource } from "../../../data-source";
-import { Element } from "../../../entity/Element";
 import { responseError } from "../../../errors/responseError";
+import { AppDataSource } from "../../../data-source";
 import getProfileById from "../../../profile/utils/getProfileById";
+import { Element } from "../../../entity/Element";
+import { UserRole } from "../../../entity/User";
+import { Account } from "../../../entity/Account";
+import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import { ElementDTO } from "../dto/request/element.dto";
 import { CreateElementDTO } from "../dto/response/createdElement.dto";
-import { JWT } from "../../../auth/security/jwt";
-import { User } from "../../../entity/User";
 
 export class ElementController extends EntityControllerBase<Element> {
   constructor() {
@@ -19,27 +19,23 @@ export class ElementController extends EntityControllerBase<Element> {
   async createElement(req: Request, res: Response, next: NextFunction) {
     try {
       const fields: ElementDTO = req.body;
-      const { token } = req.body;
       const { id } = fields.profile;
 
       fields.type = fields.type?.toLowerCase();
       fields.group = fields.group?.toLowerCase();
 
-      const userId = JWT.getJwtPayloadValueByKey(token, "id");
-
       if (fields.type === "i") {
-        const user = await User.findOne({
-          select: { role: true },
-          where: { id: userId },
-        });
+        if (!fields.user) responseError(res, "User not found.", 404);
 
-        if (!user) responseError(res, "User not found.", 404);
-
-        if (user.role === "cliente")
+        if (fields.user.role === UserRole.GHOST)
           responseError(res, "User not allowed.", 401);
       }
 
       const profile = await getProfileById({ id, res });
+
+      if (!fields.is_general) {
+        fields.account = await this.findAccontElementNotGeneral(fields.group);
+      }
 
       const objectElement = Object.assign(new Element(), {
         ...fields,
@@ -150,5 +146,22 @@ export class ElementController extends EntityControllerBase<Element> {
       if (res.statusCode === 200) res.status(500);
       next(error);
     }
+  }
+
+  private getAccountCode(group: string): string {
+    return (
+      (group === "pdgt" && "800") ||
+      (group === "ddod" && "800") ||
+      (group === "ddgt" && "800") ||
+      (group === "onex" && "900-20") ||
+      (group === "onfp" && "900-20") ||
+      (group === "onpa" && "900-20") ||
+      (group === "onbn" && "900-20")
+    );
+  }
+
+  private async findAccontElementNotGeneral(group: string): Promise<Account> {
+    const code = this.getAccountCode(group);
+    return await Account.findOneBy({ code });
   }
 }

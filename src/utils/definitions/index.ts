@@ -149,6 +149,7 @@ export type DataVoucherReportType = AccountingVoucherType & {
   number: number;
   documentNumber: string;
   descriptionVoucher: string;
+  descriptionElement?: string;
   accountingDate: string | Date;
 };
 

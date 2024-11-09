@@ -2,6 +2,7 @@ import { AccountController } from "../controller/AccountController";
 import { authMiddleware } from "../../../auth/middlewares/authMiddleware";
 import { userMiddleware } from "../../../auth/middlewares/userMiddleware";
 import { isAdminMiddleware } from "../../../auth/middlewares/isAdminMiddleware";
+import { SupportDocumentController } from "../controller/SupportDocumentController";
 
 export const accountRoutes = [
   {
@@ -38,5 +39,19 @@ export const accountRoutes = [
     controller: AccountController,
     middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
     action: "deleteAccount",
+  },
+  {
+    method: "get",
+    route: "/initial/balance/:accountId",
+    controller: SupportDocumentController,
+    middlewares: [authMiddleware, userMiddleware],
+    action: "getInitialBalance",
+  },
+  {
+    method: "put",
+    route: "/initial/balance",
+    controller: SupportDocumentController,
+    middlewares: [authMiddleware, userMiddleware],
+    action: "setInitialBalance",
   },
 ];

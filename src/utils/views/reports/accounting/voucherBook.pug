@@ -4,7 +4,7 @@ include ../generic/mixins
 
 block content
     each item, index in data
-        -const {fullName, nit, printedDate, number, documentNumber, descriptionVoucher, accountingDate, accounting, totalDebe, totalHaber} = item
+        -const {fullName, nit, printedDate, number, documentNumber, descriptionVoucher, descriptionElement, accountingDate, accounting, totalDebe, totalHaber} = item
         include tableVoucher
         if index+2 < data.length && !((index+1) % 2)
             table.page-next(style="page-break-before: always;height: 1in")
