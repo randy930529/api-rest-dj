@@ -191,11 +191,10 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         date_end,
       ]}].pdf`;
 
-      const SECTION_WHERE = { user: { id: user?.id } };
       const { profile, fiscalYear } = await SectionState.findOne({
         select: SECTION_SELECT,
         relations: SECTION_RELATIONS,
-        where: SECTION_WHERE,
+        where: { user: { id: user?.id } },
       });
 
       const MAYOR_WHERE = {
@@ -259,8 +258,10 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
       for (const mayor of accountingDetails) {
         const mayorDetail = accountingRemoveDuplicate.get(mayor.date as string);
         if (mayorDetail) {
+          const voucher = mayor.detail.replace("Comprobante No. ", ",");
           accountingRemoveDuplicate.set(mayor.date as string, {
             ...mayorDetail,
+            detail: mayorDetail.detail + voucher,
             debe: mayorDetail.debe + mayor.debe,
             haber: mayorDetail.haber + mayor.haber,
             saldo: mayor.saldo,
@@ -483,16 +484,18 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
                 acc.asset.total += saldo;
                 break;
               case "470":
-                acc.passive.lendsShortTerm + saldo;
+                acc.passive.lendsShortTerm += saldo;
+                acc.passive.pasivo += saldo;
               case "520":
-                acc.passive.lendsLongTerm + saldo;
+                acc.passive.lendsLongTerm += saldo;
+                acc.passive.longTerm += saldo;
               case "520":
               case "470":
                 acc.passive.total += saldo;
                 break;
               case "600-10":
-                acc.patrimony.initSaldo;
-                acc.patrimony.total += saldo;
+                acc.patrimony.initSaldo += saldo * -1;
+                acc.patrimony.total += saldo * -1;
                 break;
               case "600-20":
               case "600-30":
@@ -500,9 +503,9 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
               case "600-50":
                 acc.patrimony.patrimonio.push({
                   description: codeDescription[account.code],
-                  amount: saldo,
+                  amount: saldo * -1,
                 });
-                acc.patrimony.total += saldo;
+                acc.patrimony.total += saldo * -1;
                 break;
               default:
                 break;
@@ -513,11 +516,16 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
           stateInit
         );
 
+      passive.lendsLongTerm = Math.abs(passive.lendsLongTerm);
+      passive.lendsShortTerm = Math.abs(passive.lendsShortTerm);
+      passive.pasivo = Math.abs(passive.pasivo);
+      passive.longTerm = Math.abs(passive.longTerm);
+      passive.total = Math.abs(passive.total);
       const saldoAccount900 = this.saldoTotalInAccount900(accountsBigger);
       const saldoAccountsExpenses =
         this.saldoTotalInAccountExpense(accountsBigger);
 
-      const utility = saldoAccount900 - saldoAccountsExpenses;
+      const utility = Math.abs(saldoAccount900) - saldoAccountsExpenses;
       patrimony.patrimonio.push(
         ...[
           {
@@ -528,7 +536,7 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         ]
       );
 
-      const total = passive.total + patrimony.total;
+      const total = passive.total + patrimony.total + utility;
 
       if (patrimony.total < 0) patrimony.total *= -1;
       if (asset.caja < 0) asset.caja *= -1;
@@ -614,7 +622,7 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
       const incomes = this.saldoTotalInAccount900(accountsBigger);
 
       const stateInit: DataYieldStateReportType = {
-        averagePayments: 0,
+        averagePayments: this.saldoTotalInAccountExpense(accountsBigger),
         capitalPayments: 0,
         expesesToPayments: new Map([
           ["800", { description: "Gastos de Operación", amount: 0 }],
@@ -633,12 +641,12 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
 
             switch (code) {
               case "820":
-                acc.averagePayments += saldo;
+                // acc.averagePayments += saldo;
                 acc.capitalPayments += saldo;
                 break;
               case "810":
               case "800":
-                acc.averagePayments += saldo;
+              // acc.averagePayments += saldo;
               case "800":
               case "810-10":
               case "810-20":
@@ -658,7 +666,10 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
           stateInit
         );
 
-      const utilityOrLost = incomes - averagePayments + capitalPayments;
+      const utilityOrLost =
+        (incomes < 0 ? incomes * -1 : incomes) -
+        averagePayments +
+        capitalPayments;
       const expeses = Array.from(expesesToPayments.values());
 
       const data = {

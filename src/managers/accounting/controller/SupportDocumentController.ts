@@ -992,21 +992,22 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
 
   private getDebeCode(group: string, is_bank: boolean): string {
     return (
-      (group === "omcb" && "100") ||
-      (group === "ombc" && "110") ||
-      (group === "omcl" && "470") ||
-      (group === "omlc" && "520") ||
+      (group === "omcb" && "110") ||
+      (group === "ombc" && "100") ||
+      (group === "omcl" && "520") ||
+      (group === "omlc" && "470") ||
+      (group === "onrt" && "900-10") ||
       (is_bank ? "110" : "100")
     );
   }
 
   private getHaberCode(group: string): string {
     return (
-      (group === "omcb" && "110") ||
-      (group === "ombc" && "100") ||
-      (group === "omcl" && "520") ||
-      (group === "omlc" && "470") ||
-      (group === "onrt" && "900-10")
+      (group === "omcb" && "100") ||
+      (group === "ombc" && "110") ||
+      (group === "omcl" && "470") ||
+      (group === "omlc" && "520") ||
+      (group === "onrt" && "470")
     );
   }
 
