@@ -250,11 +250,12 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       const accountId = parseInt(req.params.accountId);
 
       const SECTION_WHERE = { user: { id: user?.id } };
-      const { fiscalYear } = await SectionState.findOne({
+      const { profile } = await SectionState.findOne({
         select: SECTION_SELECT,
         relations: SECTION_RELATIONS,
         where: SECTION_WHERE,
       });
+      const fiscalYear = profile.fiscalYear.find(({ primary }) => primary);
 
       const account = await Account.findOneBy({ id: accountId });
       if (!account) responseError(res, "Account not found.", 404);
@@ -316,23 +317,19 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
           404
         );
 
-      const balanceToSet = await VoucherDetail.findOne({
-        select: {
-          mayor: {
-            id: true,
-            saldo: true,
-          },
-        },
-        relations: { mayor: true },
-        where: {
-          mayor: {
-            id: fields.id,
-            is_reference: true,
-            fiscalYear: { id: fiscalYearId },
-            account: { id: accountId },
-          },
+      const INITIAL_BALANCE_WHERE = {
+        mayor: {
+          id: fields.id,
+          is_reference: true,
+          fiscalYear: { id: fiscalYearId },
           account: { id: accountId },
         },
+        account: { id: accountId },
+      };
+      const balanceToSet = await VoucherDetail.findOne({
+        select: VOUCHER_DETAIL_SELECT,
+        relations: VOUCHER_DETAIL_RELATIONS,
+        where: INITIAL_BALANCE_WHERE,
       });
 
       const saldo = fields.voucherDetail.debe - fields.voucherDetail.haber;
