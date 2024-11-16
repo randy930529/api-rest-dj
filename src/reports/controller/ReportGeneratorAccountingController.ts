@@ -101,6 +101,7 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         select: VOUCHER_SELECT,
         relations: VOUCHER_RELATIONS,
         where: VOUCHER_WHERE,
+        order: { number: "ASC" },
       });
 
       if (!vouchers.length)
@@ -538,9 +539,9 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
 
       const total = passive.total + patrimony.total + utility;
 
-      if (patrimony.total < 0) patrimony.total *= -1;
-      if (asset.caja < 0) asset.caja *= -1;
-      if (asset.banco < 0) asset.banco *= -1;
+      patrimony.total = Math.abs(patrimony.total);
+      asset.caja = Math.abs(asset.caja);
+      asset.banco = Math.abs(asset.banco);
 
       const data = {
         fullName,
@@ -667,9 +668,7 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         );
 
       const utilityOrLost =
-        (incomes < 0 ? incomes * -1 : incomes) -
-        averagePayments +
-        capitalPayments;
+        Math.abs(incomes) - averagePayments + capitalPayments;
       const expeses = Array.from(expesesToPayments.values());
 
       const data = {
@@ -684,7 +683,7 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         expeses,
       };
 
-      if (data.incomes < 0) data.incomes *= -1;
+      data.incomes = Math.abs(data.incomes);
 
       const compiledTemplate = pug.compileFile(this.templatePath);
       const htmlContent = compiledTemplate(data);

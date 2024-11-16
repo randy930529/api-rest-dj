@@ -62,6 +62,9 @@ export class FiscalYear extends Model {
   @JoinColumn()
   musicalGroup: MusicalGroup;
 
+  @Column({ default: false })
+  primary: boolean;
+
   @OneToMany(
     () => SupportDocument,
     (supportDocument) => supportDocument.fiscalYear,
