@@ -4,20 +4,13 @@ import { ENV } from "./settings/environment";
 import * as pug from "pug";
 import { convert } from "html-to-text";
 
-const smtp =
-  ENV.debug === "staging"
-    ? {
-        service: "Yahoo",
-        secure: ENV.emailSecure,
-        auth: ENV.auth,
-      }
-    : {
-        host: ENV.emailHost,
-        port: ENV.emailPort,
-        secure: ENV.emailSecure,
-        auth: ENV.auth,
-        tls: ENV.tls,
-      };
+const smtp = {
+  host: ENV.emailHost,
+  port: ENV.emailPort,
+  secure: ENV.emailSecure,
+  auth: ENV.auth,
+  tls: ENV.tls,
+};
 
 export default class Email {
   emailUser: string;
@@ -49,10 +42,13 @@ export default class Email {
       html,
     };
 
-    const info = await this.newTransport().sendMail(mailOptions);
     if (ENV.debug === "development") {
-      console.log(nodemailer.getTestMessageUrl(info));
+      console.log({
+        ...mailOptions,
+        html: undefined,
+      });
     }
+    await this.newTransport().sendMail(mailOptions);
   }
 
   async sendVerificationCode() {

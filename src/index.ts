@@ -11,17 +11,7 @@ import { Routes } from "./router";
 import { errorHandler } from "./errors/middlewares/errorHandler";
 import { appConfig } from "../config";
 import verifyPaymentsNotRegistered from "./api/utils";
-import WebSocketServer, { socketClients } from "./utils/socket";
-
-//Para provar el envio de correo. Eliminar!
-import * as nodemailer from "nodemailer";
-if (appConfig.debug === "development" || appConfig.debug === "staging") {
-  (async function () {
-    const credentials = await nodemailer.createTestAccount();
-    console.log(credentials);
-  })();
-}
-//
+// import WebSocketServer, { socketClients } from "./utils/socket";
 
 AppDataSource.initialize()
   .then(async () => {
@@ -32,7 +22,7 @@ AppDataSource.initialize()
     app.use(bodyParser.json());
     app.use(cors(appConfig.corsOptions));
 
-    const { server, wss } = WebSocketServer(app);
+    // const { server, wss } = WebSocketServer(app);
 
     // register express routes from defined application routes
     Routes.forEach((route) => {
@@ -102,7 +92,8 @@ AppDataSource.initialize()
     });
 
     // start express server
-    server.listen(appConfig.port);
+    // server.listen(appConfig.port);
+    app.listen(appConfig.port);
 
     console.log(
       `🚀  Express server has started on port ${appConfig.port}. Server ready at: http://localhost:${appConfig.port}/`

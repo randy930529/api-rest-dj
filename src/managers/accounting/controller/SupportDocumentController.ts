@@ -250,12 +250,11 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       const accountId = parseInt(req.params.accountId);
 
       const SECTION_WHERE = { user: { id: user?.id } };
-      const { profile } = await SectionState.findOne({
+      const { fiscalYear } = await SectionState.findOne({
         select: SECTION_SELECT,
         relations: SECTION_RELATIONS,
         where: SECTION_WHERE,
       });
-      const fiscalYear = profile.fiscalYear.find(({ primary }) => primary);
 
       const account = await Account.findOneBy({ id: accountId });
       if (!account) responseError(res, "Account not found.", 404);

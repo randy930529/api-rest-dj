@@ -7,7 +7,7 @@ import * as ws from "ws";
 export const socketClients: Map<string, ws> = new Map();
 
 export default function WebSocketServer(app: core.Express){
-    const server = http.createServer(app);
+    const server = http.createServer(/*app*/);
     const wss = new ws.Server({ noServer: true });
 
     server.on("upgrade", (request, socket, head) => {
