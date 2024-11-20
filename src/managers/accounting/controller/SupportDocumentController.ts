@@ -1,24 +1,28 @@
 import { NextFunction, Request, Response } from "express";
+import { In, NotBrackets } from "typeorm";
 import * as moment from "moment";
 import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { AppDataSource } from "../../../data-source";
+import { responseError } from "../../../errors/responseError";
 import { appConfig } from "../../../../config";
 import { SupportDocument } from "../../../entity/SupportDocument";
-import { CreateSupportDocumentDTO } from "../dto/request/createSupportDocument.dto";
-import { CreatedSupportDocumentDTO } from "../dto/response/createdSupportDocument.dto";
-import { UpdateSupportDocumentDTO } from "../dto/request/updateSupportDocument.dto";
-import { responseError } from "../../../errors/responseError";
-import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import { Element } from "../../../entity/Element";
 import { FiscalYear } from "../../../entity/FiscalYear";
 import { ProfileActivity } from "../../../entity/ProfileActivity";
-import { Dj08SectionData, SectionName } from "../../../entity/Dj08SectionData";
 import { Voucher } from "../../../entity/Voucher";
 import { VoucherDetail } from "../../../entity/VoucherDetail";
 import { Account } from "../../../entity/Account";
 import { Mayor } from "../../../entity/Mayor";
 import { SectionState } from "../../../entity/SectionState";
+import { Dj08SectionData, SectionName } from "../../../entity/Dj08SectionData";
+import { CreateSupportDocumentDTO } from "../dto/request/createSupportDocument.dto";
+import { CreatedSupportDocumentDTO } from "../dto/response/createdSupportDocument.dto";
+import { UpdateSupportDocumentDTO } from "../dto/request/updateSupportDocument.dto";
+import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import { calculeF20ToDj08 } from "../../../reports/utils/utilsToReports";
+import { CreateMayorDTO } from "../dto/request/createMayor.dto";
+import { SetInitialBalanceDTO } from "../dto/request/setInitialBalance.dto";
+import { InitialBalancesDTO } from "../dto/request/getInitialBalances.dto";
 import {
   AllDataSectionsDj08Type,
   DataSectionAType,
@@ -43,17 +47,19 @@ import {
   FISCAL_YEAR_RELATIONS,
   FISCAL_YEAR_SELECT,
 } from "../utils/query/fiscalYear.fetch";
-import { CreateMayorDTO } from "../dto/request/createMayor.dto";
 import {
   VOUCHER_DETAIL_ORDER,
   VOUCHER_DETAIL_RELATIONS,
   VOUCHER_DETAIL_SELECT,
 } from "../utils/query/voucherDetail.fetch";
-import { SetInitialBalanceDTO } from "../dto/request/setInitialBalance.dto";
 import {
   SECTION_RELATIONS,
   SECTION_SELECT,
 } from "../utils/query/fiscalYearToUserSection.fetch";
+import {
+  MAYOR_RELATIONS,
+  MAYOR_SELECT,
+} from "../utils/query/initialBalance.fetch";
 
 export class SupportDocumentController extends EntityControllerBase<SupportDocument> {
   constructor() {
@@ -244,6 +250,45 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
     }
   }
 
+  async getInitialBalancesAll(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { fiscalYear }: InitialBalancesDTO = req.body;
+      const acountInitials = await this.getAccountInitialsBalances();
+      const codeAccountInitials = await acountInitials.map(({ code }) => code);
+
+      if (!fiscalYear?.id)
+        responseError(res, "Get initial balances requiere an id valid.", 404);
+
+      const mayor = await this.getInitialsBalances(
+        fiscalYear.id,
+        codeAccountInitials
+      );
+
+      return acountInitials.map((account, index) => {
+        if (
+          mayor.find((val) => val.voucherDetail.account.code === account.code)
+        ) {
+          return mayor[index];
+        }
+        return Mayor.create({
+          date: moment(`${fiscalYear.year - 1}-12-31`).toDate(),
+          saldo: 0,
+          init_saldo: true,
+          voucherDetail: {
+            debe: 0,
+            haber: 0,
+            account,
+          },
+          account,
+          fiscalYear,
+        });
+      });
+    } catch (error) {
+      if (res.statusCode === 200) res.status(500);
+      next(error);
+    }
+  }
+
   async getInitialBalance(req: Request, res: Response, next: NextFunction) {
     try {
       const { user } = req.body;
@@ -260,17 +305,10 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       if (!account) responseError(res, "Account not found.", 404);
 
       const mayor = await Mayor.findOne({
-        select: {
-          voucherDetail: {
-            id: true,
-            debe: true,
-            haber: true,
-            account: { id: true, code: true },
-          },
-        },
-        relations: { voucherDetail: { account: true } },
+        select: MAYOR_SELECT,
+        relations: MAYOR_RELATIONS,
         where: {
-          is_reference: true,
+          init_saldo: true,
           fiscalYear: { id: fiscalYear.id },
           account: { id: accountId },
         },
@@ -281,7 +319,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         : Mayor.create({
             date: moment(`${fiscalYear.year - 1}-12-31`).toDate(),
             saldo: 0,
-            is_reference: true,
+            init_saldo: true,
             voucherDetail: {
               debe: 0,
               haber: 0,
@@ -319,7 +357,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       const INITIAL_BALANCE_WHERE = {
         mayor: {
           id: fields.id,
-          is_reference: true,
+          init_saldo: true,
           fiscalYear: { id: fiscalYearId },
           account: { id: accountId },
         },
@@ -1172,5 +1210,70 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         where: { id: element.id },
       })
     )?.account;
+  }
+
+  private async getInitialsBalances(
+    fiscalYearId: number,
+    accountCodes: string[]
+  ): Promise<Mayor[]> {
+    return await Mayor.find({
+      select: MAYOR_SELECT,
+      relations: MAYOR_RELATIONS,
+      where: {
+        init_saldo: true,
+        fiscalYear: { id: fiscalYearId },
+        account: { code: In(accountCodes) },
+      },
+      order: { account: { code: "ASC" } },
+    });
+  }
+
+  private async getInitialBalancesToFiscalYearId(fiscalYearId: number) {
+    return await Mayor.createQueryBuilder("mayor")
+      .leftJoin("mayor.fiscalYear", "fiscalYear", "fiscalYear.id = :id", {
+        id: fiscalYearId,
+      })
+      .leftJoinAndSelect("mayor.voucherDetail", "voucherDetail")
+      .leftJoinAndSelect("voucherDetail.account", "account")
+      .leftJoin("mayor.account", "mayorAccount")
+      .where("mayor.init_saldo = :initSaldo", { initSaldo: true })
+      .andWhere(
+        new NotBrackets((qb) => {
+          qb.where("mayorAccount.code LIKE :patrimonyAccouns", {
+            patrimonyAccouns: "6%",
+          })
+            .orWhere("mayorAccount.code LIKE :expenseAccouns", {
+              expenseAccouns: "8%",
+            })
+            .orWhere("mayorAccount.code LIKE :incomeAccouns", {
+              incomeAccouns: "9%",
+            });
+        })
+      )
+      .getMany();
+  }
+
+  private async getAccountInitialsBalances(
+    patrimonyAccouns: string = "6%",
+    expenseAccouns: string = "8%",
+    incomeAccouns: string = "9%"
+  ): Promise<Account[]> {
+    return await Account.createQueryBuilder()
+      .select(["id", "code", "description", "acreedor"])
+      .where(
+        new NotBrackets((qb) => {
+          qb.where("code LIKE :patrimonyAccouns", {
+            patrimonyAccouns,
+          })
+            .orWhere("code LIKE :expenseAccouns", {
+              expenseAccouns,
+            })
+            .orWhere("code LIKE :incomeAccouns", {
+              incomeAccouns,
+            });
+        })
+      )
+      .orderBy("code", "ASC")
+      .getRawMany();
   }
 }

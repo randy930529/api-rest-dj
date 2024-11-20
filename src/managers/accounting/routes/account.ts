@@ -16,14 +16,14 @@ export const accountRoutes = [
     method: "get",
     route: "/accounts",
     controller: AccountController,
-    middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
+    middlewares: [authMiddleware],
     action: "all",
   },
   {
     method: "get",
     route: "/account/:id",
     controller: AccountController,
-    middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
+    middlewares: [authMiddleware],
     action: "onAccount",
   },
   {
@@ -39,6 +39,13 @@ export const accountRoutes = [
     controller: AccountController,
     middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
     action: "deleteAccount",
+  },
+  {
+    method: "get",
+    route: "/initial/balances",
+    controller: SupportDocumentController,
+    middlewares: [authMiddleware],
+    action: "getInitialBalancesAll",
   },
   {
     method: "get",

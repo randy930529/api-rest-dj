@@ -19,7 +19,7 @@ export class Mayor extends Model {
   saldo: number;
 
   @Column({ default: false })
-  is_reference: boolean;
+  init_saldo: boolean;
 
   @OneToOne(() => VoucherDetail, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   @JoinColumn()

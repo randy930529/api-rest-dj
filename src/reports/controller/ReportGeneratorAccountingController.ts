@@ -227,7 +227,7 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         totalDebe,
         totalHaber,
       } = biggers.reduce<AccountingMayorType>(
-        (acc, { date, saldo, is_reference, voucherDetail }) => {
+        (acc, { date, saldo, init_saldo: initSaldo, voucherDetail }) => {
           const { debe, haber } = voucherDetail;
 
           const mayorDetail: MayorDetailType = {
@@ -238,7 +238,7 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
             saldo,
           };
 
-          if (is_reference) {
+          if (initSaldo) {
             mayorDetail.detail = "Saldo inicial";
             acc.accounting.unshift(mayorDetail);
           } else {
