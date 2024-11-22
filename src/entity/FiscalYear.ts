@@ -52,6 +52,9 @@ export class FiscalYear extends Model {
   @Column({ default: false })
   run_acounting: boolean;
 
+  @Column({ default: true })
+  balanced: boolean;
+
   @ManyToOne(() => Profile, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   @JoinColumn()
   profile: Profile;

@@ -1,18 +1,33 @@
 import { NextFunction, Request, Response } from "express";
-import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
-import { EntityControllerBase } from "../../../base/EntityControllerBase";
+import { In } from "typeorm";
 import { AppDataSource } from "../../../data-source";
-import { FiscalYear } from "../../../entity/FiscalYear";
+import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { responseError } from "../../../errors/responseError";
+import { FiscalYear } from "../../../entity/FiscalYear";
+import { VoucherDetail } from "../../../entity/VoucherDetail";
+import { Mayor } from "../../../entity/Mayor";
+import { Account } from "../../../entity/Account";
+import { Dj08SectionData } from "../../../entity/Dj08SectionData";
 import getProfileById from "../../../profile/utils/getProfileById";
+import { BiggerAccountsInitialsType } from "../../../utils/definitions";
+import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import { FiscalYearDTO } from "../dto/request/fiscalYear.dto";
 import { CreateFiscalYearDTO } from "../dto/response/createFiscalYear.dto";
-import { Dj08SectionData } from "../../../entity/Dj08SectionData";
 import { defaultSectionDataInit } from "../utils";
+import {
+  getAccountInitialsBalances,
+  getBiggerAccountsInitials,
+  passPreviousBalanceToInitialBalance,
+  updateBiggers,
+} from "../../accounting/utils";
 import {
   DELETE_FISCAL_YEAR_RELATIONS,
   DELETE_FISCAL_YEAR_SELECT,
 } from "../utils/query/deleteFiscalYear.fetch";
+import {
+  BALANCES_ACCOUNT_RELATIONS,
+  BALANCES_ACCOUNT_SELECT,
+} from "../utils/query/balancesAccountFiscalYear.fetch";
 
 export class FiscalYearController extends EntityControllerBase<FiscalYear> {
   constructor() {
@@ -46,7 +61,10 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
         section_data,
       });
 
-      await newDj08Data.save();
+      await Promise.all([
+        newDj08Data.save(),
+        passPreviousBalanceToInitialBalance(newFiscalYear),
+      ]);
 
       const fiscalYear: CreateFiscalYearDTO = newFiscalYear;
       const resp: BaseResponseDTO = {
@@ -197,6 +215,63 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);
+    }
+  }
+
+  async passBalancesToFiscalYear(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const id = parseInt(req.params.fiscalYearId);
+      const [codeAccountInitials] = await getAccountInitialsBalances();
+
+      const [currentBalances, newBalances] = await Promise.all([
+        Account.find({
+          select: BALANCES_ACCOUNT_SELECT,
+          relations: BALANCES_ACCOUNT_RELATIONS,
+          where: {
+            code: In(codeAccountInitials),
+            mayors: { fiscalYear: { id }, init_saldo: true },
+          },
+          order: { code: "ASC", id: "ASC" },
+        }),
+        getBiggerAccountsInitials({ id } as FiscalYear, codeAccountInitials),
+      ]);
+
+      const mapBalances = new Map<string, BiggerAccountsInitialsType>();
+      for (const balance of newBalances) {
+        mapBalances.set(balance.code, balance);
+      }
+
+      const promises = currentBalances.map(async ({ code, mayors }) => {
+        const { debe = 0, haber = 0, saldo = 0 } = mapBalances.get(code) || {};
+        return Promise.all([
+          VoucherDetail.create({
+            ...mayors[0].voucherDetail,
+            debe,
+            haber,
+          }).save(),
+          Mayor.create({
+            ...mayors[0],
+            saldo,
+          }).save(),
+        ]);
+      });
+
+      const data = await Promise.all(promises);
+      if (data) {
+        const promises = data.map(([, mayor]) => updateBiggers(mayor));
+        await Promise.all(promises);
+      }
+
+      res.status(204);
+      return "Pass balances successfully.";
+    } catch (error) {
+      if (res.statusCode === 200) res.status(500);
+      next(error);
+      return;
     }
   }
 }

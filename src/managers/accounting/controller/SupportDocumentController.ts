@@ -20,9 +20,9 @@ import { CreatedSupportDocumentDTO } from "../dto/response/createdSupportDocumen
 import { UpdateSupportDocumentDTO } from "../dto/request/updateSupportDocument.dto";
 import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import { calculeF20ToDj08 } from "../../../reports/utils/utilsToReports";
-import { CreateMayorDTO } from "../dto/request/createMayor.dto";
 import { SetInitialBalanceDTO } from "../dto/request/setInitialBalance.dto";
 import { InitialBalancesDTO } from "../dto/request/getInitialBalances.dto";
+import { getAccountInitialsBalances, updateBiggers } from "../utils";
 import {
   AllDataSectionsDj08Type,
   DataSectionAType,
@@ -48,7 +48,6 @@ import {
   FISCAL_YEAR_SELECT,
 } from "../utils/query/fiscalYear.fetch";
 import {
-  VOUCHER_DETAIL_ORDER,
   VOUCHER_DETAIL_RELATIONS,
   VOUCHER_DETAIL_SELECT,
 } from "../utils/query/voucherDetail.fetch";
@@ -225,13 +224,13 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       );
 
       const [, , updatedDJ08Error] = await Promise.all([
-        this.updateBiggers({
+        updateBiggers({
           id: -1,
           date: null,
           fiscalYear: removeSupportDocument.fiscalYear,
           voucherDetail: removeSupportDocument.voucher.voucherDetails[0],
         }),
-        this.updateBiggers({
+        updateBiggers({
           id: -1,
           date: null,
           fiscalYear: removeSupportDocument.fiscalYear,
@@ -253,8 +252,8 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
   async getInitialBalancesAll(req: Request, res: Response, next: NextFunction) {
     try {
       const { fiscalYear }: InitialBalancesDTO = req.body;
-      const acountInitials = await this.getAccountInitialsBalances();
-      const codeAccountInitials = await acountInitials.map(({ code }) => code);
+      const [codeAccountInitials, acountInitials] =
+        await getAccountInitialsBalances();
 
       if (!fiscalYear?.id)
         responseError(res, "Get initial balances requiere an id valid.", 404);
@@ -379,7 +378,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       balanceResult.save();
 
       if (balanceToSet) {
-        this.updateBiggers({ ...balanceResult.mayor });
+        updateBiggers(balanceResult.mayor);
       }
 
       const mayor = balanceResult;
@@ -999,7 +998,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
 
         const resultVoucher = await voucher.save();
         for (const voucherDetail of resultVoucher.voucherDetails) {
-          await this.updateBiggers({
+          await updateBiggers({
             id: voucherDetail.mayor?.id,
             date,
             fiscalYear,
@@ -1152,56 +1151,6 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
     ];
   }
 
-  private async updateBiggers(fieldsMayor: CreateMayorDTO): Promise<void> {
-    const { account, debe, haber } = fieldsMayor.voucherDetail;
-    const fiscalYearId = fieldsMayor.fiscalYear.id;
-    const accountId = account?.id;
-
-    const [mayorsToUpdate, saldo] = await this.updateBalances(
-      accountId,
-      fiscalYearId
-    );
-
-    fieldsMayor.id ||
-      mayorsToUpdate.push(
-        Mayor.create({
-          ...fieldsMayor,
-          saldo: saldo + debe - haber,
-          account,
-        })
-      );
-
-    await Mayor.save(mayorsToUpdate);
-  }
-
-  private async updateBalances(
-    accountId: number,
-    fiscalYearId: number
-  ): Promise<[Mayor[], number]> {
-    const VOUCHER_DETAIL_WHERE = {
-      account: { id: accountId },
-      mayor: { fiscalYear: { id: fiscalYearId } },
-    };
-    const voucherDetailsToBalanceAccount = await VoucherDetail.find({
-      select: VOUCHER_DETAIL_SELECT,
-      relations: VOUCHER_DETAIL_RELATIONS,
-      where: VOUCHER_DETAIL_WHERE,
-      order: VOUCHER_DETAIL_ORDER,
-    });
-
-    return voucherDetailsToBalanceAccount.reduce<[Mayor[], number]>(
-      ([mayorsToUpdate, saldo], val) => {
-        saldo += val.debe - val.haber;
-        if (val.mayor.saldo !== saldo) {
-          val.mayor.saldo = saldo;
-          mayorsToUpdate.push(val.mayor);
-        }
-        return [mayorsToUpdate, saldo];
-      },
-      [[], 0]
-    );
-  }
-
   private async getAccountElement(element: Element): Promise<Account> {
     return (
       await Element.findOne({
@@ -1251,29 +1200,5 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         })
       )
       .getMany();
-  }
-
-  private async getAccountInitialsBalances(
-    patrimonyAccouns: string = "6%",
-    expenseAccouns: string = "8%",
-    incomeAccouns: string = "9%"
-  ): Promise<Account[]> {
-    return await Account.createQueryBuilder()
-      .select(["id", "code", "description", "acreedor"])
-      .where(
-        new NotBrackets((qb) => {
-          qb.where("code LIKE :patrimonyAccouns", {
-            patrimonyAccouns,
-          })
-            .orWhere("code LIKE :expenseAccouns", {
-              expenseAccouns,
-            })
-            .orWhere("code LIKE :incomeAccouns", {
-              incomeAccouns,
-            });
-        })
-      )
-      .orderBy("code", "ASC")
-      .getRawMany();
   }
 }

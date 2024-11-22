@@ -51,4 +51,11 @@ export const fiscalYearRoutes = [
     middlewares: [authMiddleware],
     action: "deleteMusicalGroup",
   },
+  {
+    method: "post",
+    route: "/fiscal/year/pass/saldo/:fiscalYearId",
+    controller: FiscalYearController,
+    middlewares: [authMiddleware],
+    action: "passBalancesToFiscalYear",
+  },
 ];
