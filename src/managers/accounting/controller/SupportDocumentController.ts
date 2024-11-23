@@ -22,7 +22,11 @@ import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import { calculeF20ToDj08 } from "../../../reports/utils/utilsToReports";
 import { SetInitialBalanceDTO } from "../dto/request/setInitialBalance.dto";
 import { InitialBalancesDTO } from "../dto/request/getInitialBalances.dto";
-import { getAccountInitialsBalances, updateBiggers } from "../utils";
+import {
+  getAccountInitialsBalances,
+  updateBiggers,
+  verifyCuadreInAccount,
+} from "../utils";
 import {
   AllDataSectionsDj08Type,
   DataSectionAType,
@@ -61,8 +65,10 @@ import {
 } from "../utils/query/initialBalance.fetch";
 
 export class SupportDocumentController extends EntityControllerBase<SupportDocument> {
+  private balanced: boolean;
   constructor() {
     const repository = AppDataSource.getRepository(SupportDocument);
+    const balanced = true;
     super(repository);
   }
 
@@ -223,21 +229,36 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         supportDocumentToRemove
       );
 
-      const [, , updatedDJ08Error] = await Promise.all([
-        updateBiggers({
-          id: -1,
-          date: null,
-          fiscalYear: removeSupportDocument.fiscalYear,
-          voucherDetail: removeSupportDocument.voucher.voucherDetails[0],
-        }),
-        updateBiggers({
-          id: -1,
-          date: null,
-          fiscalYear: removeSupportDocument.fiscalYear,
-          voucherDetail: removeSupportDocument.voucher.voucherDetails[1],
-        }),
-        this.updatedDJ08(removeSupportDocument),
-      ]);
+      const [balanceDebit, balanceCredit, updatedDJ08Error] = await Promise.all(
+        [
+          updateBiggers({
+            id: -1,
+            date: null,
+            fiscalYear: removeSupportDocument.fiscalYear,
+            voucherDetail: removeSupportDocument.voucher.voucherDetails[0],
+          }),
+          updateBiggers({
+            id: -1,
+            date: null,
+            fiscalYear: removeSupportDocument.fiscalYear,
+            voucherDetail: removeSupportDocument.voucher.voucherDetails[1],
+          }),
+          this.updatedDJ08(removeSupportDocument),
+        ]
+      );
+
+      if (balanceDebit || balanceCredit) {
+        const balancedDebe = (this.balanced =
+          verifyCuadreInAccount(balanceDebit));
+        const balancedHaber = (this.balanced =
+          verifyCuadreInAccount(balanceDebit));
+        this.balanced = balancedDebe && balancedHaber;
+
+        if (this.balanced !== removeSupportDocument.fiscalYear.balanced) {
+          removeSupportDocument.fiscalYear.balanced = this.balanced;
+          removeSupportDocument.fiscalYear.save();
+        }
+      }
 
       if (updatedDJ08Error) responseError(res, updatedDJ08Error, 500);
 
@@ -378,14 +399,21 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       balanceResult.save();
 
       if (balanceToSet) {
-        updateBiggers(balanceResult.mayor);
+        this.balanced = verifyCuadreInAccount(
+          await updateBiggers(balanceResult.mayor)
+        );
+
+        if (this.balanced !== fields.fiscalYear.balanced) {
+          fields.fiscalYear.balanced = this.balanced;
+          FiscalYear.save(fields.fiscalYear);
+        }
       }
 
       const mayor = balanceResult;
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
-        data: { mayor },
+        data: { mayor, balance: this.balanced },
       };
 
       res.status(201);
@@ -1200,5 +1228,9 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         })
       )
       .getMany();
+  }
+
+  private setBalanced(): void {
+    this.balanced = !this.balanced;
   }
 }

@@ -40,6 +40,11 @@ import {
   STATE_ACCOUNT_RELATIONS,
   STATE_ACCOUNT_SELECT,
 } from "../utils/query/mayorAccount.fetch";
+import {
+  calculeNetPatrimony,
+  calculeUtility,
+  generateSaldoIncomesAndSaldoExpenses,
+} from "../../managers/accounting/utils";
 
 export default class ReportGeneratorAccountingController extends ReportGenerator {
   private templatePath: string;
@@ -522,11 +527,9 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
       passive.pasivo = Math.abs(passive.pasivo);
       passive.longTerm = Math.abs(passive.longTerm);
       passive.total = Math.abs(passive.total);
-      const saldoAccount900 = this.saldoTotalInAccount900(accountsBigger);
-      const saldoAccountsExpenses =
-        this.saldoTotalInAccountExpense(accountsBigger);
-
-      const utility = Math.abs(saldoAccount900) - saldoAccountsExpenses;
+      const [saldoIncomes, saldoExpenses] =
+        generateSaldoIncomesAndSaldoExpenses(accountsBigger);
+      const utility = calculeUtility(saldoIncomes, saldoExpenses);
       patrimony.patrimonio.push(
         ...[
           {
@@ -537,7 +540,11 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         ]
       );
 
-      const total = passive.total + patrimony.total + utility;
+      const total = calculeNetPatrimony(
+        passive.total,
+        patrimony.total,
+        utility
+      );
 
       patrimony.total = Math.abs(patrimony.total);
       asset.caja = Math.abs(asset.caja);
@@ -620,10 +627,11 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
       const emissionDate = moment(date_end).format("DD/MM/YYYY");
       const fullName = `${first_name} ${last_name}`;
 
-      const incomes = this.saldoTotalInAccount900(accountsBigger);
+      const [saldoIncomes, saldoExpenses] =
+        generateSaldoIncomesAndSaldoExpenses(accountsBigger);
 
       const stateInit: DataYieldStateReportType = {
-        averagePayments: this.saldoTotalInAccountExpense(accountsBigger),
+        averagePayments: saldoExpenses,
         capitalPayments: 0,
         expesesToPayments: new Map([
           ["800", { description: "Gastos de Operación", amount: 0 }],
@@ -635,19 +643,15 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         utilityOrLost: 0,
       };
 
-      const { averagePayments, capitalPayments, expesesToPayments } =
+      const { capitalPayments, expesesToPayments } =
         accountsBigger.reduce<DataYieldStateReportType>(
           (acc, { saldo, account }) => {
             const code = account?.code;
 
             switch (code) {
               case "820":
-                // acc.averagePayments += saldo;
                 acc.capitalPayments += saldo;
                 break;
-              case "810":
-              case "800":
-              // acc.averagePayments += saldo;
               case "800":
               case "810-10":
               case "810-20":
@@ -668,7 +672,7 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         );
 
       const utilityOrLost =
-        Math.abs(incomes) - averagePayments + capitalPayments;
+        Math.abs(saldoIncomes) - saldoExpenses + capitalPayments;
       const expeses = Array.from(expesesToPayments.values());
 
       const data = {
@@ -676,8 +680,8 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         nit,
         printedDate,
         emissionDate,
-        incomes,
-        averagePayments,
+        incomes: saldoIncomes,
+        averagePayments: saldoExpenses,
         capitalPayments,
         utilityOrLost,
         expeses,
@@ -699,20 +703,5 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
       if (res.statusCode === 200) res.status(500);
       next(error);
     }
-  }
-
-  private saldoTotalInAccount900(accountsBigger: Mayor[]): number {
-    return accountsBigger.reduce((saldoTotal, { saldo, account }) => {
-      return account?.code.startsWith("900") ? saldoTotal + saldo : saldoTotal;
-    }, 0);
-  }
-
-  private saldoTotalInAccountExpense(accountsBigger: Mayor[]): number {
-    return accountsBigger.reduce((saldoTotal, { saldo, account }) => {
-      return account?.code.startsWith("810") ||
-        ["800", "820"].indexOf(account?.code) !== -1
-        ? saldoTotal + saldo
-        : saldoTotal;
-    }, 0);
   }
 }

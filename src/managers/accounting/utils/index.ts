@@ -122,7 +122,7 @@ export async function getBiggerAccountsInitials(
 
 export async function updateBiggers(
   fieldsMayor: CreateMayorDTO
-): Promise<void> {
+): Promise<Mayor[]> {
   const { account, debe, haber } = fieldsMayor.voucherDetail;
   const fiscalYearId = fieldsMayor.fiscalYear.id;
   const accountId = account?.id;
@@ -138,7 +138,7 @@ export async function updateBiggers(
       })
     );
 
-  await Mayor.save(mayorsToUpdate);
+  return await Mayor.save(mayorsToUpdate);
 }
 
 export async function updateBalances(
@@ -167,4 +167,71 @@ export async function updateBalances(
     },
     [[], 0]
   );
+}
+
+export function isIncomeOrGosto(accountCode: string = ""): boolean | void {
+  if (accountCode.startsWith("900")) {
+    return true;
+  } else if (
+    accountCode.startsWith("810") ||
+    ["800", "820"].indexOf(accountCode) !== -1
+  ) {
+    return false;
+  } else {
+    return;
+  }
+}
+
+export function generateSaldoIncomesAndSaldoExpenses(
+  balances: Mayor[]
+): [number, number] {
+  return balances.reduce(
+    ([saldoIncomesTotal, saldoExpensesTotal], { saldo, account }) => {
+      const isIncome = isIncomeOrGosto(account.code);
+      if (isIncome === undefined)
+        return [saldoIncomesTotal, saldoExpensesTotal];
+
+      if (isIncome) {
+        saldoIncomesTotal += saldo;
+      } else {
+        saldoExpensesTotal += saldo;
+      }
+
+      return [saldoIncomesTotal, saldoExpensesTotal];
+    },
+    [0, 0]
+  );
+}
+
+export function calculeUtility(
+  saldoIncomes: number,
+  saldoExpenses: number
+): number {
+  return parseFloat((Math.abs(saldoIncomes) - saldoExpenses).toFixed(2));
+}
+
+export function calculeNetPatrimony(
+  passiveTotal: number,
+  patrimonyTotal: number,
+  utility: number
+): number {
+  return parseFloat((passiveTotal + patrimonyTotal + utility).toFixed(2));
+}
+
+export function verifyCuadreInAccount(balances: Mayor[]): boolean {
+  const { totalDebe, totalHaber } = balances.reduce<{
+    totalDebe: number;
+    totalHaber: number;
+  }>(
+    (cuadre, { saldo }) => {
+      if (saldo > 0) {
+        cuadre.totalDebe += saldo;
+      } else {
+        cuadre.totalHaber += Math.abs(saldo);
+      }
+      return cuadre;
+    },
+    { totalDebe: 0, totalHaber: 0 }
+  );
+  return totalDebe === totalHaber;
 }

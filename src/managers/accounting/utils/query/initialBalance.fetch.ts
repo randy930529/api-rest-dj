@@ -9,9 +9,11 @@ export const MAYOR_SELECT: FindOptionsSelect<Mayor> = {
     account: { id: true, code: true, acreedor: true, description: true },
   },
   account: { id: true, code: true, acreedor: true, description: true },
+  fiscalYear: { id: true, year: true, balanced: true },
 };
 
 export const MAYOR_RELATIONS: FindOptionsRelations<Mayor> = {
   voucherDetail: { account: true },
   account: true,
+  fiscalYear: true,
 };
