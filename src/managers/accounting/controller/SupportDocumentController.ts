@@ -68,8 +68,8 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
   private balanced: boolean;
   constructor() {
     const repository = AppDataSource.getRepository(SupportDocument);
-    const balanced = true;
     super(repository);
+    this.setBalanced();
   }
 
   async createSupportDocument(req: Request, res: Response, next: NextFunction) {
@@ -413,13 +413,12 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
-        data: { mayor, balance: this.balanced },
+        data: { mayor, balanced: this.balanced },
       };
 
       res.status(201);
       return { ...resp };
     } catch (error) {
-      console.log(error);
       if (res.statusCode === 200) res.status(500);
       next(error);
     }

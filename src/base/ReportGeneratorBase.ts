@@ -29,6 +29,7 @@ class ReportGenerator {
 
       return pdfBuffer;
     } catch (error) {
+      console.error(error);
       throw new Error("Generate pdf of report faild.");
     }
   }
