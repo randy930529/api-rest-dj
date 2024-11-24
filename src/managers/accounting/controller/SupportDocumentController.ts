@@ -394,7 +394,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       const balanceResult = await VoucherDetail.create({
         ...(balanceToSet || {}),
         ...fields.voucherDetail,
-        mayor: { ...(balanceToSet.mayor || {}), ...fields, saldo },
+        mayor: { ...(balanceToSet?.mayor || {}), ...fields, saldo },
       });
       balanceResult.save();
 
@@ -419,6 +419,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       res.status(201);
       return { ...resp };
     } catch (error) {
+      console.log(error);
       if (res.statusCode === 200) res.status(500);
       next(error);
     }

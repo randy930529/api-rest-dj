@@ -16,6 +16,8 @@ export const SECTION_SELECT: FindOptionsSelect<SectionState> = {
     },
     regimen: true,
     is_tcp: true,
+	run_acounting: true,
+    balanced: true,
     created_at: true,
     updated_at: true,
     supportDocuments: {
