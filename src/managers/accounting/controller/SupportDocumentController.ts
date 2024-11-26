@@ -409,7 +409,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         }
       }
 
-      const mayor = balanceResult;
+      const mayor = balanceResult.mayor;
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
