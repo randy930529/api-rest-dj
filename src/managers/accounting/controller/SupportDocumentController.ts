@@ -273,12 +273,12 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
   async getInitialBalancesAll(req: Request, res: Response, next: NextFunction) {
     try {
       const { fiscalYear }: InitialBalancesDTO = req.body;
-      const [codeAccountInitials, acountInitials] =
-        await getAccountInitialsBalances();
 
       if (!fiscalYear?.id)
         responseError(res, "Get initial balances requiere an id valid.", 404);
 
+      const [codeAccountInitials, acountInitials] =
+        await getAccountInitialsBalances();
       const mayor = await this.getInitialsBalances(
         fiscalYear.id,
         codeAccountInitials
