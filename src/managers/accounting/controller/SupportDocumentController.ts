@@ -279,16 +279,18 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
 
       const [codeAccountInitials, acountInitials] =
         await getAccountInitialsBalances();
-      const mayor = await this.getInitialsBalances(
+      const mayors = await this.getInitialsBalances(
         fiscalYear.id,
         codeAccountInitials
       );
 
       return acountInitials.map((account, index) => {
         if (
-          mayor.find((val) => val.voucherDetail.account.code === account.code)
+          mayors.find(
+            (mayor) => mayor.voucherDetail?.account?.code === account.code
+          )
         ) {
-          return mayor[index];
+          return mayors[index];
         }
         return Mayor.create({
           date: moment(`${fiscalYear.year - 1}-12-31`).toDate(),
