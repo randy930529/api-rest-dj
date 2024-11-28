@@ -273,22 +273,24 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
   async getInitialBalancesAll(req: Request, res: Response, next: NextFunction) {
     try {
       const { fiscalYear }: InitialBalancesDTO = req.body;
-      const [codeAccountInitials, acountInitials] =
-        await getAccountInitialsBalances();
 
       if (!fiscalYear?.id)
         responseError(res, "Get initial balances requiere an id valid.", 404);
 
-      const mayor = await this.getInitialsBalances(
+      const [codeAccountInitials, acountInitials] =
+        await getAccountInitialsBalances();
+      const mayors = await this.getInitialsBalances(
         fiscalYear.id,
         codeAccountInitials
       );
 
       return acountInitials.map((account, index) => {
         if (
-          mayor.find((val) => val.voucherDetail.account.code === account.code)
+          mayors.find(
+            (mayor) => mayor.voucherDetail?.account?.code === account.code
+          )
         ) {
-          return mayor[index];
+          return mayors[index];
         }
         return Mayor.create({
           date: moment(`${fiscalYear.year - 1}-12-31`).toDate(),
@@ -409,7 +411,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         }
       }
 
-      const mayor = balanceResult;
+      const mayor = balanceResult.mayor;
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,

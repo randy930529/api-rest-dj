@@ -32,7 +32,7 @@ export async function getAccountInitialsBalances(
       })
     )
     .orderBy("code", "ASC")
-    .getRawMany();
+    .getRawMany<Account>();
 
   const codeAccountInitials = acountInitials.map(({ code }) => code);
 
