@@ -1,9 +1,7 @@
 import puppeteer from "puppeteer";
-import * as htmlpdf from "html-pdf";
 import { SectionState } from "../entity/SectionState";
 import { SupportDocument } from "../entity/SupportDocument";
 import { SupportDocumentPartialType } from "../utils/definitions";
-import { ENV } from "../utils/settings/environment";
 
 class ReportGenerator {
   private chromePath: string;
@@ -14,20 +12,6 @@ class ReportGenerator {
 
   async generatePDF({ htmlContent }: { htmlContent: string }): Promise<Buffer> {
     try {
-      if (ENV.debug === "staging") {
-        const options = {
-          format: "Letter",
-        };
-
-        htmlpdf.create(htmlContent, options).toBuffer((err, buffer) => {
-          if (err) {
-            throw new Error(err.message);
-          }
-
-          return buffer;
-        });
-      }
-
       const browser = await puppeteer.launch({
         headless: "new",
         executablePath: this.chromePath,

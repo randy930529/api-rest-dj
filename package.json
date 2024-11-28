@@ -32,7 +32,6 @@
     "express-async-errors": "^3.1.1",
     "express-jwt-authz": "^2.4.1",
     "express-validator": "^7.0.1",
-    "html-pdf": "^3.0.1",
     "html-to-text": "^9.0.5",
     "inquirer": "^8.0.0",
     "joi": "^17.9.2",
