@@ -77,6 +77,7 @@ export class ProfileController extends EntityControllerBase<Profile> {
         year,
         date,
         individual: true,
+        primary:true,
         profile: newProfile,
       });
       const newFiscalYear = await FiscalYear.save(newFiscalYearDTO);

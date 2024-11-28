@@ -240,6 +240,7 @@ export class AuthController {
           year,
           date,
           individual: true,
+          primary:true,
           profile,
         });
         const newFiscalYear = await this.fiscalYearRepository.save(

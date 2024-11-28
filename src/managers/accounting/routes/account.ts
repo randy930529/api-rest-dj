@@ -41,14 +41,14 @@ export const accountRoutes = [
     action: "deleteAccount",
   },
   {
-    method: "get",
+    method: "post",
     route: "/initial/balances",
     controller: SupportDocumentController,
     middlewares: [authMiddleware],
     action: "getInitialBalancesAll",
   },
   {
-    method: "get",
+    method: "post",
     route: "/initial/balance/:accountId",
     controller: SupportDocumentController,
     middlewares: [authMiddleware, userMiddleware],
