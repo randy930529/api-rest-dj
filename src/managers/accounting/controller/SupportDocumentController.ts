@@ -24,6 +24,7 @@ import { SetInitialBalanceDTO } from "../dto/request/setInitialBalance.dto";
 import { InitialBalancesDTO } from "../dto/request/getInitialBalances.dto";
 import {
   getAccountInitialsBalances,
+  getBiggerAccounts,
   updateBiggers,
   verifyCuadreInAccount,
 } from "../utils";
@@ -390,6 +391,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         relations: VOUCHER_DETAIL_RELATIONS,
         where: INITIAL_BALANCE_WHERE,
       });
+      this.balanced = balanceToSet.mayor.fiscalYear.balanced
 
       const saldo = fields.voucherDetail.debe - fields.voucherDetail.haber;
 
@@ -397,17 +399,15 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         ...(balanceToSet || {}),
         ...fields.voucherDetail,
         mayor: { ...(balanceToSet?.mayor || {}), ...fields, saldo },
-      });
-      balanceResult.save();
+      }).save();
 
-      if (balanceToSet) {
-        this.balanced = verifyCuadreInAccount(
-          await updateBiggers(balanceResult.mayor)
-        );
+      if ((await updateBiggers(balanceResult.mayor)).length > 0) {
+        const balances = await getBiggerAccounts(fields.fiscalYear);
+        this.balanced = verifyCuadreInAccount(balances as unknown as Mayor[]);
 
-        if (this.balanced !== fields.fiscalYear.balanced) {
-          fields.fiscalYear.balanced = this.balanced;
-          FiscalYear.save(fields.fiscalYear);
+        if (this.balanced !== balanceToSet.mayor.fiscalYear.balanced) {
+          balanceResult.mayor.fiscalYear.balanced = this.balanced;
+          FiscalYear.save(balanceResult.mayor.fiscalYear);
         }
       }
 

@@ -10,6 +10,7 @@ import {
   VOUCHER_DETAIL_RELATIONS,
   VOUCHER_DETAIL_SELECT,
 } from "./query/voucherDetail.fetch";
+import { getLastMayorInAccount } from "./query/queryLastMayorInAccount.fetch";
 
 export async function getAccountInitialsBalances(
   patrimonyAccouns: string = "6%",
@@ -73,6 +74,14 @@ export async function passPreviousBalanceToInitialBalance(
   await Promise.all(promises);
 }
 
+export async function getBiggerAccounts(
+  fiscalYear: FiscalYear
+): Promise<BiggerAccountsInitialsType[]> {
+  return await getLastMayorInAccount(
+    fiscalYear.id
+  ).getRawMany<BiggerAccountsInitialsType>();
+}
+
 export async function getBiggerAccountsInitials(
   fiscalYear: FiscalYear,
   accountCodes: string[]
@@ -82,42 +91,9 @@ export async function getBiggerAccountsInitials(
   }
   const codes = accountCodes.map((c) => `'${c}'`).join(",");
 
-  return await Account.createQueryBuilder("account")
-    .select(["id", "code", "description", "acreedor"])
-    .innerJoinAndSelect(
-      (qb) => {
-        return qb
-          .select(["date", "saldo", "init_saldo"])
-          .addSelect(`"voucherDetail"."haber"`)
-          .addSelect(`"voucherDetail"."debe"`)
-          .addSelect(`"mayorAccount"."accountId"`, "mayor_accountId")
-          .from(Mayor, "mayorAccount")
-          .innerJoin(
-            "mayorAccount.voucherDetail",
-            "voucherDetail",
-            `"mayorAccount"."accountId" = "voucherDetail"."accountId"`
-          )
-          .innerJoin(
-            (subQuery) => {
-              return subQuery
-                .select(`"accountId", MAX("id") AS max_id`)
-                .from(Mayor, "mayor")
-                .where(`"mayor"."fiscalYearId"=:fiscalYearId`, {
-                  fiscalYearId: fiscalYear.id,
-                })
-                .groupBy(`"accountId"`)
-                .groupBy(`"accountId"`);
-            },
-            "lastMayor",
-            `"mayorAccount"."accountId" = "lastMayor"."accountId" AND "mayorAccount"."id" = "lastMayor"."max_id"`
-          );
-      },
-      "mayor",
-      `"account"."id" = "mayor"."mayor_accountId"`
-    )
+  return await getLastMayorInAccount(fiscalYear.id)
     .where(`account.code IN(${codes})`)
-    .orderBy("account.code", "ASC")
-    .getRawMany();
+    .getRawMany<BiggerAccountsInitialsType>();
 }
 
 export async function updateBiggers(
@@ -225,7 +201,7 @@ export function verifyCuadreInAccount(balances: Mayor[]): boolean {
   }>(
     (cuadre, { saldo }) => {
       if (saldo > 0) {
-        cuadre.totalDebe += saldo;
+        cuadre.totalDebe += Number(saldo);
       } else {
         cuadre.totalHaber += Math.abs(saldo);
       }

@@ -10,7 +10,7 @@ export const VOUCHER_DETAIL_SELECT: FindOptionsSelect<VoucherDetail> = {
     id: true,
     code: true,
   },
-  mayor: { id: true, saldo: true, fiscalYear: { id: true } },
+  mayor: { id: true, saldo: true, fiscalYear: { id: true, balanced:true,individual:true } },
 };
 
 export const VOUCHER_DETAIL_RELATIONS: FindOptionsRelations<VoucherDetail> = {
