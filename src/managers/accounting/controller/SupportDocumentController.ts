@@ -230,35 +230,30 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         supportDocumentToRemove
       );
 
-      const [balanceDebit, balanceCredit, updatedDJ08Error] = await Promise.all(
-        [
-          updateBiggers({
-            id: -1,
-            date: null,
-            fiscalYear: removeSupportDocument.fiscalYear,
-            voucherDetail: removeSupportDocument.voucher.voucherDetails[0],
-          }),
-          updateBiggers({
-            id: -1,
-            date: null,
-            fiscalYear: removeSupportDocument.fiscalYear,
-            voucherDetail: removeSupportDocument.voucher.voucherDetails[1],
-          }),
-          this.updatedDJ08(removeSupportDocument),
-        ]
+      const [, , updatedDJ08Error] = await Promise.all([
+        updateBiggers({
+          id: -1,
+          date: null,
+          fiscalYear: removeSupportDocument.fiscalYear,
+          voucherDetail: removeSupportDocument.voucher.voucherDetails[0],
+        }),
+        updateBiggers({
+          id: -1,
+          date: null,
+          fiscalYear: removeSupportDocument.fiscalYear,
+          voucherDetail: removeSupportDocument.voucher.voucherDetails[1],
+        }),
+        this.updatedDJ08(removeSupportDocument),
+      ]);
+
+      const balances = await getBiggerAccounts(
+        supportDocumentToRemove.fiscalYear
       );
+      this.balanced = verifyCuadreInAccount(balances as unknown as Mayor[]);
 
-      if (balanceDebit || balanceCredit) {
-        const balancedDebe = (this.balanced =
-          verifyCuadreInAccount(balanceDebit));
-        const balancedHaber = (this.balanced =
-          verifyCuadreInAccount(balanceDebit));
-        this.balanced = balancedDebe && balancedHaber;
-
-        if (this.balanced !== removeSupportDocument.fiscalYear.balanced) {
-          removeSupportDocument.fiscalYear.balanced = this.balanced;
-          removeSupportDocument.fiscalYear.save();
-        }
+      if (this.balanced !== removeSupportDocument.fiscalYear.balanced) {
+        removeSupportDocument.fiscalYear.balanced = this.balanced;
+        removeSupportDocument.fiscalYear.save();
       }
 
       if (updatedDJ08Error) responseError(res, updatedDJ08Error, 500);
@@ -285,14 +280,15 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         codeAccountInitials
       );
 
-      return acountInitials.map((account, index) => {
-        if (
-          mayors.find(
-            (mayor) => mayor.voucherDetail?.account?.code === account.code
-          )
-        ) {
-          return mayors[index];
+      return acountInitials.map((account) => {
+        const existingMayor = mayors.find(
+          (mayor) => mayor.account?.code === account.code
+        );
+
+        if (existingMayor) {
+          return existingMayor;
         }
+
         return Mayor.create({
           date: moment(`${fiscalYear.year - 1}-12-31`).toDate(),
           saldo: 0,
@@ -386,36 +382,43 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         },
         account: { id: accountId },
       };
-      const balanceToSet = await VoucherDetail.findOne({
+      const voucherDetailToSet = await VoucherDetail.findOne({
         select: VOUCHER_DETAIL_SELECT,
         relations: VOUCHER_DETAIL_RELATIONS,
         where: INITIAL_BALANCE_WHERE,
       });
-      this.balanced = balanceToSet.mayor.fiscalYear.balanced
 
       const saldo = fields.voucherDetail.debe - fields.voucherDetail.haber;
 
-      const balanceResult = await VoucherDetail.create({
-        ...(balanceToSet || {}),
-        ...fields.voucherDetail,
-        mayor: { ...(balanceToSet?.mayor || {}), ...fields, saldo },
-      }).save();
-
-      if ((await updateBiggers(balanceResult.mayor)).length > 0) {
-        const balances = await getBiggerAccounts(fields.fiscalYear);
-        this.balanced = verifyCuadreInAccount(balances as unknown as Mayor[]);
-
-        if (this.balanced !== balanceToSet.mayor.fiscalYear.balanced) {
-          balanceResult.mayor.fiscalYear.balanced = this.balanced;
-          FiscalYear.save(balanceResult.mayor.fiscalYear);
-        }
+      if (!fields.voucherDetail.account) {
+        fields.voucherDetail.account = fields.account;
       }
 
-      const mayor = balanceResult.mayor;
+      const balanceData = {
+        ...(voucherDetailToSet || {}),
+        ...fields.voucherDetail,
+        mayor: { ...(voucherDetailToSet?.mayor || {}), ...fields, saldo },
+      };
+
+      const balanceResult = await VoucherDetail.create(balanceData).save();
+      if (!voucherDetailToSet) {
+        balanceResult.mayor.voucherDetail.id = balanceResult.id;
+        await balanceResult.mayor.save();
+      }
+
+      await updateBiggers(balanceResult.mayor);
+      const balances = await getBiggerAccounts(fields.fiscalYear);
+      this.balanced = verifyCuadreInAccount(balances as unknown as Mayor[]);
+
+      if (this.balanced !== fields.fiscalYear.balanced) {
+        fields.fiscalYear.balanced = this.balanced;
+        await FiscalYear.save(fields.fiscalYear);
+      }
+
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,
-        data: { mayor, balanced: this.balanced },
+        data: { mayor: balanceResult.mayor, balanced: this.balanced },
       };
 
       res.status(201);

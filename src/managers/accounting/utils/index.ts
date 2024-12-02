@@ -49,6 +49,9 @@ export async function passPreviousBalanceToInitialBalance(
     year: fiscalYear.year - 1,
     profile: { id: fiscalYear.__profileId__ },
   });
+
+  if (!previousFiscalYear) return;
+
   const balancesInitials = await getBiggerAccountsInitials(
     previousFiscalYear,
     codeAccountInitials
@@ -98,7 +101,7 @@ export async function getBiggerAccountsInitials(
 
 export async function updateBiggers(
   fieldsMayor: CreateMayorDTO
-): Promise<Mayor[]> {
+): Promise<void> {
   const { account, debe, haber } = fieldsMayor.voucherDetail;
   const fiscalYearId = fieldsMayor.fiscalYear.id;
   const accountId = account?.id;
@@ -114,7 +117,7 @@ export async function updateBiggers(
       })
     );
 
-  return await Mayor.save(mayorsToUpdate);
+  await Mayor.save(mayorsToUpdate);
 }
 
 export async function updateBalances(
