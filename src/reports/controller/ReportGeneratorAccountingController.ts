@@ -315,6 +315,7 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         "accounting/tableBalanceConfirmationAccounts"
       );
       const fileName = `Balance de comprobación de saldos_${date_end}.pdf`;
+      const date = moment(date_end).toDate();
 
       const SECTION_WHERE = { user: { id: user?.id } };
       const { profile, fiscalYear } = await SectionState.findOne({
@@ -325,7 +326,7 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
 
       const MAYOR_WHERE = {
         fiscalYear: { id: fiscalYear.id },
-        date: LessThanOrEqual(date_end),
+        date: LessThanOrEqual(date),
       };
       const yearBiggers = await Mayor.find({
         select: MAYOR_ACCOUNT_SELECT,
@@ -421,11 +422,17 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         fiscalYear: { id: fiscalYear.id },
         date: LessThanOrEqual(date),
       };
+      // const yearBiggers = await Mayor.find({
+      //   select: STATE_ACCOUNT_SELECT,
+      //   relations: STATE_ACCOUNT_RELATIONS,
+      //   where: MAYOR_WHERE,
+      //   order: STATE_ACCOUNT_ORDER,
+      // });
       const yearBiggers = await Mayor.find({
-        select: STATE_ACCOUNT_SELECT,
-        relations: STATE_ACCOUNT_RELATIONS,
+        select: MAYOR_ACCOUNT_SELECT,
+        relations: MAYOR_ACCOUNT_RELATIONS,
         where: MAYOR_WHERE,
-        order: STATE_ACCOUNT_ORDER,
+        order: MAYOR_ACCOUNT_ORDER,
       });
 
       if (!yearBiggers.length)

@@ -13,7 +13,7 @@ import {
 import { getLastMayorInAccount } from "./query/queryLastMayorInAccount.fetch";
 
 export async function getAccountInitialsBalances(
-  patrimonyAccouns: string = "6%",
+  patrimonyAccouns: string = "",
   expenseAccouns: string = "8%",
   incomeAccouns: string = "9%"
 ): Promise<[string[], Account[]]> {
@@ -43,6 +43,8 @@ export async function getAccountInitialsBalances(
 export async function passPreviousBalanceToInitialBalance(
   fiscalYear: FiscalYear
 ): Promise<void> {
+  if (!fiscalYear.run_acounting) return;
+
   const [codeAccountInitials] = await getAccountInitialsBalances();
 
   const previousFiscalYear = await FiscalYear.findOneBy({
