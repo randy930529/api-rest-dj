@@ -61,6 +61,7 @@ import {
   SECTION_SELECT,
 } from "../utils/query/fiscalYearToUserSection.fetch";
 import {
+  getInitialsBalances,
   MAYOR_RELATIONS,
   MAYOR_SELECT,
 } from "../utils/query/initialBalance.fetch";
@@ -275,7 +276,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
 
       const [codeAccountInitials, acountInitials] =
         await getAccountInitialsBalances();
-      const mayors = await this.getInitialsBalances(
+      const mayors = await getInitialsBalances(
         fiscalYear.id,
         codeAccountInitials
       );
@@ -1192,22 +1193,6 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         where: { id: element.id },
       })
     )?.account;
-  }
-
-  private async getInitialsBalances(
-    fiscalYearId: number,
-    accountCodes: string[]
-  ): Promise<Mayor[]> {
-    return await Mayor.find({
-      select: MAYOR_SELECT,
-      relations: MAYOR_RELATIONS,
-      where: {
-        init_saldo: true,
-        fiscalYear: { id: fiscalYearId },
-        account: { code: In(accountCodes) },
-      },
-      order: { account: { code: "ASC" } },
-    });
   }
 
   private setBalanced(): void {

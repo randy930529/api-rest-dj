@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { In } from "typeorm";
+import * as moment from "moment";
 import { AppDataSource } from "../../../data-source";
 import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { responseError } from "../../../errors/responseError";
@@ -28,6 +29,7 @@ import {
   BALANCES_ACCOUNT_RELATIONS,
   BALANCES_ACCOUNT_SELECT,
 } from "../utils/query/balancesAccountFiscalYear.fetch";
+import { getInitialsBalances } from "../../accounting/utils/query/initialBalance.fetch";
 
 export class FiscalYearController extends EntityControllerBase<FiscalYear> {
   constructor() {
@@ -225,7 +227,8 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
   ) {
     try {
       const id = parseInt(req.params.fiscalYearId);
-      const [codeAccountInitials] = await getAccountInitialsBalances();
+      const [codeAccountInitials,acountInitials] = await getAccountInitialsBalances();
+      const fiscalYear = await this.repository.findOneBy({id})
 
       const [currentBalances, newBalances] = await Promise.all([
         Account.find({
@@ -266,8 +269,33 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
         await Promise.all(promises);
       }
 
-      res.status(204);
-      return "Pass balances successfully.";
+      const mayors = await getInitialsBalances(
+        id,
+        codeAccountInitials
+      );
+
+      return acountInitials.map((account) => {
+        const existingMayor = mayors.find(
+          (mayor) => mayor.account?.code === account.code
+        );
+
+        if (existingMayor) {
+          return existingMayor;
+        }
+
+        return Mayor.create({
+          date: moment(`${fiscalYear.year - 1}-12-31`).toDate(),
+          saldo: 0,
+          init_saldo: true,
+          voucherDetail: {
+            debe: 0,
+            haber: 0,
+            account,
+          },
+          account,
+          fiscalYear,
+        });
+      });
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);
