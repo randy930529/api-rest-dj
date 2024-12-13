@@ -237,7 +237,7 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
           },
           order: { code: "ASC", id: "ASC" },
         }),
-        getBiggerAccountsInitials({ id } as FiscalYear, codeAccountInitials),
+        getBiggerAccountsInitials(id, codeAccountInitials),
       ]);
 
       const mapBalances = new Map<string, BiggerAccountsInitialsType>();

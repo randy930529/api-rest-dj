@@ -1,50 +1,37 @@
 import { NextFunction, Request, Response } from "express";
-import { Between, LessThanOrEqual } from "typeorm";
 import * as pug from "pug";
 import * as moment from "moment";
 import ReportGenerator from "../../base/ReportGeneratorBase";
 import { responseError } from "../../errors/responseError";
-import { SectionState } from "../../entity/SectionState";
 import { Voucher } from "../../entity/Voucher";
 import { Mayor } from "../../entity/Mayor";
+import { Profile } from "../../entity/Profile";
 import { CreateVoucherReport } from "../dto/request/createVoucherReport.dto";
 import { CreateMayorReport } from "../dto/request/createMayorReport.dto";
 import { CreateBalanceReport } from "../dto/request/createBalanceReport.dto";
 import { pugTemplatePath } from "../utils/utilsToReports";
 import {
-  AccountingMayorType,
-  AccountingVoucherType,
-  DataSituationStateReportType,
-  DataVoucherReportType,
-  DataYieldStateReportType,
-  MayorDetailType,
-} from "../../utils/definitions";
-import {
-  VOUCHER_RELATIONS,
-  VOUCHER_SELECT,
-} from "../utils/query/vouchers.fetch";
-import {
-  SECTION_RELATIONS,
-  SECTION_SELECT,
-} from "../utils/query/voucherReportSection.fetch";
-import {
-  MAYOR_ACCOUNT_ORDER,
-  MAYOR_ACCOUNT_RELATIONS,
-  MAYOR_ACCOUNT_SELECT,
-  MAYOR_ORDER,
-  MAYOR_RELATIONS,
-  MAYOR_SELECT,
-} from "../utils/query/mayor.fetch";
-import {
-  STATE_ACCOUNT_ORDER,
-  STATE_ACCOUNT_RELATIONS,
-  STATE_ACCOUNT_SELECT,
-} from "../utils/query/mayorAccount.fetch";
-import {
   calculeNetPatrimony,
   calculeUtility,
   generateSaldoIncomesAndSaldoExpenses,
+  parse2Float,
 } from "../../managers/accounting/utils";
+import { getLastMayorInAccounts, getSearchRange } from "../utils";
+import {
+  AccountingMayorType,
+  AccountingVoucherType,
+  DataSituationStateReportType,
+  DataYieldStateReportType,
+  MayorDetailType,
+  SearchRangeType,
+  VoucherDetailType,
+} from "../../utils/definitions";
+import { getDataVoucherReport } from "../utils/query/vouchers.fetch";
+import { getUserSectionToReport } from "../utils/query/voucherReportSection.fetch";
+import {
+  getMayorsOfTheFiscalYearInDateRange,
+  getMayorsOfTheFiscalYearUntilDate,
+} from "../utils/query/mayor.fetch";
 
 export default class ReportGeneratorAccountingController extends ReportGenerator {
   private templatePath: string;
@@ -72,42 +59,18 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         rangeVouchers || ""
       }].pdf`;
 
-      const SECTION_WHERE = { user: { id: user?.id } };
-      const { profile, fiscalYear } = await SectionState.findOne({
-        select: SECTION_SELECT,
-        relations: SECTION_RELATIONS,
-        where: SECTION_WHERE,
-      });
+      const { profile, fiscalYear } = await getUserSectionToReport(user?.id);
 
-      const [date_start, date_end] = rangeDate || [];
-      const voucherDateWhere = date_end
-        ? {
-            date: Between(date_start, date_end),
-          }
-        : {
-            date: date_start,
-          };
+      const [
+        { searchRange: searchRangeDate },
+        { searchRange: searchRangeNumber },
+      ] = this.createVoucherSearchRanges(rangeDate, rangeVouchers);
 
-      const [voucher_start, voucher_end] = rangeVouchers || [];
-      const voucherNumbreWhere = voucher_end
-        ? {
-            number: Between(voucher_start, voucher_end),
-          }
-        : {
-            number: voucher_start,
-          };
-
-      const VOUCHER_WHERE = {
-        supportDocument: { fiscalYear: { id: fiscalYear?.id } },
-        date: voucherDateWhere.date,
-        number: voucherNumbreWhere.number,
-      };
-      const vouchers = await Voucher.find({
-        select: VOUCHER_SELECT,
-        relations: VOUCHER_RELATIONS,
-        where: VOUCHER_WHERE,
-        order: { number: "ASC" },
-      });
+      const vouchers = await getDataVoucherReport(
+        fiscalYear?.id,
+        searchRangeDate,
+        searchRangeNumber
+      );
 
       if (!vouchers.length)
         responseError(
@@ -116,55 +79,7 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
           404
         );
 
-      const { first_name = "", last_name = "", nit = "" } = profile || {};
-      const printedDate = moment().format("DD/MM/YYYY");
-      const fullName = `${first_name} ${last_name}`;
-
-      const data = vouchers.map<DataVoucherReportType>(
-        ({
-          number,
-          description: descriptionVoucher,
-          date,
-          voucherDetails,
-          supportDocument,
-        }) => {
-          const accountingDate = moment(date).format("DD/MM/YYYY");
-          const { type_document, document: documentNumber } = supportDocument;
-          const descriptionElement =
-            type_document === "g" && supportDocument.element.description;
-
-          const { accounting, totalDebe, totalHaber } =
-            voucherDetails.reduce<AccountingVoucherType>(
-              (acc, { account, debe, haber }) => {
-                const { code, description } = account;
-                acc.accounting.push({
-                  code,
-                  description,
-                  debe: debe,
-                  haber: haber,
-                });
-                acc.totalDebe += debe;
-                acc.totalHaber += haber;
-                return acc;
-              },
-              { accounting: [], totalDebe: 0, totalHaber: 0 }
-            );
-
-          return {
-            fullName,
-            nit,
-            printedDate,
-            number,
-            documentNumber,
-            descriptionVoucher,
-            descriptionElement,
-            accountingDate,
-            accounting,
-            totalDebe,
-            totalHaber,
-          };
-        }
-      );
+      const data = this.generateVoucherReportData(profile, vouchers);
 
       const compiledTemplate = pug.compileFile(this.templatePath);
       const htmlContent = compiledTemplate({ data });
@@ -182,7 +97,7 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
     }
   }
 
-  async generateBiggerReport(
+  async generateMayorReport(
     req: Request,
     res: Response,
     next: NextFunction
@@ -190,103 +105,31 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
     try {
       const { date_start, date_end, account, user }: CreateMayorReport =
         req.body;
-      const { id: accountId, code, description } = account;
       this.templatePath = pugTemplatePath("accounting/tableBigger");
-      const fileName = `Mayor de Cuenta_${code}-${description}-[${[
-        date_start,
-        date_end,
-      ]}].pdf`;
+      const fileName = `Mayor de Cuenta_${account?.code}-${
+        account?.description
+      }-[${[date_start, date_end]}].pdf`;
 
-      const { profile, fiscalYear } = await SectionState.findOne({
-        select: SECTION_SELECT,
-        relations: SECTION_RELATIONS,
-        where: { user: { id: user?.id } },
-      });
+      const { profile, fiscalYear } = await getUserSectionToReport(user?.id);
+      const mayors = await getMayorsOfTheFiscalYearInDateRange(
+        fiscalYear?.id,
+        account?.id,
+        getSearchRange<Date>([date_start, date_end])
+      );
 
-      const MAYOR_WHERE = {
-        fiscalYear: { id: fiscalYear.id },
-        account: { id: accountId },
-        date: Between(date_start, date_end),
-      };
-      const biggers = await Mayor.find({
-        select: MAYOR_SELECT,
-        relations: MAYOR_RELATIONS,
-        where: MAYOR_WHERE,
-        order: MAYOR_ORDER,
-      });
-
-      if (!biggers.length)
+      if (!mayors.length)
         responseError(
           res,
           "No hay valores de comprobantes para el rango espesificado.",
           404
         );
 
-      const accountCode = `${code} - ${description?.toUpperCase()}`;
-      const { first_name = "", last_name = "", nit = "" } = profile || {};
-      const printedDate = moment().format("DD/MM/YYYY");
-      const fullName = `${first_name} ${last_name}`;
-
-      const {
-        accounting: accountingDetails,
-        totalDebe,
-        totalHaber,
-      } = biggers.reduce<AccountingMayorType>(
-        (acc, { date, saldo, init_saldo: initSaldo, voucherDetail }) => {
-          const { debe, haber } = voucherDetail;
-
-          const mayorDetail: MayorDetailType = {
-            detail: "",
-            date: moment(date).format("DD/MM/YYYY"),
-            debe,
-            haber,
-            saldo,
-          };
-
-          if (initSaldo) {
-            mayorDetail.detail = "Saldo inicial";
-            acc.accounting.unshift(mayorDetail);
-          } else {
-            mayorDetail.detail = `${"Comprobante"} No. ${
-              voucherDetail.voucher.number
-            }`;
-            acc.accounting.push(mayorDetail);
-          }
-          acc.totalDebe += debe;
-          acc.totalHaber += haber;
-
-          return acc;
-        },
-        { accounting: [], totalDebe: 0, totalHaber: 0 }
+      const data = this.generateMayorReportData(
+        account?.code,
+        account?.description,
+        profile,
+        mayors
       );
-
-      const accountingRemoveDuplicate = new Map<string, MayorDetailType>();
-      for (const mayor of accountingDetails) {
-        const mayorDetail = accountingRemoveDuplicate.get(mayor.date as string);
-        if (mayorDetail) {
-          const voucher = mayor.detail.replace("Comprobante No. ", ",");
-          accountingRemoveDuplicate.set(mayor.date as string, {
-            ...mayorDetail,
-            detail: mayorDetail.detail + voucher,
-            debe: mayorDetail.debe + mayor.debe,
-            haber: mayorDetail.haber + mayor.haber,
-            saldo: mayor.saldo,
-          });
-        } else {
-          accountingRemoveDuplicate.set(mayor.date as string, mayor);
-        }
-      }
-      const accounting = Array.from(accountingRemoveDuplicate.values());
-
-      const data = {
-        fullName,
-        nit,
-        printedDate,
-        accountCode,
-        accounting,
-        totalDebe,
-        totalHaber,
-      };
 
       const compiledTemplate = pug.compileFile(this.templatePath);
       const htmlContent = compiledTemplate(data);
@@ -304,7 +147,7 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
     }
   }
 
-  async generateBalanceConfirmationAccountsReport(
+  async generateBalanceAccountsReport(
     req: Request,
     res: Response,
     next: NextFunction
@@ -317,72 +160,21 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
       const fileName = `Balance de comprobación de saldos_${date_end}.pdf`;
       const date = moment(date_end).toDate();
 
-      const SECTION_WHERE = { user: { id: user?.id } };
-      const { profile, fiscalYear } = await SectionState.findOne({
-        select: SECTION_SELECT,
-        relations: SECTION_RELATIONS,
-        where: SECTION_WHERE,
-      });
+      const { profile, fiscalYear } = await getUserSectionToReport(user?.id);
+      const mayorsOftheFiscalYear = await getMayorsOfTheFiscalYearUntilDate(
+        fiscalYear.id,
+        date
+      );
 
-      const MAYOR_WHERE = {
-        fiscalYear: { id: fiscalYear.id },
-        date: LessThanOrEqual(date),
-      };
-      const yearBiggers = await Mayor.find({
-        select: MAYOR_ACCOUNT_SELECT,
-        relations: MAYOR_ACCOUNT_RELATIONS,
-        where: MAYOR_WHERE,
-        order: MAYOR_ACCOUNT_ORDER,
-      });
-
-      if (!yearBiggers.length)
+      if (!mayorsOftheFiscalYear.length)
         responseError(
           res,
           "No hay valores de comprobantes para la fecha espesificado.",
           404
         );
 
-      const accountsBigger = Object.values(
-        yearBiggers.reduce<{ [key: string]: Mayor }>((acc, val) => {
-          if (!acc[val.account.code]) {
-            acc[val.account.code] = val;
-          }
-          return acc;
-        }, {})
-      );
-
-      const { first_name = "", last_name = "", nit = "" } = profile || {};
-      const printedDate = moment().format("DD/MM/YYYY");
-      const accountingDate = moment(date_end).format("DD/MM/YYYY");
-      const fullName = `${first_name} ${last_name}`;
-
-      const { accounting, totalDebe, totalHaber } =
-        accountsBigger.reduce<AccountingMayorType>(
-          (acc, { saldo, account }) => {
-            const { code, description: detail } = account;
-
-            acc.accounting.push({
-              code,
-              detail,
-              debe: saldo > 0 ? saldo : 0,
-              haber: saldo < 0 ? saldo * -1 : 0,
-            });
-            acc.totalDebe += saldo > 0 ? saldo : 0;
-            acc.totalHaber += saldo < 0 ? saldo * -1 : 0;
-            return acc;
-          },
-          { accounting: [], totalDebe: 0, totalHaber: 0 }
-        );
-
-      const data = {
-        fullName,
-        nit,
-        printedDate,
-        accountingDate,
-        totalDebe,
-        totalHaber,
-        accounting,
-      };
+      const lastMayors = getLastMayorInAccounts(mayorsOftheFiscalYear);
+      const data = this.generateBalanceReportData(profile, date, lastMayors);
 
       const compiledTemplate = pug.compileFile(this.templatePath);
       const htmlContent = compiledTemplate(data);
@@ -393,6 +185,7 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         "Content-Disposition",
         `attachment; filename="${fileName || this.defaultFileName}"`
       );
+
       res.send(pdfBuffer);
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
@@ -411,162 +204,25 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
       const fileName = `Estado de Situación_${date_end || ""}.pdf`;
       const date = moment(date_end).toDate();
 
-      const SECTION_WHERE = { user: { id: user?.id } };
-      const { profile, fiscalYear } = await SectionState.findOne({
-        select: SECTION_SELECT,
-        relations: SECTION_RELATIONS,
-        where: SECTION_WHERE,
-      });
+      const { profile, fiscalYear } = await getUserSectionToReport(user?.id);
+      const mayors = await getMayorsOfTheFiscalYearUntilDate(
+        fiscalYear?.id,
+        date
+      );
 
-      const MAYOR_WHERE = {
-        fiscalYear: { id: fiscalYear.id },
-        date: LessThanOrEqual(date),
-      };
-      // const yearBiggers = await Mayor.find({
-      //   select: STATE_ACCOUNT_SELECT,
-      //   relations: STATE_ACCOUNT_RELATIONS,
-      //   where: MAYOR_WHERE,
-      //   order: STATE_ACCOUNT_ORDER,
-      // });
-      const yearBiggers = await Mayor.find({
-        select: MAYOR_ACCOUNT_SELECT,
-        relations: MAYOR_ACCOUNT_RELATIONS,
-        where: MAYOR_WHERE,
-        order: MAYOR_ACCOUNT_ORDER,
-      });
-
-      if (!yearBiggers.length)
+      if (!mayors.length)
         responseError(
           res,
           "No hay valores de comprobantes para la fecha espesificado.",
           404
         );
 
-      const accountsBigger = Object.values(
-        yearBiggers.reduce<{ [key: string]: Mayor }>((acc, val) => {
-          if (!acc[val.account.code]) {
-            acc[val.account.code] = val;
-          }
-          return acc;
-        }, {})
+      const lastMayors = getLastMayorInAccounts(mayors);
+      const data = this.generateSituationStateReportData(
+        profile,
+        date,
+        lastMayors
       );
-
-      const { first_name = "", last_name = "", nit = "" } = profile || {};
-      const printedDate = moment().format("DD/MM/YYYY");
-      const emissionDate = moment(date_end).format("DD/MM/YYYY");
-      const fullName = `${first_name} ${last_name}`;
-
-      const stateInit: DataSituationStateReportType = {
-        asset: {
-          activo: 0,
-          banco: 0,
-          caja: 0,
-          total: 0,
-        },
-        passive: {
-          pasivo: 0,
-          lendsShortTerm: 0,
-          longTerm: 0,
-          lendsLongTerm: 0,
-          total: 0,
-        },
-        patrimony: {
-          initSaldo: 0,
-          patrimonio: [],
-          total: 0,
-        },
-        total: 0,
-      };
-      const codeDescription = {
-        "600-20": "Incrementos de aportes del TCP",
-        "600-30": "Erogaciones efectuadas por el TCP",
-        "600-40": "Pago de cuotas del Imp. Sobre Ing. Pers.",
-        "600-50": "Pago de la Cont. a la Seg. Social del TCP",
-      };
-      const { asset, passive, patrimony } =
-        accountsBigger.reduce<DataSituationStateReportType>(
-          (acc, { saldo, account }) => {
-            switch (account?.code) {
-              case "100":
-                acc.asset.caja += saldo;
-              case "110":
-                acc.asset.banco += saldo;
-              case "100":
-              case "110":
-                acc.asset.activo += saldo;
-                acc.asset.total += saldo;
-                break;
-              case "470":
-                acc.passive.lendsShortTerm += saldo;
-                acc.passive.pasivo += saldo;
-              case "520":
-                acc.passive.lendsLongTerm += saldo;
-                acc.passive.longTerm += saldo;
-              case "520":
-              case "470":
-                acc.passive.total += saldo;
-                break;
-              case "600-10":
-                acc.patrimony.initSaldo += saldo * -1;
-                acc.patrimony.total += saldo * -1;
-                break;
-              case "600-20":
-              case "600-30":
-              case "600-40":
-              case "600-50":
-                acc.patrimony.patrimonio.push({
-                  description: codeDescription[account.code],
-                  amount: saldo * -1,
-                });
-                acc.patrimony.total += saldo * -1;
-                break;
-              default:
-                break;
-            }
-
-            return acc;
-          },
-          stateInit
-        );
-
-      passive.lendsLongTerm = Math.abs(passive.lendsLongTerm);
-      passive.lendsShortTerm = Math.abs(passive.lendsShortTerm);
-      passive.pasivo = Math.abs(passive.pasivo);
-      passive.longTerm = Math.abs(passive.longTerm);
-      passive.total = Math.abs(passive.total);
-      const [saldoIncomes, saldoExpenses] =
-        generateSaldoIncomesAndSaldoExpenses(accountsBigger);
-      const utility = calculeUtility(saldoIncomes, saldoExpenses);
-      patrimony.patrimonio.push(
-        ...[
-          {
-            description: "Utilidad retenida",
-            amount: utility > 0 ? utility : 0,
-          },
-          { description: "Perdida", amount: utility < 0 ? utility * -1 : 0 },
-        ]
-      );
-
-      const total = calculeNetPatrimony(
-        passive.total,
-        patrimony.total,
-        utility
-      );
-
-      patrimony.total = Math.abs(patrimony.total);
-      asset.caja = Math.abs(asset.caja);
-      asset.banco = Math.abs(asset.banco);
-
-      const data = {
-        fullName,
-        nit,
-        printedDate,
-        emissionDate,
-        asset,
-        passive,
-        patrimony,
-        total,
-      };
 
       const compiledTemplate = pug.compileFile(this.templatePath);
       const htmlContent = compiledTemplate(data);
@@ -595,106 +251,21 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
       const fileName = `Estado de Rendimiento${date_end || ""}.pdf`;
       const date = moment(date_end).toDate();
 
-      const SECTION_WHERE = { user: { id: user?.id } };
-      const { profile, fiscalYear } = await SectionState.findOne({
-        select: SECTION_SELECT,
-        relations: SECTION_RELATIONS,
-        where: SECTION_WHERE,
-      });
+      const { profile, fiscalYear } = await getUserSectionToReport(user?.id);
+      const mayors = await getMayorsOfTheFiscalYearUntilDate(
+        fiscalYear?.id,
+        date
+      );
 
-      const MAYOR_WHERE = {
-        fiscalYear: { id: fiscalYear.id },
-        date: LessThanOrEqual(date),
-      };
-      const yearBiggers = await Mayor.find({
-        select: STATE_ACCOUNT_SELECT,
-        relations: STATE_ACCOUNT_RELATIONS,
-        where: MAYOR_WHERE,
-        order: STATE_ACCOUNT_ORDER,
-      });
-
-      if (!yearBiggers.length)
+      if (!mayors.length)
         responseError(
           res,
           "No hay valores de comprobantes para la fecha espesificado.",
           404
         );
 
-      const accountsBigger = Object.values(
-        yearBiggers.reduce<{ [key: string]: Mayor }>((acc, val) => {
-          if (!acc[val.account.code]) {
-            acc[val.account.code] = val;
-          }
-          return acc;
-        }, {})
-      );
-
-      const { first_name = "", last_name = "", nit = "" } = profile || {};
-      const printedDate = moment().format("DD/MM/YYYY");
-      const emissionDate = moment(date_end).format("DD/MM/YYYY");
-      const fullName = `${first_name} ${last_name}`;
-
-      const [saldoIncomes, saldoExpenses] =
-        generateSaldoIncomesAndSaldoExpenses(accountsBigger);
-
-      const stateInit: DataYieldStateReportType = {
-        averagePayments: saldoExpenses,
-        capitalPayments: 0,
-        expesesToPayments: new Map([
-          ["800", { description: "Gastos de Operación", amount: 0 }],
-          ["810-10", { description: "Imp. Sobre Ventas", amount: 0 }],
-          ["810-20", { description: "Imp. Sobre Servicios", amount: 0 }],
-          ["810-30", { description: "Imp. Por Utilz. F.T.", amount: 0 }],
-          ["810-40", { description: "Imp. Otros", amount: 0 }],
-        ]),
-        utilityOrLost: 0,
-      };
-
-      const { capitalPayments, expesesToPayments } =
-        accountsBigger.reduce<DataYieldStateReportType>(
-          (acc, { saldo, account }) => {
-            const code = account?.code;
-
-            switch (code) {
-              case "820":
-                acc.capitalPayments += saldo;
-                break;
-              case "800":
-              case "810-10":
-              case "810-20":
-              case "810-30":
-              case "810-40":
-                acc.expesesToPayments.set(code, {
-                  ...acc.expesesToPayments.get(code),
-                  amount: saldo,
-                });
-                break;
-              default:
-                break;
-            }
-
-            return acc;
-          },
-          stateInit
-        );
-
-      const utilityOrLost =
-        Math.abs(saldoIncomes) - saldoExpenses + capitalPayments;
-      const expeses = Array.from(expesesToPayments.values());
-
-      const data = {
-        fullName,
-        nit,
-        printedDate,
-        emissionDate,
-        incomes: saldoIncomes,
-        averagePayments: saldoExpenses,
-        capitalPayments,
-        utilityOrLost,
-        expeses,
-      };
-
-      data.incomes = Math.abs(data.incomes);
+      const lastMayors = getLastMayorInAccounts(mayors);
+      const data = this.generateYieldStateReportData(profile, date, lastMayors);
 
       const compiledTemplate = pug.compileFile(this.templatePath);
       const htmlContent = compiledTemplate(data);
@@ -710,5 +281,464 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
       if (res.statusCode === 200) res.status(500);
       next(error);
     }
+  }
+
+  private createVoucherSearchRanges(
+    rangeDate: Date[] = [],
+    rangeVouchers: number[] = []
+  ): [SearchRangeType<Date>, SearchRangeType<number>] {
+    const voucherSearchDate = getSearchRange<Date>(rangeDate);
+    const voucherSearchNumbre = getSearchRange<number>(rangeVouchers);
+
+    return [voucherSearchDate, voucherSearchNumbre];
+  }
+
+  private generateVoucherReportData(profile: Profile, vouchers: Voucher[]) {
+    const { first_name = "", last_name = "", nit = "" } = profile || {};
+    const printedDate = moment().format("DD/MM/YYYY");
+    const fullName = `${first_name} ${last_name}`;
+
+    return vouchers.map(
+      ({
+        number,
+        description: descriptionVoucher,
+        date,
+        voucherDetails,
+        supportDocument,
+      }) => {
+        const accountingDate = moment(date).format("DD/MM/YYYY");
+        const { type_document, document: documentNumber } = supportDocument;
+        const descriptionElement =
+          type_document === "g" && supportDocument.element.description;
+
+        const { accounting, totalDebe, totalHaber } =
+          voucherDetails.reduce<AccountingVoucherType>(
+            (acc, { account, debe, haber }) => {
+              const { code, description } = account;
+              acc.accounting.push({
+                code,
+                description,
+                debe: debe,
+                haber: haber,
+              });
+              acc.totalDebe += debe;
+              acc.totalHaber += haber;
+              return acc;
+            },
+            { accounting: [], totalDebe: 0, totalHaber: 0 }
+          );
+
+        return {
+          fullName,
+          nit,
+          printedDate,
+          number,
+          documentNumber,
+          descriptionVoucher,
+          descriptionElement,
+          accountingDate,
+          ...this.normalizeVouchersData(totalDebe, totalHaber, accounting),
+        };
+      }
+    );
+  }
+
+  private generateBalanceReportData(
+    profile: Profile,
+    dateEnd: Date,
+    mayors: Mayor[]
+  ) {
+    const { first_name = "", last_name = "", nit = "" } = profile || {};
+    const printedDate = moment().format("DD/MM/YYYY");
+    const accountingDate = moment(dateEnd).format("DD/MM/YYYY");
+    const fullName = `${first_name} ${last_name}`;
+
+    const { accounting, totalDebe, totalHaber } =
+      mayors.reduce<AccountingMayorType>(
+        (acc, { saldo, account }) => {
+          const { code, description: detail } = account;
+
+          acc.accounting.push({
+            code,
+            detail,
+            debe: Math.max(saldo, 0),
+            haber: Math.max(-saldo, 0),
+          });
+          acc.totalDebe += Math.max(saldo, 0);
+          acc.totalHaber += Math.max(-saldo, 0);
+          return acc;
+        },
+        { accounting: [], totalDebe: 0, totalHaber: 0 }
+      );
+
+    return {
+      fullName,
+      nit,
+      printedDate,
+      accountingDate,
+      ...this.normalizeMayorsData(totalDebe, totalHaber, accounting),
+    };
+  }
+
+  private generateMayorReportData(
+    code: string = "",
+    description: string = "",
+    profile: Profile,
+    mayors: Mayor[]
+  ) {
+    const accountCode = `${code} - ${description.toUpperCase()}`;
+    const { first_name = "", last_name = "", nit = "" } = profile || {};
+    const printedDate = moment().format("DD/MM/YYYY");
+    const fullName = `${first_name} ${last_name}`;
+
+    const {
+      accounting: accountingDetails,
+      totalDebe,
+      totalHaber,
+    } = this.generateAccountingDetails(mayors);
+    const accounting = this.joinMayorsSameDate(accountingDetails);
+
+    return {
+      fullName,
+      nit,
+      printedDate,
+      accountCode,
+      ...this.normalizeMayorsData(totalDebe, totalHaber, accounting),
+    };
+  }
+
+  private generateSituationStateReportData(
+    profile: Profile,
+    date: Date,
+    mayors: Mayor[]
+  ) {
+    const { first_name = "", last_name = "", nit = "" } = profile || {};
+    const printedDate = moment().format("DD/MM/YYYY");
+    const emissionDate = moment(date).format("DD/MM/YYYY");
+    const fullName = `${first_name} ${last_name}`;
+
+    const initialState: DataSituationStateReportType = this.initializeState();
+    const codeDescription = this.getCodeDescription();
+
+    const data = mayors.reduce<DataSituationStateReportType>(
+      (data, { saldo, account }) =>
+        this.reduceStateData(data, saldo, account?.code, codeDescription),
+      initialState
+    );
+
+    const [saldoIncomes, saldoExpenses] =
+      generateSaldoIncomesAndSaldoExpenses(mayors);
+    const utility = calculeUtility(saldoIncomes, saldoExpenses);
+
+    data.patrimony.patrimonio.push(
+      {
+        description: "Utilidad retenida",
+        amount: Math.max(utility, 0),
+      },
+      { description: "Perdida", amount: Math.max(-utility, 0) }
+    );
+
+    data.patrimony.total = Math.abs(data.patrimony.total + utility);
+    data.total = calculeNetPatrimony(data.passive.total, data.patrimony.total);
+
+    return {
+      fullName,
+      nit,
+      printedDate,
+      emissionDate,
+      ...this.normalizeStateData(data),
+    };
+  }
+
+  private generateYieldStateReportData(
+    profile: Profile,
+    date: Date,
+    mayors: Mayor[]
+  ) {
+    const { first_name = "", last_name = "", nit = "" } = profile || {};
+    const printedDate = moment().format("DD/MM/YYYY");
+    const emissionDate = moment(date).format("DD/MM/YYYY");
+    const fullName = `${first_name} ${last_name}`;
+
+    const [saldoIncomes, saldoExpenses] =
+      generateSaldoIncomesAndSaldoExpenses(mayors);
+
+    const stateInit = this.initializeYield(saldoExpenses);
+
+    const { capitalPayments, expesesToPayments } =
+      mayors.reduce<DataYieldStateReportType>(
+        (data, { saldo, account }) =>
+          this.reduceYieldData(data, saldo, account?.code),
+        stateInit
+      );
+
+    const utilityOrLost =
+      Math.abs(saldoIncomes) - saldoExpenses + capitalPayments;
+
+    return {
+      fullName,
+      nit,
+      printedDate,
+      emissionDate,
+      ...this.normalizeYieldData(
+        saldoIncomes,
+        saldoExpenses,
+        capitalPayments,
+        utilityOrLost,
+        Array.from(expesesToPayments.values())
+      ),
+    };
+  }
+
+  private generateAccountingDetails(mayors: Mayor[]): AccountingMayorType {
+    return mayors.reduce<AccountingMayorType>(
+      (acc, { date, saldo, init_saldo: initSaldo, voucherDetail }) => {
+        const { debe, haber } = voucherDetail;
+
+        const mayorDetail: MayorDetailType = {
+          detail: "",
+          date: moment(date).format("DD/MM/YYYY"),
+          debe,
+          haber,
+          saldo,
+        };
+
+        if (initSaldo) {
+          mayorDetail.detail = "Saldo inicial";
+          acc.accounting.unshift(mayorDetail);
+        } else {
+          mayorDetail.detail = `${"Comprobante"} No. ${
+            voucherDetail.voucher.number
+          }`;
+          acc.accounting.push(mayorDetail);
+        }
+        acc.totalDebe += debe;
+        acc.totalHaber += haber;
+
+        return acc;
+      },
+      { accounting: [], totalDebe: 0, totalHaber: 0 }
+    );
+  }
+
+  private joinMayorsSameDate(
+    accountingDetails: MayorDetailType[]
+  ): MayorDetailType[] {
+    const accountingRemoveDuplicate = new Map<string, MayorDetailType>();
+    for (const mayor of accountingDetails) {
+      const mayorDetail = accountingRemoveDuplicate.get(mayor.date as string);
+      if (mayorDetail) {
+        const voucher = mayor.detail.replace("Comprobante No. ", ",");
+        accountingRemoveDuplicate.set(mayor.date as string, {
+          ...mayorDetail,
+          detail: mayorDetail.detail + voucher,
+          debe: mayorDetail.debe + mayor.debe,
+          haber: mayorDetail.haber + mayor.haber,
+          saldo: mayor.saldo,
+        });
+      } else {
+        accountingRemoveDuplicate.set(mayor.date as string, mayor);
+      }
+    }
+
+    return Array.from(accountingRemoveDuplicate.values());
+  }
+
+  private initializeState(): DataSituationStateReportType {
+    return {
+      asset: { activo: 0, banco: 0, caja: 0, total: 0 },
+      passive: {
+        pasivo: 0,
+        lendsShortTerm: 0,
+        longTerm: 0,
+        lendsLongTerm: 0,
+        total: 0,
+      },
+      patrimony: { initSaldo: 0, patrimonio: [], total: 0 },
+      total: 0,
+    };
+  }
+
+  private initializeYield(expenses: number): DataYieldStateReportType {
+    return {
+      averagePayments: expenses,
+      capitalPayments: 0,
+      expesesToPayments: new Map([
+        ["800", { description: "Gastos de Operación", amount: 0 }],
+        ["810-10", { description: "Imp. Sobre Ventas", amount: 0 }],
+        ["810-20", { description: "Imp. Sobre Servicios", amount: 0 }],
+        ["810-30", { description: "Imp. Por Utilz. F.T.", amount: 0 }],
+        ["810-40", { description: "Imp. Otros", amount: 0 }],
+      ]),
+      utilityOrLost: 0,
+    };
+  }
+
+  private getCodeDescription() {
+    return {
+      "600-20": "Incrementos de aportes del TCP",
+      "600-30": "Erogaciones efectuadas por el TCP",
+      "600-40": "Pago de cuotas del Imp. Sobre Ing. Pers.",
+      "600-50": "Pago de la Cont. a la Seg. Social del TCP",
+    };
+  }
+
+  private reduceStateData(
+    data: DataSituationStateReportType,
+    saldo: number,
+    code: string,
+    codeDescription: Record<string, string>
+  ): DataSituationStateReportType {
+    switch (code) {
+      case "100":
+      case "110":
+        if (code === "100") {
+          data.asset.caja += Math.abs(saldo);
+        } else {
+          data.asset.banco += Math.abs(saldo);
+        }
+        data.asset.activo += Math.abs(saldo);
+        data.asset.total += Math.abs(saldo);
+        break;
+      case "470":
+      case "520":
+        if (code === "470") {
+          data.passive.lendsShortTerm += saldo;
+          data.passive.pasivo += saldo;
+        } else {
+          data.passive.lendsLongTerm += saldo;
+          data.passive.longTerm += saldo;
+        }
+        data.passive.total += saldo;
+        break;
+      case "600-10":
+        data.patrimony.initSaldo -= saldo;
+        data.patrimony.total -= saldo;
+        break;
+      case "600-20":
+      case "600-30":
+      case "600-40":
+      case "600-50":
+        data.patrimony.patrimonio.push({
+          description: codeDescription[code],
+          amount: -saldo,
+        });
+        data.patrimony.total -= saldo;
+        break;
+      default:
+        break;
+    }
+
+    return data;
+  }
+
+  private reduceYieldData(
+    data: DataYieldStateReportType,
+    saldo: number,
+    code: string
+  ): DataYieldStateReportType {
+    switch (code) {
+      case "820":
+        data.capitalPayments += saldo;
+        break;
+      case "800":
+      case "810-10":
+      case "810-20":
+      case "810-30":
+      case "810-40":
+        data.expesesToPayments.set(code, {
+          ...data.expesesToPayments.get(code),
+          amount: saldo,
+        });
+        break;
+      default:
+        break;
+    }
+
+    return data;
+  }
+
+  private normalizeVouchersData(
+    debe: number,
+    haber: number,
+    mayors: VoucherDetailType[]
+  ) {
+    return {
+      totalDebe: parse2Float(debe),
+      totalHaber: parse2Float(haber),
+      accounting: mayors.map((val) => ({
+        ...val,
+        debe: parse2Float(val.debe),
+        haber: parse2Float(val.haber),
+      })),
+    };
+  }
+
+  private normalizeMayorsData(
+    debe: number,
+    haber: number,
+    mayors: MayorDetailType[]
+  ) {
+    return {
+      totalDebe: parse2Float(debe),
+      totalHaber: parse2Float(haber),
+      accounting: mayors.map((val) => ({
+        ...val,
+        debe: parse2Float(val.debe),
+        haber: parse2Float(val.haber),
+        saldo: val.saldo && parse2Float(val.saldo),
+      })),
+    };
+  }
+
+  private normalizeStateData(data: DataSituationStateReportType) {
+    const { asset, passive, patrimony, total } = data;
+    return {
+      asset: {
+        activo: parse2Float(asset.activo),
+        caja: parse2Float(asset.caja),
+        banco: parse2Float(asset.banco),
+        total: parse2Float(asset.total),
+      },
+      passive: {
+        lendsLongTerm: parse2Float(Math.abs(passive.lendsLongTerm)),
+        lendsShortTerm: parse2Float(Math.abs(passive.lendsShortTerm)),
+        pasivo: parse2Float(Math.abs(passive.pasivo)),
+        longTerm: parse2Float(Math.abs(passive.longTerm)),
+        total: parse2Float(Math.abs(passive.total)),
+      },
+      patrimony: {
+        ...patrimony,
+        initSaldo: parse2Float(patrimony.initSaldo),
+        patrimonio: patrimony.patrimonio.map(({ description, amount }) => ({
+          description,
+          amount: parse2Float(amount),
+        })),
+        total: parse2Float(patrimony.total),
+      },
+      total: parse2Float(total),
+    };
+  }
+
+  private normalizeYieldData(
+    incomes: number,
+    average: number,
+    capital: number,
+    utility: number,
+    expeses: {
+      description: string;
+      amount: number;
+    }[]
+  ) {
+    return {
+      incomes: parse2Float(Math.abs(incomes)),
+      averagePayments: parse2Float(average),
+      capitalPayments: parse2Float(capital),
+      utilityOrLost: parse2Float(utility),
+      expeses: Array.from(expeses.values()).map(({ description, amount }) => ({
+        description,
+        amount: parse2Float(amount),
+      })),
+    };
   }
 }

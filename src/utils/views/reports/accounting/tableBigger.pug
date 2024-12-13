@@ -7,8 +7,8 @@ mixin setData(data=[])
         tr(height=20 style={height:'15.0pt'})
             td.xl-65(colspan=2 height=20 style="height:15.0pt")=val.date
             td.xl-65(colspan=3 height=20 style="height:15.0pt")=val.detail
-            td.xl-65(height=20 style="height:15.0pt;text-align: right")=(val.debe?val.debe:"")
-            td.xl-65(height=20 style="height:15.0pt;text-align: right")=(val.haber?val.haber:"")
+            td.xl-65(height=20 style="height:15.0pt;text-align: right")=(val.debe && val.debe!=='0'?val.debe:"")
+            td.xl-65(height=20 style="height:15.0pt;text-align: right")=(val.haber && val.haber!=='0'?val.haber:"")
             td.xl-65(height=20 style="height:15.0pt;text-align: right")=val.saldo
     else
         td(colspan=9) There are no values

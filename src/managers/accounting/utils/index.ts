@@ -55,7 +55,7 @@ export async function passPreviousBalanceToInitialBalance(
   if (!previousFiscalYear) return;
 
   const balancesInitials = await getBiggerAccountsInitials(
-    previousFiscalYear,
+    previousFiscalYear?.id,
     codeAccountInitials
   );
 
@@ -88,7 +88,7 @@ export async function getBiggerAccounts(
 }
 
 export async function getBiggerAccountsInitials(
-  fiscalYear: FiscalYear,
+  fiscalYearId: number,
   accountCodes: string[]
 ): Promise<BiggerAccountsInitialsType[]> {
   if (accountCodes.length === 0) {
@@ -96,7 +96,7 @@ export async function getBiggerAccountsInitials(
   }
   const codes = accountCodes.map((c) => `'${c}'`).join(",");
 
-  return await getLastMayorInAccount(fiscalYear.id)
+  return await getLastMayorInAccount(fiscalYearId)
     .where(`account.code IN(${codes})`)
     .getRawMany<BiggerAccountsInitialsType>();
 }
@@ -150,7 +150,7 @@ export async function updateBalances(
   );
 }
 
-export function isIncomeOrGosto(accountCode: string = ""): boolean | void {
+export function isIncomeOrExpense(accountCode: string = ""): boolean | void {
   if (accountCode.startsWith("900")) {
     return true;
   } else if (
@@ -168,7 +168,7 @@ export function generateSaldoIncomesAndSaldoExpenses(
 ): [number, number] {
   return balances.reduce(
     ([saldoIncomesTotal, saldoExpensesTotal], { saldo, account }) => {
-      const isIncome = isIncomeOrGosto(account.code);
+      const isIncome = isIncomeOrExpense(account.code);
       if (isIncome === undefined)
         return [saldoIncomesTotal, saldoExpensesTotal];
 
@@ -188,15 +188,14 @@ export function calculeUtility(
   saldoIncomes: number,
   saldoExpenses: number
 ): number {
-  return parseFloat((Math.abs(saldoIncomes) - saldoExpenses).toFixed(2));
+  return Math.abs(saldoIncomes) - saldoExpenses;
 }
 
 export function calculeNetPatrimony(
   passiveTotal: number,
-  patrimonyTotal: number,
-  utility: number
+  patrimonyTotal: number
 ): number {
-  return parseFloat((passiveTotal + patrimonyTotal + utility).toFixed(2));
+  return passiveTotal + patrimonyTotal;
 }
 
 export function verifyCuadreInAccount(balances: Mayor[]): boolean {
@@ -215,4 +214,9 @@ export function verifyCuadreInAccount(balances: Mayor[]): boolean {
     { totalDebe: 0, totalHaber: 0 }
   );
   return totalDebe === totalHaber;
+}
+
+export function parse2Float(number: number): string {
+  if (number === 0) return "0";
+  return number.toFixed(2);
 }

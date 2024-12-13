@@ -6,9 +6,9 @@ mixin setData(data=[])
             td(colspan=2)=val.code
             td(colspan=4)=val.detail
             td
-            td(style=txt_r)=(val.debe?val.debe:"")
+            td(style=txt_r)=(val.debe && val.debe!=='0'?val.debe:"")
             td
-            td(style=txt_r)=(val.haber?val.haber:"")
+            td(style=txt_r)=(val.haber && val.haber!=='0'?val.haber:"")
     else
         td(colspan=10) There are no values
 
@@ -35,12 +35,12 @@ block tHeadContent
     tr(height=row20.height style=row20.style)
         td(colspan=10)
     tr(height=row20.height style=row20.style)
-        td(colspan=2 style=`${xl70}border-right:1pt solid`) CUENTA
-        td(colspan=4 style=`${xl70}border-left:1pt solid`) DESCRIPCION
+        td(colspan=2 style=`${xl70}${p_l}border-right:1pt solid`) CUENTA
+        td(colspan=4 style=`${xl70}${p_l}border-left:1pt solid`) DESCRIPCION
         td
-        td(style=`${xl70}${txt_r}`) DEBE
+        td(style=`${xl70}${txt_r};${p_r}`) DEBE
         td
-        td(style=`${xl70}${txt_r}`) HABER
+        td(style=`${xl70}${txt_r};${p_r}`) HABER
 block tBodyContent
     +setData(accounting)
     tr(height=row20.height style=row20.style)

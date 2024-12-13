@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { In, NotBrackets } from "typeorm";
+import { In } from "typeorm";
 import * as moment from "moment";
 import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { AppDataSource } from "../../../data-source";
@@ -1208,31 +1208,6 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       },
       order: { account: { code: "ASC" } },
     });
-  }
-
-  private async getInitialBalancesToFiscalYearId(fiscalYearId: number) {
-    return await Mayor.createQueryBuilder("mayor")
-      .leftJoin("mayor.fiscalYear", "fiscalYear", "fiscalYear.id = :id", {
-        id: fiscalYearId,
-      })
-      .leftJoinAndSelect("mayor.voucherDetail", "voucherDetail")
-      .leftJoinAndSelect("voucherDetail.account", "account")
-      .leftJoin("mayor.account", "mayorAccount")
-      .where("mayor.init_saldo = :initSaldo", { initSaldo: true })
-      .andWhere(
-        new NotBrackets((qb) => {
-          qb.where("mayorAccount.code LIKE :patrimonyAccouns", {
-            patrimonyAccouns: "6%",
-          })
-            .orWhere("mayorAccount.code LIKE :expenseAccouns", {
-              expenseAccouns: "8%",
-            })
-            .orWhere("mayorAccount.code LIKE :incomeAccouns", {
-              incomeAccouns: "9%",
-            });
-        })
-      )
-      .getMany();
   }
 
   private setBalanced(): void {

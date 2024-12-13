@@ -1,3 +1,4 @@
+import { FindOperator } from "typeorm";
 import { ProfileAddress } from "../../entity/ProfileAddress";
 
 export type SupportDocumentPartialType = {
@@ -131,13 +132,15 @@ export type AnswerType = {
   repeatPassword: string;
 };
 
+export type VoucherDetailType = {
+  code: string;
+  description: string;
+  debe: number;
+  haber: number;
+};
+
 export type AccountingVoucherType = {
-  accounting: {
-    code: string;
-    description: string;
-    debe: number;
-    haber: number;
-  }[];
+  accounting: VoucherDetailType[];
   totalDebe: number;
   totalHaber: number;
 };
@@ -230,3 +233,11 @@ export type BiggerAccountsInitialsType = {
   saldo: number;
   init_saldo: boolean;
 };
+
+export type SearchRangeType<T> =
+  | {
+      searchRange: FindOperator<T>;
+    }
+  | {
+      searchRange: T;
+    };

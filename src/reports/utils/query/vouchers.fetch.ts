@@ -1,4 +1,4 @@
-import { FindOptionsRelations, FindOptionsSelect } from "typeorm";
+import { FindOperator, FindOptionsRelations, FindOptionsSelect } from "typeorm";
 import { Voucher } from "../../../entity/Voucher";
 
 export const VOUCHER_SELECT: FindOptionsSelect<Voucher> = {
@@ -20,3 +20,20 @@ export const VOUCHER_RELATIONS: FindOptionsRelations<Voucher> = {
   voucherDetails: { account: true },
   supportDocument: { element: true },
 };
+
+export async function getDataVoucherReport(
+  fiscalYearId: number,
+  searchRangeDate: Date | FindOperator<Date>,
+  searchRangeNumber: number | FindOperator<number>
+): Promise<Voucher[]> {
+  return await Voucher.find({
+    select: VOUCHER_SELECT,
+    relations: VOUCHER_RELATIONS,
+    where: {
+      supportDocument: { fiscalYear: { id: fiscalYearId } },
+      date: searchRangeDate,
+      number: searchRangeNumber,
+    },
+    order: { number: "ASC" },
+  });
+}

@@ -74,14 +74,14 @@ export const reportsRoutes = [
     route: "/report/mayor",
     controller: ReportGeneratorAccountingController,
     middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
-    action: "generateBiggerReport",
+    action: "generateMayorReport",
   },
   {
     method: "post",
     route: "/report/balance/accounts",
     controller: ReportGeneratorAccountingController,
     middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
-    action: "generateBalanceConfirmationAccountsReport",
+    action: "generateBalanceAccountsReport",
   },
   {
     method: "post",
