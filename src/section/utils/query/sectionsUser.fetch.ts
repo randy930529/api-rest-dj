@@ -1,4 +1,4 @@
-import { FindOptionsSelect, FindOptionsRelations } from "typeorm";
+import { FindOptionsSelect, FindOptionsRelations, Repository } from "typeorm";
 import { SectionState } from "../../../entity/SectionState";
 
 export const SECTION_SELECT: FindOptionsSelect<SectionState> = {
@@ -9,6 +9,8 @@ export const SECTION_SELECT: FindOptionsSelect<SectionState> = {
     general_scheme: true,
     declared: true,
     individual: true,
+    has_documents: true,
+    date_last_document: true,
     musicalGroup: {
       id: true,
       description: true,
@@ -16,7 +18,7 @@ export const SECTION_SELECT: FindOptionsSelect<SectionState> = {
     },
     regimen: true,
     is_tcp: true,
-	run_acounting: true,
+    run_acounting: true,
     balanced: true,
     created_at: true,
     updated_at: true,
@@ -58,3 +60,18 @@ export const SECTION_RELATIONS: FindOptionsRelations<SectionState> = {
   },
   licenseUser: { license: true },
 };
+
+export async function getExistToSectionUser(
+  userId: number,
+  repository: Repository<SectionState>
+): Promise<SectionState> {
+  return await repository.findOne({
+    select: SECTION_SELECT,
+    relations: SECTION_RELATIONS,
+    where: {
+      user: {
+        id: userId,
+      },
+    },
+  });
+}

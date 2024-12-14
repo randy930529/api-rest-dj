@@ -15,6 +15,7 @@ import { LicenseUser } from "../../entity/LicenseUser";
 import {
   SECTION_SELECT,
   SECTION_RELATIONS,
+  getExistToSectionUser,
 } from "../utils/query/sectionsUser.fetch";
 import {
   PROFILE_SELECT,
@@ -141,16 +142,10 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
       const { token } = req.body;
       const id = JWT.getJwtPayloadValueByKey(token, "id");
 
-      const SECTION_WHERE: FindOptionsWhere<SectionState> = {
-        user: {
-          id,
-        },
-      };
-      const existToSectionUser = await this.repository.findOne({
-        select: SECTION_SELECT,
-        relations: SECTION_RELATIONS,
-        where: SECTION_WHERE,
-      });
+      const existToSectionUser = await getExistToSectionUser(
+        id,
+        this.repository
+      );
 
       if (existToSectionUser) return existToSectionUser;
 

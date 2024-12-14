@@ -8,6 +8,9 @@ import {
   AfterRemove,
   OneToOne,
   MoreThan,
+  AfterInsert,
+  Not,
+  BeforeRemove,
 } from "typeorm";
 import Model from "./Base";
 import * as moment from "moment";
@@ -59,6 +62,9 @@ export class SupportDocument extends Model {
   @Column({ nullable: true })
   __oldGroup__: string;
 
+  @Column({ default: false })
+  __last_document__: boolean;
+
   @ManyToOne(() => ProfileActivity, { nullable: true })
   @JoinColumn()
   profileActivity: ProfileActivity;
@@ -72,6 +78,7 @@ export class SupportDocument extends Model {
       __fiscalYearId__: undefined,
       __year__: undefined,
       __oldGroup__: undefined,
+      __last_document__: undefined,
     };
   }
 
@@ -85,6 +92,22 @@ export class SupportDocument extends Model {
   }
 
   @BeforeInsert()
+  async setLastDocument(): Promise<void> {
+    if (this.fiscalYear) {
+      this.__last_document__ = true;
+      const lastDocument = await SupportDocument.findOneBy({
+        __fiscalYearId__: this.__fiscalYearId__,
+        __last_document__: true,
+      });
+
+      if (lastDocument) {
+        lastDocument.__last_document__ = false;
+        await SupportDocument.save(lastDocument);
+      }
+    }
+  }
+
+  @BeforeInsert()
   @BeforeUpdate()
   async checkToDateInToFiscalYear(): Promise<void> {
     if (this.date && moment(this.date).year() !== this.__year__) {
@@ -92,8 +115,22 @@ export class SupportDocument extends Model {
     }
   }
 
+  @BeforeRemove()
+  async beforeRemoveDocument(): Promise<void> {
+    await this.getLastDocument();
+  }
+
+  @AfterInsert()
+  async setTrueHasDocumentsInToFiscalYear(): Promise<void> {
+    await this.setThisFiscalYear(true, this.date);
+  }
+
   @AfterRemove()
-  async updateVoucherNumber(): Promise<void> {
+  async afterRemoveDocument(): Promise<void> {
+    await this.updateVoucherNumber();
+  }
+
+  private async updateVoucherNumber(): Promise<void> {
     const voucherToUpdateNumber = await Voucher.find({
       where: {
         supportDocument: {
@@ -108,5 +145,33 @@ export class SupportDocument extends Model {
     });
 
     await Voucher.save(voucherToUpdateNumber);
+  }
+
+  private async getLastDocument(): Promise<void> {
+    if (this.__last_document__) {
+      const lastDocument = await SupportDocument.findOne({
+        where: { id: Not(this.id), __fiscalYearId__: this.__fiscalYearId__ },
+        order: { date: "DESC", id: "DESC" },
+      });
+
+      if (lastDocument) {
+        lastDocument.__last_document__ = true;
+      }
+      await Promise.all([
+        lastDocument?.save(),
+        this.setThisFiscalYear(!!lastDocument, lastDocument?.date),
+      ]);
+    }
+  }
+
+  private async setThisFiscalYear(
+    has_documents: boolean,
+    date_last_document: Date
+  ): Promise<void> {
+    if (this.fiscalYear) {
+      this.fiscalYear.has_documents = has_documents;
+      this.fiscalYear.date_last_document = date_last_document;
+      await FiscalYear.save(this.fiscalYear);
+    }
   }
 }

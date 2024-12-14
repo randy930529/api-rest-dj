@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { In } from "typeorm";
 import * as moment from "moment";
 import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { AppDataSource } from "../../../data-source";
@@ -41,6 +40,7 @@ import {
   ELEMENT_SELECT,
 } from "../utils/query/element.fetch";
 import {
+  getSupportDocumentToRemove,
   SUPPORT_DOCUMENT_RELATIONS,
   SUPPORT_DOCUMENT_SELECT,
 } from "../utils/query/supportDocument.fetch";
@@ -218,11 +218,10 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
           404
         );
 
-      const supportDocumentToRemove = await this.repository.findOne({
-        select: SUPPORT_DOCUMENT_SELECT,
-        relations: SUPPORT_DOCUMENT_RELATIONS,
-        where: { id },
-      });
+      const supportDocumentToRemove = await getSupportDocumentToRemove(
+        id,
+        this.repository
+      );
 
       if (!supportDocumentToRemove)
         responseError(res, "Entity SUPPORTDOCUMENT not found.", 404);

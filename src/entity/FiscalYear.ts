@@ -55,6 +55,12 @@ export class FiscalYear extends Model {
   @Column({ default: true })
   balanced: boolean;
 
+  @Column({ default: false })
+  has_documents: boolean;
+
+  @Column({ nullable: true })
+  date_last_document: Date;
+
   @ManyToOne(() => Profile, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   @JoinColumn()
   profile: Profile;
@@ -110,7 +116,14 @@ export class FiscalYear extends Model {
 
   @BeforeInsert()
   @BeforeUpdate()
-  async checkDuplicateFiscalYearForProfile(): Promise<void> {
+  async checksBeforeInsertAndUpdateFiscalYear(): Promise<void> {
+    await Promise.all([
+      this.checkDuplicateFiscalYearForProfile(),
+      this.checkFiscalYearIncomesPrevious(),
+    ]);
+  }
+
+  private async checkDuplicateFiscalYearForProfile(): Promise<void> {
     if (this.profile) {
       this.__profileId__ = this.profile.id;
     }
@@ -142,9 +155,7 @@ export class FiscalYear extends Model {
     }
   }
 
-  @BeforeInsert()
-  @BeforeUpdate()
-  async checkFiscalYearIncomesPrevious(): Promise<void> {
+  private async checkFiscalYearIncomesPrevious(): Promise<void> {
     const lastFiscalYearIdInProfile = (
       await FiscalYear.findOne({
         where: { id: Not(this.id), profile: { id: this.__profileId__ } },
@@ -171,7 +182,14 @@ export class FiscalYear extends Model {
   }
 
   @BeforeRemove()
-  async checkIfRemoveTheLastFiscalYear(): Promise<void> {
+  async checksBeforeRemoveFiscalYear(): Promise<void> {
+    await Promise.all([
+      this.checkIfRemoveTheLastFiscalYear(),
+      this.checkNotRemoveSectionFiscalYear(),
+    ]);
+  }
+
+  private async checkIfRemoveTheLastFiscalYear(): Promise<void> {
     const countFiscalYear = await FiscalYear.count({
       where: { profile: { id: this.profile?.id } },
     });
@@ -183,8 +201,7 @@ export class FiscalYear extends Model {
     }
   }
 
-  @BeforeRemove()
-  async checkNotRemoveSectionFiscalYear(): Promise<void> {
+  private async checkNotRemoveSectionFiscalYear(): Promise<void> {
     const sectionFiscalYear = await SectionState.findOne({
       where: { fiscalYear: { id: this.id } },
     });

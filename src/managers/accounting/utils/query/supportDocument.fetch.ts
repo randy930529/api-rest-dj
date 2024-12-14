@@ -1,4 +1,4 @@
-import { FindOptionsRelations, FindOptionsSelect } from "typeorm";
+import { FindOptionsRelations, FindOptionsSelect, Repository } from "typeorm";
 import { SupportDocument } from "../../../../entity/SupportDocument";
 
 export const SUPPORT_DOCUMENT_SELECT: FindOptionsSelect<SupportDocument> = {
@@ -10,7 +10,13 @@ export const SUPPORT_DOCUMENT_SELECT: FindOptionsSelect<SupportDocument> = {
     is_general: true,
     account: { id: true, acreedor: true },
   },
-  fiscalYear: { id: true, run_acounting: true },
+  fiscalYear: {
+    id: true,
+    date: true,
+    run_acounting: true,
+    individual: true,
+    musicalGroup: { id: true },
+  },
   profileActivity: { id: true },
   voucher: {
     id: true,
@@ -30,7 +36,18 @@ export const SUPPORT_DOCUMENT_SELECT: FindOptionsSelect<SupportDocument> = {
 export const SUPPORT_DOCUMENT_RELATIONS: FindOptionsRelations<SupportDocument> =
   {
     element: { account: true },
-    fiscalYear: true,
+    fiscalYear: { musicalGroup: true },
     profileActivity: true,
     voucher: { voucherDetails: { account: true, mayor: true } },
   };
+
+export async function getSupportDocumentToRemove(
+  id: number,
+  repository: Repository<SupportDocument>
+): Promise<SupportDocument> {
+  return await repository.findOne({
+    select: SUPPORT_DOCUMENT_SELECT,
+    relations: SUPPORT_DOCUMENT_RELATIONS,
+    where: { id },
+  });
+}
