@@ -84,11 +84,11 @@ export class SupportDocument extends Model {
 
   @BeforeInsert()
   @BeforeUpdate()
-  async up__fiscalYearIdAndyear__(): Promise<void> {
-    if (this.fiscalYear) {
-      this.__fiscalYearId__ = this.fiscalYear.id;
-      this.__year__ = this.fiscalYear.year;
-    }
+  async BeforeInsertAndUpdateDocument(): Promise<void> {
+    await Promise.all([
+      this.setfiscalYearIdAndyear__(),
+      this.checkToDateInToFiscalYear(),
+    ]);
   }
 
   @BeforeInsert()
@@ -107,14 +107,6 @@ export class SupportDocument extends Model {
     }
   }
 
-  @BeforeInsert()
-  @BeforeUpdate()
-  async checkToDateInToFiscalYear(): Promise<void> {
-    if (this.date && moment(this.date).year() !== this.__year__) {
-      throw new Error("Fuera del rango de fecha para el año fiscal.");
-    }
-  }
-
   @BeforeRemove()
   async beforeRemoveDocument(): Promise<void> {
     await this.getLastDocument();
@@ -122,12 +114,25 @@ export class SupportDocument extends Model {
 
   @AfterInsert()
   async setTrueHasDocumentsInToFiscalYear(): Promise<void> {
-    await this.setThisFiscalYear(true, this.date);
+    await this.setHasDocumentOftheFiscalYear(true);
   }
 
   @AfterRemove()
   async afterRemoveDocument(): Promise<void> {
     await this.updateVoucherNumber();
+  }
+
+  private async setfiscalYearIdAndyear__(): Promise<void> {
+    if (this.fiscalYear) {
+      this.__fiscalYearId__ = this.fiscalYear.id;
+      this.__year__ = this.fiscalYear.year;
+    }
+  }
+
+  private async checkToDateInToFiscalYear(): Promise<void> {
+    if (this.date && moment(this.date).year() !== this.__year__) {
+      throw new Error("Fuera del rango de fecha para el año fiscal.");
+    }
   }
 
   private async updateVoucherNumber(): Promise<void> {
@@ -159,18 +164,16 @@ export class SupportDocument extends Model {
       }
       await Promise.all([
         lastDocument?.save(),
-        this.setThisFiscalYear(!!lastDocument, lastDocument?.date),
+        this.setHasDocumentOftheFiscalYear(!!lastDocument),
       ]);
     }
   }
 
-  private async setThisFiscalYear(
-    has_documents: boolean,
-    date_last_document: Date
+  private async setHasDocumentOftheFiscalYear(
+    has_documents: boolean
   ): Promise<void> {
     if (this.fiscalYear) {
       this.fiscalYear.has_documents = has_documents;
-      this.fiscalYear.date_last_document = date_last_document;
       await FiscalYear.save(this.fiscalYear);
     }
   }

@@ -222,18 +222,6 @@ export type DataYieldStateReportType = {
   >;
 };
 
-export type BiggerAccountsInitialsType = {
-  id: number;
-  code: string;
-  description: string;
-  acreedor: boolean;
-  date: Date;
-  haber: number;
-  debe: number;
-  saldo: number;
-  init_saldo: boolean;
-};
-
 export type SearchRangeType<T> =
   | {
       searchRange: FindOperator<T>;

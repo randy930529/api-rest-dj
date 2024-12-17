@@ -58,9 +58,6 @@ export class FiscalYear extends Model {
   @Column({ default: false })
   has_documents: boolean;
 
-  @Column({ nullable: true })
-  date_last_document: Date;
-
   @ManyToOne(() => Profile, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   @JoinColumn()
   profile: Profile;

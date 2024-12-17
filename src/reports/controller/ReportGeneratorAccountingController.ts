@@ -29,6 +29,7 @@ import {
 import { getDataVoucherReport } from "../utils/query/vouchers.fetch";
 import { getUserSectionToReport } from "../utils/query/voucherReportSection.fetch";
 import {
+  getInitialBalanceOfTheFiscalYearToDateRange,
   getMayorsOfTheFiscalYearInDateRange,
   getMayorsOfTheFiscalYearUntilDate,
 } from "../utils/query/mayor.fetch";
@@ -117,12 +118,24 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         getSearchRange<Date>([date_start, date_end])
       );
 
-      if (!mayors.length)
+      const mayorToInitSaldo =
+        await getInitialBalanceOfTheFiscalYearToDateRange(
+          fiscalYear?.id,
+          account?.id,
+          date_start
+        );
+
+      if (!mayors.length && !mayorToInitSaldo)
         responseError(
           res,
           "No hay valores de comprobantes para el rango espesificado.",
           404
         );
+
+      if (mayorToInitSaldo) {
+        mayorToInitSaldo.init_saldo = true;
+        mayors.unshift(mayorToInitSaldo);
+      }
 
       const data = this.generateMayorReportData(
         account?.code,
@@ -439,7 +452,10 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
     );
 
     data.patrimony.total = Math.abs(data.patrimony.total + utility);
-    data.total = calculeNetPatrimony(data.passive.total, data.patrimony.total);
+    data.total = calculeNetPatrimony(
+      Math.abs(data.passive.total),
+      data.patrimony.total
+    );
 
     return {
       fullName,
@@ -526,18 +542,23 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
   ): MayorDetailType[] {
     const accountingRemoveDuplicate = new Map<string, MayorDetailType>();
     for (const mayor of accountingDetails) {
-      const mayorDetail = accountingRemoveDuplicate.get(mayor.date as string);
+      const { date, detail, debe, haber, saldo } = mayor;
+      const mayorDetail = accountingRemoveDuplicate.get(date as string);
+
       if (mayorDetail) {
-        const voucher = mayor.detail.replace("Comprobante No. ", ",");
-        accountingRemoveDuplicate.set(mayor.date as string, {
+        const voucher = detail.replace("Comprobante No. ", ",");
+        accountingRemoveDuplicate.set(date as string, {
           ...mayorDetail,
           detail: mayorDetail.detail + voucher,
-          debe: mayorDetail.debe + mayor.debe,
-          haber: mayorDetail.haber + mayor.haber,
-          saldo: mayor.saldo,
+          debe: mayorDetail.debe + debe,
+          haber: mayorDetail.haber + haber,
+          saldo: saldo,
         });
       } else {
-        accountingRemoveDuplicate.set(mayor.date as string, mayor);
+        accountingRemoveDuplicate.set(date as string, {
+          ...mayor,
+          saldo,
+        });
       }
     }
 

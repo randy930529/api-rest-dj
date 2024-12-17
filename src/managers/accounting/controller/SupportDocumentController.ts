@@ -23,8 +23,7 @@ import { SetInitialBalanceDTO } from "../dto/request/setInitialBalance.dto";
 import { InitialBalancesDTO } from "../dto/request/getInitialBalances.dto";
 import {
   getAccountInitialsBalances,
-  getBiggerAccounts,
-  updateBiggers,
+  updateMayors,
   verifyCuadreInAccount,
 } from "../utils";
 import {
@@ -65,6 +64,7 @@ import {
   MAYOR_RELATIONS,
   MAYOR_SELECT,
 } from "../utils/query/initialBalance.fetch";
+import { getLastMayorOfTheAccounts } from "../utils/query/mayorsTheAccountInToFiscalYear.fetch";
 
 export class SupportDocumentController extends EntityControllerBase<SupportDocument> {
   private balanced: boolean;
@@ -231,13 +231,13 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       );
 
       const [, , updatedDJ08Error] = await Promise.all([
-        updateBiggers({
+        updateMayors({
           id: -1,
           date: null,
           fiscalYear: removeSupportDocument.fiscalYear,
           voucherDetail: removeSupportDocument.voucher.voucherDetails[0],
         }),
-        updateBiggers({
+        updateMayors({
           id: -1,
           date: null,
           fiscalYear: removeSupportDocument.fiscalYear,
@@ -246,10 +246,10 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         this.updatedDJ08(removeSupportDocument),
       ]);
 
-      const balances = await getBiggerAccounts(
-        supportDocumentToRemove.fiscalYear
+      const balances = await getLastMayorOfTheAccounts(
+        supportDocumentToRemove.fiscalYear.id
       );
-      this.balanced = verifyCuadreInAccount(balances as unknown as Mayor[]);
+      this.balanced = verifyCuadreInAccount(balances);
 
       if (this.balanced !== removeSupportDocument.fiscalYear.balanced) {
         removeSupportDocument.fiscalYear.balanced = this.balanced;
@@ -406,9 +406,9 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         await balanceResult.mayor.save();
       }
 
-      await updateBiggers(balanceResult.mayor);
-      const balances = await getBiggerAccounts(fields.fiscalYear);
-      this.balanced = verifyCuadreInAccount(balances as unknown as Mayor[]);
+      await updateMayors(balanceResult.mayor);
+      const balances = await getLastMayorOfTheAccounts(fiscalYearId);
+      this.balanced = verifyCuadreInAccount(balances);
 
       if (this.balanced !== fields.fiscalYear.balanced) {
         fields.fiscalYear.balanced = this.balanced;
@@ -1031,7 +1031,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
 
         const resultVoucher = await voucher.save();
         for (const voucherDetail of resultVoucher.voucherDetails) {
-          await updateBiggers({
+          await updateMayors({
             id: voucherDetail.mayor?.id,
             date,
             fiscalYear,

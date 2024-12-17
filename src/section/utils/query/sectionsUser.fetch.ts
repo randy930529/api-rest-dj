@@ -10,7 +10,6 @@ export const SECTION_SELECT: FindOptionsSelect<SectionState> = {
     declared: true,
     individual: true,
     has_documents: true,
-    date_last_document: true,
     musicalGroup: {
       id: true,
       description: true,
