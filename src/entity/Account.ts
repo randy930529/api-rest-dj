@@ -1,4 +1,12 @@
-import { Entity, Column, JoinColumn, ManyToOne, OneToMany } from "typeorm";
+import {
+  Entity,
+  Column,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  BeforeInsert,
+  BeforeUpdate,
+} from "typeorm";
 import Model from "./Base";
 import { Profile } from "./Profile";
 import { Element } from "./Element";
@@ -14,7 +22,7 @@ export enum AccountType {
 }
 @Entity()
 export class Account extends Model {
-  @Column({ type: "varchar", length: 20 })
+  @Column({ type: "varchar", length: 20, unique: true })
   code: string;
 
   @Column({ type: "varchar", length: 120 })
@@ -42,4 +50,12 @@ export class Account extends Model {
 
   @OneToMany(() => Mayor, (mayor) => mayor.account)
   mayors: Mayor[];
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async checkDuplicateCode(): Promise<void> {
+    const existingAccount = await Account.findOneBy({ code: this.code });
+    if (existingAccount)
+      throw new Error("Sólo una cuenta con igual código es admitida.");
+  }
 }

@@ -22,6 +22,7 @@ import { ProfileActivity } from "./ProfileActivity";
 import { ProfileHiredPerson } from "./ProfileHiredPerson";
 import { SectionState } from "./SectionState";
 import { Voucher } from "./Voucher";
+import { VoucherDetail } from "./VoucherDetail";
 
 @Entity()
 export class FiscalYear extends Model {
@@ -183,6 +184,8 @@ export class FiscalYear extends Model {
     await Promise.all([
       this.checkIfRemoveTheLastFiscalYear(),
       this.checkNotRemoveSectionFiscalYear(),
+      this.removeInitBalances(),
+      this.removeDJ08(),
     ]);
   }
 
@@ -210,18 +213,37 @@ export class FiscalYear extends Model {
     }
   }
 
-  @BeforeRemove()
-  async removeDJ08(): Promise<void> {
-    const dj08ToRemove = await Dj08SectionData.findOne({
-      relations: ["dJ08"],
-      where: {
-        dJ08: { fiscalYear: { id: this.id } },
-      },
-    });
+  private async removeDJ08(): Promise<void> {
+    if (!this.has_documents) {
+      const dj08ToRemove = await Dj08SectionData.findOne({
+        relations: ["dJ08"],
+        where: {
+          dJ08: { fiscalYear: { id: this.id } },
+        },
+      });
 
-    if (dj08ToRemove) {
-      await dj08ToRemove.remove();
-      await dj08ToRemove.dJ08.remove();
+      if (dj08ToRemove) {
+        await dj08ToRemove.remove();
+        await dj08ToRemove.dJ08.remove();
+      }
+    } else {
+      throw new Error(
+        "No se puede eliminar porque tiene documentos asociados."
+      );
+    }
+  }
+
+  private async removeInitBalances() {
+    if (!this.has_documents) {
+      const initBalances = await VoucherDetail.findBy({
+        mayor: { fiscalYear: { id: this.id } },
+      });
+
+      await VoucherDetail.remove(initBalances);
+    } else {
+      throw new Error(
+        "No se puede eliminar porque tiene documentos asociados."
+      );
     }
   }
 }
