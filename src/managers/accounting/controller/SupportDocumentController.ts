@@ -11,8 +11,6 @@ import { ProfileActivity } from "../../../entity/ProfileActivity";
 import { Voucher } from "../../../entity/Voucher";
 import { VoucherDetail } from "../../../entity/VoucherDetail";
 import { Account } from "../../../entity/Account";
-import { Mayor } from "../../../entity/Mayor";
-import { SectionState } from "../../../entity/SectionState";
 import { Dj08SectionData, SectionName } from "../../../entity/Dj08SectionData";
 import { CreateSupportDocumentDTO } from "../dto/request/createSupportDocument.dto";
 import { CreatedSupportDocumentDTO } from "../dto/response/createdSupportDocument.dto";
@@ -55,16 +53,9 @@ import {
   VOUCHER_DETAIL_RELATIONS,
   VOUCHER_DETAIL_SELECT,
 } from "../utils/query/voucherDetail.fetch";
-import {
-  SECTION_RELATIONS,
-  SECTION_SELECT,
-} from "../utils/query/fiscalYearToUserSection.fetch";
-import {
-  getInitialsBalances,
-  MAYOR_RELATIONS,
-  MAYOR_SELECT,
-} from "../utils/query/initialBalance.fetch";
+import { getInitialsBalances } from "../utils/query/initialBalance.fetch";
 import { getLastMayorOfTheAccounts } from "../utils/query/mayorsTheAccountInToFiscalYear.fetch";
+import { getInitialBalances } from "../../period/utils";
 
 export class SupportDocumentController extends EntityControllerBase<SupportDocument> {
   private balanced: boolean;
@@ -280,73 +271,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         codeAccountInitials
       );
 
-      return acountInitials.map((account) => {
-        const existingMayor = mayors.find(
-          (mayor) => mayor.account?.code === account.code
-        );
-
-        if (existingMayor) {
-          return existingMayor;
-        }
-
-        return Mayor.create({
-          date: moment(`${fiscalYear.year - 1}-12-31`).toDate(),
-          saldo: 0,
-          init_saldo: true,
-          voucherDetail: {
-            debe: 0,
-            haber: 0,
-            account,
-          },
-          account,
-          fiscalYear,
-        });
-      });
-    } catch (error) {
-      if (res.statusCode === 200) res.status(500);
-      next(error);
-    }
-  }
-
-  async getInitialBalance(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { user } = req.body;
-      const accountId = parseInt(req.params.accountId);
-
-      const SECTION_WHERE = { user: { id: user?.id } };
-      const { fiscalYear } = await SectionState.findOne({
-        select: SECTION_SELECT,
-        relations: SECTION_RELATIONS,
-        where: SECTION_WHERE,
-      });
-
-      const account = await Account.findOneBy({ id: accountId });
-      if (!account) responseError(res, "Account not found.", 404);
-
-      const mayor = await Mayor.findOne({
-        select: MAYOR_SELECT,
-        relations: MAYOR_RELATIONS,
-        where: {
-          init_saldo: true,
-          fiscalYear: { id: fiscalYear.id },
-          account: { id: accountId },
-        },
-      });
-
-      return mayor
-        ? ({ ...mayor, account, fiscalYear } as Mayor)
-        : Mayor.create({
-            date: moment(`${fiscalYear.year - 1}-12-31`).toDate(),
-            saldo: 0,
-            init_saldo: true,
-            voucherDetail: {
-              debe: 0,
-              haber: 0,
-              account,
-            },
-            account,
-            fiscalYear,
-          });
+      return getInitialBalances(acountInitials, mayors, fiscalYear);
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);

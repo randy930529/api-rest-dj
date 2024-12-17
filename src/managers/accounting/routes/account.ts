@@ -48,13 +48,6 @@ export const accountRoutes = [
     action: "getInitialBalancesAll",
   },
   {
-    method: "post",
-    route: "/initial/balance/:accountId",
-    controller: SupportDocumentController,
-    middlewares: [authMiddleware, userMiddleware],
-    action: "getInitialBalance",
-  },
-  {
     method: "put",
     route: "/initial/balance",
     controller: SupportDocumentController,
