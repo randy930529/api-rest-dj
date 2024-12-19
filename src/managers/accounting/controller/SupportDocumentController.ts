@@ -1122,4 +1122,15 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
   private setBalanced(): void {
     this.balanced = !this.balanced;
   }
+
+  /**
+   * runCuadre
+   * @method
+   * "Para crear la contabilidad desde otro sistema."
+   */
+  public async runCuadre(supportDocument: SupportDocument): Promise<void> {
+    const isError = await this.cuadre(supportDocument);
+
+    if (isError) throw new Error(isError);
+  }
 }

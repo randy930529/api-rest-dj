@@ -171,6 +171,7 @@ export class FiscalYear extends Model {
         section_data[SectionName.SECTION_A]?.totals?.incomes || 0;
       if (totalIncomesSectionA > 500000) this.run_acounting = true;
     }
+
     if (!this.run_acounting && this.id && this.id !== -1) {
       const voucherInFiscalYear = await Voucher.findOneBy({
         supportDocument: { __fiscalYearId__: this.id },

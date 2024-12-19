@@ -6,6 +6,8 @@ import { FiscalYear } from "../../../entity/FiscalYear";
 import { VoucherDetail } from "../../../entity/VoucherDetail";
 import { Mayor } from "../../../entity/Mayor";
 import { Account } from "../../../entity/Account";
+import { SupportDocument } from "../../../entity/SupportDocument";
+import { SupportDocumentController } from "../../accounting/controller/SupportDocumentController";
 import { Dj08SectionData } from "../../../entity/Dj08SectionData";
 import getProfileById from "../../../profile/utils/getProfileById";
 import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
@@ -23,6 +25,7 @@ import {
 } from "../utils/query/deleteFiscalYear.fetch";
 import { getInitialsBalances } from "../../accounting/utils/query/initialBalance.fetch";
 import { getBiggerAccountsInitials } from "../../accounting/utils/query/mayorsTheAccountInToFiscalYear.fetch";
+import { getSupportDocumentsToAccounting } from "../utils/query/supportDocumentsToAccounting.fetch";
 
 export class FiscalYearController extends EntityControllerBase<FiscalYear> {
   constructor() {
@@ -99,7 +102,24 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
           ? fields.musicalGroup
           : undefined;
 
-      const fiscalYearUpdate = await this.update({ id, res }, fields);
+      const fiscalYearToUpdate = await this.repository.findOneBy({ id });
+
+      if (!fiscalYearToUpdate) responseError(res, "FiscalYear not found.", 404);
+
+      const fiscalYearUpdated = this.repository.create({
+        ...fiscalYearToUpdate,
+        ...fields,
+      });
+      const fiscalYearUpdate = await this.repository.save(fiscalYearUpdated);
+
+      if (
+        fields.run_acounting &&
+        !fiscalYearToUpdate.run_acounting &&
+        fiscalYearToUpdate.has_documents
+      ) {
+        await passPreviousBalanceToInitialBalance(fiscalYearUpdate);
+        await this.generateAccountingInFiscalYear(fiscalYearUpdate);
+      }
 
       const fiscalYear: CreateFiscalYearDTO = fiscalYearUpdate;
       const resp: BaseResponseDTO = {
@@ -365,5 +385,21 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
     }
 
     return updatedMayor;
+  }
+
+  private async generateAccountingInFiscalYear(fiscalYear: FiscalYear) {
+    const documents = await getSupportDocumentsToAccounting(fiscalYear.id);
+    await this.generateAccounting(fiscalYear, documents);
+  }
+
+  private async generateAccounting(
+    fiscalYear: FiscalYear,
+    documents: SupportDocument[]
+  ): Promise<void> {
+    const run = new SupportDocumentController();
+
+    for (const document of documents) {
+      await run.runCuadre({ ...document, fiscalYear } as SupportDocument);
+    }
   }
 }

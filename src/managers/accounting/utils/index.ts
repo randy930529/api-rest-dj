@@ -49,7 +49,7 @@ export async function passPreviousBalanceToInitialBalance(
     profile: { id: fiscalYear.__profileId__ },
   });
 
-  if (!previousFiscalYear) return;
+  if (!previousFiscalYear || !previousFiscalYear?.run_acounting) return;
 
   const balancesInitials = await getBiggerAccountsInitials(
     previousFiscalYear?.id,
