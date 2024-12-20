@@ -154,23 +154,15 @@ export class FiscalYear extends Model {
   }
 
   private async checkFiscalYearIncomesPrevious(): Promise<void> {
-    const lastFiscalYearIdInProfile = (
-      await FiscalYear.findOne({
-        where: { id: Not(this.id), profile: { id: this.__profileId__ } },
-        order: { id: "DESC" },
-      })
-    )?.id;
-    const dj08SectionData = await Dj08SectionData.findOneBy({
-      dJ08: { fiscalYear: { id: lastFiscalYearIdInProfile } },
-      is_rectification: true,
+    const lastFiscalYearIdInProfile = await FiscalYear.findOne({
+      where: { id: Not(this.id), profile: { id: this.__profileId__ } },
+      order: { id: "DESC" },
     });
 
-    if (dj08SectionData) {
-      const section_data = JSON.parse(dj08SectionData.section_data);
-      const totalIncomesSectionA =
-        section_data[SectionName.SECTION_A]?.totals?.incomes || 0;
-      if (totalIncomesSectionA > 500000) this.run_acounting = true;
-    }
+    const totalIncomesSectionA = await this.getTotalIncomesInLastFiscalYear(
+      lastFiscalYearIdInProfile?.id
+    );
+    if (totalIncomesSectionA > 500000) this.run_acounting = true;
 
     if (!this.run_acounting && this.id && this.id !== -1) {
       const voucherInFiscalYear = await Voucher.findOneBy({
@@ -246,5 +238,21 @@ export class FiscalYear extends Model {
         "No se puede eliminar porque tiene documentos asociados."
       );
     }
+  }
+
+  private async getTotalIncomesInLastFiscalYear(
+    fiscalYearId: number
+  ): Promise<number> {
+    if (!fiscalYearId) return 0;
+
+    const dj08SectionData = await Dj08SectionData.findOneBy({
+      dJ08: { fiscalYear: { id: fiscalYearId } },
+      is_rectification: true,
+    });
+
+    if (!dj08SectionData) return 0;
+
+    const section_data = JSON.parse(dj08SectionData.section_data);
+    return section_data[SectionName.SECTION_A]?.totals?.incomes || 0;
   }
 }

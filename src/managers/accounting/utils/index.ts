@@ -1,80 +1,84 @@
-import { NotBrackets } from "typeorm";
+import * as moment from "moment";
 import { Account } from "../../../entity/Account";
 import { FiscalYear } from "../../../entity/FiscalYear";
 import { Mayor } from "../../../entity/Mayor";
 import { VoucherDetail } from "../../../entity/VoucherDetail";
 import { CreateMayorDTO } from "../dto/request/createMayor.dto";
 import {
-  getBiggerAccountsInitials,
+  getMayorAccountsInitials,
+  getMayorsIncomesAndExpensesInitials,
   getMayorsTheAccountToFiscalYear,
 } from "./query/mayorsTheAccountInToFiscalYear.fetch";
-
-export async function getAccountInitialsBalances(
-  patrimonyAccouns: string = "",
-  expenseAccouns: string = "8%",
-  incomeAccouns: string = "9%"
-): Promise<[string[], Account[]]> {
-  const acountInitials = await Account.createQueryBuilder()
-    .select(["id", "code", "description", "acreedor"])
-    .where(
-      new NotBrackets((qb) => {
-        qb.where("code LIKE :patrimonyAccouns", {
-          patrimonyAccouns,
-        })
-          .orWhere("code LIKE :expenseAccouns", {
-            expenseAccouns,
-          })
-          .orWhere("code LIKE :incomeAccouns", {
-            incomeAccouns,
-          });
-      })
-    )
-    .orderBy("code", "ASC")
-    .getRawMany<Account>();
-
-  const codeAccountInitials = acountInitials.map(({ code }) => code);
-
-  return [codeAccountInitials, acountInitials];
-}
+import {
+  getAccountInitialsBalances,
+  getInitialsBalances,
+} from "./query/initialBalance.fetch";
 
 export async function passPreviousBalanceToInitialBalance(
   fiscalYear: FiscalYear
 ): Promise<void> {
   if (!fiscalYear.run_acounting) return;
 
-  const [codeAccountInitials] = await getAccountInitialsBalances();
+  // const [codeAccountInitials, accountInitials] =
+  //   await getAccountInitialsBalances();
+
+  // const previousFiscalYear = await FiscalYear.findOneBy({
+  //   year: fiscalYear.year - 1,
+  //   profile: { id: fiscalYear.__profileId__ },
+  // });
+
+  // if (!previousFiscalYear || !previousFiscalYear?.run_acounting) return;
+
+  // let balancesInitials = await getMayorAccountsInitials(
+  //   previousFiscalYear?.id,
+  //   codeAccountInitials
+  // );
+
+  const [codeAccountInitials, acountInitials] =
+    await getAccountInitialsBalances();
+
+  let [previousBalances, currentInitialBalances] = await Promise.all([
+    getPreviousMayorsToInitialBalances(
+      fiscalYear,
+      codeAccountInitials,
+      acountInitials
+    ),
+    getInitialsBalances(fiscalYear.id, codeAccountInitials),
+  ]);
+
+  currentInitialBalances = await setMayorsToInitialBalances(
+    fiscalYear,
+    previousBalances,
+    currentInitialBalances
+  );
+
+  // await pushInitialBalances(fiscalYear, balancesInitials);
+}
+
+export async function getPreviousMayorsToInitialBalances(
+  fiscalYear: FiscalYear,
+  codeAccountInitials: string[],
+  accountInitials: Account[]
+): Promise<Mayor[]> {
+  if (!fiscalYear.run_acounting) return;
 
   const previousFiscalYear = await FiscalYear.findOneBy({
     year: fiscalYear.year - 1,
     profile: { id: fiscalYear.__profileId__ },
   });
 
-  if (!previousFiscalYear || !previousFiscalYear?.run_acounting) return;
+  if (!previousFiscalYear) return;
 
-  const balancesInitials = await getBiggerAccountsInitials(
+  const balancesInitials = await getMayorAccountsInitials(
     previousFiscalYear?.id,
     codeAccountInitials
   );
 
-  const promises = balancesInitials.map(
-    async ({ account, voucherDetail, date, saldo }) => {
-      const { debe, haber } = voucherDetail;
-      return Mayor.create({
-        date,
-        account,
-        fiscalYear,
-        init_saldo: true,
-        saldo,
-        voucherDetail: await VoucherDetail.create({
-          account,
-          debe,
-          haber,
-        }).save(),
-      }).save();
-    }
+  return await getInitialPatrimony(
+    previousFiscalYear?.id,
+    accountInitials,
+    balancesInitials
   );
-
-  await Promise.all(promises);
 }
 
 export async function updateMayors(fieldsMayor: CreateMayorDTO): Promise<void> {
@@ -189,6 +193,203 @@ export function verifyCuadreInAccount(balances: Mayor[]): boolean {
     { totalDebe: 0, totalHaber: 0 }
   );
   return totalDebe === totalHaber;
+}
+
+export function getAccountOfThePatrimony(accounts: Account[]): Account {
+  return accounts.find(({ code }) => code === "600-10");
+}
+
+export async function getInitialPatrimony(
+  fiscalYearId: number,
+  accounts: Account[],
+  mayors: Mayor[]
+): Promise<Mayor[]> {
+  const account = getAccountOfThePatrimony(accounts);
+  if (!account) throw new Error("Account to initial patrimony not found.");
+
+  const mayorsIncomesAndExpenses = await getMayorsIncomesAndExpensesInitials(
+    fiscalYearId
+  );
+
+  const netPatrimony = calculeInitialPatrimony(
+    mayors,
+    mayorsIncomesAndExpenses
+  );
+
+  const resultMayorPatrimony = generateMayorPatrimony(account, -netPatrimony);
+
+  setMayorAccountPatrimony(account, resultMayorPatrimony, mayors);
+
+  return mayors;
+}
+
+export function calculeInitialPatrimony(
+  mayorsPatrimony: Mayor[],
+  mayorsOperations: Mayor[]
+): number {
+  const [saldoIncomes, saldoExpenses] =
+    generateSaldoIncomesAndSaldoExpenses(mayorsOperations);
+  const utility = calculeUtility(saldoIncomes, saldoExpenses);
+
+  const patrimony = generateInitialPatrimony(mayorsPatrimony);
+  return calculeNetPatrimony(patrimony, utility);
+}
+
+export function generateInitialPatrimony(mayors: Mayor[]): number {
+  return mayors.reduce(
+    (total, { saldo, account }) =>
+      account.code?.startsWith("6") ? total - saldo : total,
+    0
+  );
+}
+
+export async function pushInitialBalances(
+  fiscalYear: FiscalYear,
+  mayors: Mayor[]
+): Promise<Mayor[]> {
+  return await Promise.all(
+    mayors.map(({ account, voucherDetail, saldo }) => {
+      const { debe, haber } = voucherDetail;
+      const date = moment(`${fiscalYear.year - 1}-12-31`).toDate();
+
+      return createMayor(fiscalYear, account, date, debe, haber, saldo);
+    })
+  );
+}
+
+export async function createAndGetMayors(
+  fiscalYear: FiscalYear,
+  mayors: Mayor[]
+): Promise<Mayor[]> {
+  return await Promise.all(
+    mayors.map((mayor) => {
+      return createMayorAndUpdate(fiscalYear, mayor);
+    })
+  );
+}
+
+export async function createMayorAndUpdate(
+  fiscalYear: FiscalYear,
+  mayor: Mayor
+): Promise<Mayor> {
+  if (!mayor?.account || !mayor?.voucherDetail)
+    throw new Error("Create mayor required (account and voucher detail).");
+
+  const { account, saldo = 0 } = mayor;
+  const { debe = 0, haber = 0 } = mayor.voucherDetail;
+  const date = moment(`${fiscalYear.year - 1}-12-31`).toDate();
+  const newMayor = await createMayor(
+    fiscalYear,
+    account,
+    date,
+    debe,
+    haber,
+    saldo
+  );
+
+  if (fiscalYear.has_documents) {
+    await updateMayors(newMayor);
+  }
+
+  return newMayor;
+}
+
+export async function createMayor(
+  fiscalYear: FiscalYear,
+  account: Account,
+  date: Date,
+  debe: number,
+  haber: number,
+  saldo: number
+) {
+  return Mayor.create({
+    date,
+    account,
+    fiscalYear,
+    init_saldo: true,
+    saldo,
+    voucherDetail: await VoucherDetail.create({
+      account,
+      debe,
+      haber,
+    }).save(),
+  }).save();
+}
+
+export async function setMayorsToInitialBalances(
+  fiscalYear: FiscalYear,
+  previousBalances: Mayor[],
+  currentBalances: Mayor[]
+): Promise<Mayor[]> {
+  if (!currentBalances.length) {
+    return await createAndGetMayors(fiscalYear, previousBalances);
+  } else {
+    const mapMayorsToCode = new Map<string, Mayor>();
+    for (const mayor of previousBalances) {
+      if (!mapMayorsToCode.get(mayor.account.code)) {
+        mapMayorsToCode.set(mayor.account.code, mayor);
+      }
+    }
+    return await updateAndGetMayors(currentBalances, mapMayorsToCode);
+  }
+}
+
+export async function updateAndGetMayors(
+  mayors: Mayor[],
+  mapMayors: Map<string, Mayor>
+): Promise<Mayor[]> {
+  return await Promise.all(mayors.map((val) => updateMayor(val, mapMayors)));
+}
+
+export async function updateMayor(
+  mayor: Mayor,
+  mapMayors: Map<string, Mayor>
+): Promise<Mayor> {
+  const { fiscalYear, account } = mayor || {};
+  const { saldo, voucherDetail } = {
+    ...(mapMayors.get(account?.code) || {}),
+  };
+  const { debe, haber } = voucherDetail || {};
+  const updatedMayor = await Mayor.create({
+    ...mayor,
+    saldo,
+    voucherDetail: { ...mayor.voucherDetail, debe, haber },
+  }).save();
+  await updatedMayor.voucherDetail.save();
+
+  if (fiscalYear?.has_documents) {
+    await updateMayors(updatedMayor);
+  }
+
+  return updatedMayor;
+}
+
+export function generateMayorPatrimony(
+  account: Account,
+  netPatrimony: number
+): Mayor {
+  return Mayor.create({
+    account,
+    init_saldo: true,
+    saldo: netPatrimony,
+    voucherDetail: {
+      account,
+      debe: Math.max(netPatrimony, 0),
+      haber: Math.max(-netPatrimony, 0),
+    },
+  });
+}
+
+export function setMayorAccountPatrimony(
+  accountPatrimony: Account,
+  mayor: Mayor,
+  mayors: Mayor[]
+): Mayor[] {
+  const indexMayorPatrimony = mayors.findIndex(
+    ({ account }) => account?.code === accountPatrimony.code
+  );
+
+  return mayors.fill(mayor, indexMayorPatrimony, indexMayorPatrimony + 1);
 }
 
 export function parse2Float(number: number): string {

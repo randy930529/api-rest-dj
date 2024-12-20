@@ -1,4 +1,4 @@
-import { In } from "typeorm";
+import { In, Like, Not } from "typeorm";
 import { Mayor } from "../../../../entity/Mayor";
 import { getLastMayorInAccounts } from "../../../../reports/utils";
 import {
@@ -37,7 +37,7 @@ export async function getLastMayorOfTheAccounts(
   );
 }
 
-export async function getBiggerAccountsInitials(
+export async function getMayorAccountsInitials(
   fiscalYearId: number,
   accountCodes: string[]
 ): Promise<Mayor[]> {
@@ -53,6 +53,27 @@ export async function getBiggerAccountsInitials(
       where: {
         fiscalYear: { id: fiscalYearId },
         account: { code: In(accountCodes) },
+      },
+    })
+  );
+}
+
+export async function getMayorsIncomesAndExpensesInitials(
+  fiscalYearId: number,
+  incomeAccountCode: string = "9%",
+  expenseAccountCode: string = "8%"
+) {
+  return getLastMayorInAccounts(
+    await Mayor.find({
+      select: MAYOR_ACCOUNT_SELECT,
+      relations: MAYOR_ACCOUNT_RELATIONS,
+      order: getMayorOrder("DESC"),
+      where: {
+        fiscalYear: { id: fiscalYearId },
+        account: [
+          { code: Like(incomeAccountCode) },
+          { code: Like(expenseAccountCode) },
+        ],
       },
     })
   );

@@ -19,11 +19,7 @@ import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import { calculeF20ToDj08 } from "../../../reports/utils/utilsToReports";
 import { SetInitialBalanceDTO } from "../dto/request/setInitialBalance.dto";
 import { InitialBalancesDTO } from "../dto/request/getInitialBalances.dto";
-import {
-  getAccountInitialsBalances,
-  updateMayors,
-  verifyCuadreInAccount,
-} from "../utils";
+import { updateMayors, verifyCuadreInAccount } from "../utils";
 import {
   AllDataSectionsDj08Type,
   DataSectionAType,
@@ -53,7 +49,10 @@ import {
   VOUCHER_DETAIL_RELATIONS,
   VOUCHER_DETAIL_SELECT,
 } from "../utils/query/voucherDetail.fetch";
-import { getInitialsBalances } from "../utils/query/initialBalance.fetch";
+import {
+  getAccountInitialsBalances,
+  getInitialsBalances,
+} from "../utils/query/initialBalance.fetch";
 import { getLastMayorOfTheAccounts } from "../utils/query/mayorsTheAccountInToFiscalYear.fetch";
 import { getInitialBalances } from "../../period/utils";
 

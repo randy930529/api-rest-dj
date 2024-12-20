@@ -1,5 +1,11 @@
-import { FindOptionsRelations, FindOptionsSelect, In } from "typeorm";
+import {
+  FindOptionsRelations,
+  FindOptionsSelect,
+  In,
+  NotBrackets,
+} from "typeorm";
 import { Mayor } from "../../../../entity/Mayor";
+import { Account } from "../../../../entity/Account";
 
 export const MAYOR_SELECT: FindOptionsSelect<Mayor> = {
   voucherDetail: {
@@ -31,4 +37,32 @@ export async function getInitialsBalances(
     },
     order: { account: { code: "ASC" } },
   });
+}
+
+export async function getAccountInitialsBalances(
+  patrimonyAccouns: string = "",
+  expenseAccouns: string = "8%",
+  incomeAccouns: string = "9%"
+): Promise<[string[], Account[]]> {
+  const acountInitials = await Account.createQueryBuilder()
+    .select(["id", "code", "description", "acreedor"])
+    .where(
+      new NotBrackets((qb) => {
+        qb.where("code LIKE :patrimonyAccouns", {
+          patrimonyAccouns,
+        })
+          .orWhere("code LIKE :expenseAccouns", {
+            expenseAccouns,
+          })
+          .orWhere("code LIKE :incomeAccouns", {
+            incomeAccouns,
+          });
+      })
+    )
+    .orderBy("code", "ASC")
+    .getRawMany<Account>();
+
+  const codeAccountInitials = acountInitials.map(({ code }) => code);
+
+  return [codeAccountInitials, acountInitials];
 }

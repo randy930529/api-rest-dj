@@ -3,7 +3,6 @@ import { AppDataSource } from "../../../data-source";
 import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { responseError } from "../../../errors/responseError";
 import { FiscalYear } from "../../../entity/FiscalYear";
-import { VoucherDetail } from "../../../entity/VoucherDetail";
 import { Mayor } from "../../../entity/Mayor";
 import { Account } from "../../../entity/Account";
 import { SupportDocument } from "../../../entity/SupportDocument";
@@ -15,16 +14,22 @@ import { FiscalYearDTO } from "../dto/request/fiscalYear.dto";
 import { CreateFiscalYearDTO } from "../dto/response/createFiscalYear.dto";
 import { defaultSectionDataInit, getInitialBalances } from "../utils";
 import {
-  getAccountInitialsBalances,
+  createAndGetMayors,
+  getInitialPatrimony,
+  getPreviousMayorsToInitialBalances,
   passPreviousBalanceToInitialBalance,
+  setMayorsToInitialBalances,
   updateMayors,
 } from "../../accounting/utils";
 import {
   DELETE_FISCAL_YEAR_RELATIONS,
   DELETE_FISCAL_YEAR_SELECT,
 } from "../utils/query/deleteFiscalYear.fetch";
-import { getInitialsBalances } from "../../accounting/utils/query/initialBalance.fetch";
-import { getBiggerAccountsInitials } from "../../accounting/utils/query/mayorsTheAccountInToFiscalYear.fetch";
+import {
+  getAccountInitialsBalances,
+  getInitialsBalances,
+} from "../../accounting/utils/query/initialBalance.fetch";
+import { getMayorAccountsInitials } from "../../accounting/utils/query/mayorsTheAccountInToFiscalYear.fetch";
 import { getSupportDocumentsToAccounting } from "../utils/query/supportDocumentsToAccounting.fetch";
 
 export class FiscalYearController extends EntityControllerBase<FiscalYear> {
@@ -253,14 +258,15 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
         await getAccountInitialsBalances();
 
       let [previousBalances, currentInitialBalances] = await Promise.all([
-        this.getPreviousMayorsToInitialBalances(
+        getPreviousMayorsToInitialBalances(
           fiscalYear,
-          codeAccountInitials
+          codeAccountInitials,
+          acountInitials
         ),
         getInitialsBalances(id, codeAccountInitials),
       ]);
 
-      currentInitialBalances = await this.setMayorsToInitialBalances(
+      currentInitialBalances = await setMayorsToInitialBalances(
         fiscalYear,
         previousBalances,
         currentInitialBalances
@@ -276,115 +282,6 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
       next(error);
       return;
     }
-  }
-
-  private async getPreviousMayorsToInitialBalances(
-    fiscalYear: FiscalYear,
-    codeAccountInitials: string[]
-  ): Promise<Mayor[]> {
-    if (!fiscalYear.run_acounting) return;
-
-    const previousFiscalYear = await FiscalYear.findOneBy({
-      year: fiscalYear.year - 1,
-      profile: { id: fiscalYear.__profileId__ },
-    });
-
-    if (!previousFiscalYear) return;
-
-    return await getBiggerAccountsInitials(
-      previousFiscalYear?.id,
-      codeAccountInitials
-    );
-  }
-
-  private async setMayorsToInitialBalances(
-    fiscalYear: FiscalYear,
-    previousBalances: Mayor[],
-    currentBalances: Mayor[]
-  ): Promise<Mayor[]> {
-    if (!currentBalances.length) {
-      return await this.createAndGetMayors(fiscalYear, previousBalances);
-    } else {
-      const mapMayorsToCode = new Map<string, Mayor>();
-      for (const mayor of previousBalances) {
-        if (!mapMayorsToCode.get(mayor.account.code)) {
-          mapMayorsToCode.set(mayor.account.code, mayor);
-        }
-      }
-      return await this.updateAndGetMayors(currentBalances, mapMayorsToCode);
-    }
-  }
-
-  private async createAndGetMayors(
-    fiscalYear: FiscalYear,
-    mayors: Mayor[]
-  ): Promise<Mayor[]> {
-    return await Promise.all(
-      mayors.map(({ account, voucherDetail, date, saldo }) => {
-        const { debe, haber } = voucherDetail;
-        return this.createMayor(fiscalYear, account, date, debe, haber, saldo);
-      })
-    );
-  }
-
-  private async updateAndGetMayors(
-    mayors: Mayor[],
-    mapMayors: Map<string, Mayor>
-  ): Promise<Mayor[]> {
-    return await Promise.all(
-      mayors.map((val) => this.updateMayor(val, mapMayors))
-    );
-  }
-
-  private async createMayor(
-    fiscalYear: FiscalYear,
-    account: Account,
-    date: Date,
-    debe: number,
-    haber: number,
-    saldo: number
-  ): Promise<Mayor> {
-    const newMayor = await Mayor.create({
-      date,
-      account,
-      fiscalYear,
-      init_saldo: true,
-      saldo,
-      voucherDetail: await VoucherDetail.create({
-        account,
-        debe,
-        haber,
-      }).save(),
-    }).save();
-
-    if (fiscalYear.has_documents) {
-      await updateMayors(newMayor);
-    }
-
-    return newMayor;
-  }
-
-  private async updateMayor(
-    mayor: Mayor,
-    mapMayors: Map<string, Mayor>
-  ): Promise<Mayor> {
-    const { fiscalYear, account } = mayor || {};
-    const { saldo, voucherDetail } = {
-      ...(mapMayors.get(account?.code) || {}),
-    };
-    const { debe, haber } = voucherDetail || {};
-    const updatedMayor = await Mayor.create({
-      ...mayor,
-      saldo,
-      voucherDetail: { ...mayor.voucherDetail, debe, haber },
-    }).save();
-    await updatedMayor.voucherDetail.save();
-
-    if (fiscalYear?.has_documents) {
-      await updateMayors(updatedMayor);
-    }
-
-    return updatedMayor;
   }
 
   private async generateAccountingInFiscalYear(fiscalYear: FiscalYear) {

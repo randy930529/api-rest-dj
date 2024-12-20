@@ -77,7 +77,7 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         responseError(
           res,
           "No hay valores de comprobantes para el rango espesificado.",
-          404
+          416
         );
 
       const data = this.generateVoucherReportData(profile, vouchers);
@@ -129,7 +129,7 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         responseError(
           res,
           "No hay valores de comprobantes para el rango espesificado.",
-          404
+          416
         );
 
       if (mayorToInitSaldo) {
@@ -183,7 +183,7 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         responseError(
           res,
           "No hay valores de comprobantes para la fecha espesificado.",
-          404
+          416
         );
 
       const lastMayors = getLastMayorInAccounts(mayorsOftheFiscalYear);
@@ -227,7 +227,7 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         responseError(
           res,
           "No hay valores de comprobantes para la fecha espesificado.",
-          404
+          416
         );
 
       const lastMayors = getLastMayorInAccounts(mayors);
@@ -274,7 +274,7 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         responseError(
           res,
           "No hay valores de comprobantes para la fecha espesificado.",
-          404
+          416
         );
 
       const lastMayors = getLastMayorInAccounts(mayors);
