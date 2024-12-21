@@ -3,8 +3,6 @@ import { AppDataSource } from "../../../data-source";
 import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { responseError } from "../../../errors/responseError";
 import { FiscalYear } from "../../../entity/FiscalYear";
-import { Mayor } from "../../../entity/Mayor";
-import { Account } from "../../../entity/Account";
 import { SupportDocument } from "../../../entity/SupportDocument";
 import { SupportDocumentController } from "../../accounting/controller/SupportDocumentController";
 import { Dj08SectionData } from "../../../entity/Dj08SectionData";
@@ -14,12 +12,9 @@ import { FiscalYearDTO } from "../dto/request/fiscalYear.dto";
 import { CreateFiscalYearDTO } from "../dto/response/createFiscalYear.dto";
 import { defaultSectionDataInit, getInitialBalances } from "../utils";
 import {
-  createAndGetMayors,
-  getInitialPatrimony,
   getPreviousMayorsToInitialBalances,
   passPreviousBalanceToInitialBalance,
   setMayorsToInitialBalances,
-  updateMayors,
 } from "../../accounting/utils";
 import {
   DELETE_FISCAL_YEAR_RELATIONS,
@@ -29,7 +24,6 @@ import {
   getAccountInitialsBalances,
   getInitialsBalances,
 } from "../../accounting/utils/query/initialBalance.fetch";
-import { getMayorAccountsInitials } from "../../accounting/utils/query/mayorsTheAccountInToFiscalYear.fetch";
 import { getSupportDocumentsToAccounting } from "../utils/query/supportDocumentsToAccounting.fetch";
 
 export class FiscalYearController extends EntityControllerBase<FiscalYear> {
