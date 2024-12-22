@@ -67,6 +67,8 @@ export async function getPreviousMayorsToInitialBalances(
 }
 
 export async function updateMayors(fieldsMayor: CreateMayorDTO): Promise<void> {
+  if (!fieldsMayor.fiscalYear?.run_acounting) return;
+
   const { account, debe, haber } = fieldsMayor.voucherDetail;
   const fiscalYearId = fieldsMayor.fiscalYear.id;
   const accountId = account?.id;

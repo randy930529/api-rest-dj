@@ -223,13 +223,13 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
           id: -1,
           date: null,
           fiscalYear: removeSupportDocument.fiscalYear,
-          voucherDetail: removeSupportDocument.voucher.voucherDetails[0],
+          voucherDetail: removeSupportDocument?.voucher?.voucherDetails[0],
         }),
         updateMayors({
           id: -1,
           date: null,
           fiscalYear: removeSupportDocument.fiscalYear,
-          voucherDetail: removeSupportDocument.voucher.voucherDetails[1],
+          voucherDetail: removeSupportDocument?.voucher?.voucherDetails[1],
         }),
         this.updatedDJ08(removeSupportDocument),
       ]);
@@ -249,6 +249,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       res.status(204);
       return "Support document has been removed successfully.";
     } catch (error) {
+      console.log(error);
       if (res.statusCode === 200) res.status(500);
       next(error);
     }

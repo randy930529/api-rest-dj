@@ -136,6 +136,8 @@ export class SupportDocument extends Model {
   }
 
   private async updateVoucherNumber(): Promise<void> {
+    if (!this.fiscalYear?.run_acounting) return;
+
     const voucherToUpdateNumber = await Voucher.find({
       where: {
         supportDocument: {
