@@ -28,6 +28,7 @@ export const SUPPORT_DOCUMENT_SELECT: FindOptionsSelect<SupportDocument> = {
       account: { id: true, acreedor: true },
       mayor: {
         id: true,
+        account: { id: true, code: true },
       },
     },
   },
@@ -38,8 +39,19 @@ export const SUPPORT_DOCUMENT_RELATIONS: FindOptionsRelations<SupportDocument> =
     element: { account: true },
     fiscalYear: { musicalGroup: true },
     profileActivity: true,
-    voucher: { voucherDetails: { account: true, mayor: true } },
+    voucher: { voucherDetails: { account: true, mayor: { account: true } } },
   };
+
+export async function getSupportDocumentToUpdate(
+  id: number,
+  repository: Repository<SupportDocument>
+): Promise<SupportDocument> {
+  return await repository.findOne({
+    select: SUPPORT_DOCUMENT_SELECT,
+    relations: SUPPORT_DOCUMENT_RELATIONS,
+    where: { id },
+  });
+}
 
 export async function getSupportDocumentToRemove(
   id: number,

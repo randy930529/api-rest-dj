@@ -34,8 +34,7 @@ import {
 } from "../utils/query/element.fetch";
 import {
   getSupportDocumentToRemove,
-  SUPPORT_DOCUMENT_RELATIONS,
-  SUPPORT_DOCUMENT_SELECT,
+  getSupportDocumentToUpdate,
 } from "../utils/query/supportDocument.fetch";
 import {
   PROFILE_ACTIVITIES_RELATIONS,
@@ -153,11 +152,10 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
           responseError(res, "It is required Account of the Elemento.", 404);
       }
 
-      const supportDocumentToUpdate = await this.repository.findOne({
-        select: SUPPORT_DOCUMENT_SELECT,
-        relations: SUPPORT_DOCUMENT_RELATIONS,
-        where: { id },
-      });
+      const supportDocumentToUpdate = await getSupportDocumentToUpdate(
+        id,
+        this.repository
+      );
 
       if (!supportDocumentToUpdate)
         responseError(res, `SUPPORTDOCUMENT not found.`, 404);
@@ -932,6 +930,9 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         const voucher =
           supportDocument.voucher ||
           (await this.createVoucher(supportDocument));
+        const voucherDetailsToUpdateMayor = [
+          ...(voucher?.voucherDetails || []),
+        ];
 
         const groupTrim = group.trim();
         const [[accountDebe, debe], [accountHaber, haber]] = await Promise.all([
@@ -951,10 +952,13 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
           voucher.voucherDetails = createVoucherDetails;
         } else {
           this.updateVoucherDetails(voucher, createVoucherDetails);
+          this.updateMayors(voucher, date, accountDebe, accountHaber);
         }
 
         const resultVoucher = await voucher.save();
-        for (const voucherDetail of resultVoucher.voucherDetails) {
+        voucherDetailsToUpdateMayor.push(...resultVoucher.voucherDetails);
+
+        for (const voucherDetail of voucherDetailsToUpdateMayor) {
           await updateMayors({
             id: voucherDetail.mayor?.id,
             date,
@@ -966,6 +970,25 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
     } catch (error) {
       console.log("ERROR EN CUADRE: ", error.message);
       return error.message;
+    }
+  }
+
+  private updateMayors(
+    voucher: Voucher,
+    date: Date,
+    accountDebe: Account,
+    accountHaber: Account
+  ): void {
+    for (const voucherDetail of voucher.voucherDetails) {
+      if (!accountDebe || !accountDebe) return;
+
+      if (!voucherDetail.haber) {
+        voucherDetail.mayor.date = date;
+        voucherDetail.mayor.account = accountDebe;
+      } else {
+        voucherDetail.mayor.date = date;
+        voucherDetail.mayor.account = accountHaber;
+      }
     }
   }
 
@@ -1081,18 +1104,23 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
     debe: number | null,
     haber: number | null
   ): VoucherDetail[] {
+    if (!accountDebe || !accountHaber)
+      throw new Error(
+        "Create voucher details required one (accountDebe and accountHaber)."
+      );
+
     return [
       VoucherDetail.create({
         debe: debe || 0,
         haber: haber || 0,
         voucher,
-        account: accountDebe || accountHaber,
+        account: accountDebe,
       }),
       VoucherDetail.create({
         debe: haber || 0,
         haber: debe || 0,
         voucher,
-        account: accountHaber || accountHaber,
+        account: accountHaber,
       }),
     ];
   }
