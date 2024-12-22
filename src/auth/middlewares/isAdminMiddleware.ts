@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { responseError } from "../../errors/responseError";
+import { UserRole } from "../../entity/User";
 
 export const isAdminMiddleware = (
   request: Request,
@@ -13,7 +14,7 @@ export const isAdminMiddleware = (
       responseError(response, "User not activate.", 401);
     }
 
-    if (user.role !== "admin") {
+    if (user.role !== UserRole.ADMIN) {
       responseError(
         response,
         "User does not have permission to perform this action.",

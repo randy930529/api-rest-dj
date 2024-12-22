@@ -1,4 +1,4 @@
-import { Entity, Column, OneToMany, BeforeRemove } from "typeorm";
+import { Entity, Column, OneToMany } from "typeorm";
 import { HiredPerson } from "./HiredPerson";
 import Model from "./Base";
 import { ProfileAddress } from "./ProfileAddress";

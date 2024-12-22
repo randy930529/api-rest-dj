@@ -23,7 +23,7 @@ export const apiConfigRoutes = [
     route: "/api/config",
     controller: ApiConfigController,
     middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
-    action: "create",
+    action: "createConfig",
   },
   {
     method: "get",
@@ -45,13 +45,6 @@ export const apiConfigRoutes = [
     controller: ApiConfigController,
     middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
     action: "updateConfig",
-  },
-  {
-    method: "patch",
-    route: "/api/config",
-    controller: ApiConfigController,
-    middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
-    action: "partialConfig",
   },
   {
     method: "delete",

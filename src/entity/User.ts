@@ -1,4 +1,4 @@
-import { Entity, Column, OneToMany, Index, BeforeRemove } from "typeorm";
+import { Entity, Column, OneToMany, Index } from "typeorm";
 import { RefreshToken } from "./RefreshToken";
 import Model from "./Base";
 import { LicenseUser } from "./LicenseUser";

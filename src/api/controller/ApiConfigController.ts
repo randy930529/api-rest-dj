@@ -7,6 +7,7 @@ import { Config } from "../../entity/Config";
 import { BaseResponseDTO } from "../../auth/dto/response/base.dto";
 import { responseError } from "../../errors/responseError";
 import { UpdateConfigDTO } from "../dto/updateConfig.dto";
+import { CreateConfigDTO } from "../../api/dto/createConfig.dto";
 
 export class ApiConfigController extends EntityControllerBase<Config> {
   constructor() {
@@ -37,22 +38,38 @@ export class ApiConfigController extends EntityControllerBase<Config> {
     res.sendFile(filePath);
   }
 
+  async createConfig(req: Request, res: Response, next: NextFunction) {
+    try {
+      const fields: CreateConfigDTO = req.body;
+
+      const configCreate = this.generateConfig(fields);
+      const configCreated = await this.create(configCreate);
+
+      const resp: BaseResponseDTO = {
+        status: "success",
+        error: undefined,
+        data: { config: configCreated },
+      };
+
+      res.status(201);
+      return { ...resp };
+    } catch (error) {
+      if (res.statusCode === 200) res.status(500);
+      next(error);
+    }
+  }
+
   async updateConfig(req: Request, res: Response, next: NextFunction) {
     try {
-      const fields: Config = req.body;
-      const { id } = fields;
+      const fields: UpdateConfigDTO = req.body;
+      if (!fields.id)
+        responseError(res, "Update api config requiere id valid.", 404);
 
-      if (!id) responseError(res, "Update api config requiere id valid.", 404);
-
-      const configUpdate = await this.update({ id, res }, fields);
-
-      process.env.MEa_By_MFP = `${configUpdate.MEa_By_MFP}`;
-      process.env.PPD_PERCENTAGE = `${configUpdate.PPD_PERCENTAGE}`;
-      process.env.PE_0_10000 = `${configUpdate.PE_0_10000}`;
-      process.env.PE_10000_20000 = `${configUpdate.PE_10000_20000}`;
-      process.env.PE_20000_30000 = `${configUpdate.PE_20000_30000}`;
-      process.env.PE_30000_50000 = `${configUpdate.PE_30000_50000}`;
-      process.env.PE_ABOVE_50000 = `${configUpdate.PE_ABOVE_50000}`;
+      const configToUpdateCreate = this.generateConfig(fields);
+      const configUpdate = await this.update(
+        { id: fields.id, res },
+        configToUpdateCreate
+      );
 
       const resp: BaseResponseDTO = {
         status: "success",
@@ -68,36 +85,26 @@ export class ApiConfigController extends EntityControllerBase<Config> {
     }
   }
 
-  async partialConfig(req: Request, res: Response, next: NextFunction) {
-    try {
-      const fields: UpdateConfigDTO = req.body;
-      const { id } = fields;
+  private generateConfig(fields: CreateConfigDTO | UpdateConfigDTO): Config {
+    fields.progressiveScale = this.updateTramoNumber(fields.progressiveScale);
 
-      if (!id) responseError(res, "Update config requiere id valid.", 404);
+    return this.repository.create({
+      ...fields,
+      company: JSON.stringify(fields.company),
+      mora_scale: JSON.stringify(fields.mora_scale),
+    });
+  }
 
-      const fieldToUpdate: string = Object.keys(fields)[1];
-
-      const configToUpdate = await this.one({ id, req, res });
-
-      const configUpdateObject = Object.assign(new Config(), {
-        ...configToUpdate,
-        [fieldToUpdate]: fields[fieldToUpdate],
-      });
-
-      const configUpdate = await this.update({ id, res }, configUpdateObject);
-      process.env[fieldToUpdate] = `${configUpdate[fieldToUpdate]}`;
-
-      const resp: BaseResponseDTO = {
-        status: "success",
-        error: undefined,
-        data: { config: configUpdate },
-      };
-
-      res.status(200);
-      return { ...resp };
-    } catch (error) {
-      if (res.statusCode === 200) res.status(500);
-      next(error);
-    }
+  private updateTramoNumber(
+    fieldsScale: {
+      id?: number;
+      is_normal: boolean;
+      tramo?: number;
+      from: number;
+      to: number;
+      porcentage: number;
+    }[]
+  ) {
+    return fieldsScale.map((val, index) => ({ ...val, tramo: index + 1 }));
   }
 }
