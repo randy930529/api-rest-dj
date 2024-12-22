@@ -249,7 +249,6 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       res.status(204);
       return "Support document has been removed successfully.";
     } catch (error) {
-      console.log(error);
       if (res.statusCode === 200) res.status(500);
       next(error);
     }

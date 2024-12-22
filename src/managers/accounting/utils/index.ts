@@ -305,8 +305,8 @@ export async function createMayor(
 
 export async function setMayorsToInitialBalances(
   fiscalYear: FiscalYear,
-  previousBalances: Mayor[],
-  currentBalances: Mayor[]
+  previousBalances: Mayor[] = [],
+  currentBalances: Mayor[] = []
 ): Promise<Mayor[]> {
   if (!currentBalances.length) {
     return await createAndGetMayors(fiscalYear, previousBalances);
