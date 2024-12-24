@@ -696,8 +696,8 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
   }
 
   private normalizeMayorsData(
-    debe: number,
-    haber: number,
+    debe: number = 0,
+    haber: number = 0,
     mayors: MayorDetailType[]
   ) {
     return {
@@ -705,8 +705,8 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
       totalHaber: parse2Float(haber),
       accounting: mayors.map((val) => ({
         ...val,
-        debe: parse2Float(val.debe),
-        haber: parse2Float(val.haber),
+        debe: parse2Float(val.debe || 0),
+        haber: parse2Float(val.haber || 0),
         saldo: val.saldo && parse2Float(val.saldo),
       })),
     };
