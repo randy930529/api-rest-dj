@@ -311,12 +311,11 @@ export async function setMayorsToInitialBalances(
   if (!currentBalances.length) {
     return await createAndGetMayors(fiscalYear, previousBalances);
   } else {
-    const mapMayorsToCode = new Map<string, Mayor>();
-    for (const mayor of previousBalances) {
-      if (!mapMayorsToCode.get(mayor.account.code)) {
-        mapMayorsToCode.set(mayor.account.code, mayor);
-      }
+    if (currentBalances.length < previousBalances.length) {
+      normalizeBalances(fiscalYear, previousBalances, currentBalances);
     }
+    const mapMayorsToCode = getMapMayorToAccountCode(previousBalances);
+
     return await updateAndGetMayors(currentBalances, mapMayorsToCode);
   }
 }
@@ -340,9 +339,12 @@ export async function updateMayor(
   const updatedMayor = await Mayor.create({
     ...mayor,
     saldo,
-    voucherDetail: { ...mayor.voucherDetail, debe, haber },
+    voucherDetail: await VoucherDetail.create({
+      ...mayor.voucherDetail,
+      debe,
+      haber,
+    }).save(),
   }).save();
-  await updatedMayor.voucherDetail.save();
 
   if (fiscalYear?.has_documents) {
     await updateMayors(updatedMayor);
@@ -376,10 +378,50 @@ export function setMayorAccountPatrimony(
     ({ account }) => account?.code === accountPatrimony.code
   );
 
+  if (indexMayorPatrimony === -1) {
+    mayors.push(mayor);
+    return mayors;
+  }
+
   return mayors.fill(mayor, indexMayorPatrimony, indexMayorPatrimony + 1);
 }
 
 export function parse2Float(number: number): string {
   if (number === 0) return "0";
   return number.toFixed(2);
+}
+
+function normalizeBalances(
+  fiscalYear: FiscalYear,
+  previousBalances: Mayor[],
+  currentBalances: Mayor[]
+) {
+  if (!fiscalYear)
+    throw new Error("Normaliza initial balances riquered fiscal year.");
+
+  const mapCurrentMayors = getMapMayorToAccountCode(currentBalances);
+  for (const { account } of previousBalances) {
+    if (!mapCurrentMayors.get(account?.code)) {
+      const date = moment(`${fiscalYear.year - 1}-12-31`).toDate();
+      currentBalances.push(
+        Mayor.create({
+          date,
+          fiscalYear,
+          account,
+          voucherDetail: { account, debe: 0, haber: 0 },
+        })
+      );
+    }
+  }
+}
+
+function getMapMayorToAccountCode(mayors: Mayor[]): Map<string, Mayor> {
+  const mapMayorsToCode = new Map<string, Mayor>();
+  for (const mayor of mayors) {
+    if (!mapMayorsToCode.get(mayor.account.code)) {
+      mapMayorsToCode.set(mayor.account.code, mayor);
+    }
+  }
+
+  return mapMayorsToCode;
 }
