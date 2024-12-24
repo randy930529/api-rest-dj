@@ -121,9 +121,9 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       const validDate: Date = moment().add(validTimeTMBill, "s").toDate();
       const currency = currencyTMBill;
       const description = "Pago de licencia";
-
+      const importLicense = license.discounts_import || license.import;
       const tmBillDTO = await TMBill.create({
-        import: license.import,
+        import: importLicense,
         validDate,
         currency,
         description,
