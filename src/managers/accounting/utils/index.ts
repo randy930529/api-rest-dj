@@ -205,9 +205,7 @@ export async function getInitialPatrimony(
 
   const resultMayorPatrimony = generateMayorPatrimony(account, -netPatrimony);
 
-  setMayorAccountPatrimony(account, resultMayorPatrimony, mayors);
-
-  return mayors;
+  return setMayorAccountPatrimony(account, resultMayorPatrimony, mayors);
 }
 
 export function calculeInitialPatrimony(
@@ -259,11 +257,10 @@ export async function createMayorAndUpdate(
   fiscalYear: FiscalYear,
   mayor: Mayor
 ): Promise<Mayor> {
-  if (!mayor?.account || !mayor?.voucherDetail)
-    throw new Error("Create mayor required (account and voucher detail).");
+  if (!mayor?.account) throw new Error("Create mayor required account.");
 
   const { account, saldo = 0 } = mayor;
-  const { debe = 0, haber = 0 } = mayor.voucherDetail;
+  const [debe, haber] = [Math.max(saldo, 0), Math.max(-saldo, 0)];
   const date = moment(`${fiscalYear.year - 1}-12-31`).toDate();
   const newMayor = await createMayor(
     fiscalYear,
@@ -374,21 +371,27 @@ export function setMayorAccountPatrimony(
   mayor: Mayor,
   mayors: Mayor[]
 ): Mayor[] {
-  const indexMayorPatrimony = mayors.findIndex(
-    ({ account }) => account?.code === accountPatrimony.code
+  mayors = mayors.filter(({ account }) =>
+    isMayorPatrimony(account.code, accountPatrimony.code)
   );
+  mayors.push(mayor);
 
-  if (indexMayorPatrimony === -1) {
-    mayors.push(mayor);
-    return mayors;
-  }
-
-  return mayors.fill(mayor, indexMayorPatrimony, indexMayorPatrimony + 1);
+  return mayors;
 }
 
 export function parse2Float(number: number): string {
   if (number === 0) return "0";
   return number.toFixed(2);
+}
+
+export function isMayorPatrimony(
+  mayorAccountCode: string,
+  accountPatrimonyCode: string
+): boolean {
+  return (
+    !mayorAccountCode.startsWith(accountPatrimonyCode.charAt(0)) ||
+    mayorAccountCode === accountPatrimonyCode
+  );
 }
 
 function normalizeBalances(
