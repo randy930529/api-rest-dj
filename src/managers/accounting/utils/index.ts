@@ -205,9 +205,7 @@ export async function getInitialPatrimony(
 
   const resultMayorPatrimony = generateMayorPatrimony(account, -netPatrimony);
 
-  setMayorAccountPatrimony(account, resultMayorPatrimony, mayors);
-
-  return mayors;
+  return setMayorAccountPatrimony(account, resultMayorPatrimony, mayors);
 }
 
 export function calculeInitialPatrimony(
@@ -259,11 +257,10 @@ export async function createMayorAndUpdate(
   fiscalYear: FiscalYear,
   mayor: Mayor
 ): Promise<Mayor> {
-  if (!mayor?.account || !mayor?.voucherDetail)
-    throw new Error("Create mayor required (account and voucher detail).");
+  if (!mayor?.account) throw new Error("Create mayor required account.");
 
   const { account, saldo = 0 } = mayor;
-  const { debe = 0, haber = 0 } = mayor.voucherDetail;
+  const [debe, haber] = [Math.max(saldo, 0), Math.max(-saldo, 0)];
   const date = moment(`${fiscalYear.year - 1}-12-31`).toDate();
   const newMayor = await createMayor(
     fiscalYear,
@@ -311,46 +308,20 @@ export async function setMayorsToInitialBalances(
   if (!currentBalances.length) {
     return await createAndGetMayors(fiscalYear, previousBalances);
   } else {
-    if (currentBalances.length < previousBalances.length) {
-      normalizeBalances(fiscalYear, previousBalances, currentBalances);
-    }
-    const mapMayorsToCode = getMapMayorToAccountCode(previousBalances);
-
-    return await updateAndGetMayors(currentBalances, mapMayorsToCode);
+    const setAccountCodes = [
+      ...new Set(
+        [...currentBalances, ...previousBalances].map(
+          ({ account }) => account.code
+        )
+      ),
+    ];
+    return await updateAndGetMayors(
+      fiscalYear,
+      currentBalances,
+      previousBalances,
+      setAccountCodes
+    );
   }
-}
-
-export async function updateAndGetMayors(
-  mayors: Mayor[],
-  mapMayors: Map<string, Mayor>
-): Promise<Mayor[]> {
-  return await Promise.all(mayors.map((val) => updateMayor(val, mapMayors)));
-}
-
-export async function updateMayor(
-  mayor: Mayor,
-  mapMayors: Map<string, Mayor>
-): Promise<Mayor> {
-  const { fiscalYear, account } = mayor || {};
-  const { saldo } = {
-    ...(mapMayors.get(account?.code) || {}),
-  };
-  const [debe, haber] = [Math.max(saldo, 0), Math.max(-saldo, 0)];
-  const updatedMayor = await Mayor.create({
-    ...mayor,
-    saldo,
-    voucherDetail: await VoucherDetail.create({
-      ...mayor.voucherDetail,
-      debe,
-      haber,
-    }).save(),
-  }).save();
-
-  if (fiscalYear?.has_documents) {
-    await updateMayors(updatedMayor);
-  }
-
-  return updatedMayor;
 }
 
 export function generateMayorPatrimony(
@@ -374,16 +345,14 @@ export function setMayorAccountPatrimony(
   mayor: Mayor,
   mayors: Mayor[]
 ): Mayor[] {
-  const indexMayorPatrimony = mayors.findIndex(
-    ({ account }) => account?.code === accountPatrimony.code
+  mayors = mayors.filter(
+    ({ account }) =>
+      isMayorPatrimony(account.code, accountPatrimony.code) &&
+      account?.code !== accountPatrimony.code
   );
+  mayors.push(mayor);
 
-  if (indexMayorPatrimony === -1) {
-    mayors.push(mayor);
-    return mayors;
-  }
-
-  return mayors.fill(mayor, indexMayorPatrimony, indexMayorPatrimony + 1);
+  return mayors;
 }
 
 export function parse2Float(number: number): string {
@@ -391,37 +360,100 @@ export function parse2Float(number: number): string {
   return number.toFixed(2);
 }
 
-function normalizeBalances(
-  fiscalYear: FiscalYear,
-  previousBalances: Mayor[],
-  currentBalances: Mayor[]
-) {
-  if (!fiscalYear)
-    throw new Error("Normaliza initial balances riquered fiscal year.");
-
-  const mapCurrentMayors = getMapMayorToAccountCode(currentBalances);
-  for (const { account } of previousBalances) {
-    if (!mapCurrentMayors.get(account?.code)) {
-      const date = moment(`${fiscalYear.year - 1}-12-31`).toDate();
-      currentBalances.push(
-        Mayor.create({
-          date,
-          fiscalYear,
-          account,
-          voucherDetail: { account, debe: 0, haber: 0 },
-        })
-      );
-    }
-  }
+export function isMayorPatrimony(
+  mayorAccountCode: string,
+  accountPatrimonyCode: string
+): boolean {
+  return (
+    !mayorAccountCode.startsWith(accountPatrimonyCode.charAt(0)) ||
+    mayorAccountCode === accountPatrimonyCode
+  );
 }
 
-function getMapMayorToAccountCode(mayors: Mayor[]): Map<string, Mayor> {
-  const mapMayorsToCode = new Map<string, Mayor>();
-  for (const mayor of mayors) {
-    if (!mapMayorsToCode.get(mayor.account.code)) {
-      mapMayorsToCode.set(mayor.account.code, mayor);
+export async function updateAndGetMayors(
+  fiscalYear: FiscalYear,
+  currents: Mayor[],
+  previous: Mayor[],
+  codes: string[]
+) {
+  const setCodes = [...new Set(codes)];
+  const currentsMap = getObjectMapToCode<Mayor>(currents, getCodeCallback);
+  const previousMap = getObjectMapToCode<Mayor>(previous, getCodeCallback);
+
+  return await Promise.all(
+    setCodes.map((code) =>
+      makeUpdateOrCreate(
+        fiscalYear,
+        currentsMap.get(code),
+        previousMap.get(code)
+      )
+    )
+  );
+}
+
+export function makeUpdateOrCreate(
+  fiscalYear: FiscalYear,
+  currentMayor: Mayor,
+  previouMayor: Mayor
+) {
+  if (currentMayor && previouMayor) {
+    return getUpdateMayor(currentMayor, previouMayor.saldo);
+  } else if (!currentMayor && previouMayor) {
+    return createMayorAndUpdate(fiscalYear, previouMayor);
+  }
+  return currentMayor.save();
+}
+
+export async function getUpdateMayor(
+  mayor: Mayor,
+  saldo: number
+): Promise<Mayor> {
+  if (saldo === undefined || saldo === null || Number.isNaN(saldo))
+    return mayor;
+
+  const [debe, haber] = [Math.max(saldo, 0), Math.max(-saldo, 0)];
+  const voucherDetail = await getUpdateMayorVoucherDetail(mayor, debe, haber);
+
+  const updatedMayor = await Mayor.create({
+    ...mayor,
+    saldo,
+    voucherDetail,
+  }).save();
+
+  if (mayor.fiscalYear?.has_documents) {
+    await updateMayors(updatedMayor);
+  }
+
+  return updatedMayor;
+}
+
+export async function getUpdateMayorVoucherDetail(
+  mayor: Mayor,
+  debe: number,
+  haber: number
+) {
+  return await VoucherDetail.create({
+    ...mayor.voucherDetail,
+    debe,
+    haber,
+  }).save();
+}
+
+export function getObjectMapToCode<T>(
+  vals: T[],
+  callback: (val: T) => string
+): Map<string, T> {
+  const mapToCode: Map<string, T> = new Map<string, T>();
+
+  for (const val of vals) {
+    if (!mapToCode.get(callback(val))) {
+      mapToCode.set(callback(val), val);
     }
   }
 
-  return mapMayorsToCode;
+  return mapToCode;
+}
+
+function getCodeCallback(mayor: Mayor): string {
+  return mayor.account?.code;
 }

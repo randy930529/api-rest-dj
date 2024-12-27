@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import { Between } from "typeorm";
 import * as pug from "pug";
 import * as moment from "moment";
-import { appConfig } from "../../../config";
 import ReportGenerator from "../../base/ReportGeneratorBase";
 import { User } from "../../entity/User";
 import { SectionState } from "../../entity/SectionState";
@@ -15,6 +14,7 @@ import {
   calculeMoraDays,
   clearDuplicatesInArray,
   defaultDataArray,
+  getCantElemetColumExpenses,
   getDataAndTotalsToDj08Sections,
   getDataExpensesInToMonthArrayToTables,
   getDataToDay,
@@ -29,7 +29,11 @@ import {
   DataSectionGType,
   DataSectionHType,
   DataSectionIType,
+  ExpensesNameToTableType,
+  ExpensesNameType,
   SupportDocumentPartialType,
+  TotalMonthsType,
+  TotalsAnnualType,
   TotalSectionAType,
   TotalSectionGType,
   TotalSectionIType,
@@ -72,7 +76,12 @@ export default class ReportGeneratorDJ08Controller extends ReportGenerator {
         month ? `en_el_mes-${month}` : "mensuales"
       }.pdf`;
 
-      const { expensePD } = appConfig.group;
+      const [
+        totalElemetColumGeneralsTb1,
+        totalElemetColumNotGeneralsTb1,
+        totalElemetColumNotGeneralsTb2,
+        expensePD,
+      ] = getCantElemetColumExpenses();
 
       const getInfoReportToDataBase: SupportDocumentPartialType[] =
         await this.getInfoReportToDataBase({
@@ -99,7 +108,10 @@ export default class ReportGeneratorDJ08Controller extends ReportGenerator {
           (val) => val.is_general && val.group?.trim() === "niei"
         );
 
-      const expensesNameTb1 = defaultDataArray<string>(6, "");
+      const expensesNameTb1 = defaultDataArray<string>(
+        totalElemetColumNotGeneralsTb1,
+        ""
+      );
       let totalsTb1 = defaultDataArray<number>(13, 0);
 
       const expensesNameTb2 = defaultDataArray<string>(3, "");
@@ -127,7 +139,7 @@ export default class ReportGeneratorDJ08Controller extends ReportGenerator {
             expensesGeneralsRecordedToDay,
             "amount",
             expensePD,
-            defaultDataArray<number>(7, 0),
+            defaultDataArray<number>(totalElemetColumGeneralsTb1, 0),
             cashInBank[day],
             cashInBox[day]
           );
@@ -137,7 +149,10 @@ export default class ReportGeneratorDJ08Controller extends ReportGenerator {
             cashInBank[day] += expensesGeneralsForDays.pop();
           }
 
-          let expensesMePDForDays = defaultDataArray<number>(6, 0);
+          let expensesMePDForDays = defaultDataArray<number>(
+            totalElemetColumNotGeneralsTb1,
+            0
+          );
           for (let i = 0; i < expensesMePDRecordedToDay.length; i++) {
             const document: SupportDocumentPartialType =
               expensesMePDRecordedToDay[i];
@@ -188,7 +203,10 @@ export default class ReportGeneratorDJ08Controller extends ReportGenerator {
           const expensesMeNIEIRecordedToDay: SupportDocumentPartialType[] =
             expensesMeNIEI.filter((val) => moment(val.date).date() === day + 1);
 
-          let expensesMeDDForDays = defaultDataArray<number>(3, 0);
+          let expensesMeDDForDays = defaultDataArray<number>(
+            totalElemetColumNotGeneralsTb2,
+            0
+          );
           for (let i = 0; i < expensesMeDDRecordedToDay.length; i++) {
             const document: SupportDocumentPartialType =
               expensesMeDDRecordedToDay[i];
@@ -468,34 +486,8 @@ export default class ReportGeneratorDJ08Controller extends ReportGenerator {
         type: "g",
       });
 
-      const dataMonths = <DataIndexByType>{};
-
-      const expensesName: {
-        [key: number]: {
-          tb1: string[];
-          tb2: string[];
-        };
-      } = {};
-
-      const allExpensesName: {
-        tb1: string[];
-        tb2: string[];
-      } = {
-        tb1: defaultDataArray<string>(6, ""),
-        tb2: defaultDataArray<string>(3, ""),
-      };
-
-      const totalMonths: {
-        [key: number]: (string | number)[][];
-      } = {};
-
-      let totals: {
-        tb1: (string | number)[];
-        tb2: (string | number)[];
-      } = {
-        tb1: defaultDataArray<number>(13, 0),
-        tb2: defaultDataArray<number>(10, 0),
-      };
+      const [dataMonths, expensesName, allExpensesName, totalMonths, totals] =
+        this.getInitializeExpenseReportAnnualData();
 
       for (let i = 1; i <= 12; i++) {
         const expensesGenerals = infoReportToDataBase.filter(
@@ -1054,5 +1046,33 @@ export default class ReportGeneratorDJ08Controller extends ReportGenerator {
       if (res.statusCode === 200) res.status(500);
       next(error);
     }
+  }
+
+  private getInitializeExpenseReportAnnualData(): [
+    DataIndexByType,
+    ExpensesNameType,
+    ExpensesNameToTableType,
+    TotalMonthsType,
+    TotalsAnnualType
+  ] {
+    const [
+      ,
+      totalElemetColumNotGeneralsTb1,
+      totalElemetColumNotGeneralsTb2,
+      ,
+    ] = getCantElemetColumExpenses();
+    return [
+      {},
+      {},
+      {
+        tb1: defaultDataArray<string>(totalElemetColumNotGeneralsTb1, ""),
+        tb2: defaultDataArray<string>(totalElemetColumNotGeneralsTb2, ""),
+      },
+      {},
+      {
+        tb1: defaultDataArray<number>(13, 0),
+        tb2: defaultDataArray<number>(10, 0),
+      },
+    ];
   }
 }

@@ -3,6 +3,10 @@ import { appConfig } from "../../../../config";
 import { Account } from "../../../entity/Account";
 import { Mayor } from "../../../entity/Mayor";
 import { FiscalYear } from "../../../entity/FiscalYear";
+import {
+  getAccountOfThePatrimony,
+  isMayorPatrimony,
+} from "../../accounting/utils";
 
 export const defaultSectionDataInit = (): string => {
   const { MEa_By_MFP } = appConfig.accountingConstants;
@@ -47,26 +51,31 @@ export function getInitialBalances(
   mayors: Mayor[],
   fiscalYear: FiscalYear
 ): Mayor[] {
-  return acountInitials.map((account) => {
-    const existingMayor = mayors.find(
-      (mayor) => mayor.account?.code === account.code
-    );
+  const accountPatrimony = getAccountOfThePatrimony(acountInitials);
+  return acountInitials
+    .map((account) => {
+      const existingMayor = mayors.find(
+        ({ account: accountMayor }) => accountMayor?.code === account.code
+      );
 
-    if (existingMayor) {
-      return existingMayor;
-    }
+      if (existingMayor) {
+        return existingMayor;
+      }
 
-    return Mayor.create({
-      date: moment(`${fiscalYear.year - 1}-12-31`).toDate(),
-      saldo: 0,
-      init_saldo: true,
-      voucherDetail: {
-        debe: 0,
-        haber: 0,
+      return Mayor.create({
+        date: moment(`${fiscalYear.year - 1}-12-31`).toDate(),
+        saldo: 0,
+        init_saldo: true,
+        voucherDetail: {
+          debe: 0,
+          haber: 0,
+          account,
+        },
         account,
-      },
-      account,
-      fiscalYear,
-    });
-  });
+        fiscalYear,
+      });
+    })
+    .filter(({ account: accountMayor }) =>
+      isMayorPatrimony(accountMayor?.code, accountPatrimony.code)
+    );
 }
