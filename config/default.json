@@ -61,7 +61,16 @@
       }
     ],
     "group": {
-      "expensePD": ["pdmp", "pdmv", "pdcb", "pdee", "pdrp", "pdog", "ddgt"]
+      "expensePD": [
+        "pdmp",
+        "pdmv",
+        "pdcb",
+        "pdee",
+        "pdrp",
+        "pdgc",
+        "pdog",
+        "ddgt"
+      ]
     },
     "tradedDays": [
       "-01-01",

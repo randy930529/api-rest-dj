@@ -4,6 +4,31 @@ import { SupportDocumentPartialType } from "../../utils/definitions";
 import { Dj08SectionData } from "../../entity/Dj08SectionData";
 import { appConfig } from "../../../config";
 
+const totalElemetColumInExpensesReport: number = 16 as const;
+const totalElemetColumNotGeneralsTb2: number = 3 as const;
+
+export function getCantElemetColumExpenses(
+  totalElemetColum: number = totalElemetColumInExpensesReport,
+  totalElemetColumDDNotGeneralsTb2: number = totalElemetColumNotGeneralsTb2
+): [number, number, number, string[]] {
+  const { expensePD } = appConfig.group;
+
+  if (!expensePD) throw new Error("Expenses group PD not found in app config.");
+
+  const totalElemetColumGeneralsTb1 = expensePD.length;
+  const totalElemetColumNotGeneralsTb1 =
+    totalElemetColum -
+    totalElemetColumGeneralsTb1 -
+    totalElemetColumDDNotGeneralsTb2;
+
+  return [
+    totalElemetColumGeneralsTb1,
+    totalElemetColumNotGeneralsTb1,
+    totalElemetColumDDNotGeneralsTb2,
+    expensePD,
+  ];
+}
+
 const pugTemplatePath = (template: string) =>
   path.join(__dirname, `../../utils/views/reports/${template}.pug`);
 
@@ -55,12 +80,23 @@ const getDataExpensesInToMonthArrayToTables = (
   expensesMePD: SupportDocumentPartialType[],
   expensesMeDD: SupportDocumentPartialType[]
 ): (number | string)[][][] => {
-  const { expensePD } = appConfig.group;
+  const [
+    totalElemetColumGeneralsTb1,
+    totalElemetColumNotGeneralsTb1,
+    totalElemetColumNotGeneralsTb2,
+    expensePD,
+  ] = getCantElemetColumExpenses();
 
-  const expensesNameTb1 = defaultDataArray<string>(6, "");
+  const expensesNameTb1 = defaultDataArray<string>(
+    totalElemetColumNotGeneralsTb1,
+    ""
+  );
   let totalsTb1 = defaultDataArray<number>(13, 0);
 
-  const expensesNameTb2 = defaultDataArray<string>(3, "");
+  const expensesNameTb2 = defaultDataArray<string>(
+    totalElemetColumNotGeneralsTb2,
+    ""
+  );
   let totalsTb2 = defaultDataArray<number>(10, 0);
   const expensesGeneralsForDaysTb2 = defaultDataArray<number>(31, 0);
 
@@ -83,7 +119,7 @@ const getDataExpensesInToMonthArrayToTables = (
         expensesGeneralsRecordedToDay,
         "amount",
         expensePD,
-        defaultDataArray<number>(7, 0),
+        defaultDataArray<number>(totalElemetColumGeneralsTb1, 0),
         cashInBank[day],
         cashInBox[day]
       );
@@ -96,7 +132,7 @@ const getDataExpensesInToMonthArrayToTables = (
       const expensesMePDForDays = getExpensesInToDay(
         expensesMePD,
         expensesNameTb1,
-        6,
+        totalElemetColumNotGeneralsTb1,
         day
       );
 

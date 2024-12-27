@@ -132,6 +132,27 @@ export type AnswerType = {
   repeatPassword: string;
 };
 
+export type ExpensesNameType = {
+  [key: number]: {
+    tb1: string[];
+    tb2: string[];
+  };
+};
+
+export type ExpensesNameToTableType = {
+  tb1: string[];
+  tb2: string[];
+};
+
+export type TotalMonthsType = {
+  [key: number]: (string | number)[][];
+};
+
+export type TotalsAnnualType = {
+  tb1: (string | number)[];
+  tb2: (string | number)[];
+};
+
 export type VoucherDetailType = {
   code: string;
   description: string;
