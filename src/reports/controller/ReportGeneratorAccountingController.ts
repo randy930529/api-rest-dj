@@ -700,6 +700,10 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
     haber: number = 0,
     mayors: MayorDetailType[]
   ) {
+    mayors.sort(
+      (a, b) =>
+        Number(a.code?.replace("-", "")) - Number(b.code?.replace("-", ""))
+    );
     return {
       totalDebe: parse2Float(debe),
       totalHaber: parse2Float(haber),
