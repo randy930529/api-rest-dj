@@ -3,8 +3,8 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
-const RESOURCES = {"assets/AssetManifest.bin": "fce25dc22ff350c87f701effaa713bc3",
-"assets/AssetManifest.json": "b200a2ecfcd7ad229805fe0d60724083",
+const RESOURCES = {"assets/AssetManifest.bin": "9b06fb46bb3762fa36b2f63e8871a1f5",
+"assets/AssetManifest.json": "156c54c90f5f7e78b6c84d5d8cb04d97",
 "assets/assets/icons/apklis_logo.svg": "47c17c9b5d582cf14c644e54bf0517d1",
 "assets/assets/icons/edit_role.svg": "2d295082e01487542d0cff24bc1cf409",
 "assets/assets/icons/menu_about.svg": "431606d60da0191b3dbd5e20c51b1d86",
@@ -28,8 +28,8 @@ const RESOURCES = {"assets/AssetManifest.bin": "fce25dc22ff350c87f701effaa713bc3
 "assets/assets/images/tm.webp": "cbd351761383029cbca02602b03fbadd",
 "assets/assets/images/User%2520Icon.svg": "950d2f1652bdb59675231707a9124535",
 "assets/FontManifest.json": "c7c530122981123e0493892c2938a922",
-"assets/fonts/MaterialIcons-Regular.otf": "0a0f92cc950734c2abfee2d3ac1ecf33",
-"assets/NOTICES": "f072df36be95d9350806be1b548e99c8",
+"assets/fonts/MaterialIcons-Regular.otf": "2ebdee165cda04949cd7735ba030f008",
+"assets/NOTICES": "235f92a3535f0e29a7f21f2bfb3ac18b",
 "assets/packages/awesome_dialog/assets/flare/error.flr": "e3b124665e57682dab45f4ee8a16b3c9",
 "assets/packages/awesome_dialog/assets/flare/info.flr": "bc654ba9a96055d7309f0922746fe7a7",
 "assets/packages/awesome_dialog/assets/flare/info2.flr": "21af33cb65751b76639d98e106835cfb",
@@ -41,9 +41,13 @@ const RESOURCES = {"assets/AssetManifest.bin": "fce25dc22ff350c87f701effaa713bc3
 "assets/packages/awesome_dialog/assets/flare/warning_without_loop.flr": "c84f528c7e7afe91a929898988012291",
 "assets/packages/bootstrap_icons/fonts/BootstrapIcons.ttf": "b2ba1585f0ec2d2725ec1c7f43d8d00e",
 "assets/packages/cupertino_icons/assets/CupertinoIcons.ttf": "10b47199fbe38e2f762d4664c13857ed",
-"assets/packages/font_awesome_flutter/lib/fonts/fa-brands-400.ttf": "4769f3245a24c1fa9965f113ea85ec2a",
-"assets/packages/font_awesome_flutter/lib/fonts/fa-regular-400.ttf": "3ca5dc7621921b901d513cc1ce23788c",
-"assets/packages/font_awesome_flutter/lib/fonts/fa-solid-900.ttf": "18aa19918687acf55845bf4db4a7361e",
+"assets/packages/font_awesome_flutter/lib/fonts/fa-brands-400.ttf": "17ee8e30dde24e349e70ffcdc0073fb0",
+"assets/packages/font_awesome_flutter/lib/fonts/fa-regular-400.ttf": "f3307f62ddff94d2cd8b103daf8d1b0f",
+"assets/packages/font_awesome_flutter/lib/fonts/fa-solid-900.ttf": "521273daf0e3f7a4cce2e00896ce4db1",
+"assets/packages/syncfusion_flutter_pdfviewer/assets/highlight.png": "7384946432b51b56b0990dca1a735169",
+"assets/packages/syncfusion_flutter_pdfviewer/assets/squiggly.png": "c9602bfd4aa99590ca66ce212099885f",
+"assets/packages/syncfusion_flutter_pdfviewer/assets/strikethrough.png": "cb39da11cd936bd01d1c5a911e429799",
+"assets/packages/syncfusion_flutter_pdfviewer/assets/underline.png": "c94a4441e753e4744e2857f0c4359bf0",
 "assets/shaders/ink_sparkle.frag": "f8b80e740d33eb157090be4e995febdf",
 "canvaskit/canvaskit.js": "76f7d822f42397160c5dfc69cbc9b2de",
 "canvaskit/canvaskit.wasm": "f48eaf57cada79163ec6dec7929486ea",
@@ -58,10 +62,10 @@ const RESOURCES = {"assets/AssetManifest.bin": "fce25dc22ff350c87f701effaa713bc3
 "icons/Icon-512.png": "233931323597ef1bf44ff83621441348",
 "icons/Icon-maskable-192.png": "233931323597ef1bf44ff83621441348",
 "icons/Icon-maskable-512.png": "233931323597ef1bf44ff83621441348",
-"index.html": "7f3798e3d08538144a0dfb6314c9d6f4",
-"/": "7f3798e3d08538144a0dfb6314c9d6f4",
-"main.dart.js": "6194875e6582fa9b1d1e1cf5b330f2b0",
-"manifest.json": "d77398c309bdc7587fd39411550b3e57",
+"index.html": "a4b0208dfa8098770bd1d5e45b3a1c1b",
+"/": "a4b0208dfa8098770bd1d5e45b3a1c1b",
+"main.dart.js": "3622e7348cec935969fd5436b12655b1",
+"manifest.json": "ba285b90c68ea2e2ffa6cb23f92ae027",
 "splash/img/dark-1x.png": "233931323597ef1bf44ff83621441348",
 "splash/img/dark-2x.png": "233931323597ef1bf44ff83621441348",
 "splash/img/dark-3x.png": "496955e032e61c1af84e58f423dd0b39",
@@ -70,7 +74,7 @@ const RESOURCES = {"assets/AssetManifest.bin": "fce25dc22ff350c87f701effaa713bc3
 "splash/img/light-2x.png": "c8902974337d3010db29e7ad064885d2",
 "splash/img/light-3x.png": "496955e032e61c1af84e58f423dd0b39",
 "splash/img/light-4x.png": "f3fa0459e740fc733a27abbe32b0a045",
-"version.json": "14f8262a4970693be14e4e509de935ae"};
+"version.json": "0e982b56c3fc8b2735de256af2f2b8a9"};
 // The application shell files that are downloaded before a service worker can
 // start.
 const CORE = ["main.dart.js",
