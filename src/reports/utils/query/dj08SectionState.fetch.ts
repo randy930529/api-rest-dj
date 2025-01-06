@@ -34,3 +34,13 @@ export const SECTION_STATE_RELATIONS: FindOptionsRelations<SectionState> = {
   profile: { address: { address: true } },
   fiscalYear: { musicalGroup: true, dj08: { dj08SectionData: true } },
 };
+
+export async function getUserSectionToDJ08Report(
+  userId: number
+): Promise<SectionState> {
+  return await SectionState.findOne({
+    select: SECTION_STATE_SELECT,
+    relations: SECTION_STATE_RELATIONS,
+    where: { user: { id: userId } },
+  });
+}

@@ -1,4 +1,4 @@
-extends ../generic/tableBase
+extends ../../generic/tableBase
 
 mixin setDataToSectionI(data=[], row=0)
     each val, index in data
@@ -30,9 +30,9 @@ block column
 
 block tBodyContent
     tr(height=36 style="height:27.0pt;border-top: 2pt solid black;")
-        td.xl-78(width=27 rowspan=rowsSectionI style="width: 20pt;vertical-align: middle;")
+        td.xl-78(width=27 rowspan=rowsSectionI+4 style="width: 20pt;vertical-align: middle;")
             font.font-8.vertical-text Sección I
-        td.xl-75(width=50 rowspan=rowsSectionI style="border-right:.5pt solid black; border-left:none; border-bottom:none; width:38pt;vertical-align: middle;")
+        td.xl-75(width=50 rowspan=rowsSectionI+4 style="border-right:.5pt solid black; border-left:none; border-bottom:none; width:38pt;vertical-align: middle;")
             font.font-8.vertical-text TRABAJADORES CONTRATADOS 
         td.xl-65(width=609 colspan=26 style="border-top:none;border-left:none;width:456pt;text-align: center;vertical-align: middle;") 
             font.font-9(style="font-size: 10pt;") Datos de los trabajadores contratados. (Los TCP sólo pueden tener hasta 3 trabajadores contratados)
@@ -50,14 +50,14 @@ block tBodyContent
             font.font-8 Desde
         td.xl-65(colspan=2 height=35 style="border-top:none;border-left:none;height:26.25pt;text-align: center;vertical-align: middle;")
             font.font-8 Hasta
-    +setDataToSectionI(dataSectionI, 64)
+    +setDataToSectionI(dataSectionI, startRowSectionI)
     tr(height=24 style={height:'14.0pt'})
         td.xl-65(colspan=22 style="border-top:none;border-left:none;width:58pt;text-align: end;vertical-align: middle;") 
             font.font-8 Total
         td.xl-65(colspan=3 style=`border-right: .5pt solid black; width: 83pt;text-align: end;vertical-align: middle;`)
             font.font-9= (totalSectionI && totalSectionI.import)
         td.xl-75(width=23 style="width:22pt;vertical-align: middle;")
-            font.font-8= (82)
+            font.font-8= (startRowSectionI+rowsSectionI)
     tr(style="border-bottom: 2pt solid black;")
 
     tr(height=20 style="height: 10pt; border-left: 2pt solid white; border-right: 2pt solid white;")

@@ -25,6 +25,7 @@ import {
   DataSectionAType,
   DataSectionBType,
   DataSectionGType,
+  ObjectSectionGType,
   TotalSectionAType,
   TotalSectionGType,
 } from "../../../utils/definitions";
@@ -36,14 +37,7 @@ import {
   getSupportDocumentToRemove,
   getSupportDocumentToUpdate,
 } from "../utils/query/supportDocument.fetch";
-import {
-  PROFILE_ACTIVITIES_RELATIONS,
-  PROFILE_ACTIVITIES_SELECT,
-} from "../utils/query/profileActivities.fetch";
-import {
-  FISCAL_YEAR_RELATIONS,
-  FISCAL_YEAR_SELECT,
-} from "../utils/query/fiscalYear.fetch";
+import { getProfileActivities } from "../utils/query/profileActivities.fetch";
 import {
   VOUCHER_DETAIL_RELATIONS,
   VOUCHER_DETAIL_SELECT,
@@ -54,6 +48,9 @@ import {
 } from "../utils/query/initialBalance.fetch";
 import { getLastMayorOfTheAccounts } from "../utils/query/mayorsTheAccountInToFiscalYear.fetch";
 import { getInitialBalances } from "../../period/utils";
+import { getDJ08SectionsData } from "../utils/query/dj08SectionData.fetch";
+import { getParseDJ08SectionsData, setDataSectionG } from "../utils/updateDJ08";
+import { getDocumentsFiscalYearOrOfTheProfileActivity } from "../utils/query/allDocumentsOfFiscalYear.fetch";
 
 export class SupportDocumentController extends EntityControllerBase<SupportDocument> {
   private balanced: boolean;
@@ -360,62 +357,17 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
     supportDocument: SupportDocument
   ): Promise<void | string> {
     try {
-      const DJ08_WHERE = {
-        dJ08: { fiscalYear: { id: supportDocument.__fiscalYearId__ } },
-        is_rectification: true,
-      };
-      const dj08ToUpdate = await Dj08SectionData.findOne({
-        where: DJ08_WHERE,
-      });
-      const { section_data: sectionDataJSONString } = dj08ToUpdate;
-      const section_data: AllDataSectionsDj08Type = JSON.parse(
-        sectionDataJSONString
-      );
-
-      const PROFILE_ACTIVITIES_WHERE = {
-        supportDocuments: {
-          fiscalYear: { id: supportDocument.__fiscalYearId__ },
-        },
-      };
-      const profileActivities =
-        supportDocument.type_document === "g" ||
-        supportDocument.type_document === "i"
-          ? await ProfileActivity.find({
-              select: PROFILE_ACTIVITIES_SELECT,
-              relations: PROFILE_ACTIVITIES_RELATIONS,
-              where: PROFILE_ACTIVITIES_WHERE,
-            })
-          : [];
-
-      const FISCAL_YEAR_WHERE = {
-        id: supportDocument.__fiscalYearId__,
-        supportDocuments: {
-          type_document: supportDocument.type_document,
-        },
-      };
-      const documents =
-        supportDocument.type_document === "g" ||
-        supportDocument.type_document === "i"
-          ? profileActivities.reduce<SupportDocument[]>(
-              (documents, activity) => {
-                documents = [...documents, ...activity.supportDocuments];
-                return documents;
-              },
-              []
-            )
-          : (
-              await FiscalYear.findOne({
-                select: FISCAL_YEAR_SELECT,
-                relations: FISCAL_YEAR_RELATIONS,
-                where: FISCAL_YEAR_WHERE,
-              })
-            )?.supportDocuments || [];
+      const { __fiscalYearId__: fiscalYearId, type_document } = supportDocument;
+      const [dj08ToUpdate, documents, profileActivities] =
+        await this.getInitializeUpdateDj08Data(fiscalYearId, type_document);
+      const sectionsData =
+        getParseDJ08SectionsData<AllDataSectionsDj08Type>(dj08ToUpdate);
 
       switch (supportDocument.type_document) {
         case "m":
           let elementGroup = supportDocument.element.group?.trim();
           const paidTributes = documents;
-          const dataSectionF = section_data[SectionName.SECTION_F].data as {
+          const dataSectionF = sectionsData[SectionName.SECTION_F].data as {
             [key: string]: DataSectionBType;
           };
 
@@ -427,7 +379,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
                   : sumTotal,
               0
             );
-            section_data[SectionName.SECTION_B].data["F15"] = expensesBookTTI19;
+            sectionsData[SectionName.SECTION_B].data["F15"] = expensesBookTTI19;
           } else if (elementGroup === "tpcm") {
             const expensesBookTTJ19 = paidTributes.reduce(
               (sumTotal, val) =>
@@ -437,7 +389,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
               0
             );
 
-            section_data[SectionName.SECTION_C].data["F22"] = expensesBookTTJ19;
+            sectionsData[SectionName.SECTION_C].data["F22"] = expensesBookTTJ19;
           } else if (elementGroup === "tpsv") {
             const expensesBookTTB19 = paidTributes.reduce(
               (sumTotal, val) =>
@@ -537,7 +489,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
                     : sumTotal,
                 0
               );
-              section_data[SectionName.SECTION_B].data["F15"] =
+              sectionsData[SectionName.SECTION_B].data["F15"] =
                 expensesBookTTI19;
             } else if (elementGroup === "tpcm") {
               const expensesBookTTJ19 = paidTributes.reduce(
@@ -548,7 +500,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
                 0
               );
 
-              section_data[SectionName.SECTION_C].data["F22"] =
+              sectionsData[SectionName.SECTION_C].data["F22"] =
                 expensesBookTTJ19;
             } else if (elementGroup === "tpsv") {
               const expensesBookTTB19 = paidTributes.reduce(
@@ -648,8 +600,8 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
           dataSectionF["F44"] = {
             import: importF44,
           };
-          section_data[SectionName.SECTION_F].data = dataSectionF;
-          section_data[SectionName.SECTION_B].data["F14"] = importF44;
+          sectionsData[SectionName.SECTION_F].data = dataSectionF;
+          sectionsData[SectionName.SECTION_B].data["F14"] = importF44;
           break;
 
         case "g":
@@ -700,11 +652,11 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
             newTotalSectionAG.incomes += income;
             newTotalSectionAG.expenses += expense;
           }
-          section_data[SectionName.SECTION_A].data = newDataSectionAG;
-          section_data[SectionName.SECTION_A].totals = newTotalSectionAG;
-          section_data[SectionName.SECTION_B].data["F11"] =
+          sectionsData[SectionName.SECTION_A].data = newDataSectionAG;
+          sectionsData[SectionName.SECTION_A].totals = newTotalSectionAG;
+          sectionsData[SectionName.SECTION_B].data["F11"] =
             newTotalSectionAG.incomes;
-          section_data[SectionName.SECTION_B].data["F13"] =
+          sectionsData[SectionName.SECTION_B].data["F13"] =
             newTotalSectionAG.expenses;
 
           const expensesDD = documents.filter(
@@ -719,7 +671,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
             0
           );
 
-          section_data[SectionName.SECTION_B].data["F16"] = parseFloat(
+          sectionsData[SectionName.SECTION_B].data["F16"] = parseFloat(
             expensesBookTGP19.toFixed()
           );
           break;
@@ -773,11 +725,11 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
             newTotalSectionA.incomes += income;
             newTotalSectionA.expenses += expense;
           }
-          section_data[SectionName.SECTION_A].data = newDataSectionA;
-          section_data[SectionName.SECTION_A].totals = newTotalSectionA;
-          section_data[SectionName.SECTION_B].data["F11"] =
+          sectionsData[SectionName.SECTION_A].data = newDataSectionA;
+          sectionsData[SectionName.SECTION_A].totals = newTotalSectionA;
+          sectionsData[SectionName.SECTION_B].data["F11"] =
             newTotalSectionA.incomes;
-          section_data[SectionName.SECTION_B].data["F13"] =
+          sectionsData[SectionName.SECTION_B].data["F13"] =
             newTotalSectionA.expenses;
           break;
 
@@ -795,19 +747,19 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
           );
 
           if (group === "onex") {
-            section_data[SectionName.SECTION_B].data["F17"] = upFile;
+            sectionsData[SectionName.SECTION_B].data["F17"] = upFile;
           } else if (group === "onda") {
-            section_data[SectionName.SECTION_B].data["F18"] = upFile;
+            sectionsData[SectionName.SECTION_B].data["F18"] = upFile;
           } else if (group === "onfp") {
-            section_data[SectionName.SECTION_B].data["F19"] = upFile;
+            sectionsData[SectionName.SECTION_B].data["F19"] = upFile;
           } else if (group === "onpa") {
-            section_data[SectionName.SECTION_C].data["F23"] = upFile;
+            sectionsData[SectionName.SECTION_C].data["F23"] = upFile;
           } else if (group === "onrt") {
-            section_data[SectionName.SECTION_C].data["F24"] = upFile;
+            sectionsData[SectionName.SECTION_C].data["F24"] = upFile;
           } else if (group === "onbn") {
-            section_data[SectionName.SECTION_C].data["F25"] = upFile;
+            sectionsData[SectionName.SECTION_C].data["F25"] = upFile;
           } else if (group === "onde") {
-            section_data[SectionName.SECTION_E].data["F34"] = upFile;
+            sectionsData[SectionName.SECTION_E].data["F34"] = upFile;
           }
 
           if (group !== supportDocument.__oldGroup__) {
@@ -824,19 +776,19 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
             );
 
             if (supportDocument.__oldGroup__ === "onex") {
-              section_data[SectionName.SECTION_B].data["F17"] = upFile;
+              sectionsData[SectionName.SECTION_B].data["F17"] = upFile;
             } else if (supportDocument.__oldGroup__ === "onda") {
-              section_data[SectionName.SECTION_B].data["F18"] = upFile;
+              sectionsData[SectionName.SECTION_B].data["F18"] = upFile;
             } else if (supportDocument.__oldGroup__ === "onfp") {
-              section_data[SectionName.SECTION_B].data["F19"] = upFile;
+              sectionsData[SectionName.SECTION_B].data["F19"] = upFile;
             } else if (supportDocument.__oldGroup__ === "onpa") {
-              section_data[SectionName.SECTION_C].data["F23"] = upFile;
+              sectionsData[SectionName.SECTION_C].data["F23"] = upFile;
             } else if (supportDocument.__oldGroup__ === "onrt") {
-              section_data[SectionName.SECTION_C].data["F24"] = upFile;
+              sectionsData[SectionName.SECTION_C].data["F24"] = upFile;
             } else if (supportDocument.__oldGroup__ === "onbn") {
-              section_data[SectionName.SECTION_C].data["F25"] = upFile;
+              sectionsData[SectionName.SECTION_C].data["F25"] = upFile;
             } else if (supportDocument.__oldGroup__ === "onde") {
-              section_data[SectionName.SECTION_E].data["F34"] = upFile;
+              sectionsData[SectionName.SECTION_E].data["F34"] = upFile;
             }
           }
           break;
@@ -845,16 +797,16 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
           break;
       }
 
-      const dataSectionB = section_data[SectionName.SECTION_B].data as {
+      const dataSectionB = sectionsData[SectionName.SECTION_B].data as {
         [key: string]: number;
       };
-      section_data[SectionName.SECTION_B].data["F20"] =
+      sectionsData[SectionName.SECTION_B].data["F20"] =
         calculeF20ToDj08(dataSectionB);
 
       const { constantToSectionG } = appConfig;
-      const F20 = section_data[SectionName.SECTION_B].data["F20"] as number;
+      const F20 = sectionsData[SectionName.SECTION_B].data["F20"] as number;
 
-      const dataSectionG = section_data[SectionName.SECTION_G].data as {
+      const dataSectionG = sectionsData[SectionName.SECTION_G].data as {
         [key: string]: DataSectionGType;
       };
       const totalSectionG: TotalSectionGType = {
@@ -891,18 +843,75 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         return count + 1;
       }, 45);
 
-      section_data[SectionName.SECTION_G] = {
+      sectionsData[SectionName.SECTION_G] = {
         data: dataSectionG,
         totals: totalSectionG,
       };
-      section_data[SectionName.SECTION_C].data["F21"] = totalSectionG.import;
+      sectionsData[SectionName.SECTION_C].data["F21"] = totalSectionG.import;
 
-      dj08ToUpdate.section_data = JSON.stringify(section_data);
+      dj08ToUpdate.section_data = JSON.stringify(sectionsData);
       await dj08ToUpdate.save();
     } catch (error) {
       console.log("ERROR EN DJ-08: ", error.message);
       return error.message;
     }
+  }
+
+  private async getInitializeUpdateDj08Data(
+    fiscalYearId: number,
+    type: string
+  ): Promise<[Dj08SectionData, SupportDocument[], ProfileActivity[]]> {
+    const profileActivities = await getProfileActivities(fiscalYearId, type);
+
+    const data = await Promise.all([
+      getDJ08SectionsData(fiscalYearId),
+      getDocumentsFiscalYearOrOfTheProfileActivity(
+        fiscalYearId,
+        type,
+        profileActivities
+      ),
+    ]);
+    return [...data, profileActivities];
+  }
+
+  private updateDj08Sections(sectionsData: AllDataSectionsDj08Type): string {
+    const dataSectionB = this.getSectionValue<{ [key: string]: number }>(
+      sectionsData,
+      SectionName.SECTION_B
+    );
+    const F20 = calculeF20ToDj08(dataSectionB);
+    this.setSectionValue(sectionsData, SectionName.SECTION_B, "F20", F20);
+
+    const dataSectionG = this.getSectionValue<ObjectSectionGType>(
+      sectionsData,
+      SectionName.SECTION_G
+    );
+    const data = setDataSectionG(F20, 45, dataSectionG);
+    sectionsData[SectionName.SECTION_G] = data;
+    this.setSectionValue(
+      sectionsData,
+      SectionName.SECTION_C,
+      "F21",
+      data.totals.import
+    );
+
+    return JSON.stringify(sectionsData);
+  }
+
+  private getSectionValue<T>(
+    sectionsData: AllDataSectionsDj08Type,
+    section: SectionName
+  ): T {
+    return sectionsData[section].data as unknown as T;
+  }
+
+  private setSectionValue(
+    sectionsData: AllDataSectionsDj08Type,
+    section: SectionName,
+    row: string,
+    value: number
+  ): void {
+    sectionsData[section].data[row] = value;
   }
 
   /**

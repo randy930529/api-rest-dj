@@ -4,7 +4,6 @@ import * as pug from "pug";
 import * as moment from "moment";
 import ReportGenerator from "../../base/ReportGeneratorBase";
 import { User } from "../../entity/User";
-import { SectionState } from "../../entity/SectionState";
 import { Dj08SectionData, SectionName } from "../../entity/Dj08SectionData";
 import { StateTMBill } from "../../entity/StateTMBill";
 import { CreateReportDj08DTO } from "../dto/request/reportDj08.dto";
@@ -43,10 +42,7 @@ import {
   STATE_TMBILL_RELATIONS,
   STATE_TMBILL_SELECT,
 } from "../utils/query/stateTMBill.fetch";
-import {
-  SECTION_STATE_RELATIONS,
-  SECTION_STATE_SELECT,
-} from "../utils/query/dj08SectionState.fetch";
+import { getUserSectionToDJ08Report } from "../utils/query/dj08SectionState.fetch";
 
 export default class ReportGeneratorDJ08Controller extends ReportGenerator {
   private templatePath: string;
@@ -575,8 +571,6 @@ export default class ReportGeneratorDJ08Controller extends ReportGenerator {
     try {
       const { declared = false, date, user }: CreateReportDj08DTO = req.body;
 
-      this.templatePath = pugTemplatePath("dj08/swornDeclaration");
-
       const dateDeclare = moment(date);
       const dateSigns = {
         day: dateDeclare.date(),
@@ -584,12 +578,7 @@ export default class ReportGeneratorDJ08Controller extends ReportGenerator {
         year: dateDeclare.year(),
       };
 
-      const SECTION_STATE_WHERE = { user: { id: user.id } };
-      const { profile, fiscalYear } = await SectionState.findOne({
-        select: SECTION_STATE_SELECT,
-        relations: SECTION_STATE_RELATIONS,
-        where: SECTION_STATE_WHERE,
-      });
+      const { profile, fiscalYear } = await getUserSectionToDJ08Report(user.id);
 
       const {
         first_name,
@@ -605,10 +594,13 @@ export default class ReportGeneratorDJ08Controller extends ReportGenerator {
       ci.padEnd(11);
       nit.padEnd(11);
 
+      const dj08Version = this.getDJ08Version(year);
+      this.templatePath = pugTemplatePath(
+        `dj08/v${dj08Version}/swornDeclaration`
+      );
       const fileName = `DJ-08-IP-${year}.pdf`;
 
       const dJ08 = fiscalYear.dj08[0];
-
       const dj08SectionData = dJ08?.dj08SectionData.find(
         (val) => val.is_rectification === true
       );
@@ -635,10 +627,14 @@ export default class ReportGeneratorDJ08Controller extends ReportGenerator {
       const is_rectification =
         dj08SectionData.is_rectification && fiscalYear.declared;
 
+      const { totalRows: rowsSectionA } = this.getStartRowAndtotalRowToSection(
+        SectionName.SECTION_A,
+        dj08Version
+      );
       const [dataSectionA, totalSectionA] = getDataAndTotalsToDj08Sections<
         DataSectionAType,
         TotalSectionAType
-      >(dj08SectionData, SectionName.SECTION_A);
+      >(dj08SectionData, SectionName.SECTION_A, rowsSectionA);
       totalSectionA.incomes = parseFloat(
         totalSectionA.incomes?.toFixed() || "0"
       );
@@ -906,25 +902,37 @@ export default class ReportGeneratorDJ08Controller extends ReportGenerator {
         { concepto: "Otros", import: sectionFData.F43?.import?.toFixed() },
       ];
 
+      const { startRow: startRowSectionG, totalRows: rowsSectionG } =
+        this.getStartRowAndtotalRowToSection(
+          SectionName.SECTION_G,
+          dj08Version
+        );
       const [dataSectionG, totalSectionG] = getDataAndTotalsToDj08Sections<
         DataSectionGType,
         TotalSectionGType
-      >(dj08SectionData, SectionName.SECTION_G);
+      >(dj08SectionData, SectionName.SECTION_G, rowsSectionG);
 
+      const { startRow: startRowSectionH, totalRows: rowsSectionH } =
+        this.getStartRowAndtotalRowToSection(
+          SectionName.SECTION_H,
+          dj08Version
+        );
       const [dataSectionH, totalSectionH] = getDataAndTotalsToDj08Sections<
         DataSectionHType,
         TotalSectionGType
-      >(dj08SectionData, SectionName.SECTION_H);
+      >(dj08SectionData, SectionName.SECTION_H, rowsSectionH);
 
+      const { startRow: startRowSectionI, totalRows: rowsSectionI } =
+        this.getStartRowAndtotalRowToSection(
+          SectionName.SECTION_I,
+          dj08Version
+        );
       const [dataSectionI, totalSectionI] = getDataAndTotalsToDj08Sections<
         DataSectionIType,
         TotalSectionIType
-      >(dj08SectionData, SectionName.SECTION_I);
+      >(dj08SectionData, SectionName.SECTION_I, rowsSectionI);
 
       const rowsSectionF = dataSectionF.length + 3;
-      const rowsSectionG = dataSectionF.length + 2;
-      const rowsSectionH = dataSectionH.length + 3;
-      const rowsSectionI = dataSectionI.length + 4;
 
       const compiledTemplate = pug.compileFile(this.templatePath);
 
@@ -958,8 +966,11 @@ export default class ReportGeneratorDJ08Controller extends ReportGenerator {
         dataSectionI,
         totalSectionI,
         rowsSectionF,
+        startRowSectionG,
         rowsSectionG,
+        startRowSectionH,
         rowsSectionH,
+        startRowSectionI,
         rowsSectionI,
       });
 
@@ -1074,5 +1085,82 @@ export default class ReportGeneratorDJ08Controller extends ReportGenerator {
         tb2: defaultDataArray<number>(10, 0),
       },
     ];
+  }
+
+  private getDJ08Version(year: number): number {
+    return (year < 2024 && 1) || (year >= 2024 && 2) || 1;
+  }
+
+  private getSectionStartRow(section: number, version: number): number {
+    if (version === 2) {
+      return (
+        (section === 1 && 1) ||
+        (section === 2 && 11) ||
+        (section === 3 && 21) ||
+        (section === 4 && 28) ||
+        (section === 5 && 32) ||
+        (section === 6 && 37) ||
+        (section === 7 && 45) ||
+        (section === 8 && 57) ||
+        (section === 9 && 69) ||
+        -1
+      );
+    }
+
+    return (
+      (section === 1 && 1) ||
+      (section === 2 && 11) ||
+      (section === 3 && 21) ||
+      (section === 4 && 28) ||
+      (section === 5 && 32) ||
+      (section === 6 && 37) ||
+      (section === 7 && 45) ||
+      (section === 8 && 52) ||
+      (section === 9 && 64) ||
+      -1
+    );
+  }
+
+  private getSectionTotalRows(section: number, version: number): number {
+    if (version === 2) {
+      return (
+        (section === 1 && 9) ||
+        (section === 2 && 10) ||
+        (section === 3 && 7) ||
+        (section === 4 && 4) ||
+        (section === 5 && 4) ||
+        (section === 6 && 7) ||
+        (section === 7 && 10) ||
+        (section === 8 && 10) ||
+        (section === 9 && 18) ||
+        0
+      );
+    }
+
+    return (
+      (section === 1 && 9) ||
+      (section === 2 && 10) ||
+      (section === 3 && 7) ||
+      (section === 4 && 4) ||
+      (section === 5 && 4) ||
+      (section === 6 && 7) ||
+      (section === 7 && 5) ||
+      (section === 8 && 10) ||
+      (section === 9 && 18) ||
+      0
+    );
+  }
+
+  private getStartRowAndtotalRowToSection(
+    section: number,
+    version: number = 1
+  ): {
+    startRow: number;
+    totalRows: number;
+  } {
+    return {
+      startRow: this.getSectionStartRow(section, version),
+      totalRows: this.getSectionTotalRows(section, version),
+    };
   }
 }

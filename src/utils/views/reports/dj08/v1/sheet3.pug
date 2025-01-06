@@ -1,4 +1,4 @@
-extends ../generic/tableBase
+extends ../../generic/tableBase
 
 mixin setDataToSectionF(data=[], row=0, align="start")
     each val, index in data
@@ -46,9 +46,9 @@ block column
 
 block tBodyContent
     tr(height=25 style="height:14.95pt;border-top: 2pt solid black;")
-        td.xl-78(width=23 rowspan=rowsSectionF style="width: 20pt;vertical-align: middle;")
+        td.xl-78(width=23 rowspan=rowsSectionF+1 style="width: 20pt;vertical-align: middle;")
             font.font-8.vertical-text Sección F
-        td.xl-75(width=50 rowspan=rowsSectionF style="border-right:.5pt solid black; border-left:none; border-bottom:none; width:38pt;vertical-align: middle;")
+        td.xl-75(width=50 rowspan=rowsSectionF+1 style="border-right:.5pt solid black; border-left:none; border-bottom:none; width:38pt;vertical-align: middle;")
             div(style="display: flex; align-items: center; justify-content: center; padding: 2pt 0;")
                 font.font-8.vertical-text Total de Tributos Pagados Asociados 
                 font.font-8.vertical-text a la Actividad
@@ -66,9 +66,9 @@ block tBodyContent
     tr(height=20 style="height: 10pt; border-left: 2pt solid white; border-right: 2pt solid white;")
     
     tr(height=24 style="height:14.0pt;border-top: 2pt solid black;")
-        td.xl-78(width=23 rowspan=rowsSectionG style="width: 20pt;vertical-align: middle;")
+        td.xl-78(width=23 rowspan=rowsSectionG+4 style="width: 20pt;vertical-align: middle;")
             font.font-8.vertical-text Sección G
-        td.xl-75(width=50 rowspan=rowsSectionG style="border-right:.5pt solid black; border-left:none; border-bottom:none; width:38pt;vertical-align: middle;")
+        td.xl-75(width=50 rowspan=rowsSectionG+4 style="border-right:.5pt solid black; border-left:none; border-bottom:none; width:38pt;vertical-align: middle;")
             div(style="display: flex; align-items: center; justify-content: center; padding: 2pt 0;")
                 font.font-8.vertical-text Determinacion del impuesto según  
                 font.font-8.vertical-text escala progresiva aplicada a la 
@@ -88,7 +88,7 @@ block tBodyContent
         td.xl-65(height=35 style="border-top:none;border-left:none;height:26.25pt;text-align: center;vertical-align: middle;")
             font.font-8 Exceso de
         +celEnumerate(116,87,"Hasta",19)
-    +setDataToSectionG(dataSectionG, 45)
+    +setDataToSectionG(dataSectionG, startRowSectionG)
     tr(height=25 style={height:'14.95pt'})
         td.xl-65(colspan=2 style="border-top:none;border-left:none;width:58pt;text-align: end;vertical-align: middle;") 
             font.font-8 Total
@@ -98,13 +98,13 @@ block tBodyContent
         td.xl-65(style=`border-right: .5pt solid black; width: 83pt;text-align: end;vertical-align: middle;`)
             font.font-9= (totalSectionG && totalSectionG.import)
         td.xl-75(width=23 style="width:22pt;vertical-align: middle;")
-            font.font-8= (50)
+            font.font-8= (startRowSectionG+rowsSectionG)
     tr(style="border-bottom: 2pt solid black;")
     tr(height=20 style="height: 10pt; border-left: 2pt solid white; border-right: 2pt solid white;")
     tr(height=24 style="height:14.0pt;border-top: 2pt solid black;")
-        td.xl-78(width=23 rowspan=(rowsSectionH+3) style="width: 20pt;vertical-align: middle;")
+        td.xl-78(width=23 rowspan=(rowsSectionH+6) style="width: 20pt;vertical-align: middle;")
             font.font-8.vertical-text Sección H Sector de la Cultura
-        td.xl-75(width=50 rowspan=rowsSectionH style="border-right:.5pt solid black; border-left:none; border-bottom:none; width:38pt;vertical-align: middle;")
+        td.xl-75(width=50 rowspan=rowsSectionH+3 style="border-right:.5pt solid black; border-left:none; border-bottom:none; width:38pt;vertical-align: middle;")
             div(style="display: flex; align-items: center; justify-content: center; padding: 2pt 0;")
                 font.font-8.vertical-text Ingresos obtenidos por las empresas de cultura en 
                 font.font-8.vertical-text el grado en que participan en la gestión del 
@@ -120,8 +120,8 @@ block tBodyContent
         td.xl-65(height=24 colspan=2 style="border-top:none;border-left:none;height:18.0pt;text-align: center;vertical-align: bottom;")
             font.font-8 Importe
         td.xl-75(width=23 style="width:22pt;vertical-align: middle;")
-            font.font-8= (51)
-    +setDataToSectionH(dataSectionH, 52)
+            font.font-8= (startRowSectionG+rowsSectionG+1)
+    +setDataToSectionH(dataSectionH, startRowSectionH)
     tr(height=24 style={height:'14.0pt'})
         td.xl-65(colspan=3 style="border-top:none;border-left:none;width:58pt;text-align: end;vertical-align: middle;") 
             font.font-8 Total
@@ -131,7 +131,7 @@ block tBodyContent
         td.xl-65(colspan=2 style=`border-right: .5pt solid black; width: 83pt;text-align: end;vertical-align: middle;`)
             font.font-9= (totalSectionH && totalSectionH.import)
         td.xl-75(width=23 style="width:22pt;vertical-align: middle;")
-            font.font-8= (62)
+            font.font-8= (startRowSectionH+rowsSectionH)
     tr(height=24 style={height:"14.0pt"})
         td.xl-65(width=609 colspan=9 style="background: silver;border-left:none;width:456pt;text-align: center;vertical-align: middle;") 
             font.font-9(style="font-size: 10pt;") DECLARACIÓN JURADA CONJUNTA
@@ -146,5 +146,5 @@ block tBodyContent
         td.xl-65(colspan=4 style=`border-right: .5pt solid black; width: 83pt;text-align: center;vertical-align: middle;`)
             font.font-8=musicalGroup && musicalGroup.number_members
         td.xl-75(width=23 style="width:22pt;vertical-align: middle;")
-            font.font-8= (63)
+            font.font-8= (startRowSectionH+rowsSectionH+1)
     tr(style="border-bottom: 2pt solid black;")
