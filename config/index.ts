@@ -1,4 +1,5 @@
 import * as config from "config";
+import { ProgressiveScaleType } from "../src/utils/definitions";
 
 /**
  * @type
@@ -31,11 +32,7 @@ type accountingConstantsType = {
   PE_ABOVE_50000?: number;
 };
 
-type ConstantToSectionGType = {
-  from: number;
-  to: number;
-  porcentageType: number;
-}[];
+type ConstantToSectionGType = ProgressiveScaleType[];
 
 type businessMetadataType = {
   name: string;

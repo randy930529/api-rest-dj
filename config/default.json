@@ -36,26 +36,51 @@
     "constantToSectionG": [
       {
         "from": 0,
-        "to": 10000,
-        "porcentageType": 15
+        "to": 25000,
+        "porcentageType": 5
       },
       {
-        "from": 10000,
-        "to": 20000,
-        "porcentageType": 20
-      },
-      {
-        "from": 20000,
-        "to": 30000,
-        "porcentageType": 30
-      },
-      {
-        "from": 30000,
+        "from": 25000,
         "to": 50000,
-        "porcentageType": 40
+        "porcentageType": 10
       },
       {
         "from": 50000,
+        "to": 100000,
+        "porcentageType": 15
+      },
+      {
+        "from": 100000,
+        "to": 200000,
+        "porcentageType": 20
+      },
+      {
+        "from": 200000,
+        "to": 350000,
+        "porcentageType": 25
+      },
+      {
+        "from": 350000,
+        "to": 500000,
+        "porcentageType": 30
+      },
+      {
+        "from": 500000,
+        "to": 650000,
+        "porcentageType": 35
+      },
+      {
+        "from": 650000,
+        "to": 800000,
+        "porcentageType": 40
+      },
+      {
+        "from": 800000,
+        "to": 1000000,
+        "porcentageType": 45
+      },
+      {
+        "from": 1000000,
         "to": null,
         "porcentageType": 50
       }

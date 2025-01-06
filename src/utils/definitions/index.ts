@@ -1,6 +1,12 @@
 import { FindOperator } from "typeorm";
 import { ProfileAddress } from "../../entity/ProfileAddress";
 
+export type ProgressiveScaleType = {
+  from: number;
+  to: number;
+  porcentageType: number;
+};
+
 export type SupportDocumentPartialType = {
   amount: string;
   date: Date;
@@ -74,6 +80,10 @@ export type DataSectionGType = {
   baseImponible: number;
   porcentageType: number;
   import: number;
+};
+
+export type ObjectSectionGType = {
+  [key: string]: DataSectionGType;
 };
 
 export type TotalSectionGType = {
