@@ -1,0 +1,29 @@
+extends ../../generic/base
+
+block stylesheet
+    style.
+        * {
+            font-family: Arial, sans-serif !important;
+        }
+        table {
+        border-collapse: collapse;
+        table-layout: fixed;
+        width: 487pt;
+        border: 2pt solid black;
+      }
+      font.font-8 {
+        font-size: 10pt;
+      }
+
+block content
+    include ../../generic/mixins
+    -let tableWidth = "600pt"
+
+    include sheet1
+    table.page-next
+    
+    include sheet2
+    table.page-next
+    include sheet3
+    table.page-next
+    include sheet4

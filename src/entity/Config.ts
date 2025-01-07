@@ -1,27 +1,7 @@
-import {
-  BeforeInsert,
-  BeforeRemove,
-  BeforeUpdate,
-  Column,
-  Entity,
-  JoinColumn,
-  OneToMany,
-  OneToOne,
-} from "typeorm";
+import { Column, Entity } from "typeorm";
 import Model from "./Base";
 import { appConfig } from "../../config";
 import { ColumnNumericTransformer } from "../utils/ColumnNumericTransformer";
-import { Account } from "./Account";
-import { ProgressiveScale } from "./ProgressiveScale";
-import { User, UserRole } from "./User";
-
-const defaultCompany = JSON.stringify({
-  name: "",
-  source: null,
-  address: "",
-  phoneNumber: "",
-  email: "",
-});
 
 @Entity()
 export class Config extends Model {
@@ -31,76 +11,81 @@ export class Config extends Model {
   @Column({ default: appConfig.licenseFreeDays ?? 0 })
   license_free_days: number;
 
-  @Column({ type: "integer", width: 4, nullable: true })
-  inactivity_max: number;
+  @Column({ default: appConfig.businessMetadata.name })
+  business_name: string;
+
+  @Column({ default: appConfig.businessMetadata.source })
+  business_source: number;
+
+  @Column({ default: appConfig.businessMetadata.address })
+  business_address: string;
+
+  @Column({ default: appConfig.businessMetadata.phone })
+  business_phone: string;
+
+  @Column({ default: appConfig.businessMetadata.email })
+  business_email: string;
 
   @Column({
     type: "numeric",
     precision: 19,
     scale: 2,
     transformer: new ColumnNumericTransformer(),
-    default: 0,
+    default: appConfig.accountingConstants.MEa_By_MFP ?? 0,
   })
-  except_min: number;
-
-  @Column({ type: "integer", width: 4, nullable: true })
-  allowance: number;
+  MEa_By_MFP: number;
 
   @Column({
-    type: "json",
-    default: defaultCompany,
+    type: "numeric",
+    precision: 3,
+    scale: 2,
+    transformer: new ColumnNumericTransformer(),
+    default: appConfig.accountingConstants.PPD_PERCENTAGE ?? 1,
   })
-  company: string;
+  PPD_PERCENTAGE: number;
 
   @Column({
-    type: "json",
-    nullable: true,
+    type: "numeric",
+    precision: 3,
+    scale: 2,
+    transformer: new ColumnNumericTransformer(),
+    default: appConfig.accountingConstants.PE_0_10000 ?? 1,
   })
-  mora_scale: string;
+  PE_0_10000: number;
 
-  @OneToOne(() => Account, { nullable: true })
-  @JoinColumn()
-  accountBox: Account;
+  @Column({
+    type: "numeric",
+    precision: 3,
+    scale: 2,
+    transformer: new ColumnNumericTransformer(),
+    default: appConfig.accountingConstants.PE_10000_20000 ?? 1,
+  })
+  PE_10000_20000: number;
 
-  @OneToOne(() => Account, { nullable: true })
-  @JoinColumn()
-  accountBank: Account;
+  @Column({
+    type: "numeric",
+    precision: 3,
+    scale: 2,
+    transformer: new ColumnNumericTransformer(),
+    default: appConfig.accountingConstants.PE_20000_30000 ?? 1,
+  })
+  PE_20000_30000: number;
 
-  @OneToMany(
-    () => ProgressiveScale,
-    (progressiveScale) => progressiveScale.config,
-    { cascade: ["insert", "update"] }
-  )
-  progressiveScale: ProgressiveScale[];
+  @Column({
+    type: "numeric",
+    precision: 3,
+    scale: 2,
+    transformer: new ColumnNumericTransformer(),
+    default: appConfig.accountingConstants.PE_30000_50000 ?? 1,
+  })
+  PE_30000_50000: number;
 
-  @OneToOne(() => Account, { nullable: true })
-  @JoinColumn()
-  accountLongTerm: Account;
-
-  @OneToOne(() => Account, { nullable: true })
-  @JoinColumn()
-  accountShortTerm: Account;
-
-  @OneToOne(() => User, { nullable: true })
-  @JoinColumn()
-  user: User;
-
-  toJSON() {
-    return {
-      ...this,
-      company: JSON.parse(this.company),
-      mora_scale: JSON.parse(this.mora_scale),
-      created_at: undefined,
-      updated_at: undefined,
-    };
-  }
-
-  @BeforeInsert()
-  @BeforeUpdate()
-  @BeforeRemove()
-  checkIsUserAdmin(): void {
-    if (this.user && this.user.role !== UserRole.ADMIN) {
-      throw new Error("User does not have permission to perform this action.");
-    }
-  }
+  @Column({
+    type: "numeric",
+    precision: 3,
+    scale: 2,
+    transformer: new ColumnNumericTransformer(),
+    default: appConfig.accountingConstants.PE_ABOVE_50000 ?? 1,
+  })
+  PE_ABOVE_50000: number;
 }

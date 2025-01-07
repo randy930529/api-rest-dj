@@ -1,0 +1,178 @@
+extends ../../generic/tableBase
+
+mixin celEnumerate(w=1, ws=1, text="", c=0, cs=1, rs=1)
+    td.xl-65(width=w colspan=cs rowspan= rs style=`border-right: .5pt solid black; width: ${ws}pt`)
+        font.font-10= c
+        font.font-11= text
+
+mixin celWithWhiteSpace(count=0, data="")
+    each val in data
+        td.xl-65(width=18 style="border-right: .5pt solid black;text-align: center;vertical-align: middle; width: 14pt")
+            font.font-9= val
+    else
+        - let n = 0;
+        while n < count
+            td.xl-65(width=18 style="border-right: .5pt solid black; width: 14pt")
+            -n++
+
+mixin listItem(items=[])
+    each val in items
+        font.font-8(style="display: flex; text-align: justify; font-size:8.5pt; margin-bottom: 2pt;")= val
+
+block column
+    -let colsArray=[{width:96, style:{width: '85pt'}}, {width:89, style:{width: '70pt'}}, {width:32, style:{width: '24pt'}}, {width:88, style:{width: '65pt'}}, {width:97, style:{width: '73pt'}}, {width:20, style:{width: '15pt'}}, {width:19, style:{width: '14pt'}}]
+    +colGroup(colsArray)
+    col(width=17, span=2, style={width: '13pt'})
+    -colsArray=[{width:16, style:{width: '12pt'}}, {width:17, style:{width: '13pt'}}, {width:23, style:{width: '17pt'}}, {width:21, style:{width: '16pt'}}, {width:16, style:{width: '12pt'}}, {width:21, style:{width: '16pt'}}, {width:20, style:{width: '15pt'}}, {width:168, style:{width: '153pt'}}]
+    +colGroup(colsArray)
+
+block tHeadContent
+    tr(height=63 style={height:'47.45pt'})
+        td.xl-78(colspan=3 height=63 width=208 style="border-bottom: .5pt solid black; height: 47.45pt; width: 156pt")
+            div(style="display: flex; align-items: center; justify-content: center; height: 100%;")
+                include logoONAT
+        td.xl-75(colspan=14 width=558 style="border-right:.5pt solid black; border-left:none; width:420pt")
+            font.font-9 DECLARACIÓN JURADA
+            br
+            font.font-9 IMPUESTO SOBRE INGRESOS PERSONALES - PESOS CUP
+
+block tBodyContent
+    -const objetivo = "-  OBJETIVO:  Formalizar  mediante  Declaración  Jurada  la  liquidación  y  pago  en  Pesos  -  CUP,  anual  o  de  un  período  menor  de  12  meses  al  causar  baja  el contribuyente,  del  Impuesto  sobre  Ingresos  Personales,  que  deben  presentar   todas  las  personas  naturales  autorizadas  a  realizar  actividades  que  generen ingresos gravados por este tributo, obtenidos dentro de un mismo año fiscal, excepto los ingresos provenientes de las actividades del sector agropecuario y los ingresos eventuales por ventas de vehículos y viviendas, premios, contratos en el exterior y otros que expresamente se autorice su deducción."
+    -const formatoYEstructura = ["- Las SECCIONES A hasta la C, se cumplimentan para determinar el Impuesto a pagar.", "- La SECCIÓN D se utiliza solo en caso de presentarse una Declaración Jurada Rectificada.", "- La SECCIÓN E se cumplimenta siempre, ya que es la que determina el importe total a pagar, según se apliquen o no bonificaciones, se deduzca el impuesto pagado en Declaraciones Juradas presentadas en el año fiscal o se aplique bonificación."]
+    -const requisitos = ["- La Declaración Jurada, DJ – 08 se elabora en PESOS – CUP. Los importes se registran en pesos sin centavos.", "-  La Declaración Jurada se confecciona a máquina de escribir o tinta, en letra de molde. La Declaración Jurada NO puede presentar enmiendas ni tachaduras. Es obligatoria la firma del moedo en la hoja 4.", "- Los espacios  sombreados NO se utilizan  por el contribuyente. Las filas vacías se igualan a cero (0).", "-  La Declaración Jurada no puede ser llenada por ningún funcionario de la ONAT.", "- La Declaración Jurada se confecciona en dos ejemplares, uno para la Oficina municipal de la ONAT y otro para el contribuyente, se declaran la totalidad de los ingresos obtenidos en el año fiscal, en el ejercicio de todas las actividades autorizadas, incluyendo aquellos cuyo pago se realiza mediante retenciones o pagos parciales, excluyendo los ingresos provenientes del sector agropecuario y los eventuales, según se indica en el objetivo.", "- Se descuenta el 100% de gastos asociados a la actividad, siempre que tenga justificación documental del 80% de los mismos. Todos los gastos deben estar registrados en su Registro de Gastos.", "- Se descuenta el mínimo exento de 39 120,00CUP", "- La Declaración Jurada anual, se presenta en el año siguiente al que se liquida antes del 30 de abril. Cuando abarca un período, inferior a 12 meses por causar baja, se presenta en el término de 15 días naturales siguientes a la fecha del cese de la actividad.", "- Cuando el resultado de la Declaración Jurada da A PAGAR, presenta un modelo en la ONAT y para pagar lo hace en el Banco con el vector fiscal del año que se liquida , o  puede pagar por los canales electrónicos de pago como Transfermovil, que le descuenta un 3% del importe a pagar.", "- Usted debe guardar un modelo por un termino de 5 años. No debe entregar ningún modelo de la Declaración Jurada en el Banco.", "- Si usted posee firma digital puede presentar la declaración jurada por vía digital o por el Portal Tributario", "- Cuando el resultado de la Declaración Jurada NO DA IMPORTE A PAGAR, se deposita en el buzón de la ONAT del municipio en que está inscripto el contribuyente o en cualquier otro municipio."]
+
+    tr(height=26 style={height:'20.1pt'})
+        +celEnumerate(96, 72, "Año fiscal", 1)
+        +celEnumerate(89, 67, "Individual", 2)
+        td.xl-65(width=23 style="border-right: .5pt solid black;text-align: center;vertical-align: middle; width: 17pt")
+            font.font-9(style="font-size: 15pt;")= `${individual?"X":""}`
+        +celEnumerate(150, 113, "NIT", 3, 2)
+        +celWithWhiteSpace(11, nit)
+        +celEnumerate(168, 126, "Rectificación DJ", 5)
+    tr(height=26 style={height:'19.5pt'})
+        td.xl-65(width=96 style=`border-right: .5pt solid black;text-align: center;vertical-align: middle; width: 72pt`)
+            font.font-9= year
+        td.xl-65(width=89 style=`border-right: .5pt solid black;text-align: center;vertical-align: middle; width: 67pt`)
+            font.font-8 Conjunta
+        td.xl-65(width=23 style="border-right: .5pt solid black;text-align: center;vertical-align: middle; width: 17pt")
+            font.font-9(style="font-size: 15pt;")= `${individual?"":"X"}`
+        +celEnumerate(150, 113, "Carné de identidad", 4, 2)
+        +celWithWhiteSpace(11, ci)
+        td.xl-65(width=168 style="border-right: .5pt solid black;text-align: center;vertical-align: middle; width: 126pt")
+            font.font-9(style="font-size: 15pt;")= `${is_rectification?"X":""}`
+    tr(height=26 style={height:'19.5pt'})
+        +celEnumerate(165, 124, "Nombre (s) y apellidos:", 6, 3)
+        td.xl-65(width=558 colspan=15 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:420pt")
+            font.font-9= `${first_name} ${last_name}`
+    tr(height=20 style={height:'15.0pt'})
+        +celEnumerate(165, 124, "Dirección según Carné de identidad", 7, 2, 2)
+        td.xl-65(width=206 colspan=4 style="border-top:none;border-left:none;width:155pt")
+            font.font-8(style="display: block; text-align: center") Calle o Avenida
+        td.xl-65(width=73 colspan=4 style="border-top:none;border-left:none;width:55pt")
+            font.font-8(style="display: block; text-align: center") Número
+        td.xl-65(width=77 colspan=4 style="border-top:none;border-left:none;width:58pt")
+            font.font-8(style="display: block; text-align: center") Apto
+        td.xl-65(width=225 colspan=4 style="border-top:none;border-left:none;width:169pt")
+            font.font-8(style="display: block; text-align: center") Entrecalles
+    tr(height=24 style={height:'18.0pt'})
+        td.xl-65(width=206 colspan=4 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:155pt")
+            font.font-9= address && address.street
+        td.xl-65(width=73 colspan=4 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:55pt")
+            font.font-9= address && address.number
+        td.xl-65(width=77 colspan=4 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:58pt")
+            font.font-9= address && address.apartment
+        td.xl-65(width=225 colspan=4 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:169pt")
+            font.font-9= address && address.betweenStreets
+    tr(height=19 style={height:'14.85pt'})
+        td.xl-65(width=206 colspan=2 style="border-right: .5pt solid black;width:155pt")
+            font.font-8(style="display: block; text-align: center") Referencia
+        td.xl-65(width=206 colspan=4 style="border-top:none;border-left:none;width:155pt")
+            font.font-8(style="display: block; text-align: center") Reparto
+        td.xl-65(width=73 colspan=10 style="border-top:none;border-left:none;width:55pt")
+            font.font-8(style="display: block; text-align: center") Municipio
+        td.xl-65(width=77 colspan=2 style="border-top:none;border-left:none;width:58pt")
+            font.font-8(style="display: block; text-align: center") Provincia
+    tr(height=19 style={height:'14.85pt'})
+        td.xl-65(width=206 colspan=2 style="border-right: .5pt solid black;text-align: center;vertical-align: middle; width:155pt")
+            font.font-9= address && address.ref
+        td.xl-65(width=206 colspan=4 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:155pt")
+            font.font-9= address && address.district
+        td.xl-65(width=73 colspan=10 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:55pt")
+            font.font-9= address && address.address && address.address.municipality
+        td.xl-65(width=77 colspan=2 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:58pt")
+            font.font-9= address && address.address && address.address.province
+    tr(height=36 style={height:'27.0pt'})
+        td.xl-65(width=96 style="border-right: .5pt solid black;width:72pt")
+            font.font-11 Código Zona Postal
+        td.xl-65(width=89 style="border-top:none;border-left:none;width:67pt")
+            font.font-11 Teléfono
+        td.xl-65(width=245 colspan=6 style="border-top:none;border-left:none;width:184pt")
+            font.font-11 Correo Electrónico
+        +celEnumerate(148, 112, "Opera en su municipio", 8, 8)
+        +celEnumerate(168, 126, "Municipio donde opera", 9)
+    tr(height=19 style={height:'14.85pt'})
+        td.xl-65(width=96 style="border-right: .5pt solid black;text-align: center;vertical-align: middle; width:72pt")
+            font.font-9= address && address.postcode
+        td.xl-65(width=89 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:67pt")
+            font.font-9= address && address.phoneNumber
+        td.xl-65(width=245 colspan=6 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:184pt")
+            font.font-9= email
+        td.xl-65(width=34 colspan=2 style="border-top:none;border-left:none;width:26pt")
+            font.font-11 SI
+        td.xl-65(width=34 colspan=2 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:26pt")
+            font.font-9(style="font-size: 15pt;")= `${operatesInMunicipality?"":"X"}`
+        td.xl-65(width=34 colspan=2 style="border-top:none;border-left:none;width:26pt")
+            font.font-11 NO
+        td.xl-65(width=34 colspan=2 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:26pt")
+            font.font-9(style="font-size: 15pt;")= `${operatesInMunicipality?"X":""}`
+        td.xl-65(width=188 colspan=2 style="border-top:none;border-left:none;text-align: center;vertical-align: middle; width:141pt")
+            font.font-9= operatesInMunicipality
+    tr(height=33 style={height:'24.75pt'})
+        +celEnumerate(96, 72,"", 10, 19)
+    tr(height=17 style={height:'12.75pt'})
+        td.xl-65(width=294 colspan=4 rowspan=4 style=`border-right: .5pt solid black; width: 221pt`)
+            font.font-11(style="height: 54pt;") Impuesto sobre Ingresos Personales. Liquidación adicional.
+        td.xl-65(width=304 colspan=12 style="border-top:none;border-left:none;width:229pt")
+            font.font-11 Código del tributo
+        td.xl-65(width=168 style="border-top:none;border-left:none;width:126pt")
+            font.font-11 Código del Banco
+    tr(height=18 style={height:'13.5pt'})
+        td.xl-65(width=304 colspan=12 style="border-top:none;border-left:none;width:229pt")
+            font.font-11(style="display: flex; justify-content: center;font-weight: 700") 053022-2
+        td.xl-65(width=168 style="border-top:none;border-left:none;width:126pt")
+            font.font-11(style="display: flex; justify-content: center;font-weight: 700") 70104
+    tr(height=17 style={height:'12.75pt'})
+        td.xl-65(width=304 height=34 colspan=12 rowspan=2 style=`border-right: .5pt solid black; height:25.5pt; width: 229pt`)
+            font.font-9(style="display: flex; justify-content: center; align-items: center; height: 24pt; font-weight: 700") TOTAL A PAGAR
+        td.xl-65(width=304 colspan=12 style="border-top:none;border-left:none;width:229pt")
+            font.font-11 Importe fila 36
+    tr(height=17 style="height: 12.75pt; border-bottom: 2pt solid black;")
+        td.xl-65(width=168 style="border-top:none;border-left:none;width:126pt")
+            font.font-11(style="display: flex; justify-content: center;font-weight: 700")= totalToPay
+    tr(height=20 style="height: 10pt; border-left: 2pt solid white; border-right: 2pt solid white;")
+    tr(height=72 style="height: 54.6pt; border-top: 2pt solid black;")
+        td.xl-65(width=766 height=72 colspan=19 style="border-right: .5pt solid black;width:576pt")
+            font.font-9(style="display: flex; text-align: justify; font-size:9pt;")= objetivo
+    tr(height=17 style={height:'12.75pt'})
+        td.xl-65(width=766 height=17 colspan=19 style="background: #F1F1F1; border-right: .5pt solid black;width:576pt")
+            font.font-9(style="display: flex; align-items: center; text-align: justify; height: 12pt; font-size:8.5pt;") FORMATO Y ESTRUCTURA
+    tr(height=17 style={height:'12.75pt'})
+        td.xl-65(width=766 height=65 colspan=19 style="border-right: .5pt solid black;width:576pt")
+            +listItem(formatoYEstructura)
+    tr(height=17 style={height:'12.75pt'})
+        td.xl-65(width=766 height=17 colspan=19 style="background: #F1F1F1; border-right: .5pt solid black;width:576pt")
+            font.font-9(style="display: flex; align-items: center; text-align: justify; height: 12pt; font-size:8.5pt;") REQUISITOS GENERALES A TENER EN CUENTA EN LA CONFECCIÓN Y PRESENTACIÓN DE LA DECLARACIÓN JURADA
+    tr(height=33 style={height:'24.95pt'})
+        td.xl-65(width=766 height=65 colspan=19 style="border-right: .5pt solid black;width:576pt")
+            +listItem(requisitos)
+    tr(height=18 style={height:'14.1pt'})
+        td.xl-65(width=766 height=18 colspan=19 style="border-right: .5pt solid black;width:576pt")
+            +listItem(["- Sí su Declaración Jurada da a pagar, y la entrega en la ONAT y paga antes del 28 de febrero, puede descontarse  el 5% del importe a pagar (fila 33) ."])
+    tr(height=40 style={height:'30.0pt'})
+        td.xl-65(width=766 height=17 colspan=19 style="border-right: .5pt solid black;width:576pt")
+            font.font-9(style="display: flex; text-align: justify; font-size:9pt;") - Si usted tiene aprobado  el Régimen Simplificado de tributación, debe marcar en la casilla A en el escaque Si.  En este caso,   si sus ingresos son inferiores a  200 000.00 CUP, usted no liquida el impuesto, o sea no lo paga.
+    tr(height=20 style={height:'15.2pt'})
+        td.xl-65(width=766 height=18 colspan=19 style="border-right: .5pt solid black;width:576pt")
+            font.font-8(style="display: flex; text-align: justify; font-size:8.5pt; margin-bottom: 2pt;") - Para más información vea el instructivo que le brindamos en formato digital, o visite nuestro Portal tributario
+                a(href="http://www.onat.gob.cu/" style="text-decoration: none;")
+                    font.font-8(style="display: flex; text-align: justify; font-size:8.5pt; margin: auto 2pt;") www.onat.gob.cu
