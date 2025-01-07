@@ -155,7 +155,11 @@ export class FiscalYear extends Model {
 
   private async checkFiscalYearIncomesPrevious(): Promise<void> {
     const lastFiscalYearIdInProfile = await FiscalYear.findOne({
-      where: { id: Not(this.id), profile: { id: this.__profileId__ } },
+      where: {
+        id: Not(this.id),
+        profile: { id: this.__profileId__ },
+        year: this.year - 1,
+      },
       order: { id: "DESC" },
     });
 
