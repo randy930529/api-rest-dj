@@ -1,6 +1,6 @@
 {
-    "name": "camygestor",
-    "short_name": "camygestor",
+    "name": "CA-MyGestor",
+    "short_name": "CA-MyGestor",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
