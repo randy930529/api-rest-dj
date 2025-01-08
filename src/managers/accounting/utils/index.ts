@@ -375,7 +375,7 @@ export async function updateAndGetMayors(
   currents: Mayor[],
   previous: Mayor[],
   codes: string[]
-) {
+): Promise<Mayor[]> {
   const setCodes = [...new Set(codes)];
   const currentsMap = getObjectMapToCode<Mayor>(currents, getCodeCallback);
   const previousMap = getObjectMapToCode<Mayor>(previous, getCodeCallback);
@@ -395,22 +395,17 @@ export function makeUpdateOrCreate(
   fiscalYear: FiscalYear,
   currentMayor: Mayor,
   previouMayor: Mayor
-) {
-  if (currentMayor && previouMayor) {
-    return getUpdateMayor(currentMayor, previouMayor.saldo);
-  } else if (!currentMayor && previouMayor) {
-    return createMayorAndUpdate(fiscalYear, previouMayor);
+): Promise<Mayor> {
+  if (currentMayor) {
+    return getUpdateMayor(currentMayor, previouMayor?.saldo);
   }
-  return currentMayor.save();
+  return createMayorAndUpdate(fiscalYear, previouMayor);
 }
 
 export async function getUpdateMayor(
   mayor: Mayor,
-  saldo: number
+  saldo: number = 0
 ): Promise<Mayor> {
-  if (saldo === undefined || saldo === null || Number.isNaN(saldo))
-    return mayor;
-
   const [debe, haber] = [Math.max(saldo, 0), Math.max(-saldo, 0)];
   const voucherDetail = await getUpdateMayorVoucherDetail(mayor, debe, haber);
 

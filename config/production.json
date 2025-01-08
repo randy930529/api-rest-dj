@@ -1,7 +1,7 @@
 {
   "app": {
-    "versionAPK": 54,
-    "versionApp": "1.0.1",
+    "versionAPK": 59,
+    "versionApp": "2.0.0",
     "site": "https://mygestor.conalbert.cu",
     "debug": "production",
     "port": 4000,
