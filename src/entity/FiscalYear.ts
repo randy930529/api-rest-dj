@@ -182,7 +182,7 @@ export class FiscalYear extends Model {
       this.checkIfRemoveTheLastFiscalYear(),
       this.checkNotRemoveSectionFiscalYear(),
       this.removeInitBalances(),
-      this.removeDJ08(),
+      this.checkHasDocuments(),
     ]);
   }
 
@@ -210,20 +210,8 @@ export class FiscalYear extends Model {
     }
   }
 
-  private async removeDJ08(): Promise<void> {
-    if (!this.has_documents) {
-      const dj08ToRemove = await Dj08SectionData.findOne({
-        relations: ["dJ08"],
-        where: {
-          dJ08: { fiscalYear: { id: this.id } },
-        },
-      });
-
-      if (dj08ToRemove) {
-        await dj08ToRemove.remove();
-        await dj08ToRemove.dJ08.remove();
-      }
-    } else {
+  private async checkHasDocuments(): Promise<void> {
+    if (this.has_documents) {
       throw new Error(
         "No se puede eliminar porque tiene documentos asociados."
       );

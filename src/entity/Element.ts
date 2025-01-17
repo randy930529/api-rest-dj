@@ -31,7 +31,7 @@ export class Element extends Model {
   @Column({ nullable: true })
   help: string;
 
-  @ManyToOne(() => Profile, { nullable: true, cascade: ["remove"] })
+  @ManyToOne(() => Profile, { nullable: true, onDelete: "CASCADE" })
   @JoinColumn()
   profile: Profile;
 

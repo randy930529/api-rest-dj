@@ -14,7 +14,7 @@ export class Enterprise extends Model {
   @Column({ default: false })
   is_general: boolean;
 
-  @ManyToOne(() => User, { cascade: ["update"], nullable: true })
+  @ManyToOne(() => User, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   @JoinColumn()
   user: User;
 

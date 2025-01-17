@@ -1,9 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-} from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import Model from "./Base";
 import { ProfileActivity } from "./ProfileActivity";
 import { ProfileHiredPerson } from "./ProfileHiredPerson";
@@ -33,7 +28,8 @@ export class ProfileHiredPersonActivity extends Model {
 
   @ManyToOne(
     () => ProfileActivity,
-    (profileActivity) => profileActivity.profileHiredPersonActivity
+    (profileActivity) => profileActivity.profileHiredPersonActivity,
+    { onDelete: "CASCADE" }
   )
   @JoinColumn()
   profileActivity: ProfileActivity;

@@ -65,7 +65,7 @@ export class SupportDocument extends Model {
   @Column({ default: false })
   __last_document__: boolean;
 
-  @ManyToOne(() => ProfileActivity, { nullable: true })
+  @ManyToOne(() => ProfileActivity, { nullable: true, onDelete: "CASCADE" })
   @JoinColumn()
   profileActivity: ProfileActivity;
 

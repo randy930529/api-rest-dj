@@ -58,9 +58,7 @@ export class User extends Model {
   @OneToMany(() => Profile, (profile) => profile.user)
   profiles: Profile[];
 
-  @OneToMany(() => Enterprise, (enterprise) => enterprise.user, {
-    onDelete: "CASCADE",
-  })
+  @OneToMany(() => Enterprise, (enterprise) => enterprise.user)
   enterprise: Enterprise[];
 
   toJSON() {

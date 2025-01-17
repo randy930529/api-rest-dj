@@ -29,7 +29,7 @@ export class Mayor extends Model {
   @JoinColumn()
   account: Account;
 
-  @ManyToOne(() => FiscalYear)
+  @ManyToOne(() => FiscalYear, { onDelete: "CASCADE" })
   @JoinColumn()
   fiscalYear: FiscalYear;
 }
