@@ -12,6 +12,7 @@ export const SUPPORT_DOCUMENT_SELECT: FindOptionsSelect<SupportDocument> = {
   },
   fiscalYear: {
     id: true,
+    year: true,
     date: true,
     run_acounting: true,
     individual: true,

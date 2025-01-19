@@ -1,4 +1,5 @@
 import { appConfig } from "../../../../config";
+import { SupportDocument } from "../../../entity/SupportDocument";
 import { Dj08SectionData } from "../../../entity/Dj08SectionData";
 import {
   AllDataSectionsDj08Type,
@@ -14,6 +15,20 @@ export function getParseDJ08SectionsData<
   if (typeof dj08ToUpdate.section_data === "string")
     return JSON.parse(dj08ToUpdate.section_data);
   return JSON.stringify(dj08ToUpdate.section_data) as unknown as T;
+}
+
+export function getDocumentGroup(document: SupportDocument): string {
+  const { element } = document;
+  if (!element) throw new Error("Get document required element.");
+
+  return element.group?.trim();
+}
+
+export function getDocumentsOfToGroup(
+  group: string,
+  documents: SupportDocument[]
+): SupportDocument[] {
+  return documents.filter((document) => getDocumentGroup(document) === group);
 }
 
 export function setDataSectionG(
@@ -74,4 +89,18 @@ export function setDataRow(
 
     return newRow;
   }
+}
+
+export function getTotalAmountInDocuments(
+  documents: SupportDocument[]
+): number {
+  return documents.reduce((sumTotal, { amount }) => sumTotal + (amount | 0), 0);
+}
+
+export function isExpensesDD(
+  type: string,
+  is_general: boolean,
+  group: string
+): boolean {
+  return type === "g" && is_general && group === "ddgt";
 }

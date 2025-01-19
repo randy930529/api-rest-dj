@@ -74,6 +74,10 @@ export type DataSectionBType = {
   import: number;
 };
 
+export type ObjectSectionBType = {
+  [key: string]: DataSectionBType;
+};
+
 export type DataSectionGType = {
   from: number;
   to: number;
@@ -84,6 +88,10 @@ export type DataSectionGType = {
 
 export type ObjectSectionGType = {
   [key: string]: DataSectionGType;
+};
+
+export type ObjectSectionAType = {
+  [key: string]: DataSectionAType;
 };
 
 export type TotalSectionGType = {

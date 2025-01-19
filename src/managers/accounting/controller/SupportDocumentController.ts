@@ -3,7 +3,6 @@ import * as moment from "moment";
 import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { AppDataSource } from "../../../data-source";
 import { responseError } from "../../../errors/responseError";
-import { appConfig } from "../../../../config";
 import { SupportDocument } from "../../../entity/SupportDocument";
 import { Element } from "../../../entity/Element";
 import { FiscalYear } from "../../../entity/FiscalYear";
@@ -24,10 +23,10 @@ import {
   AllDataSectionsDj08Type,
   DataSectionAType,
   DataSectionBType,
-  DataSectionGType,
+  ObjectSectionAType,
+  ObjectSectionBType,
   ObjectSectionGType,
   TotalSectionAType,
-  TotalSectionGType,
 } from "../../../utils/definitions";
 import {
   ELEMENT_RELATIONS,
@@ -49,7 +48,14 @@ import {
 import { getLastMayorOfTheAccounts } from "../utils/query/mayorsTheAccountInToFiscalYear.fetch";
 import { getInitialBalances } from "../../period/utils";
 import { getDJ08SectionsData } from "../utils/query/dj08SectionData.fetch";
-import { getParseDJ08SectionsData, setDataSectionG } from "../utils/updateDJ08";
+import {
+  getDocumentGroup,
+  getDocumentsOfToGroup,
+  getParseDJ08SectionsData,
+  getTotalAmountInDocuments,
+  isExpensesDD,
+  setDataSectionG,
+} from "../utils/updateDJ08";
 import { getDocumentsFiscalYearOrOfTheProfileActivity } from "../utils/query/allDocumentsOfFiscalYear.fetch";
 
 export class SupportDocumentController extends EntityControllerBase<SupportDocument> {
@@ -365,495 +371,133 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
 
       switch (supportDocument.type_document) {
         case "m":
-          let elementGroup = supportDocument.element.group?.trim();
-          const paidTributes = documents;
-          const dataSectionF = sectionsData[SectionName.SECTION_F].data as {
-            [key: string]: DataSectionBType;
-          };
-
-          if (elementGroup === "tprz") {
-            const expensesBookTTI19 = paidTributes.reduce(
-              (sumTotal, val) =>
-                val.element.group.trim() === "tprz"
-                  ? sumTotal + val.amount
-                  : sumTotal,
-              0
-            );
-            sectionsData[SectionName.SECTION_B].data["F15"] = expensesBookTTI19;
-          } else if (elementGroup === "tpcm") {
-            const expensesBookTTJ19 = paidTributes.reduce(
-              (sumTotal, val) =>
-                val.element.group.trim() === "tpcm"
-                  ? sumTotal + val.amount
-                  : sumTotal,
-              0
-            );
-
-            sectionsData[SectionName.SECTION_C].data["F22"] = expensesBookTTJ19;
-          } else if (elementGroup === "tpsv") {
-            const expensesBookTTB19 = paidTributes.reduce(
-              (sumTotal, val) =>
-                val.element.group.trim() === "tpsv"
-                  ? sumTotal + val.amount
-                  : sumTotal,
-              0
-            );
-
-            dataSectionF["F37"] = {
-              import: expensesBookTTB19,
-            };
-            dataSectionF["F38"] = {
-              import: null,
-            };
-          } else if (elementGroup === "tpft") {
-            const expensesBookTTC19 = paidTributes.reduce(
-              (sumTotal, val) =>
-                val.element.group.trim() === "tpft"
-                  ? sumTotal + val.amount
-                  : sumTotal,
-              0
-            );
-
-            dataSectionF["F39"] = {
-              import: expensesBookTTC19,
-            };
-          } else if (elementGroup === "tpdc") {
-            const expensesBookTTD19 = paidTributes.reduce(
-              (sumTotal, val) =>
-                val.element.group.trim() === "tpdc"
-                  ? sumTotal + val.amount
-                  : sumTotal,
-              0
-            );
-
-            dataSectionF["F40"] = {
-              import: expensesBookTTD19,
-            };
-          } else if (elementGroup === "tpdc") {
-            const expensesBookTTD19 = paidTributes.reduce(
-              (sumTotal, val) =>
-                val.element.group.trim() === "tpdc"
-                  ? sumTotal + val.amount
-                  : sumTotal,
-              0
-            );
-
-            dataSectionF["F40"] = {
-              import: expensesBookTTD19,
-            };
-          } else if (elementGroup === "tpan") {
-            const expensesBookTTE19 = paidTributes.reduce(
-              (sumTotal, val) =>
-                val.element.group.trim() === "tpan"
-                  ? sumTotal + val.amount
-                  : sumTotal,
-              0
-            );
-
-            dataSectionF["F41"] = {
-              import: expensesBookTTE19,
-            };
-          } else if (elementGroup === "tpcs") {
-            const expensesBookTTF19 = paidTributes.reduce(
-              (sumTotal, val) =>
-                val.element.group.trim() === "tpcs"
-                  ? sumTotal + val.amount
-                  : sumTotal,
-              0
-            );
-
-            dataSectionF["F42"] = {
-              import: expensesBookTTF19,
-            };
-          } else if (elementGroup === "tpot") {
-            const expensesBookTTG19 = paidTributes.reduce(
-              (sumTotal, val) =>
-                val.element.group.trim() === "tpot"
-                  ? sumTotal + val.amount
-                  : sumTotal,
-              0
-            );
-
-            dataSectionF["F43"] = {
-              import: expensesBookTTG19,
-            };
-          }
-
-          if (elementGroup !== supportDocument.__oldGroup__) {
-            elementGroup = supportDocument.__oldGroup__;
-            if (elementGroup === "tprz") {
-              const expensesBookTTI19 = paidTributes.reduce(
-                (sumTotal, val) =>
-                  val.element.group.trim() === "tprz"
-                    ? sumTotal + val.amount
-                    : sumTotal,
-                0
-              );
-              sectionsData[SectionName.SECTION_B].data["F15"] =
-                expensesBookTTI19;
-            } else if (elementGroup === "tpcm") {
-              const expensesBookTTJ19 = paidTributes.reduce(
-                (sumTotal, val) =>
-                  val.element.group.trim() === "tpcm"
-                    ? sumTotal + val.amount
-                    : sumTotal,
-                0
-              );
-
-              sectionsData[SectionName.SECTION_C].data["F22"] =
-                expensesBookTTJ19;
-            } else if (elementGroup === "tpsv") {
-              const expensesBookTTB19 = paidTributes.reduce(
-                (sumTotal, val) =>
-                  val.element.group.trim() === "tpsv"
-                    ? sumTotal + val.amount
-                    : sumTotal,
-                0
-              );
-
-              dataSectionF["F37"] = {
-                import: expensesBookTTB19,
-              };
-              dataSectionF["F38"] = {
-                import: null,
-              };
-            } else if (elementGroup === "tpft") {
-              const expensesBookTTC19 = paidTributes.reduce(
-                (sumTotal, val) =>
-                  val.element.group.trim() === "tpft"
-                    ? sumTotal + val.amount
-                    : sumTotal,
-                0
-              );
-
-              dataSectionF["F39"] = {
-                import: expensesBookTTC19,
-              };
-            } else if (elementGroup === "tpdc") {
-              const expensesBookTTD19 = paidTributes.reduce(
-                (sumTotal, val) =>
-                  val.element.group.trim() === "tpdc"
-                    ? sumTotal + val.amount
-                    : sumTotal,
-                0
-              );
-
-              dataSectionF["F40"] = {
-                import: expensesBookTTD19,
-              };
-            } else if (elementGroup === "tpdc") {
-              const expensesBookTTD19 = paidTributes.reduce(
-                (sumTotal, val) =>
-                  val.element.group.trim() === "tpdc"
-                    ? sumTotal + val.amount
-                    : sumTotal,
-                0
-              );
-
-              dataSectionF["F40"] = {
-                import: expensesBookTTD19,
-              };
-            } else if (elementGroup === "tpan") {
-              const expensesBookTTE19 = paidTributes.reduce(
-                (sumTotal, val) =>
-                  val.element.group.trim() === "tpan"
-                    ? sumTotal + val.amount
-                    : sumTotal,
-                0
-              );
-
-              dataSectionF["F41"] = {
-                import: expensesBookTTE19,
-              };
-            } else if (elementGroup === "tpcs") {
-              const expensesBookTTF19 = paidTributes.reduce(
-                (sumTotal, val) =>
-                  val.element.group.trim() === "tpcs"
-                    ? sumTotal + val.amount
-                    : sumTotal,
-                0
-              );
-
-              dataSectionF["F42"] = {
-                import: expensesBookTTF19,
-              };
-            } else if (elementGroup === "tpot") {
-              const expensesBookTTG19 = paidTributes.reduce(
-                (sumTotal, val) =>
-                  val.element.group.trim() === "tpot"
-                    ? sumTotal + val.amount
-                    : sumTotal,
-                0
-              );
-
-              dataSectionF["F43"] = {
-                import: expensesBookTTG19,
-              };
-            }
-          }
-
-          const importF44 = parseFloat(
-            Object.values({ ...dataSectionF, F44: { import: null } })
-              .reduce((sumaTotal, val) => sumaTotal + val.import, 0)
-              .toFixed()
-          );
-          dataSectionF["F44"] = {
-            import: importF44,
-          };
-          sectionsData[SectionName.SECTION_F].data = dataSectionF;
-          sectionsData[SectionName.SECTION_B].data["F14"] = importF44;
+          this.updateTaxes(sectionsData, supportDocument, documents);
           break;
 
         case "g":
-          const newDataSectionAG: { [key: string | number]: DataSectionAType } =
-            {};
-          const newTotalSectionAG: TotalSectionAType = {
-            incomes: 0,
-            expenses: 0,
-          };
-
-          for (let i = 0; i < profileActivities.length; i++) {
-            const activity = profileActivities[i];
-            const { date_start, date_end } = activity;
-            const { code, description } = activity.activity;
-            const date_start_day = moment(date_start).date();
-            const date_start_month = moment(date_start).month() + 1;
-            const date_end_day = moment(date_end).date();
-            const date_end_month = moment(date_end).month() + 1;
-            const { income, expense } = activity.supportDocuments.reduce(
-              (sumaTotal, val) => {
-                if (
-                  val.type_document === "i" &&
-                  val.element.group?.trim() === "iggv"
-                ) {
-                  sumaTotal.income += parseFloat(val.amount.toFixed());
-                } else if (
-                  val.type_document === "g" &&
-                  val.element.group?.startsWith("pd")
-                ) {
-                  sumaTotal.expense += parseFloat(val.amount.toFixed());
-                }
-
-                return sumaTotal;
-              },
-              { income: 0, expense: 0 }
-            );
-
-            const data: DataSectionAType = {
-              activity: `${code} - ${description}`,
-              period: {
-                start: [date_start_day, date_start_month],
-                end: [date_end_day, date_end_month],
-              },
-              income,
-              expense,
-            };
-            newDataSectionAG[`F${i + 1}`] = data;
-            newTotalSectionAG.incomes += income;
-            newTotalSectionAG.expenses += expense;
-          }
-          sectionsData[SectionName.SECTION_A].data = newDataSectionAG;
-          sectionsData[SectionName.SECTION_A].totals = newTotalSectionAG;
-          sectionsData[SectionName.SECTION_B].data["F11"] =
-            newTotalSectionAG.incomes;
-          sectionsData[SectionName.SECTION_B].data["F13"] =
-            newTotalSectionAG.expenses;
-
-          const expensesDD = documents.filter(
-            (val) =>
-              val.type_document === "g" &&
-              val.element.is_general &&
-              val.element.group?.trim() === "ddgt"
-          );
-
-          const expensesBookTGP19 = expensesDD.reduce(
-            (sumaTotal, val) => sumaTotal + val.amount,
-            0
-          );
-
-          sectionsData[SectionName.SECTION_B].data["F16"] = parseFloat(
-            expensesBookTGP19.toFixed()
-          );
+          this.updateExpenses(sectionsData, profileActivities, documents);
           break;
 
         case "i":
-          const newDataSectionA: { [key: string | number]: DataSectionAType } =
-            {};
-          const newTotalSectionA: TotalSectionAType = {
-            incomes: 0,
-            expenses: 0,
-          };
-
-          for (let i = 0; i < profileActivities.length; i++) {
-            const activity = profileActivities[i];
-            const { date_start, date_end } = activity;
-            const { code, description } = activity.activity;
-            const date_start_day = moment(date_start).date();
-            const date_start_month = moment(date_start).month() + 1;
-            const date_end_day = moment(date_end).date();
-            const date_end_month = moment(date_end).month() + 1;
-            const { income, expense } = activity.supportDocuments.reduce(
-              (sumaTotal, val) => {
-                if (
-                  val.type_document === "i" &&
-                  val.element.group?.trim() === "iggv"
-                ) {
-                  sumaTotal.income += parseFloat(val.amount.toFixed());
-                } else if (
-                  val.type_document === "g" &&
-                  val.element.group?.startsWith("pd")
-                ) {
-                  sumaTotal.expense += parseFloat(val.amount.toFixed());
-                }
-
-                return sumaTotal;
-              },
-              { income: 0, expense: 0 }
-            );
-
-            const data: DataSectionAType = {
-              activity: `${code} - ${description}`,
-              period: {
-                start: [date_start_day, date_start_month],
-                end: [date_end_day, date_end_month],
-              },
-              income,
-              expense,
-            };
-
-            newDataSectionA[`F${i + 1}`] = data;
-            newTotalSectionA.incomes += income;
-            newTotalSectionA.expenses += expense;
-          }
-          sectionsData[SectionName.SECTION_A].data = newDataSectionA;
-          sectionsData[SectionName.SECTION_A].totals = newTotalSectionA;
-          sectionsData[SectionName.SECTION_B].data["F11"] =
-            newTotalSectionA.incomes;
-          sectionsData[SectionName.SECTION_B].data["F13"] =
-            newTotalSectionA.expenses;
+          this.updateIncomes(sectionsData, profileActivities);
           break;
 
         case "o":
-          const group = supportDocument.element.group?.trim();
-          const allDocumentToGroup = documents.filter(
-            (val) =>
-              val.type_document === "o" && val.element.group?.trim() === group
-          );
-
-          const upFile = parseFloat(
-            allDocumentToGroup
-              .reduce((sumaTotal, val) => sumaTotal + val.amount, 0)
-              .toFixed()
-          );
-
-          if (group === "onex") {
-            sectionsData[SectionName.SECTION_B].data["F17"] = upFile;
-          } else if (group === "onda") {
-            sectionsData[SectionName.SECTION_B].data["F18"] = upFile;
-          } else if (group === "onfp") {
-            sectionsData[SectionName.SECTION_B].data["F19"] = upFile;
-          } else if (group === "onpa") {
-            sectionsData[SectionName.SECTION_C].data["F23"] = upFile;
-          } else if (group === "onrt") {
-            sectionsData[SectionName.SECTION_C].data["F24"] = upFile;
-          } else if (group === "onbn") {
-            sectionsData[SectionName.SECTION_C].data["F25"] = upFile;
-          } else if (group === "onde") {
-            sectionsData[SectionName.SECTION_E].data["F34"] = upFile;
-          }
-
-          if (group !== supportDocument.__oldGroup__) {
-            const allDocumentToGroup = documents.filter(
-              (val) =>
-                val.type_document === "o" &&
-                val.element.group?.trim() === supportDocument.__oldGroup__
-            );
-
-            const upFile = parseFloat(
-              allDocumentToGroup
-                .reduce((sumaTotal, val) => sumaTotal + val.amount, 0)
-                .toFixed()
-            );
-
-            if (supportDocument.__oldGroup__ === "onex") {
-              sectionsData[SectionName.SECTION_B].data["F17"] = upFile;
-            } else if (supportDocument.__oldGroup__ === "onda") {
-              sectionsData[SectionName.SECTION_B].data["F18"] = upFile;
-            } else if (supportDocument.__oldGroup__ === "onfp") {
-              sectionsData[SectionName.SECTION_B].data["F19"] = upFile;
-            } else if (supportDocument.__oldGroup__ === "onpa") {
-              sectionsData[SectionName.SECTION_C].data["F23"] = upFile;
-            } else if (supportDocument.__oldGroup__ === "onrt") {
-              sectionsData[SectionName.SECTION_C].data["F24"] = upFile;
-            } else if (supportDocument.__oldGroup__ === "onbn") {
-              sectionsData[SectionName.SECTION_C].data["F25"] = upFile;
-            } else if (supportDocument.__oldGroup__ === "onde") {
-              sectionsData[SectionName.SECTION_E].data["F34"] = upFile;
-            }
-          }
+          this.updateOthers(sectionsData, supportDocument, documents);
           break;
 
         default:
           break;
       }
 
-      const dataSectionB = sectionsData[SectionName.SECTION_B].data as {
-        [key: string]: number;
-      };
-      sectionsData[SectionName.SECTION_B].data["F20"] =
-        calculeF20ToDj08(dataSectionB);
+      dj08ToUpdate.section_data = this.updateDj08Sections(sectionsData);
 
-      const { constantToSectionG } = appConfig;
-      const F20 = sectionsData[SectionName.SECTION_B].data["F20"] as number;
-
-      const dataSectionG = sectionsData[SectionName.SECTION_G].data as {
-        [key: string]: DataSectionGType;
-      };
-      const totalSectionG: TotalSectionGType = {
-        baseImponible: 0,
-        import: 0,
-      };
-
-      constantToSectionG.reduce((count, val) => {
-        const { from, to, porcentageType } = val;
-        let baseImponible = 0;
-
-        if (to === null) {
-          baseImponible =
-            F20 > from ? F20 - (totalSectionG?.baseImponible || 0) : 0;
-        } else {
-          baseImponible =
-            F20 > to ? to - from : F20 - (totalSectionG?.baseImponible || 0);
-        }
-
-        const importe = parseFloat(
-          ((baseImponible * porcentageType) / 100).toFixed()
-        );
-
-        const newRow: DataSectionGType = {
-          ...val,
-          baseImponible: parseFloat(baseImponible.toFixed()),
-          import: importe,
-        };
-
-        dataSectionG[`F${count}`] = newRow;
-        totalSectionG["baseImponible"] += baseImponible;
-        totalSectionG["import"] += importe;
-
-        return count + 1;
-      }, 45);
-
-      sectionsData[SectionName.SECTION_G] = {
-        data: dataSectionG,
-        totals: totalSectionG,
-      };
-      sectionsData[SectionName.SECTION_C].data["F21"] = totalSectionG.import;
-
-      dj08ToUpdate.section_data = JSON.stringify(sectionsData);
       await dj08ToUpdate.save();
     } catch (error) {
       console.log("ERROR EN DJ-08: ", error.message);
       return error.message;
+    }
+  }
+
+  private updateTaxes(
+    sectionsData: AllDataSectionsDj08Type,
+    document: SupportDocument,
+    documents: SupportDocument[]
+  ) {
+    const elementGroup = getDocumentGroup(document);
+    const dataSectionF = this.getSectionValue<ObjectSectionBType>(
+      sectionsData,
+      SectionName.SECTION_F
+    );
+    let totalExpenses = this.calculeTotalExpensesOfToGroup(
+      elementGroup,
+      documents
+    );
+    let row = this.getTaxeRowKey(elementGroup);
+
+    this.setDataRowsToSectionF(dataSectionF, "F38", null);
+    this.setSectionTaxesValueRows(
+      sectionsData,
+      dataSectionF,
+      row,
+      totalExpenses
+    );
+
+    if (elementGroup !== document.__oldGroup__) {
+      totalExpenses = this.calculeTotalExpensesOfToGroup(
+        document.__oldGroup__,
+        documents
+      );
+      row = this.getTaxeRowKey(document.__oldGroup__);
+
+      this.setSectionTaxesValueRows(
+        sectionsData,
+        dataSectionF,
+        row,
+        totalExpenses
+      );
+    }
+
+    const importF44 = this.calculeValueF44(
+      Object.values<DataSectionBType>({ ...dataSectionF, F44: { import: 0 } })
+    );
+
+    this.setDataRowsToSectionF(dataSectionF, "F44", importF44);
+    this.setSectionValue(sectionsData, SectionName.SECTION_B, "F14", importF44);
+    sectionsData[SectionName.SECTION_F].data = dataSectionF;
+  }
+
+  private updateExpenses(
+    sectionsData: AllDataSectionsDj08Type,
+    profileActivities: ProfileActivity[],
+    documents: SupportDocument[]
+  ) {
+    const [newDataSectionAG, newTotalSectionAG] =
+      this.generateDataSectionA(profileActivities);
+
+    this.setSectionAValues(sectionsData, newDataSectionAG, newTotalSectionAG);
+
+    const expensesBookTGP19 = getTotalAmountInDocuments(
+      this.getDocumentsExpensesDD(documents)
+    );
+
+    this.setSectionValue(
+      sectionsData,
+      SectionName.SECTION_B,
+      "F16",
+      parseFloat(expensesBookTGP19.toFixed())
+    );
+  }
+
+  private updateIncomes(
+    sectionsData: AllDataSectionsDj08Type,
+    profileActivities: ProfileActivity[]
+  ) {
+    const [newDataSectionAG, newTotalSectionAG] =
+      this.generateDataSectionA(profileActivities);
+
+    this.setSectionAValues(sectionsData, newDataSectionAG, newTotalSectionAG);
+  }
+
+  private updateOthers(
+    sectionsData: AllDataSectionsDj08Type,
+    document: SupportDocument,
+    documents: SupportDocument[]
+  ) {
+    const elementGroup = getDocumentGroup(document);
+    let total = this.calculeTotalExpensesOfToGroup(elementGroup, documents);
+    let row = this.getOtherRowKey(elementGroup);
+
+    this.setSectionOthersValueRows(sectionsData, row, total);
+
+    if (elementGroup !== document.__oldGroup__) {
+      total = this.calculeTotalExpensesOfToGroup(
+        document.__oldGroup__,
+        documents
+      );
+      row = this.getOtherRowKey(document.__oldGroup__);
+
+      this.setSectionOthersValueRows(sectionsData, row, total);
     }
   }
 
@@ -863,7 +507,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
   ): Promise<[Dj08SectionData, SupportDocument[], ProfileActivity[]]> {
     const profileActivities = await getProfileActivities(fiscalYearId, type);
 
-    const data = await Promise.all([
+    const [sectionsData, documents] = await Promise.all([
       getDJ08SectionsData(fiscalYearId),
       getDocumentsFiscalYearOrOfTheProfileActivity(
         fiscalYearId,
@@ -871,31 +515,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         profileActivities
       ),
     ]);
-    return [...data, profileActivities];
-  }
-
-  private updateDj08Sections(sectionsData: AllDataSectionsDj08Type): string {
-    const dataSectionB = this.getSectionValue<{ [key: string]: number }>(
-      sectionsData,
-      SectionName.SECTION_B
-    );
-    const F20 = calculeF20ToDj08(dataSectionB);
-    this.setSectionValue(sectionsData, SectionName.SECTION_B, "F20", F20);
-
-    const dataSectionG = this.getSectionValue<ObjectSectionGType>(
-      sectionsData,
-      SectionName.SECTION_G
-    );
-    const data = setDataSectionG(F20, 45, dataSectionG);
-    sectionsData[SectionName.SECTION_G] = data;
-    this.setSectionValue(
-      sectionsData,
-      SectionName.SECTION_C,
-      "F21",
-      data.totals.import
-    );
-
-    return JSON.stringify(sectionsData);
+    return [sectionsData, documents, profileActivities];
   }
 
   private getSectionValue<T>(
@@ -905,6 +525,148 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
     return sectionsData[section].data as unknown as T;
   }
 
+  private getTaxeRowKey(group: string): string {
+    if (!group) return;
+
+    const row =
+      (group === "tprz" && "F15") ||
+      (group === "tpcm" && "F22") ||
+      (group === "tpsv" && "F37") ||
+      (group === "tpft" && "F39") ||
+      (group === "tpdc" && "F40") ||
+      (group === "tpan" && "F41") ||
+      (group === "tpcs" && "F42") ||
+      (group === "tpot" && "F43") ||
+      null;
+
+    if (!row) throw new Error("Element group not correspond to any row.");
+
+    return row;
+  }
+
+  private getOtherRowKey(group: string): string {
+    if (!group) return;
+
+    const row =
+      (group === "onex" && "F17") ||
+      (group === "onda" && "F18") ||
+      (group === "onfp" && "F19") ||
+      (group === "onpa" && "F23") ||
+      (group === "onrt" && "F24") ||
+      (group === "onbn" && "F25") ||
+      (group === "onde" && "F34") ||
+      null;
+
+    if (!row) throw new Error("Element group not correspond to any row.");
+
+    return row;
+  }
+
+  private updateDj08Sections(sectionsData: AllDataSectionsDj08Type): string {
+    const F20 = this.setSectionB_F20(sectionsData);
+    this.setSectionGAndSectionC_F21(F20, sectionsData);
+
+    return JSON.stringify(sectionsData);
+  }
+
+  private setSectionB_F20(sectionsData: AllDataSectionsDj08Type): number {
+    const dataSectionB = this.getSectionValue<{ [key: string]: number }>(
+      sectionsData,
+      SectionName.SECTION_B
+    );
+    const F20 = calculeF20ToDj08(dataSectionB);
+    this.setSectionValue(sectionsData, SectionName.SECTION_B, "F20", F20);
+
+    return F20;
+  }
+
+  private setDataRowsToSectionF(
+    dataSection: ObjectSectionBType,
+    row: string,
+    value: number
+  ) {
+    dataSection[row] = {
+      import: value,
+    };
+  }
+
+  private setSectionGAndSectionC_F21(
+    F20: number,
+    sectionsData: AllDataSectionsDj08Type
+  ) {
+    const dataSectionG = this.getSectionValue<ObjectSectionGType>(
+      sectionsData,
+      SectionName.SECTION_G
+    );
+    const data = setDataSectionG(F20, 45, dataSectionG);
+
+    sectionsData[SectionName.SECTION_G] = data;
+    this.setSectionValue(
+      sectionsData,
+      SectionName.SECTION_C,
+      "F21",
+      data.totals.import
+    );
+  }
+
+  private setSectionTaxesValueRows(
+    sectionsData: AllDataSectionsDj08Type,
+    sectionF: ObjectSectionBType,
+    row: string,
+    value: number
+  ) {
+    if (!row) return;
+
+    if (row === "F15" || row === "F22") {
+      const section =
+        row === "F15" ? SectionName.SECTION_B : SectionName.SECTION_C;
+      this.setSectionValue(sectionsData, section, row, value);
+    } else {
+      this.setDataRowsToSectionF(sectionF, "F37", value);
+    }
+  }
+
+  private setSectionOthersValueRows(
+    sectionsData: AllDataSectionsDj08Type,
+    row: string,
+    value: number
+  ) {
+    if (!row) return;
+    const section = this.getSectionOthers(row);
+
+    if (!section) return;
+    this.setSectionValue(sectionsData, section, row, value);
+  }
+
+  private getSectionOthers(row: string): SectionName {
+    return (
+      (row === "F17" && SectionName.SECTION_B) ||
+      (row === "F18" && SectionName.SECTION_B) ||
+      (row === "F19" && SectionName.SECTION_B) ||
+      (row === "F23" && SectionName.SECTION_C) ||
+      (row === "F24" && SectionName.SECTION_C) ||
+      (row === "F25" && SectionName.SECTION_C) ||
+      (row === "F34" && SectionName.SECTION_E) ||
+      null
+    );
+  }
+
+  private calculeTotalExpensesOfToGroup(
+    group: string,
+    documents: SupportDocument[]
+  ): number {
+    const documentsOfToGroup = getDocumentsOfToGroup(group, documents);
+
+    return getTotalAmountInDocuments(documentsOfToGroup);
+  }
+
+  private calculeValueF44(data: DataSectionBType[]): number {
+    const value = data
+      .reduce((sumaTotal, { import: amount }) => sumaTotal + amount, 0)
+      .toFixed();
+    return parseFloat(value);
+  }
+
   private setSectionValue(
     sectionsData: AllDataSectionsDj08Type,
     section: SectionName,
@@ -912,6 +674,147 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
     value: number
   ): void {
     sectionsData[section].data[row] = value;
+  }
+
+  private generateDataSectionA(
+    activities: ProfileActivity[]
+  ): [ObjectSectionAType, TotalSectionAType] {
+    const newData: ObjectSectionAType = {};
+    const newTotals: TotalSectionAType = {
+      incomes: 0,
+      expenses: 0,
+    };
+
+    for (let i = 0; i < activities.length; i++) {
+      const activity = activities[i];
+      const { code, description } = activity.activity;
+      const activityDate = this.getActivityDayAndMonth(
+        activity.date_start,
+        activity.date_end
+      );
+
+      const { incomes, expenses } = this.getTotalIncomeAndExpenseInActivities(
+        activity.supportDocuments
+      );
+
+      const data = this.createDataSectionA(
+        code,
+        description,
+        activityDate,
+        incomes,
+        expenses
+      );
+
+      newData[`F${i + 1}`] = data;
+      newTotals.incomes += incomes;
+      newTotals.expenses += expenses;
+    }
+
+    return [newData, newTotals];
+  }
+
+  private getActivityDayAndMonth(
+    date_start: Date,
+    date_end: Date
+  ): [number, number, number, number] {
+    return [
+      moment(date_start).date(),
+      moment(date_start).month() + 1,
+      moment(date_end).date(),
+      moment(date_end).month() + 1,
+    ];
+  }
+
+  private getTotalIncomeAndExpenseInActivities(
+    documents: SupportDocument[]
+  ): TotalSectionAType {
+    return documents.reduce<TotalSectionAType>(
+      (sumaTotal, val) => {
+        const elementGroup = getDocumentGroup(val);
+        return this.getSumaTotalIncomesAndExpenses(
+          sumaTotal,
+          val.type_document,
+          elementGroup,
+          val.amount
+        );
+      },
+      { incomes: 0, expenses: 0 }
+    );
+  }
+
+  private getSumaTotalIncomesAndExpenses(
+    sumaTotal: TotalSectionAType,
+    type: string,
+    group: string,
+    amount: number
+  ): TotalSectionAType {
+    const key = this.getKeySumaTotal(type, group);
+
+    if (key) {
+      sumaTotal[key] += parseFloat(amount.toFixed());
+    }
+
+    return sumaTotal;
+  }
+
+  private getKeySumaTotal(type: string, group: string): string {
+    return (
+      (type === "i" && group === "iggv" && "incomes") ||
+      (type === "g" && group?.startsWith("pd") && "expenses") ||
+      null
+    );
+  }
+
+  private createDataSectionA(
+    code: string,
+    description: string,
+    activityDate: number[],
+    income: number,
+    expense: number
+  ): DataSectionAType {
+    return {
+      activity: `${code} - ${description}`,
+      period: {
+        start: activityDate.slice(0, 2),
+        end: activityDate.slice(2),
+      },
+      income,
+      expense,
+    };
+  }
+
+  private setSectionAValues(
+    sectionsData: AllDataSectionsDj08Type,
+    data: ObjectSectionAType,
+    totals: TotalSectionAType
+  ) {
+    sectionsData[SectionName.SECTION_A].data = data;
+    sectionsData[SectionName.SECTION_A].totals = totals;
+    this.setSectionValue(
+      sectionsData,
+      SectionName.SECTION_B,
+      "F11",
+      totals.incomes
+    );
+    this.setSectionValue(
+      sectionsData,
+      SectionName.SECTION_B,
+      "F13",
+      totals.expenses
+    );
+  }
+
+  private getDocumentsExpensesDD(
+    documents: SupportDocument[]
+  ): SupportDocument[] {
+    return documents.filter((document) => {
+      const elementGroup = getDocumentGroup(document);
+      return isExpensesDD(
+        document.type_document,
+        document.element.is_general,
+        elementGroup
+      );
+    });
   }
 
   /**
