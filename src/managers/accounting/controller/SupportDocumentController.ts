@@ -557,6 +557,21 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       (group === "onde" && "F34") ||
       null;
 
+    if (
+      [
+        "omap",
+        "omlp",
+        "omcp",
+        "omcb",
+        "ombc",
+        "omcl",
+        "omlc",
+        "ompp",
+        "omrt",
+      ].includes(group)
+    )
+      return;
+
     if (!row) throw new Error("Element group not correspond to any row.");
 
     return row;
@@ -921,7 +936,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       (group === "ombc" && "100") ||
       (group === "omcl" && "520") ||
       (group === "omlc" && "470") ||
-      (group === "onrt" && "900-10") ||
+      (group === "onrt" && "600-40") ||
       (is_bank ? "110" : "100")
     );
   }
@@ -932,7 +947,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       (group === "ombc" && "110") ||
       (group === "omcl" && "470") ||
       (group === "omlc" && "520") ||
-      (group === "onrt" && "470")
+      (group === "onrt" && "900-10")
     );
   }
 
