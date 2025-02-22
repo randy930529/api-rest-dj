@@ -415,7 +415,6 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
     );
     let row = this.getTaxeRowKey(elementGroup);
 
-    this.setDataRowsToSectionF(dataSectionF, "F38", null);
     this.setSectionTaxesValueRows(
       sectionsData,
       dataSectionF,
@@ -532,10 +531,11 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       (group === "tprz" && "F15") ||
       (group === "tpcm" && "F22") ||
       (group === "tpsv" && "F37") ||
-      (group === "tpft" && "F39") ||
-      (group === "tpdc" && "F40") ||
-      (group === "tpan" && "F41") ||
-      (group === "tpcs" && "F42") ||
+      (group === "tpft" && "F38") ||
+      (group === "tpdc" && "F39") ||
+      (group === "tpan" && "F40") ||
+      (group === "tpcs" && "F41") ||
+      (group === "tpss" && "F42") ||
       (group === "tpot" && "F43") ||
       null;
 
@@ -637,7 +637,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         row === "F15" ? SectionName.SECTION_B : SectionName.SECTION_C;
       this.setSectionValue(sectionsData, section, row, value);
     } else {
-      this.setDataRowsToSectionF(sectionF, "F37", value);
+      this.setDataRowsToSectionF(sectionF, row, value);
     }
   }
 

@@ -882,17 +882,20 @@ export default class ReportGeneratorDJ08Controller extends ReportGenerator {
           concepto: "Impuesto sobre las Ventas y/o Servicio",
           import: sectionFData.F37?.import?.toFixed(),
         },
-        { concepto: "", import: sectionFData.F38?.import?.toFixed() },
         {
           concepto: "Impuesto por la Utilización de la Fuerza de Trabajo",
-          import: sectionFData.F39?.import?.toFixed(),
+          import: sectionFData.F38?.import?.toFixed(),
         },
         {
           concepto: "Impuesto sobre Documentos",
-          import: sectionFData.F40?.import?.toFixed(),
+          import: sectionFData.F39?.import?.toFixed(),
         },
         {
           concepto: "Tasa por la Radicación de Anuncios y Propaganda Comercial",
+          import: sectionFData.F40?.import?.toFixed(),
+        },
+        {
+          concepto: "Contribución especial a la Seguridad Social",
           import: sectionFData.F41?.import?.toFixed(),
         },
         {
