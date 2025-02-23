@@ -76,7 +76,7 @@ export class License extends Model {
 
   @BeforeInsert()
   @BeforeUpdate()
-  async setDateAndPorcentage(): Promise<void> {
+  async setValueDiscounts(): Promise<void> {
     if (this.discounts_days && this.discounts_import) {
       const { import: priceReal } = this;
       if (priceReal <= this.discounts_import)
@@ -85,7 +85,7 @@ export class License extends Model {
       const setDiscountsDate =
         !this.id ||
         this.discounts_days !==
-          (await License.findOneBy({ id: this.id })).discounts_days;
+          (await License.findOneBy({ id: this.id }))?.discounts_days;
 
       if (setDiscountsDate) {
         this.discounts_date_end = moment()
