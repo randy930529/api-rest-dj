@@ -36,6 +36,13 @@ export const reportsRoutes = [
   },
   {
     method: "post",
+    route: "/report/taxes",
+    controller: ReportGeneratorDJ08Controller,
+    middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
+    action: "generateOperationsTaxesReport",
+  },
+  {
+    method: "post",
     route: "/report/dj08",
     controller: ReportGeneratorDJ08Controller,
     middlewares: [authMiddleware, userMiddleware, licenseMiddleware],

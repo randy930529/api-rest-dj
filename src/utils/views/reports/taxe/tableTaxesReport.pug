@@ -1,0 +1,61 @@
+extends ../generic/tableBase
+
+mixin rowsHeader(headRows=[])
+    each columns in headRows
+        tr(height=row20.height style=row20.style)
+            each column in columns
+                td(rowspan=column.rows colspan=column.cols style=br+txt_ac) 
+                    font= column.name
+            else
+                td There are no values
+
+mixin rowsFootHeader(footColumns=[])
+    -let count = 0
+    tr(height=row20.height style=row20.style)
+        each column in footColumns
+            -const type = typeof column
+            if type === 'number'
+                each val,i in Array(column)
+                    td(style=br+txt_ac)= (i+count+1)
+                -count+=column
+            else
+                td(style=br+txt_ac)= column
+                -count++
+        else 
+            td There are no values
+
+mixin tableBaseHead(headRows=[], footRows=[])
+    +rowsHeader(rows)
+    +rowsFootHeader(footRows)
+
+mixin setData(dataMatrix=[[]])
+    each data, index in dataMatrix
+        tr(height=row20.height style=row20.style)
+            td(style=br+text_up)= months[index]
+            each val,i in data
+                td(style=br+txt_r+p_r)= (val===0?"":val.toFixed(2))
+            else
+                td There are no values
+    else
+        td There are no values
+
+mixin setTotals(dataTotals=[])
+    tr(height=row20.height style=row20.style)
+        td(style=br+txt_b) Total pagado
+        each val,i in dataTotals
+            td(style=br+txt_b+txt_r+p_r)= (val===0?"":val.toFixed(2))
+        else
+            td There are no values
+        td
+
+block column
+    col(width="65" span="16" style="width:60pt")
+
+block tHeadContent
+    -const rows = [[{ name: 'TRIBUTOS ASOCIADOS A LA ACTIVIDAD PAGADOS Y DEDUCIBLES EN LA DECLARACION JURADA',rows:1,cols:16}], [{name:'SUBCUENTAS',rows:1,cols:16}], [{name:'POSIBLES A DEDUCIR DENTRO DE LOS LIMITES DE GASTOS ESTABLECIDOS',rows:1,cols:16}], [{name:'MES',rows:4,cols:1},{name:'Impuesto sobre Ventas o Servcios',rows:3,cols:1},{name:'Impuesto por utilización de la F.T.',rows:3,cols:1},{name:'Impuesto sobre documentos',rows:3,cols:1},{name:'Tasa por radicación de anuncios y propaganda',rows:3,cols:1},{name:'Contribución especial a la Seguridad Social',rows:3,cols:1},{name:'Contribución a la Seguridad Social',rows:2,cols:3},{name:'Otros tributos',rows:3,cols:1},{name:'Subtotal',rows:3,cols:1}, {name:'Constribución para la restauración y conservación de la zona',rows:3,cols:1},{name:'Cuota mensual',rows:3,cols:1},{name:'Total pagado en el mes',rows:3,cols:1},{name:'PAGADO EN',rows:1,cols:2}], [{name:'Caja',rows:2,cols:1},{name:'Banco',rows:2,cols:1}], [{name:'Total',rows:1,cols:1},{name:'12.5%',rows:1,cols:1},{name:'1.5%',rows:1,cols:1}]]
+    -var footRows = [5,'6=7+8',3,'10=1+2+3+4+5+6+9',2,'13=10+11+12',2]
+    +tableBaseHead(rows, footRows)
+
+block tBodyContent
+    +setData(data)
+    +setTotals(totals)

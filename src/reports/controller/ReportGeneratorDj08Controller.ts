@@ -1062,6 +1062,117 @@ export default class ReportGeneratorDJ08Controller extends ReportGenerator {
     }
   }
 
+  async generateOperationsTaxesReport(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { user }: { user: User } = req.body;
+
+      this.templatePath = pugTemplatePath("taxe/tableTaxesReport");
+      const fileName = `Reporte_de_Operaciones_de_Tributo.pdf`;
+
+      const getInfoReportToDataBase = await this.getInfoReportToDataBase({
+        userId: user?.id,
+        type: "m",
+      });
+
+      const data = defaultDataArray<number[]>(
+        12,
+        defaultDataArray<number>(15, 0)
+      );
+      const totals = defaultDataArray<number>(15, 0);
+
+      this.setDataTaxes(getInfoReportToDataBase, data, totals);
+
+      const compiledTemplate = pug.compileFile(this.templatePath);
+
+      const htmlContent = compiledTemplate({
+        tableFont: 11,
+        data,
+        totals,
+      });
+      const pdfBuffer = await this.generatePDF({
+        htmlContent,
+        margin: {
+          top: "1.91cm",
+          right: "0.5cm",
+          bottom: "1.91cm",
+          left: "1cm",
+        },
+        landscape: true,
+      });
+
+      res.contentType("application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${fileName || this.defaultFileName}"`
+      );
+      res.send(pdfBuffer);
+    } catch (error) {
+      if (res.statusCode === 200) res.status(500);
+      next(error);
+    }
+  }
+
+  private setDataTaxes(
+    documents: SupportDocumentPartialType[],
+    data: number[][],
+    totals: number[]
+  ) {
+    for (const document of documents) {
+      const month = parseInt(document.month) - 1;
+      const amount = parseFloat(document.amount);
+      const payIn = document.is_bank ? totals.length - 1 : totals.length - 2;
+      const colTaxe = this.getTaxeColumn(document.group);
+
+      if (colTaxe === null)
+        throw new Error("Taxe group not correspond to any column.");
+
+      data[month] = [...data[month]];
+      data[month][colTaxe] += amount;
+      data[month][payIn] += amount;
+      if (colTaxe === 6 || colTaxe === 7) {
+        data[month][5] += amount;
+        totals[5] += amount;
+      }
+      const [subTotal, totalInMonth] = this.getSubTotalAndTotal(data[month]);
+      totals[colTaxe] += amount;
+      totals[payIn] += amount;
+      totals[9] += subTotal - data[month][9];
+      totals[12] += totalInMonth - data[month][12];
+      data[month][9] = subTotal;
+      data[month][12] = totalInMonth;
+    }
+  }
+
+  private getSubTotalAndTotal(dataMonth: number[]): [number, number] {
+    const subTotal = sumaTotal([...dataMonth.slice(0, 6), dataMonth[8]]);
+    const total = sumaTotal([subTotal, ...dataMonth.slice(10, 12)]);
+
+    return [subTotal, total];
+  }
+
+  private getTaxeColumn(group: string): number {
+    if (!group) throw new Error("Get taxe column required document group.");
+    const grp = group?.trim();
+
+    return (
+      (grp === "tpsv" && 0) ||
+      (grp === "tpft" && 1) ||
+      (grp === "tpdc" && 2) ||
+      (grp === "tpan" && 3) ||
+      (grp === "tpcs" && 4) ||
+      (grp === "tpss" && 6) ||
+      (grp === "trss" && 7) ||
+      (grp === "tpot" && 8) ||
+      (grp === "tprz" && 10) ||
+      (grp === "tpcm" && 11) ||
+      null
+    );
+  }
+
   private getInitializeExpenseReportAnnualData(): [
     DataIndexByType,
     ExpensesNameType,

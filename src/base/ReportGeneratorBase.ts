@@ -1,4 +1,4 @@
-import puppeteer from "puppeteer";
+import puppeteer, { PDFMargin } from "puppeteer";
 import { SupportDocumentPartialType } from "../utils/definitions";
 import { getSupportDocumentToReportData } from "./utils/query/supportDocumentsDataToReport.fetch";
 import { getSectionUserToReport } from "./utils/query/sectionUserToReport.fetch";
@@ -10,7 +10,15 @@ class ReportGenerator {
     this.chromePath = chromePath;
   }
 
-  async generatePDF({ htmlContent }: { htmlContent: string }): Promise<Buffer> {
+  async generatePDF({
+    htmlContent,
+    margin,
+    landscape = false,
+  }: {
+    htmlContent: string;
+    margin?: PDFMargin;
+    landscape?: boolean;
+  }): Promise<Buffer> {
     try {
       const browser = await puppeteer.launch({
         headless: "new",
@@ -22,7 +30,11 @@ class ReportGenerator {
 
       await page.setContent(htmlContent);
 
-      const pdfBuffer = await page.pdf({ format: "LETTER" });
+      const pdfBuffer = await page.pdf({
+        format: "LETTER",
+        landscape,
+        margin,
+      });
 
       await page.close();
       await browser.close();
