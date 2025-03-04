@@ -536,6 +536,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       (group === "tpan" && "F40") ||
       (group === "tpcs" && "F41") ||
       (group === "tpss" && "F42") ||
+      (group === "trss" && "F42") ||
       (group === "tpot" && "F43") ||
       null;
 
@@ -947,6 +948,8 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       (group === "ombc" && "110") ||
       (group === "omcl" && "470") ||
       (group === "omlc" && "520") ||
+      (group === "trss" && "500") ||
+      (group === "niss" && "500") ||
       (group === "onrt" && "900-10")
     );
   }

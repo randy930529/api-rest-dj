@@ -1,4 +1,4 @@
-extends ../generic/tableBase
+extends ../generic/tableBase2
 
 mixin rowsHeader(headRows=[])
     each columns in headRows
@@ -57,5 +57,6 @@ block tHeadContent
     +tableBaseHead(rows, footRows)
 
 block tBodyContent
+    -const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
     +setData(data)
     +setTotals(totals)

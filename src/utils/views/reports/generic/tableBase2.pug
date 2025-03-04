@@ -1,0 +1,30 @@
+-const font7="font-weight: 700;font-style: normal;text-decoration: underline;"
+-const font11="font-size: 11.0pt;font-style: normal;font-family: Calibri, sans-serif;"
+-const row20={height:20, style:"height:15.0pt"}
+-const xl70 = "font-weight: 700;text-align: left;border: 1.5pt solid;"
+-const txt_r="text-align: right;"
+-const txt_b="font-weight: 700;"
+-const txt_ac="text-align: center;"
+-const txt_unl=txt_b+"font-style: normal;text-decoration: underline;"
+-const txt_ac_b=txt_b+txt_ac
+-const text_up="text-transform: uppercase;"
+-const p_r="padding-right: 1pt;"
+-const p_l="padding-left: 1.5pt;"
+-const br="border:.5pt solid black;"
+-const br_r="border-right:.5pt solid black;"
+-const br_l="border-left:.5pt solid black;"
+-const br_b="border-bottom:.5pt solid black;"
+-const br_t="border-top:.5pt solid black;"
+
+table.page-one(
+    role='presentation'
+    border=0
+    cellpadding=0
+    cellspacing=0
+    width=tableWidth
+)
+    block column
+    -const tbFont = tableFont===11?font11:""
+    tbody(style=tbFont)
+        block tHeadContent
+        block tBodyContent
