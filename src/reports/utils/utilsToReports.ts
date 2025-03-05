@@ -71,7 +71,11 @@ export function getDataToDay(
 
   for (let i = 0; i < documents.length; i++) {
     const document = documents[i];
-    const index: number = group.indexOf(document.group?.trim());
+    const toGroup = document.group?.trim();
+    let index: number = group.indexOf(toGroup);
+    if (index === -1 && (toGroup === "pdrc" || toGroup === "pdri")) {
+      index = 4;
+    }
     const value = parseFloat(document[data]);
     toDay[index] += value;
     document.is_bank ? (cashInBank += value) : (cashInBox += value);

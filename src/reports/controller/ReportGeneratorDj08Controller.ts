@@ -101,7 +101,9 @@ export default class ReportGeneratorDJ08Controller extends ReportGenerator {
 
       const expensesMeNIEI: SupportDocumentPartialType[] =
         getInfoReportToDataBase.filter(
-          (val) => val.is_general && val.group?.trim() === "niei"
+          (val) =>
+            val.is_general &&
+            (val.group?.trim() === "niei" || val.group?.trim() === "niss")
         );
 
       const expensesNameTb1 = defaultDataArray<string>(
