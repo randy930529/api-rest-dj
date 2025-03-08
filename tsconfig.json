@@ -11,7 +11,10 @@
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./src/*"],
-      "@entity/": ["./src/entity/*"]
+      "@/entity": ["./src/entity"],
+      "@/controller": ["./src/*/controller"],
+      "@/routes": ["./src/*/routes"],
+      "@/dto": ["./src/*/dto"]
     }
   },
   "exclude": ["node_modules"]

@@ -27,7 +27,7 @@ const transferProtocol: string = appConfig.site;
 const ACTIVATION_URL = (appName, uid, token) =>
   `${appName}/activate/?uid=${uid}&token=${token}`;
 const RESETPASSWORD_URL = (appName, uid, token) =>
-  `${appName}://reset_password/?uid=${uid}&token=${token}`;
+  `${appName}/reset_password/?uid=${uid}&token=${token}`;
 
 export class AuthController {
   private userRepository = AppDataSource.getRepository(User);
@@ -38,6 +38,7 @@ export class AuthController {
     try {
       const fields: RegisterDTO = req.body;
       const { email, password, repeatPassword } = fields;
+      email.trim();
 
       if (password !== repeatPassword) {
         responseError(res, "Repeat password does not match the password.");
@@ -74,7 +75,10 @@ export class AuthController {
           });
 
           await notificacionDTO.save();
-          responseError(res, "Server is not ready to send your messages.");
+          responseError(
+            res,
+            `Problema de comunicación con el correo: Por favor intente más tarde "Reenviar correo" de activación de cuenta.`
+          );
         });
 
       if (appConfig.debug === "production") {
@@ -236,6 +240,7 @@ export class AuthController {
           year,
           date,
           individual: true,
+          primary:true,
           profile,
         });
         const newFiscalYear = await this.fiscalYearRepository.save(
@@ -263,6 +268,7 @@ export class AuthController {
   async userResendActivation(req: Request, res: Response, next: NextFunction) {
     try {
       const { email } = req.body;
+      email.trim();
 
       const existingUser = await this.userRepository.findOneBy({ email });
 
@@ -288,7 +294,10 @@ export class AuthController {
           });
 
           await notificacionDTO.save();
-          responseError(res, "Server is not ready to send your messages.");
+          responseError(
+            res,
+            `Problema de comunicación con el correo: Por favor intente más tarde "Reenviar correo" de activación de cuenta.`
+          );
         });
 
       if (appConfig.debug === "production") {
@@ -347,6 +356,7 @@ export class AuthController {
   async userResetPassword(req: Request, res: Response, next: NextFunction) {
     try {
       const { email } = req.body;
+      email.trim();
 
       const existingUser = await this.userRepository.findOneBy({ email });
 
@@ -366,7 +376,10 @@ export class AuthController {
       await new Email(existingUser, confirUrl)
         .sendPasswordResetToken()
         .catch((error) => {
-          responseError(res, "Server is not ready to send your messages.");
+          responseError(
+            res,
+            `Problema de comunicación con el correo: Por favor intente más tarde restablcer la contraseña.`
+          );
         });
 
       if (appConfig.debug === "production") {

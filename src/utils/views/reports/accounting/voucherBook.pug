@@ -1,0 +1,12 @@
+include ../generic/mixins
+
+-const row20={height:20, style:"height:15.0pt"}
+
+block content
+    each item, index in data
+        -const {fullName, nit, printedDate, number, documentNumber, descriptionVoucher, descriptionElement, accountingDate, accounting, totalDebe, totalHaber} = item
+        include tableVoucher
+        if index+2 < data.length && !((index+1) % 2)
+            table.page-next(style="page-break-before: always;height: 1in")
+    else
+        p There are no values

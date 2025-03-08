@@ -106,4 +106,22 @@ export abstract class EntityControllerBase<TEntity> {
 
     return await this.repository.remove(entity);
   }
+
+  async deleteOptions(
+    options: FindOneOptions<TEntity>,
+    res: Response
+  ): Promise<TEntity> {
+    const entity = await this.repository.findOne(options);
+
+    if (!entity)
+      responseError(
+        res,
+        `Entity ${this.entityName
+          .toUpperCase()
+          .replace("CONTROLLER", "")} not found.`,
+        404
+      );
+
+    return await this.repository.remove(entity);
+  }
 }

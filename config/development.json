@@ -1,9 +1,16 @@
 {
   "app": {
+    "versionAPK": 26,
     "site": "http://localhost:4000",
     "debug": "development",
     "port": 4000,
     "emailFrom": "randy.delgado@desoft.cu",
-    "paymentAPKHref": "http://localhost:4000"
+    "paymentAPKHref": "http://localhost:4000",
+    "corsOptions": {
+      "origin": "*",
+      "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+      "preflightContinue": false,
+      "optionsSuccessStatus": 204
+    }
   }
 }

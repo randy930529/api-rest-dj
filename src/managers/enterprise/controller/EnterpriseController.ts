@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { Enterprise } from "../../../entity/Enterprise";
 import { responseError } from "../../../errors/responseError";
-import { EnterpriseDTO } from "../dto/enterprise.dto";
+import { EnterpriseDTO } from "../dto/request/enterprise.dto";
 import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import { User } from "../../../entity/User";
 

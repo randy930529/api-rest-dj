@@ -1,17 +1,31 @@
+import { FindManyOptions, FindOptionsWhere } from "typeorm";
+import { NextFunction, Request, Response } from "express";
+import { responseError } from "../../errors/responseError";
 import { AppDataSource } from "../../data-source";
 import { EntityControllerBase } from "../../base/EntityControllerBase";
+import { BaseResponseDTO } from "../../auth/dto/response/base.dto";
+import { createFindOptions } from "../../base/utils/createFindOptions";
 import { SectionState } from "../../entity/SectionState";
-import { NextFunction, Request, Response } from "express";
 import { JWT } from "../../auth/security/jwt";
 import { SectionStateDTO } from "../../section/dto/request/sectionState.dto";
-import { responseError } from "../../errors/responseError";
 import { Profile } from "../../entity/Profile";
 import { FiscalYear } from "../../entity/FiscalYear";
 import { User } from "../../entity/User";
-import { createFindOptions } from "../../base/utils/createFindOptions";
-import { FindManyOptions } from "typeorm";
-import { BaseResponseDTO } from "../../auth/dto/response/base.dto";
 import { LicenseUser } from "../../entity/LicenseUser";
+import {
+  SECTION_SELECT,
+  SECTION_RELATIONS,
+  getExistToSectionUser,
+} from "../utils/query/sectionsUser.fetch";
+import {
+  PROFILE_SELECT,
+  PROFILE_RELATIONS,
+} from "../utils/query/sectionsProfile.fetch";
+import {
+  LISENCE_USER_ORDER,
+  LISENCE_USER_RELATIONS,
+  LISENCE_USER_SELECT,
+} from "../utils/query/sectionsLicenseUser.fetch";
 
 export class SectionStateController extends EntityControllerBase<SectionState> {
   constructor() {
@@ -27,25 +41,15 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
 
       const userId = JWT.getJwtPayloadValueByKey(token, "id");
 
+      const SECTION_WHERE = {
+        user: {
+          id: userId,
+        },
+      };
       const existToSectionUser = await this.repository.findOne({
-        relations: {
-          profile: {
-            address: { address: true },
-            profileActivity: {
-              activity: true,
-            },
-          },
-          fiscalYear: {
-            supportDocuments: { element: true },
-            dj08: { dj08SectionData: true },
-          },
-          licenseUser: { license: true },
-        },
-        where: {
-          user: {
-            id: userId,
-          },
-        },
+        select: SECTION_SELECT,
+        relations: SECTION_RELATIONS,
+        where: SECTION_WHERE,
       });
 
       if (existToSectionUser) return existToSectionUser;
@@ -138,88 +142,36 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
       const { token } = req.body;
       const id = JWT.getJwtPayloadValueByKey(token, "id");
 
-      const existToSectionUser = await this.repository.findOne({
-        select: {
-          fiscalYear: {
-            id: true,
-            year: true,
-            date: true,
-            general_scheme: true,
-            declared: true,
-            individual: true,
-            regimen: true,
-            created_at: true,
-            updated_at: true,
-            supportDocuments: {
-              id: true,
-              document: true,
-              amount:true,
-              type_document: true,
-              element: {
-                id: true,
-                group: true,
-              },
-            },
-            dj08: {
-              id: true,
-              dj08SectionData: {
-                id: true,
-                section_data: true,
-                is_rectification: true,
-              },
-            },
-          },
-        },
-        relations: {
-          profile: {
-            address: { address: true },
-            profileActivity: {
-              activity: true,
-            },
-          },
-          fiscalYear: {
-            supportDocuments: { element: true },
-            dj08: { dj08SectionData: true },
-          },
-          licenseUser: { license: true },
-        },
-        where: {
-          user: {
-            id,
-          },
-        },
-      });
+      const existToSectionUser = await getExistToSectionUser(
+        id,
+        this.repository
+      );
 
       if (existToSectionUser) return existToSectionUser;
 
+      const PROFILE_WHERE = {
+        primary: true,
+        user: {
+          id,
+        },
+      };
       const currentProfile = await Profile.findOne({
-        relations: {
-          user: true,
-          fiscalYear: {
-            supportDocuments: true,
-            dj08: { dj08SectionData: true },
-          },
-          profileActivity: { activity: true },
-        },
-        where: {
-          primary: true,
-          user: {
-            id,
-          },
-        },
+        select: PROFILE_SELECT,
+        relations: PROFILE_RELATIONS,
+        where: PROFILE_WHERE,
       });
 
+      const LISENCE_USER_WHERE = {
+        is_paid: true,
+        user: {
+          id,
+        },
+      };
       const currentLicenseUser = await LicenseUser.find({
-        relations: ["user", "license"],
-        where: {
-          is_paid: true,
-          user: {
-            id,
-          },
-        },
-        order: {
-          expirationDate: "DESC",
-        },
+        select: LISENCE_USER_SELECT,
+        relations: LISENCE_USER_RELATIONS,
+        where: LISENCE_USER_WHERE,
+        order: LISENCE_USER_ORDER,
       });
 
       const newSectionStateToProfileAndFiscalYear =
@@ -246,12 +198,14 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
       const fields: SectionStateDTO = req.body;
       const { id, token } = req.body;
       const userId = JWT.getJwtPayloadValueByKey(token, "id");
+      const profileId = fields.profile?.id;
+      const fiscalYearId = fields.fiscalYear?.id;
 
       if (!id)
         responseError(res, "Update section state requiere id valid.", 404);
 
       const sectionStateToUpdate = await this.repository.findOne({
-        relations: ["user", "profile", "fiscalYear"],
+        relations: ["user"],
         where: { id },
       });
 
@@ -264,40 +218,46 @@ export class SectionStateController extends EntityControllerBase<SectionState> {
           401
         );
 
-      const profile = await Profile.findOne({
-        relations: ["fiscalYear"],
-        where: {
-          id: fields.profile.id,
-          user: {
-            id: userId,
-          },
+      const PROFILE_WHERE = {
+        id: profileId,
+        user: {
+          id: userId,
         },
+      };
+      const profile = await Profile.findOne({
+        select: PROFILE_SELECT,
+        relations: PROFILE_RELATIONS,
+        where: PROFILE_WHERE,
       });
 
       if (!profile)
         responseError(res, "Profile does not exist in this user.", 404);
 
-      let fiscalYear: FiscalYear;
-      if (fields.fiscalYear) {
-        fiscalYear = profile.fiscalYear.find(
-          (value: FiscalYear) => value.id === fields.fiscalYear.id
-        );
+      const fiscalYear: FiscalYear =
+        profile.fiscalYear.find((val) => val.id === fiscalYearId) ||
+        profile.fiscalYear.find(
+          (val) => val.id === profile.currentfiscalYear
+        ) ||
+        profile.fiscalYear[0] ||
+        null;
 
-        if (!fiscalYear)
-          responseError(
-            res,
-            "Fiscal year does not exist in this profile.",
-            404
-          );
+      if (profile && fiscalYear) {
+        profile.currentfiscalYear = fiscalYear.id;
+        await profile.save();
       }
-
-      const sectionStateUpdate = await this.repository.save({
+      await this.repository.save({
         ...sectionStateToUpdate,
         profile,
-        fiscalYear: fiscalYear || profile.fiscalYear[0] || null,
+        fiscalYear,
       });
 
-      const sectionState: SectionStateDTO = sectionStateUpdate;
+      const existToSectionUser = await this.repository.findOne({
+        select: SECTION_SELECT,
+        relations: SECTION_RELATIONS,
+        where: { id },
+      });
+
+      const sectionState: SectionStateDTO = existToSectionUser;
       const resp: BaseResponseDTO = {
         status: "success",
         error: undefined,

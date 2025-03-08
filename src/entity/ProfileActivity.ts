@@ -1,7 +1,4 @@
 import {
-  AfterInsert,
-  AfterRemove,
-  AfterUpdate,
   BeforeInsert,
   BeforeUpdate,
   Column,
@@ -14,16 +11,8 @@ import Model from "./Base";
 import { Profile } from "./Profile";
 import { Activity } from "./Activity";
 import { SupportDocument } from "./SupportDocument";
-import { Dj08SectionData, SectionName } from "./Dj08SectionData";
-import {
-  AllDataSectionsDj08Type,
-  DataSectionAType,
-  TotalSectionAType,
-} from "utils/definitions";
-import * as moment from "moment";
-import { SectionState } from "./SectionState";
-import { calculeF20ToDj08 } from "../reports/utils/utilsToReports";
 import { ProfileHiredPersonActivity } from "./ProfileHiredPersonActivity";
+import { FiscalYear } from "./FiscalYear";
 
 @Entity()
 export class ProfileActivity extends Model {
@@ -56,111 +45,63 @@ export class ProfileActivity extends Model {
   )
   profileHiredPersonActivity: ProfileHiredPersonActivity[];
 
+  @Column({ default: false })
+  primary: boolean;
+
+  @ManyToOne(() => FiscalYear, { onDelete: "CASCADE" })
+  @JoinColumn()
+  fiscalYear: FiscalYear;
+
+  @Column({ nullable: true })
+  __fiscalYearId__: number;
+
   toJSON() {
     return {
       ...this,
       __profileId__: undefined,
+      __fiscalYearId__: undefined,
     };
   }
 
   @BeforeInsert()
   @BeforeUpdate()
-  async up__profileId__(): Promise<void> {
+  async checkDuplicateProfileActivity(): Promise<void> {
     if (this.profile) {
       this.__profileId__ = this.profile.id;
+    }
+    if (this.fiscalYear) {
+      this.__fiscalYearId__ = this.fiscalYear.id;
     }
 
     if (this.activity) {
       const activityWithSameName = await ProfileActivity.findOne({
         where: {
-          profile: { id: this.profile?.id },
+          fiscalYear: { id: this.fiscalYear?.id },
           activity: { id: this.activity?.id },
         },
       });
 
-      if (activityWithSameName && this.id != activityWithSameName?.id) {
-        throw new Error("Only a activity with the same name is allowed.");
+      if (activityWithSameName && this.id !== activityWithSameName?.id) {
+        throw new Error("Sólo una actividad con el mismo nombre es admitida.");
       }
     }
   }
 
-  @AfterInsert()
-  @AfterUpdate()
-  @AfterRemove()
-  async updatedDJ08(): Promise<void> {
-    const section = await SectionState.findOne({
-      select: { fiscalYear: { id: true } },
-      relations: ["fiscalYear"],
-      where: { profile: { id: this.__profileId__ } },
-    });
-    const { id: fiscalYearId } = section.fiscalYear;
-
-    const dj08ToUpdate = await Dj08SectionData.findOne({
-      where: {
-        dJ08: {
-          profile: { id: this.__profileId__ },
-          fiscalYear: { id: fiscalYearId },
+  @BeforeInsert()
+  @BeforeUpdate()
+  async checkDuplicateProfileActivityPrimary(): Promise<void> {
+    if (this.activity && this.primary) {
+      const activityPrimary = await ProfileActivity.findOne({
+        where: {
+          profile: { id: this.profile?.id },
+          fiscalYear: { id: this.fiscalYear?.id },
+          primary: true,
         },
-        is_rectification: true,
-      },
-    });
+      });
 
-    const profileActivities = await ProfileActivity.find({
-      relations: ["activity", "supportDocuments"],
-      where: {
-        profile: { id: this.__profileId__ },
-        supportDocuments: { fiscalYear: { id: fiscalYearId } },
-      },
-    });
-
-    const { section_data: sectionDataJSONString } = dj08ToUpdate;
-    const section_data: AllDataSectionsDj08Type = JSON.parse(
-      sectionDataJSONString
-    );
-
-    const newDataSectionA: { [key: string | number]: DataSectionAType } = {};
-    const newTotalSectionA: TotalSectionAType = { incomes: 0, expenses: 0 };
-
-    for (let i = 0; i < profileActivities.length; i++) {
-      const activity = profileActivities[i];
-      const { date_start, date_end } = activity;
-      const { code, description } = activity.activity;
-      const date_start_day = moment(date_start).date();
-      const date_start_month = moment(date_start).month() + 1;
-      const date_end_day = moment(date_end).date();
-      const date_end_month = moment(date_end).month() + 1;
-      const income =
-        activity.supportDocuments.find((val) => val.type_document === "i")
-          ?.amount || 0;
-      const expense =
-        activity.supportDocuments.find((val) => val.type_document === "g")
-          ?.amount || 0;
-
-      const data: DataSectionAType = {
-        activity: `${code} - ${description}`,
-        period: {
-          start: [date_start_day, date_start_month],
-          end: [date_end_day, date_end_month],
-        },
-        income,
-        expense,
-      };
-      newDataSectionA[`F${i + 1}`] = data;
-      newTotalSectionA.incomes += income;
-      newTotalSectionA.expenses += expense;
+      if (activityPrimary && this.id !== activityPrimary?.id) {
+        throw new Error("Sólo una actividad principal es admitida.");
+      }
     }
-    section_data[SectionName.SECTION_A].data = newDataSectionA;
-    section_data[SectionName.SECTION_A].totals = newTotalSectionA;
-    section_data[SectionName.SECTION_B].data["F11"] = newTotalSectionA.incomes;
-    section_data[SectionName.SECTION_B].data["F13"] = newTotalSectionA.expenses;
-
-    const dataSectionB = section_data[SectionName.SECTION_B].data as {
-      [key: string]: number;
-    };
-    section_data[SectionName.SECTION_B].data["F20"] =
-      calculeF20ToDj08(dataSectionB);
-
-    dj08ToUpdate.section_data = JSON.stringify(section_data);
-    await dj08ToUpdate.save();
   }
 }

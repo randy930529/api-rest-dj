@@ -1,4 +1,12 @@
+import * as moment from "moment";
 import { appConfig } from "../../../../config";
+import { Account } from "../../../entity/Account";
+import { Mayor } from "../../../entity/Mayor";
+import { FiscalYear } from "../../../entity/FiscalYear";
+import {
+  getAccountOfThePatrimony,
+  isMayorPatrimony,
+} from "../../accounting/utils";
 
 export const defaultSectionDataInit = (): string => {
   const { MEa_By_MFP } = appConfig.accountingConstants;
@@ -37,3 +45,37 @@ export const defaultSectionDataInit = (): string => {
   };
   return JSON.stringify(data);
 };
+
+export function getInitialBalances(
+  acountInitials: Account[],
+  mayors: Mayor[],
+  fiscalYear: FiscalYear
+): Mayor[] {
+  const accountPatrimony = getAccountOfThePatrimony(acountInitials);
+  return acountInitials
+    .map((account) => {
+      const existingMayor = mayors.find(
+        ({ account: accountMayor }) => accountMayor?.code === account.code
+      );
+
+      if (existingMayor) {
+        return existingMayor;
+      }
+
+      return Mayor.create({
+        date: moment(`${fiscalYear.year - 1}-12-31`).toDate(),
+        saldo: 0,
+        init_saldo: true,
+        voucherDetail: {
+          debe: 0,
+          haber: 0,
+          account,
+        },
+        account,
+        fiscalYear,
+      });
+    })
+    .filter(({ account: accountMayor }) =>
+      isMayorPatrimony(accountMayor?.code, accountPatrimony.code)
+    );
+}

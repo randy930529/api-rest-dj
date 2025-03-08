@@ -1,4 +1,4 @@
-import { Entity, Column, OneToMany, Index, BeforeRemove } from "typeorm";
+import { Entity, Column, OneToMany, Index } from "typeorm";
 import { RefreshToken } from "./RefreshToken";
 import Model from "./Base";
 import { LicenseUser } from "./LicenseUser";
@@ -9,6 +9,7 @@ export enum UserRole {
   ADMIN = "admin",
   EDITOR = "editor",
   GHOST = "cliente",
+  INVOICE = "facturador",
 }
 
 @Entity()
@@ -57,9 +58,7 @@ export class User extends Model {
   @OneToMany(() => Profile, (profile) => profile.user)
   profiles: Profile[];
 
-  @OneToMany(() => Enterprise, (enterprise) => enterprise.user, {
-    onDelete: "CASCADE",
-  })
+  @OneToMany(() => Enterprise, (enterprise) => enterprise.user)
   enterprise: Enterprise[];
 
   toJSON() {

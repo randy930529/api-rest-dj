@@ -1,0 +1,78 @@
+extends ../generic/tableAccountingBase
+
+mixin setData(data=[])
+    each val in data
+        tr(height=row20.height style=row20.style)
+            td(colspan=5 style=txt_r)=val.description                 	
+            td(colspan=2 style=txt_r)=val.amount
+            td
+    else
+        td(colspan=9) There are no values
+
+
+block column
+    col(width="80" span="9" style="width:60pt")
+
+block tHeadContent
+    tr(height=row20.height style=row20.style)
+        td(colspan=6 width=480 style="width:360pt") CONTRIBUYENTE: 
+            font(style=txt_unl)=fullName
+        td(colspan=3 width=240 style="width:180pt") IMPRESO: 
+            font(style="text-decoration: underline")=printedDate
+    tr(height=row20.height style=row20.style)
+        td(colspan=6 width=480 style="width:360pt") NIT: 
+            font(style=txt_b)=nit
+    tr(height=row20.height style=row20.style)
+        td(colspan=8 style=txt_ac_b) ESTADO DE RENDIMIENTO 
+    tr(height=row20.height style=row20.style)
+        td(colspan=8 style=txt_ac) FECHA DE EMISION: 
+            font(style=txt_b)=emissionDate
+    tr(height=row20.height style=row20.style)
+
+block tBodyContent
+    tr(height=row20.height style=row20.style)
+        td(colspan=7) INGRESOS POR COBROS
+        td(style=txt_r)=incomes
+    tr(height=row20.height style=row20.style)
+        td(colspan=8 style=txt_b) MENOS:
+    tr(height=row20.height style=row20.style)
+        td(colspan=5 style=txt_ac) GASTOS POR PAGOS CORRIENTES
+        td(colspan=2)
+        td(style=txt_r)=averagePayments
+    +setData(expeses)
+    tr(height=row20.height style=row20.style)
+        td(colspan=6)
+        +signatureLine({})
+        td
+    tr(height=row20.height style=row20.style)
+        td(colspan=5 style=txt_ac) GASTOS POR PAGOS DE CAPITAL
+        td(colspan=2)
+        td(style=txt_r)=capitalPayments
+    tr(height=row20.height style=row20.style)
+        td(colspan=5)
+        td(colspan=2)
+        +signatureLine({})
+    tr(height=row20.height style=row20.style)
+        td(colspan=7) UTILIDAD O PERDIDA
+        td(style=txt_r)=utilityOrLost
+    tr(height=row20.height style=row20.style)
+    tr(height=row20.height style=row20.style)
+        +signatureLine({colspan:4, rowspan:3, height:65, style:"height:48.75pt;"})
+        td(rowspan=7)
+        +signatureLine({colspan:3, rowspan:3})
+    tr(height=row20.height style=row20.style)
+    tr(height=row20.height style=row20.style)
+    tr(height=row20.height style=row20.style)
+        td(colspan=4 style=txt_ac) CONFECCIONADO POR:
+        td(colspan=3 style=txt_ac) APROBADO POR:
+    tr(height=row20.height style=row20.style)
+        td(colspan=4) Nombre:
+        td(colspan=4) Nombre: 
+            font(style=txt_b)=fullName
+    tr(height=row20.height style=row20.style)
+        td(colspan=4) Fecha:
+        td(colspan=4) Fecha:
+    tr(height=row20.height style=row20.style)
+        td(colspan=4) Cargo:
+        td(colspan=4) Cargo: TITULAR
+    tr(height=row20.height style=row20.style)

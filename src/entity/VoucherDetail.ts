@@ -1,8 +1,9 @@
-import { Entity, Column, OneToOne, JoinColumn, ManyToOne } from "typeorm";
+import { Entity, Column, JoinColumn, ManyToOne, OneToOne } from "typeorm";
 import Model from "./Base";
 import { Account } from "./Account";
 import { Voucher } from "./Voucher";
 import { ColumnNumericTransformer } from "../utils/ColumnNumericTransformer";
+import { Mayor } from "./Mayor";
 
 @Entity()
 export class VoucherDetail extends Model {
@@ -22,11 +23,16 @@ export class VoucherDetail extends Model {
   })
   haber: number;
 
-  @ManyToOne(() => Voucher)
+  @ManyToOne(() => Voucher, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   @JoinColumn()
   voucher: Voucher;
 
-  @OneToOne(() => Account)
+  @ManyToOne(() => Account)
   @JoinColumn()
   account: Account;
+
+  @OneToOne(() => Mayor, (mayor) => mayor.voucherDetail, {
+    cascade: ["insert", "update"],
+  })
+  mayor: Mayor;
 }

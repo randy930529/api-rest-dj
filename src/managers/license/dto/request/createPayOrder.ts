@@ -2,7 +2,7 @@ export type CreatePayOrderDTO = {
   request: {
     Amount: number;
     Phone: string;
-    Currency: string | "CUP";
+    Currency: string;
     Description: string;
     ExternalId: string;
     Source: string;

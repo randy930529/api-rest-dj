@@ -5,15 +5,16 @@ import {
   ManyToOne,
   OneToMany,
   BeforeInsert,
+  BeforeUpdate,
+  BeforeRemove,
 } from "typeorm";
 import Model from "./Base";
 import { User } from "./User";
-import { ProfileHiredPerson } from "./ProfileHiredPerson";
 import { HiredPerson } from "./HiredPerson";
 import { FiscalYear } from "./FiscalYear";
-import { ProfileEnterprise } from "./ProfileEnterprise";
 import { ProfileActivity } from "./ProfileActivity";
 import { ProfileAddress } from "./ProfileAddress";
+import { SectionState } from "./SectionState";
 
 @Entity()
 export class Profile extends Model {
@@ -38,6 +39,7 @@ export class Profile extends Model {
     nullable: true,
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
+    cascade: ["insert", "update"],
   })
   @JoinColumn()
   address: ProfileAddress;
@@ -54,13 +56,6 @@ export class Profile extends Model {
   @JoinColumn()
   user: User;
 
-  @OneToMany(
-    () => ProfileHiredPerson,
-    (profileHiredPerson) => profileHiredPerson.profile,
-    { cascade: ["remove"] }
-  )
-  profileHiredPerson: ProfileHiredPerson[];
-
   @OneToMany(() => HiredPerson, (hiredPerson) => hiredPerson.profile, {
     cascade: ["remove"],
   })
@@ -72,30 +67,50 @@ export class Profile extends Model {
   fiscalYear: FiscalYear[];
 
   @OneToMany(
-    () => ProfileEnterprise,
-    (profileEnterprise) => profileEnterprise.profile,
-    { cascade: ["remove"] }
-  )
-  profileEnterprise: ProfileEnterprise[];
-
-  @OneToMany(
     () => ProfileActivity,
     (profileActivity) => profileActivity.profile,
     { cascade: ["remove"] }
   )
   profileActivity: ProfileActivity[];
 
+  @Column({ default: "" })
+  profile_email: string;
+
+  @Column({ nullable: true })
+  currentfiscalYear: Number;
+
   @BeforeInsert()
+  @BeforeUpdate()
   async checkDuplicateProfilesForUser(): Promise<void> {
     const profilesForUserWithSameCi = await Profile.count({
       where: [
-        { user: { id: this.user.id }, ci: this.ci },
-        { user: { id: this.user.id }, nit: this.nit },
+        { user: { id: this.user?.id }, ci: this.ci },
+        { user: { id: this.user?.id }, nit: this.nit },
       ],
     });
 
     if (profilesForUserWithSameCi >= 2) {
-      throw new Error("Only two profiles with the same CI are allowed.");
+      throw new Error("Sólo dos perfiles con igual CI son admitidos.");
+    }
+  }
+
+  @BeforeRemove()
+  async checkNotRemovePrimaryProfile(): Promise<void> {
+    if (this.primary === true) {
+      throw new Error("No es admitido eliminar el perfil primario.");
+    }
+  }
+
+  @BeforeRemove()
+  async checkNotRemoveSectionProfile(): Promise<void> {
+    const sectionProfile = await SectionState.findOne({
+      where: { profile: { id: this.id } },
+    });
+
+    if (sectionProfile) {
+      throw new Error(
+        "No es admitido eliminar el perfil activo en la sección, antes cambie de perfil."
+      );
     }
   }
 }

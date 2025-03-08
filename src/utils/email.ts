@@ -4,20 +4,13 @@ import { ENV } from "./settings/environment";
 import * as pug from "pug";
 import { convert } from "html-to-text";
 
-const smtp =
-  ENV.debug === "staging"
-    ? {
-        service: "Yahoo",
-        secure: ENV.emailSecure,
-        auth: ENV.auth,
-      }
-    : {
-        host: ENV.emailHost,
-        port: ENV.emailPort,
-        secure: ENV.emailSecure,
-        auth: ENV.auth,
-        tls: ENV.tls,
-      };
+const smtp = {
+  host: ENV.emailHost,
+  port: ENV.emailPort,
+  secure: ENV.emailSecure,
+  auth: ENV.auth,
+  tls: ENV.tls,
+};
 
 export default class Email {
   emailUser: string;
@@ -33,8 +26,9 @@ export default class Email {
     return nodemailer.createTransport(smtp);
   }
 
-  private async send(template: string, subject: string) {
+  private async send(template: string, subject: string, options?: any) {
     const html = pug.renderFile(`${__dirname}/views/${template}.pug`, {
+      ...options,
       emailUser: this.emailUser,
       subject,
       url: this.url,
@@ -48,20 +42,36 @@ export default class Email {
       html,
     };
 
-    const info = await this.newTransport().sendMail(mailOptions);
     if (ENV.debug === "development") {
-      console.log(nodemailer.getTestMessageUrl(info));
+      console.log({
+        ...mailOptions,
+        html: undefined,
+      });
     }
+    await this.newTransport().sendMail(mailOptions);
   }
 
   async sendVerificationCode() {
-    await this.send("verificationCode", "Your account verification code");
+    await this.send("verificationCode", "Código de verificación de tu cuenta");
   }
 
   async sendPasswordResetToken() {
     await this.send(
       "resetPassword",
-      `Your password reset token (valid for only ${ENV.tokenLifetime})`
+      `Token de restablecimiento de contraseña (válido por ${
+        ENV.tokenLifetime || ""
+      })`
+    );
+  }
+
+  async sendVerifyStatusPayment(options: {
+    montoPago: number;
+    fechaPago: Date | string;
+  }) {
+    await this.send(
+      "notifications/verifyStatusPayment",
+      `Confirmación de Verificación de Pago`,
+      options
     );
   }
 }

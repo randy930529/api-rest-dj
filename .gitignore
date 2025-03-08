@@ -7,9 +7,13 @@
 /.pnp
 .pnp.js
 *-lock.json
+*.lock
 
 # production
 /build
+core
+*.config.*
+/public/*.old
 
 tmp/
 temp/

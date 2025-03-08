@@ -8,7 +8,8 @@ import { BaseResponseDTO } from "../dto/response/base.dto";
 import { UserWhitProfileDTO } from "../dto/response/auth/userWhitProfile.dto";
 import { UserUpdateDTO } from "../dto/request/userUpdate.dto";
 import { SectionState } from "../../entity/SectionState";
-import { Element } from "../../entity/Element";
+import { getUserToRemove } from "../utils/query/userToRemove.fetch";
+import { getUserSectionToRemove } from "../utils/query/userSectionToRemove.fetch";
 
 export class UserController {
   private userRepository = AppDataSource.getRepository(User);
@@ -92,112 +93,20 @@ export class UserController {
   }
 
   private async destroy(res: Response, userId: number) {
-    const id = userId;
+    if (!userId)
+      responseError(res, "Destroy user requiere user id valid.", 400);
 
-    if (!id) responseError(res, "Destroy user requiere user id valid.", 400);
-
-    let userToRemove = await this.userRepository.findOne({
-      select: {
-        licenseUser: { id: true },
-        profiles: {
-          id: true,
-          fiscalYear: {
-            id: true,
-            dj08: { id: true, dj08SectionData: true },
-            supportDocuments: { id: true, element: { id: true } },
-          },
-          address: { id: true, address: { id: true } },
-          profileHiredPerson: {
-            id: true,
-            profileHiredPersonActivity: { id: true },
-          },
-          hiredPerson: { id: true },
-          profileEnterprise: { id: true },
-          profileActivity: { id: true },
-        },
-      },
-      relations: {
-        licenseUser: true,
-        profiles: {
-          fiscalYear: {
-            dj08: { dj08SectionData: true },
-            supportDocuments: { element: true },
-          },
-          address: { address: true },
-          profileHiredPerson: { profileHiredPersonActivity: true },
-          hiredPerson: true,
-          profileEnterprise: true,
-          profileActivity: true,
-        },
-      },
-      where: { id },
-    });
+    const userToRemove = await getUserToRemove(userId, this.userRepository);
 
     if (!userToRemove) responseError(res, "This user does not exist.", 400);
 
-    await (
-      await SectionState.findOne({ where: { user: { id: userToRemove.id } } })
-    )?.remove();
-    await userToRemove.licenseUser.map(
-      async (licenseUser) => await licenseUser.remove()
-    );
-    console.log(userToRemove.profiles);
-
-    await userToRemove.profiles?.map(async (profile) => {
-      await profile.fiscalYear?.map(async (fiscalYear) => {
-        await profile.profileHiredPerson?.map(async (profileHiredPerson) => {
-          await profileHiredPerson.profileHiredPersonActivity?.map(
-            async (val) => await val.remove()
-          );
-          await profileHiredPerson.remove();
-        });
-
-        await profile.hiredPerson?.map(
-          async (hiredPerson) => await hiredPerson.remove()
-        );
-
-        await fiscalYear.dj08?.map(async (dj08) => {
-          await dj08.dj08SectionData?.map(async (val) => await val.remove());
-          await dj08.remove();
-        });
-
-        await fiscalYear.supportDocuments?.map(async (supportDocument) => {
-          await (
-            await Element.find({
-              where: {
-                supportDocuments: { id: supportDocument.id },
-                profile: { id: profile.id },
-              },
-            })
-          ).map(async (element) => await element.remove());
-          await supportDocument.remove();
-        });
-
-        await fiscalYear.remove();
-      });
-
-      await profile.address?.address?.remove();
-      await profile.address?.remove();
-
-      await profile.profileEnterprise?.map(
-        async (profileEnterprise) => await profileEnterprise.remove()
-      );
-
-      await profile.profileActivity?.map(
-        async (profileActivity) => await profileActivity.remove()
-      );
-
-      await profile.remove();
-    });
-
+    await this.removeUserSection(userId);
     await this.userRepository.remove(userToRemove);
   }
 
   private async delete(req: Request, res: Response, next: NextFunction) {
     try {
-      const { token } = req.body;
-
-      const id = JWT.getJwtPayloadValueByKey(token, "id");
+      const { id } = req.body.user as User;
 
       await this.destroy(res, id);
 
@@ -270,5 +179,9 @@ export class UserController {
     } else if (req.method === "DELETE") {
       return this.delete(req, res, next);
     }
+  }
+
+  private async removeUserSection(userId: number) {
+    await SectionState.remove(await getUserSectionToRemove(userId));
   }
 }

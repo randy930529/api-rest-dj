@@ -1,12 +1,12 @@
-import { Profile } from "../../../../entity/Profile";
 import { HiredPerson } from "../../../../entity/HiredPerson";
 import { ProfileHiredPersonActivity } from "../../../../entity/ProfileHiredPersonActivity";
+import { FiscalYear } from "../../../../entity/FiscalYear";
 
 export type ProfileHiredPersonDTO = {
   date_start: Date;
   date_end: Date;
   import?: number;
-  profile: Profile;
+  fiscalYear: FiscalYear;
   hiredPerson: HiredPerson;
-  profileHiredPersonActivity?: ProfileHiredPersonActivity[]
+  profileHiredPersonActivity?: ProfileHiredPersonActivity[];
 };

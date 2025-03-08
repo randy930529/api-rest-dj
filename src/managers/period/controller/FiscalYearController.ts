@@ -1,15 +1,30 @@
 import { NextFunction, Request, Response } from "express";
-import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
-import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { AppDataSource } from "../../../data-source";
-import { FiscalYear } from "../../../entity/FiscalYear";
+import { EntityControllerBase } from "../../../base/EntityControllerBase";
 import { responseError } from "../../../errors/responseError";
+import { FiscalYear } from "../../../entity/FiscalYear";
+import { SupportDocument } from "../../../entity/SupportDocument";
+import { SupportDocumentController } from "../../accounting/controller/SupportDocumentController";
+import { Dj08SectionData } from "../../../entity/Dj08SectionData";
 import getProfileById from "../../../profile/utils/getProfileById";
+import { BaseResponseDTO } from "../../../auth/dto/response/base.dto";
 import { FiscalYearDTO } from "../dto/request/fiscalYear.dto";
 import { CreateFiscalYearDTO } from "../dto/response/createFiscalYear.dto";
-import { Dj08SectionData } from "../../../entity/Dj08SectionData";
-import { defaultSectionDataInit } from "../utils";
-import { MusicalGroup } from "../../../entity/MusicalGroup";
+import { defaultSectionDataInit, getInitialBalances } from "../utils";
+import {
+  getPreviousMayorsToInitialBalances,
+  passPreviousBalanceToInitialBalance,
+  setMayorsToInitialBalances,
+} from "../../accounting/utils";
+import {
+  DELETE_FISCAL_YEAR_RELATIONS,
+  DELETE_FISCAL_YEAR_SELECT,
+} from "../utils/query/deleteFiscalYear.fetch";
+import {
+  getAccountInitialsBalances,
+  getInitialsBalances,
+} from "../../accounting/utils/query/initialBalance.fetch";
+import { getSupportDocumentsToAccounting } from "../utils/query/supportDocumentsToAccounting.fetch";
 
 export class FiscalYearController extends EntityControllerBase<FiscalYear> {
   constructor() {
@@ -43,7 +58,10 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
         section_data,
       });
 
-      await newDj08Data.save();
+      await Promise.all([
+        newDj08Data.save(),
+        passPreviousBalanceToInitialBalance(newFiscalYear),
+      ]);
 
       const fiscalYear: CreateFiscalYearDTO = newFiscalYear;
       const resp: BaseResponseDTO = {
@@ -83,7 +101,24 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
           ? fields.musicalGroup
           : undefined;
 
-      const fiscalYearUpdate = await this.update({ id, res }, fields);
+      const fiscalYearToUpdate = await this.repository.findOneBy({ id });
+
+      if (!fiscalYearToUpdate) responseError(res, "FiscalYear not found.", 404);
+
+      const fiscalYearUpdated = this.repository.create({
+        ...fiscalYearToUpdate,
+        ...fields,
+      });
+      const fiscalYearUpdate = await this.repository.save(fiscalYearUpdated);
+
+      if (
+        fields.run_acounting &&
+        !fiscalYearToUpdate.run_acounting &&
+        fiscalYearToUpdate.has_documents
+      ) {
+        await passPreviousBalanceToInitialBalance(fiscalYearUpdate);
+        await this.generateAccountingInFiscalYear(fiscalYearUpdate);
+      }
 
       const fiscalYear: CreateFiscalYearDTO = fiscalYearUpdate;
       const resp: BaseResponseDTO = {
@@ -144,7 +179,15 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
 
       if (!id) responseError(res, "Delete fiscal year requiere id valid.", 404);
 
-      await this.delete({ id, res });
+      const DELETE_FISCAL_YEAR_WHERE = { id };
+      await this.deleteOptions(
+        {
+          select: DELETE_FISCAL_YEAR_SELECT,
+          relations: DELETE_FISCAL_YEAR_RELATIONS,
+          where: DELETE_FISCAL_YEAR_WHERE,
+        },
+        res
+      );
 
       res.status(204);
       return "Fiscal year has been removed successfully.";
@@ -186,6 +229,68 @@ export class FiscalYearController extends EntityControllerBase<FiscalYear> {
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);
+    }
+  }
+
+  async passBalancesToFiscalYear(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const id = parseInt(req.params.fiscalYearId);
+      const fiscalYear = await this.repository.findOneBy({ id });
+
+      if (!fiscalYear) responseError(res, "Fiscal year not found.", 404);
+      if (!fiscalYear.run_acounting)
+        responseError(
+          res,
+          "En años fiscales con contabilidad desactivada, no es admitido."
+        );
+
+      const [codeAccountInitials, acountInitials] =
+        await getAccountInitialsBalances();
+
+      let [previousBalances, currentInitialBalances] = await Promise.all([
+        getPreviousMayorsToInitialBalances(
+          fiscalYear,
+          codeAccountInitials,
+          acountInitials
+        ),
+        getInitialsBalances(id, codeAccountInitials),
+      ]);
+
+      currentInitialBalances = await setMayorsToInitialBalances(
+        fiscalYear,
+        previousBalances,
+        currentInitialBalances
+      );
+
+      return getInitialBalances(
+        acountInitials,
+        currentInitialBalances,
+        fiscalYear
+      );
+    } catch (error) {
+      if (res.statusCode === 200) res.status(500);
+      next(error);
+      return;
+    }
+  }
+
+  private async generateAccountingInFiscalYear(fiscalYear: FiscalYear) {
+    const documents = await getSupportDocumentsToAccounting(fiscalYear.id);
+    await this.generateAccounting(fiscalYear, documents);
+  }
+
+  private async generateAccounting(
+    fiscalYear: FiscalYear,
+    documents: SupportDocument[]
+  ): Promise<void> {
+    const run = new SupportDocumentController();
+
+    for (const document of documents) {
+      await run.runCuadre({ ...document, fiscalYear } as SupportDocument);
     }
   }
 }

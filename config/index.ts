@@ -1,4 +1,5 @@
 import * as config from "config";
+import { ProgressiveScaleType } from "../src/utils/definitions";
 
 /**
  * @type
@@ -31,11 +32,7 @@ type accountingConstantsType = {
   PE_ABOVE_50000?: number;
 };
 
-type ConstantToSectionGType = {
-  from: number;
-  to: number;
-  porcentageType: number;
-}[];
+type ConstantToSectionGType = ProgressiveScaleType[];
 
 type businessMetadataType = {
   name: string;
@@ -64,6 +61,7 @@ interface AppConfig {
   port: number;
   emailFrom: string;
   licenseFreeDays: number;
+  cronJobTime: string;
   validTimeTMBill: number;
   currencyTMBill: string;
   paymentAPKHref: string;
@@ -72,6 +70,7 @@ interface AppConfig {
   constantToSectionG: ConstantToSectionGType;
   corsOptions: corsOptionsType;
   group: groupType;
+  tradedDays: string[];
 }
 
 export const appConfig: AppConfig = config.get("app");

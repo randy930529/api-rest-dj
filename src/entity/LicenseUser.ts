@@ -62,7 +62,7 @@ export class LicenseUser extends Model {
       where: { id: this.id },
     });
 
-    if (ref.tmBill) {
+    if (ref?.tmBill) {
       tmBillToRemoveRef = ref.tmBill;
     }
   }

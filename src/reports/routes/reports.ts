@@ -1,4 +1,5 @@
-import ReportGeneratorController from "../controller/ReportGeneratorController";
+import ReportGeneratorDJ08Controller from "../controller/ReportGeneratorDj08Controller";
+import ReportGeneratorAccountingController from "../controller/ReportGeneratorAccountingController";
 import { authMiddleware } from "../../auth/middlewares/authMiddleware";
 import { userMiddleware } from "../../auth/middlewares/userMiddleware";
 import { licenseMiddleware } from "../../managers/license/middlewares/licenseMiddleware";
@@ -8,35 +9,42 @@ export const reportsRoutes = [
   {
     method: "post",
     route: "/report/expense",
-    controller: ReportGeneratorController,
+    controller: ReportGeneratorDJ08Controller,
     middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
     action: "generateOperationsExpenseReport",
   },
   {
     method: "post",
     route: "/report/income",
-    controller: ReportGeneratorController,
+    controller: ReportGeneratorDJ08Controller,
     middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
     action: "generateOperationsIncomeReport",
   },
   {
     method: "post",
     route: "/report/income/annual",
-    controller: ReportGeneratorController,
+    controller: ReportGeneratorDJ08Controller,
     middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
     action: "generateOperationsIncomeReportAnnual",
   },
   {
     method: "post",
     route: "/report/expense/annual",
-    controller: ReportGeneratorController,
+    controller: ReportGeneratorDJ08Controller,
     middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
     action: "generateOperationsExpenseReportAnnual",
   },
   {
     method: "post",
+    route: "/report/taxes",
+    controller: ReportGeneratorDJ08Controller,
+    middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
+    action: "generateOperationsTaxesReport",
+  },
+  {
+    method: "post",
     route: "/report/dj08",
-    controller: ReportGeneratorController,
+    controller: ReportGeneratorDJ08Controller,
     middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
     action: "generateDJ08",
   },
@@ -46,5 +54,54 @@ export const reportsRoutes = [
     controller: DJ08Controller,
     middlewares: [authMiddleware, userMiddleware],
     action: "allDJ08",
+  },
+  {
+    method: "put",
+    route: "/dj08",
+    controller: DJ08Controller,
+    middlewares: [authMiddleware, userMiddleware],
+    action: "updateDJ08",
+  },
+  {
+    method: "post",
+    route: "/completed/payments",
+    controller: ReportGeneratorDJ08Controller,
+    middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
+    action: "generateCompletedPayments",
+  },
+  {
+    method: "post",
+    route: "/report/voucher",
+    controller: ReportGeneratorAccountingController,
+    middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
+    action: "generateVoucherReport",
+  },
+  {
+    method: "post",
+    route: "/report/mayor",
+    controller: ReportGeneratorAccountingController,
+    middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
+    action: "generateMayorReport",
+  },
+  {
+    method: "post",
+    route: "/report/balance/accounts",
+    controller: ReportGeneratorAccountingController,
+    middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
+    action: "generateBalanceAccountsReport",
+  },
+  {
+    method: "post",
+    route: "/report/situation/state",
+    controller: ReportGeneratorAccountingController,
+    middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
+    action: "generateSituationStateReport",
+  },
+  {
+    method: "post",
+    route: "/report/yield/state",
+    controller: ReportGeneratorAccountingController,
+    middlewares: [authMiddleware, userMiddleware, licenseMiddleware],
+    action: "generateYieldStateReport",
   },
 ];

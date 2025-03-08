@@ -1,4 +1,6 @@
 import { NextFunction, Request, Response } from "express";
+import * as pug from "pug";
+import * as path from "path";
 import { AppDataSource } from "../../data-source";
 import { EntityControllerBase } from "../../base/EntityControllerBase";
 import { Config } from "../../entity/Config";
@@ -10,6 +12,29 @@ export class ApiConfigController extends EntityControllerBase<Config> {
   constructor() {
     const repository = AppDataSource.getRepository(Config);
     super(repository);
+  }
+
+  async apiHome(req: Request, res: Response, next: NextFunction) {
+    const filePath = path.join(__dirname, `../../utils/views/api/index.pug`);
+    const options = {
+      title: "API-rest dj",
+      url: "logo.empresa",
+    };
+    const html = pug.renderFile(filePath, options);
+
+    res.send(html);
+  }
+
+  async staticMediaFiles(req: Request, res: Response, next: NextFunction) {
+    const { type, file } = req.params;
+    const filePath = path.join(
+      __dirname,
+      "../../../public",
+      `${type ? `${type}/` : ``}`,
+      file
+    );
+
+    res.sendFile(filePath);
   }
 
   async updateConfig(req: Request, res: Response, next: NextFunction) {

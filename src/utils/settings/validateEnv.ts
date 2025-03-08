@@ -24,6 +24,7 @@ const validateEnv = () => {
     API_DATABASE_PASSWORD: str(),
     API_DATABASE_NAME: str(),
     API_URL_PAYMENT: url(),
+    URL_PAY_NOTIFICATION: url(),
     USER_WS_EXTERNAL_PAYMENT: str(),
     SEED_WS_EXTERNAL_PAYMENT: str(),
     JWT_SECRET_KEY: str(),

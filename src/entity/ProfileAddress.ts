@@ -8,7 +8,7 @@ export class ProfileAddress extends Model {
   @Column({ type: "varchar", length: 255, nullable: true, default: "" })
   street: string;
 
-  @Column({ type: "varchar", length: 4, nullable: true, default: "" })
+  @Column({ type: "varchar", length: 10, nullable: true, default: "" })
   number: string;
 
   @Column({ type: "varchar", length: 100, nullable: true, default: "" })
@@ -29,7 +29,11 @@ export class ProfileAddress extends Model {
   @Column({ type: "varchar", length: 8, nullable: true, default: "" })
   phoneNumber: string;
 
-  @ManyToOne(() => Address, { onDelete: "CASCADE", onUpdate: "CASCADE" })
+  @ManyToOne(() => Address, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+    cascade: ["insert", "update"],
+  })
   @JoinColumn()
   address: Address;
 

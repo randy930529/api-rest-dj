@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
+import { Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import Model from "./Base";
 import { Profile } from "./Profile";
 import { FiscalYear } from "./FiscalYear";

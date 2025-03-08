@@ -5,6 +5,20 @@ import { ApiConfigController } from "../../api/controller/ApiConfigController";
 
 export const apiConfigRoutes = [
   {
+    method: "get",
+    route: "/",
+    controller: ApiConfigController,
+    middlewares: [],
+    action: "apiHome",
+  },
+  {
+    method: "get",
+    route: "/media/:type/:file",
+    controller: ApiConfigController,
+    middlewares: [],
+    action: "staticMediaFiles",
+  },
+  {
     method: "post",
     route: "/api/config",
     controller: ApiConfigController,

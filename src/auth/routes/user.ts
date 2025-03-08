@@ -27,7 +27,7 @@ export const userRoutes = [
   },
   {
     method: "delete",
-    route: "/user/:id",
+    route: "/delete/user/:id",
     controller: UserController,
     middlewares: [authMiddleware, userMiddleware, isAdminMiddleware],
     action: "remove",
@@ -57,7 +57,7 @@ export const userRoutes = [
     method: "delete",
     route: "/user/me",
     controller: UserController,
-    middlewares: [authMiddleware],
+    middlewares: [authMiddleware, userMiddleware],
     action: "userMe",
   },
 ];

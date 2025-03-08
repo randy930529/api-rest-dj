@@ -14,7 +14,6 @@ import { License } from "../../../entity/License";
 import { CreateLicenseUserDTO } from "../dto/response/createLicenseUserDTO.dto";
 import { TMBill } from "../../../entity/TMBill";
 import { StateTMBill } from "../../../entity/StateTMBill";
-import { stateTMBillRoutes } from "../../bills/routes/stateTMBill";
 import { appConfig } from "../../../../config";
 import { JWT } from "../../../auth/security/jwt";
 import { CreatePayOrderDTO } from "../dto/request/createPayOrder";
@@ -23,6 +22,8 @@ import { PayOrderResultDTO } from "../dto/response/payOrderResult";
 import { createFindOptions } from "../../../base/utils/createFindOptions";
 import { PAY_NOTIFICATION_URL, PASSWORD_WS_EXTERNAL_PAYMENT } from "../utils";
 import { NotificationTM, NotiType } from "../../../entity/NotificationTM";
+import { checkPaymentWhitTM } from "../../../api/utils";
+import { SectionState } from "../../../entity/SectionState";
 
 export class LicenseUserController extends EntityControllerBase<LicenseUser> {
   constructor() {
@@ -62,12 +63,13 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       const licenseId = fields.license.id;
       const {
         businessMetadata,
-        site,
         validTimeTMBill,
         paymentAPKHref,
         currencyTMBill,
       } = appConfig;
       const { source } = businessMetadata;
+      const site =
+        ENV.debug === "production" ? ENV.urlPayNotification : appConfig.site;
 
       if (!licenseId)
         responseError(res, "Do must provide a valid license id.", 404);
@@ -119,9 +121,9 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
       const validDate: Date = moment().add(validTimeTMBill, "s").toDate();
       const currency = currencyTMBill;
       const description = "Pago de licencia";
-
+      const importLicense = license.discounts_import || license.import;
       const tmBillDTO = await TMBill.create({
-        import: license.import,
+        import: importLicense,
         validDate,
         currency,
         description,
@@ -132,7 +134,7 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
         tmBill: tmBillDTO,
       });
 
-      const stateTMBillEndPoint = stateTMBillRoutes[0].route;
+      const stateTMBillEndPoint = "/license/payment/notification";
       const UrlResponse = PAY_NOTIFICATION_URL(site, stateTMBillEndPoint);
       const uuid: string = uuidv4();
       const licenseKey: string = uuid.substring(0, 20);
@@ -317,6 +319,117 @@ export class LicenseUserController extends EntityControllerBase<LicenseUser> {
 
       res.status(204);
       return "License user has been removed successfully.";
+    } catch (error) {
+      if (res.statusCode === 200) res.status(500);
+      next(error);
+    }
+  }
+
+  async verifyStatusPaymentLicense(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const id = parseInt(req.params.id);
+
+      const licenseUser = await LicenseUser.findOne({
+        relations: {
+          tmBill: { stateTMBills: true },
+          license: true,
+          user: true,
+        },
+        select: {
+          tmBill: { id: true, stateTMBills: { id: true } },
+          license: { id: true, days: true, max_profiles: true },
+          user: {
+            id: true,
+            active: true,
+            end_license: true,
+            max_profiles: true,
+          },
+        },
+        where: { id, user: { active: true } },
+      });
+
+      if (!licenseUser)
+        responseError(res, "License user requiere id valid.", 404);
+
+      const resp: BaseResponseDTO = {
+        status: "success",
+        error: undefined,
+        data: { licenseUser },
+      };
+
+      if (licenseUser && !licenseUser.is_paid) {
+        const { licenseKey: externalId } = licenseUser;
+        const { source } = appConfig.businessMetadata;
+
+        const payCompleted = await checkPaymentWhitTM({ externalId, source });
+        if (payCompleted.Success) {
+          const { TmId, BankId, Bank } = payCompleted;
+          const end_license = licenseUser.user.end_license ?? undefined;
+          const expirationDate =
+            end_license && moment(end_license).isBefore(moment())
+              ? moment().add(licenseUser.license.days, "d").toDate()
+              : moment(end_license).add(licenseUser.license.days, "d").toDate();
+
+          licenseUser.is_paid = true;
+          licenseUser.expirationDate = expirationDate;
+          licenseUser.user.end_license = expirationDate;
+          licenseUser.payMentUrl = null;
+
+          licenseUser.tmBill.stateTMBills = licenseUser.tmBill.stateTMBills.map(
+            (val) =>
+              ({
+                ...val,
+                success: true,
+              } as StateTMBill)
+          );
+          licenseUser.tmBill.orderIdTM = TmId;
+          licenseUser.tmBill.bankId = BankId;
+          licenseUser.tmBill.bank = Bank;
+
+          const currentSectionState = await SectionState.findOne({
+            where: {
+              user: {
+                id: licenseUser.user.id,
+              },
+            },
+          });
+
+          if (
+            end_license &&
+            moment(end_license).isBefore(moment(licenseUser.created_at))
+          ) {
+            licenseUser.user.max_profiles = Math.max(
+              ...[
+                licenseUser.user.max_profiles,
+                licenseUser.license.max_profiles,
+              ]
+            );
+            currentSectionState.licenseUser = licenseUser;
+          }
+
+          const data = await Promise.all([
+            licenseUser.save(),
+            licenseUser.user.save(),
+            ...licenseUser.tmBill.stateTMBills.map((val) => val.save),
+            currentSectionState.save(),
+          ]);
+
+          resp.data["licenseUser"] = data[0];
+
+          res.status(201);
+          return { ...resp };
+        } else {
+          res.status(402);
+          return { ...resp };
+        }
+      }
+
+      res.status(200);
+      return { ...resp };
     } catch (error) {
       if (res.statusCode === 200) res.status(500);
       next(error);

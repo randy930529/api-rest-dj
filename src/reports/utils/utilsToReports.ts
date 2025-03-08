@@ -1,80 +1,122 @@
 import * as path from "path";
 import * as moment from "moment";
-import {
-  DataDJ08Type,
-  ProfileActivityPartialType,
-  SupportDocumentPartialType,
-} from "../../utils/definitions";
-import { SectionState } from "../../entity/SectionState";
+import { SupportDocumentPartialType } from "../../utils/definitions";
 import { Dj08SectionData } from "../../entity/Dj08SectionData";
 import { appConfig } from "../../../config";
 
-const pugTemplatePath = (template: string) =>
-  path.join(__dirname, `../../utils/views/reports/${template}.pug`);
+const totalElemetColumInExpensesReport: number = 16 as const;
+const totalElemetColumNotGeneralsTb2: number = 3 as const;
 
-const defaultDataArray = <T>(length: number, defaultValue: T): T[] =>
-  Array(length).fill(defaultValue);
+export function getCantElemetColumExpenses(
+  totalElemetColum: number = totalElemetColumInExpensesReport,
+  totalElemetColumDDNotGeneralsTb2: number = totalElemetColumNotGeneralsTb2
+): [number, number, number, string[]] {
+  const { expensePD } = appConfig.group;
 
-const indexBy = <T extends { id: string | number }>(
+  if (!expensePD) throw new Error("Expenses group PD not found in app config.");
+
+  const totalElemetColumGeneralsTb1 = expensePD.length;
+  const totalElemetColumNotGeneralsTb1 =
+    totalElemetColum -
+    totalElemetColumGeneralsTb1 -
+    totalElemetColumDDNotGeneralsTb2;
+
+  return [
+    totalElemetColumGeneralsTb1,
+    totalElemetColumNotGeneralsTb1,
+    totalElemetColumDDNotGeneralsTb2,
+    expensePD,
+  ];
+}
+
+export function pugTemplatePath(template: string) {
+  return path.join(__dirname, `../../utils/views/reports/${template}.pug`);
+}
+
+export function defaultDataArray<T>(length: number, defaultValue: T): T[] {
+  return Array(length).fill(defaultValue);
+}
+
+export function indexBy<T extends { id: string | number }>(
   array: T[]
-): { [key: string]: T } =>
-  array.reduce((acc, val) => {
+): { [key: string]: T } {
+  return array.reduce((acc, val) => {
     const index: string | number = val.id;
     acc[index] = val;
     return acc;
   }, {});
+}
 
-const sumaArray = (array1: number[], array2: number[]): number[] =>
-  array1.reduce<number[]>((result, val, index) => {
+export function sumaArray(array1: number[], array2: number[]): number[] {
+  return array1.reduce<number[]>((result, val, index) => {
     const sum = val + array2[index];
     return [...result, Number(sum.toFixed(2))];
   }, []);
+}
 
-const sumaTotal = (array: number[]): number =>
-  array.reduce((suma, val) => suma + val, 0);
+export function sumaTotal(array: number[]): number {
+  return array.reduce((suma, val) => parseFloat((suma + val).toFixed(2)), 0);
+}
 
-const getDataToDay = <T>(
+export function getDataToDay(
   documents: SupportDocumentPartialType[],
   data: string,
   group: string[],
-  defaultValue: T[]
-): T[] => {
+  defaultValue: number[],
+  cashInBank: number,
+  cashInBox: number
+): number[] {
   const toDay = defaultValue;
   if (!documents.length) return toDay;
 
   for (let i = 0; i < documents.length; i++) {
     const document = documents[i];
-    const index: number = group.indexOf(document.group?.trim());
-    const value = parseFloat(document[data]) as unknown as T;
-    toDay[index] = value;
+    const toGroup = document.group?.trim();
+    let index: number = group.indexOf(toGroup);
+    if (index === -1 && (toGroup === "pdrc" || toGroup === "pdri")) {
+      index = 4;
+    }
+    const value = parseFloat(document[data]);
+    toDay[index] += value;
+    document.is_bank ? (cashInBank += value) : (cashInBox += value);
   }
 
-  return toDay;
-};
+  return [...toDay, cashInBank, cashInBox];
+}
 
-const getDataExpensesInToMonthArrayToTables = (
+export function getDataExpensesInToMonthArrayToTables(
   expensesGenerals: SupportDocumentPartialType[],
   expensesMePD: SupportDocumentPartialType[],
   expensesMeDD: SupportDocumentPartialType[]
-): (number | string)[][][] => {
-  const { expensePD } = appConfig.group;
+): (number | string)[][][] {
+  const [
+    totalElemetColumGeneralsTb1,
+    totalElemetColumNotGeneralsTb1,
+    totalElemetColumNotGeneralsTb2,
+    expensePD,
+  ] = getCantElemetColumExpenses();
 
-  const expensesNameTb1 = defaultDataArray<string>(6, "");
+  const expensesNameTb1 = defaultDataArray<string>(
+    totalElemetColumNotGeneralsTb1,
+    ""
+  );
   let totalsTb1 = defaultDataArray<number>(13, 0);
 
-  const expensesNameTb2 = defaultDataArray<string>(3, "");
+  const expensesNameTb2 = defaultDataArray<string>(
+    totalElemetColumNotGeneralsTb2,
+    ""
+  );
   let totalsTb2 = defaultDataArray<number>(10, 0);
   const expensesGeneralsForDaysTb2 = defaultDataArray<number>(31, 0);
 
-  /**
-   * @param
-   * egresos Egresos no incluidos a efectos de impuesto, autorizados por el MFP.
-   */
-  const egresos = defaultDataArray<number>(31, 0);
   const totalsExpensesOperating = defaultDataArray<number>(31, 0);
   const cashInBox = defaultDataArray<number>(31, 0);
   const cashInBank = defaultDataArray<number>(31, 0);
   const totalPaid = defaultDataArray<number>(31, 0);
+
+  const expensesMeNIEI = expensesGenerals.filter(
+    (val) => val.group?.trim() === "niei"
+  );
 
   const expensesForDaysTb1: (number | string)[][] = Array.from(
     { length: 31 },
@@ -82,17 +124,24 @@ const getDataExpensesInToMonthArrayToTables = (
       const expensesGeneralsRecordedToDay: SupportDocumentPartialType[] =
         expensesGenerals.filter((val) => moment(val.date).date() === day + 1);
 
-      const expensesGeneralsForDays = getDataToDay<number>(
+      const expensesGeneralsForDays = getDataToDay(
         expensesGeneralsRecordedToDay,
         "amount",
         expensePD,
-        defaultDataArray<number>(7, 0)
+        defaultDataArray<number>(totalElemetColumGeneralsTb1, 0),
+        cashInBank[day],
+        cashInBox[day]
       );
+
+      if (expensesGeneralsRecordedToDay.length) {
+        cashInBox[day] += expensesGeneralsForDays.pop();
+        cashInBank[day] += expensesGeneralsForDays.pop();
+      }
 
       const expensesMePDForDays = getExpensesInToDay(
         expensesMePD,
         expensesNameTb1,
-        6,
+        totalElemetColumNotGeneralsTb1,
         day
       );
 
@@ -124,18 +173,33 @@ const getDataExpensesInToMonthArrayToTables = (
         day
       );
 
+      const expensesMeNIEIRecordedToDay = expensesMeNIEI.filter(
+        (val) => moment(val.date).date() === day + 1
+      );
+
+      const { egresos } = expensesMeNIEIRecordedToDay.reduce(
+        (sumaTotals, val) => {
+          sumaTotals.egresos += parseFloat(val.amount);
+          val.is_bank
+            ? (sumaTotals.sumaCashInBank += parseFloat(val.amount))
+            : (sumaTotals.sumeCashInBox += parseFloat(val.amount));
+          return sumaTotals;
+        },
+        { egresos: 0, sumaCashInBank: 0, sumeCashInBox: 0 }
+      );
+
       const toDay: number[] = [
         expensesGeneralsForDaysTb2[day],
         ...expensesMeDDForDays,
       ];
 
       const total: number = sumaTotal(toDay);
-      const sumaTotalEgresos = total + egresos[day];
+      const sumaTotalEgresos = total + egresos;
       totalsExpensesOperating[day] += sumaTotalEgresos;
       const sumacashInBoxAndBank = cashInBox[day] + cashInBank[day];
       totalPaid[day] += sumacashInBoxAndBank;
       toDay.push(total);
-      toDay.push(egresos[day]);
+      toDay.push(egresos);
       toDay.push(totalsExpensesOperating[day]);
       toDay.push(cashInBox[day]);
       toDay.push(cashInBank[day]);
@@ -152,7 +216,7 @@ const getDataExpensesInToMonthArrayToTables = (
     [expensesNameTb1, expensesNameTb2],
     [totalsTb1, totalsTb2],
   ];
-};
+}
 
 function getExpensesInToDay(
   expenses: SupportDocumentPartialType[],
@@ -186,7 +250,7 @@ function getExpensesInToDay(
   return expensesInToDay;
 }
 
-const clearDuplicatesInArray = <T>(from: T[], to: T[]): T[] => {
+export function clearDuplicatesInArray<T>(from: T[], to: T[]): T[] {
   const setFrom = new Set(from);
   const uniqueElements: T[] = [...from];
 
@@ -195,251 +259,141 @@ const clearDuplicatesInArray = <T>(from: T[], to: T[]): T[] => {
   });
 
   return uniqueElements;
-};
+}
 
-const getDJ08Data = async (
-  year: number,
-  userId: number
-): Promise<DataDJ08Type> => {
-  const dataQuery = await SectionState.createQueryBuilder(`section`)
-    .select([`section.id`])
-    .leftJoin(`section.user`, `user`)
-    .leftJoin(`section.fiscalYear`, `fiscalYear`)
-    .leftJoinAndSelect(`section.profile`, `profile`)
-    .leftJoinAndSelect(`profile.address`, `profileAddress`)
-    .leftJoinAndSelect(`profileAddress.address`, `address`)
-    .leftJoinAndSelect(
-      `profile.profileActivity`,
-      `activities`,
-      `EXTRACT(year FROM activities.date_start)= :year`,
-      {
-        year,
-      }
-    )
-    .leftJoinAndSelect(`activities.activity`, `activity`)
-    .leftJoinAndSelect(`activities.supportDocuments`, `documents`)
-    .leftJoinAndSelect(`profile.profileEnterprise`, `enterprises`)
-    .leftJoinAndSelect(`enterprises.enterprise`, `enterprise`)
-    .leftJoinAndSelect(
-      `profile.profileHiredPerson`,
-      `hiredPersons`,
-      `EXTRACT(year FROM hiredPersons.date_start)= :year`,
-      {
-        year,
-      }
-    )
-    .leftJoinAndSelect(`hiredPersons.hiredPerson`, `hire`)
-    .leftJoinAndSelect(`hire.address`, `hireAddress`)
-    .where(`user.id= :userId`, { userId })
-    .andWhere(`fiscalYear.year= :year`, { year })
-    .limit(9)
-    .getOne();
-
-  if (!dataQuery.profile) throw new Error("Profile not found.");
-
-  const {
-    first_name,
-    last_name,
-    ci,
-    nit,
-    address,
-    profileActivity,
-    profileEnterprise,
-    profileHiredPerson,
-  } = dataQuery.profile;
-
-  const activities = profileActivity.map<ProfileActivityPartialType>((pa) => ({
-    ...pa,
-    ...pa.activity,
-    activity: pa.activity.description,
-    documents: pa.supportDocuments.map((sd) => ({
-      ...sd,
-      type: sd.type_document,
-    })),
-  }));
-
-  const enterprises = profileEnterprise.map<{
-    amount: number;
-    import: number;
-    name: string;
-  }>((pe) => ({ ...pe, name: pe.enterprise.name }));
-
-  const hiredPersons = profileHiredPerson.map<{
-    date_start: Date;
-    date_end: Date;
-    import: number;
-    first_name: string;
-    last_name: string;
-    ci: string;
-    municipality: string;
-  }>((hp) => ({
-    ...hp,
-    ...hp.hiredPerson,
-    municipality: hp.hiredPerson.address.municipality,
-  }));
-
-  const result = {
-    first_name,
-    last_name,
-    ci,
-    nit,
-    address,
-    activities,
-    enterprises,
-    hiredPersons,
-  };
-
-  return result;
-};
-
-const toCompleteDataSection = <T>(
-  start: number,
-  section: number,
-  dataSectionArray: T[]
-): T[] => {
-  const defaultElements = {
+export function getDefaultElementsToSection<T>(section: number): T {
+  return {
     1: {
-      defaultData: {
-        activity: "",
-        period: { start: ["", ""], end: ["", ""] },
-        income: null,
-        expense: null,
-      },
-      to: 9,
+      activity: "",
+      period: { start: ["", ""], end: ["", ""] },
+      income: null,
+      expense: null,
     },
     6: {
-      defaultData: {
-        concepto: "",
-        import: "",
-      },
-      to: 7,
+      concepto: "",
+      import: "",
     },
     7: {
-      defaultData: {
-        from: null,
-        to: null,
-        baseImponible: null,
-        porcentageType: null,
-        import: null,
-      },
-      to: 5,
+      from: null,
+      to: null,
+      baseImponible: null,
+      porcentageType: null,
+      import: null,
     },
     8: {
-      defaultData: {
-        enterprise: "",
-        valueHire: null,
-        porcentage: null,
-        import: null,
-      },
-      to: 10,
+      enterprise: "",
+      valueHire: null,
+      porcentage: null,
+      import: null,
     },
     9: {
-      defaultData: {
-        code: defaultDataArray<string>(3, ""),
-        fullName: "",
-        from: [null, null],
-        to: [null, null],
-        municipality: "",
-        nit: defaultDataArray<string>(11, ""),
-        import: null,
-      },
-      to: 18,
+      code: defaultDataArray<string>(3, ""),
+      fullName: "",
+      from: [null, null],
+      to: [null, null],
+      municipality: "",
+      nit: defaultDataArray<string>(11, ""),
+      import: null,
     },
-  };
+  }[section] as unknown as T;
+}
 
-  const { defaultData, to }: { defaultData: T; to: number } =
-    defaultElements[section];
+export function toCompleteDataSection<T>(
+  start: number,
+  addRows: number,
+  section: number,
+  dataSectionArray: T[]
+): T[] {
+  const defaultData = getDefaultElementsToSection<T>(section);
 
-  for (let i = start; i < to; i++) {
+  for (let i = start; i < addRows; i++) {
     dataSectionArray.push(defaultData);
   }
 
   return dataSectionArray;
-};
+}
 
-const getDataAndTotalsToDj08Sections = <T1, T2>(
+export function getDataAndTotalsToDj08Sections<T1, T2>(
   data: Dj08SectionData,
-  section: number
-): [T1[], T2] => {
+  section: number,
+  rows: number
+): [T1[], T2] {
   const { section_data } = data;
 
   const dataSection: T1[] = Object.values(section_data[section]["data"] || {});
   const totalSection: T2 = section_data[section]["totals"];
 
-  toCompleteDataSection(dataSection.length, section, dataSection);
+  toCompleteDataSection<T1>(dataSection.length, rows, section, dataSection);
   return [dataSection, totalSection];
-};
+}
 
-const calculeF20ToDj08 = <
+export function calculeF20ToDj08<
   T extends {
     [key: string]: number;
   }
->(
-  dataSection: T
-): number => {
+>(dataSection: T): number {
   const sumTotal = Object.keys(dataSection).reduce(
     (sum, key) =>
-      dataSection[key] && key != "F11" && key != "F20"
+      dataSection[key] && key !== "F11" && key !== "F20"
         ? sum + dataSection[key]
         : sum,
     0
   );
 
-  return dataSection["F11"] > sumTotal ? dataSection["F11"] - sumTotal : 0;
-};
-
-const calculeF26ToDj08 = <
-  T extends {
-    [key: string]: number;
-  }
->(
-  dataSection: T
-): number => {
-  const sumTotal = Object.keys(dataSection).reduce(
-    (sum, key) =>
-      dataSection[key] && key != "F21" && key != "F26" && key != "F27"
-        ? sum + dataSection[key]
-        : sum,
-    0
+  return parseFloat(
+    (dataSection["F11"] > sumTotal
+      ? dataSection["F11"] - sumTotal
+      : 0
+    ).toFixed()
   );
+}
 
-  return dataSection["F21"] > sumTotal ? dataSection["F21"] - sumTotal : 0;
-};
+export function calculeTradedDaysOfYear(
+  year: number,
+  tradedDays: string[] = [...(appConfig?.tradedDays || [])]
+) {
+  return tradedDays.map((val) => moment(`${year}${val}`).dayOfYear());
+}
 
-const calculeF27ToDj08 = <
-  T extends {
-    [key: string]: number;
+export function calculeMoraDays(
+  startYear: number,
+  startDate: moment.Moment,
+  endDate: moment.Moment
+): number {
+  let tradedDaysOfYear = calculeTradedDaysOfYear(startYear);
+  let countMoraDays = 0;
+
+  while (startDate.isBefore(endDate)) {
+    if (startYear !== startDate.year()) {
+      startYear = startDate.year();
+      tradedDaysOfYear = calculeTradedDaysOfYear(startYear);
+    }
+
+    if (
+      [0, 6].indexOf(startDate.weekday()) === -1 &&
+      tradedDaysOfYear.indexOf(startDate.dayOfYear()) === -1
+    ) {
+      countMoraDays++;
+    }
+    startDate.add(1, "d");
   }
->(
-  dataSection: T
-): number => {
-  const sumTotal =
-    dataSection["F22"] > 0
-      ? 0
-      : Object.keys(dataSection).reduce(
-          (sum, key) =>
-            dataSection[key] && key != "F21" && key != "F26" && key != "F27"
-              ? sum + dataSection[key]
-              : sum,
-          0
-        );
 
-  return dataSection["F21"] > sumTotal ? dataSection["F21"] - sumTotal : 0;
-};
+  return countMoraDays;
+}
 
-export {
-  pugTemplatePath,
-  defaultDataArray,
-  indexBy,
-  sumaArray,
-  sumaTotal,
-  getDataToDay,
-  getDataExpensesInToMonthArrayToTables as getDataExpensesInToMenthArrayToTables,
-  clearDuplicatesInArray,
-  getDJ08Data,
-  toCompleteDataSection,
-  getDataAndTotalsToDj08Sections,
-  calculeF20ToDj08,
-  calculeF26ToDj08,
-  calculeF27ToDj08,
-};
+export function calculateMora(F32: number, F35: number, moraDays: number) {
+  const payToMora = (debit: number, porcentage: number, days: number = 1) =>
+    parseFloat((debit * porcentage * days).toFixed());
+
+  if (moraDays <= 30) {
+    return F35 + payToMora(F32, 0.02);
+  } else if (moraDays > 30 && moraDays <= 60) {
+    return F35 + payToMora(F32, 0.05);
+  } else if (moraDays > 60) {
+    const mora = payToMora(F32, 0.001, moraDays);
+    const topMora = payToMora(F32, 0.3);
+
+    return mora <= topMora ? F35 + mora : F35 + topMora;
+  }
+  return 0;
+}

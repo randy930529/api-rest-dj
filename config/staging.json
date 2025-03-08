@@ -1,14 +1,19 @@
 {
   "app": {
-    "site": "https://api-xvfd.onrender.com",
+    "versionAPK": 54,
+    "versionApp": "1.0.1",
+    "site": "http://mygestor.grm.desoft.cu",
     "debug": "staging",
     "port": 4000,
     "corsOptions": {
-      "origin": "https://apkdj.onrender.com"
+      "origin": "*",
+      "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+      "preflightContinue": false,
+      "optionsSuccessStatus": 204
     },
     "emailFrom": "randy.delgado@desoft.cu",
-    "licenseFreeDays": 5,
+    "licenseFreeDays": 30,
     "validTimeTMBill": 86400,
-    "paymentAPKHref": "https://api-xvfd.onrender.com"
+    "paymentAPKHref": "http://mygestor.grm.desoft.cu/api/v1/tm_compra_en_linea"
   }
 }
