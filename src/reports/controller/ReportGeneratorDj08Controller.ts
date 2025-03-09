@@ -1160,19 +1160,18 @@ export default class ReportGeneratorDJ08Controller extends ReportGenerator {
     if (!group) throw new Error("Get taxe column required document group.");
     const grp = group?.trim();
 
-    return (
-      (grp === "tpsv" && 0) ||
-      (grp === "tpft" && 1) ||
-      (grp === "tpdc" && 2) ||
-      (grp === "tpan" && 3) ||
-      (grp === "tpcs" && 4) ||
-      (grp === "tpss" && 6) ||
-      (grp === "trss" && 7) ||
-      (grp === "tpot" && 8) ||
-      (grp === "tprz" && 10) ||
-      (grp === "tpcm" && 11) ||
-      null
-    );
+    if (grp === "tpsv") return 0;
+    if (grp === "tpft") return 1;
+    if (grp === "tpdc") return 2;
+    if (grp === "tpan") return 3;
+    if (grp === "tpcs") return 4;
+    if (grp === "tpss") return 6;
+    if (grp === "trss") return 7;
+    if (grp === "tpot") return 8;
+    if (grp === "tprz") return 10;
+    if (grp === "tpcm") return 11;
+
+    return null;
   }
 
   private getInitializeExpenseReportAnnualData(): [

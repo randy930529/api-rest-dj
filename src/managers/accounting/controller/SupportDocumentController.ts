@@ -364,6 +364,9 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
   ): Promise<void | string> {
     try {
       const { __fiscalYearId__: fiscalYearId, type_document } = supportDocument;
+
+      if (supportDocument.element.group.trim() === "emty") return;
+
       const [dj08ToUpdate, documents, profileActivities] =
         await this.getInitializeUpdateDj08Data(fiscalYearId, type_document);
       const sectionsData =
