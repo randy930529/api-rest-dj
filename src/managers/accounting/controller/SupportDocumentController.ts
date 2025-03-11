@@ -426,6 +426,8 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
 
     let row = this.getTaxeRowKey(elementGroup);
 
+    if (!row) return;
+
     this.setSectionTaxesValueRows(
       sectionsData,
       dataSectionF,
@@ -439,6 +441,8 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         documents
       );
       row = this.getTaxeRowKey(document.__oldGroup__);
+
+      if (!row) return;
 
       this.setSectionTaxesValueRows(
         sectionsData,
@@ -538,7 +542,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
   private getTaxeRowKey(group: string): string {
     if (!group) return;
 
-    const row =
+    return (
       (group === "tprz" && "F15") ||
       (group === "tpcm" && "F22") ||
       (group === "tpsv" && "F37") ||
@@ -549,11 +553,8 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       (group === "tpss" && "F42") ||
       (group === "trss" && "F42") ||
       (group === "tpot" && "F43") ||
-      null;
-
-    if (!row) throw new Error("Element group not correspond to any row.");
-
-    return row;
+      null
+    );
   }
 
   private getOtherRowKey(group: string): string {
@@ -580,11 +581,10 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         "omlc",
         "ompp",
         "omrt",
+        "emty",
       ].includes(group)
     )
       return;
-
-    if (!row) throw new Error("Element group not correspond to any row.");
 
     return row;
   }
@@ -999,7 +999,10 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       "omcl",
       "omlc",
       "onrt",
+      "emty",
     ];
+
+    if (type === "i" && group === "emty") return null;
 
     return type === "g" || type === "m" || elementGroupHaber.includes(group)
       ? amount
