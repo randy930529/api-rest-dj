@@ -94,7 +94,7 @@ export function setDataRow(
 export function getTotalAmountInDocuments(
   documents: SupportDocument[]
 ): number {
-  return documents.reduce((sumTotal, { amount }) => sumTotal + (amount | 0), 0);
+  return documents.reduce((sumTotal, { amount }) => sumTotal + (amount || 0), 0);
 }
 
 export function isExpensesDD(

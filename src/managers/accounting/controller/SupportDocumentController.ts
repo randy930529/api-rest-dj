@@ -416,6 +416,14 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       elementGroup,
       documents
     );
+
+    if (elementGroup === "tpss" || elementGroup === "trss") {
+      totalExpenses += this.calculeTotalExpensesOfToGroup(
+        elementGroup === "tpss" ? "trss" : "tpss",
+        documents
+      );
+    }
+
     let row = this.getTaxeRowKey(elementGroup);
 
     this.setSectionTaxesValueRows(
@@ -940,6 +948,8 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       (group === "ombc" && "100") ||
       (group === "omcl" && "520") ||
       (group === "omlc" && "470") ||
+      (group === "trss" && "500") ||
+      (group === "niss" && "500") ||
       (group === "onrt" && "600-40") ||
       (is_bank ? "110" : "100")
     );
@@ -951,8 +961,6 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       (group === "ombc" && "110") ||
       (group === "omcl" && "470") ||
       (group === "omlc" && "520") ||
-      (group === "trss" && "500") ||
-      (group === "niss" && "500") ||
       (group === "onrt" && "900-10")
     );
   }
