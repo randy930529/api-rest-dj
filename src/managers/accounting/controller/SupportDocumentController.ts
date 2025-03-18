@@ -364,6 +364,9 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
   ): Promise<void | string> {
     try {
       const { __fiscalYearId__: fiscalYearId, type_document } = supportDocument;
+
+      if (supportDocument.element.group.trim() === "emty") return;
+
       const [dj08ToUpdate, documents, profileActivities] =
         await this.getInitializeUpdateDj08Data(fiscalYearId, type_document);
       const sectionsData =
@@ -413,7 +416,17 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       elementGroup,
       documents
     );
+
+    if (elementGroup === "tpss" || elementGroup === "trss") {
+      totalExpenses += this.calculeTotalExpensesOfToGroup(
+        elementGroup === "tpss" ? "trss" : "tpss",
+        documents
+      );
+    }
+
     let row = this.getTaxeRowKey(elementGroup);
+
+    if (!row) return;
 
     this.setSectionTaxesValueRows(
       sectionsData,
@@ -428,6 +441,8 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         documents
       );
       row = this.getTaxeRowKey(document.__oldGroup__);
+
+      if (!row) return;
 
       this.setSectionTaxesValueRows(
         sectionsData,
@@ -527,7 +542,7 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
   private getTaxeRowKey(group: string): string {
     if (!group) return;
 
-    const row =
+    return (
       (group === "tprz" && "F15") ||
       (group === "tpcm" && "F22") ||
       (group === "tpsv" && "F37") ||
@@ -538,11 +553,8 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       (group === "tpss" && "F42") ||
       (group === "trss" && "F42") ||
       (group === "tpot" && "F43") ||
-      null;
-
-    if (!row) throw new Error("Element group not correspond to any row.");
-
-    return row;
+      null
+    );
   }
 
   private getOtherRowKey(group: string): string {
@@ -569,11 +581,10 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
         "omlc",
         "ompp",
         "omrt",
+        "emty",
       ].includes(group)
     )
       return;
-
-    if (!row) throw new Error("Element group not correspond to any row.");
 
     return row;
   }
@@ -937,6 +948,8 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       (group === "ombc" && "100") ||
       (group === "omcl" && "520") ||
       (group === "omlc" && "470") ||
+      (group === "trss" && "500") ||
+      (group === "niss" && "500") ||
       (group === "onrt" && "600-40") ||
       (is_bank ? "110" : "100")
     );
@@ -948,8 +961,6 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       (group === "ombc" && "110") ||
       (group === "omcl" && "470") ||
       (group === "omlc" && "520") ||
-      (group === "trss" && "500") ||
-      (group === "niss" && "500") ||
       (group === "onrt" && "900-10")
     );
   }
@@ -988,7 +999,10 @@ export class SupportDocumentController extends EntityControllerBase<SupportDocum
       "omcl",
       "omlc",
       "onrt",
+      "emty",
     ];
+
+    if (type === "i" && group === "emty") return null;
 
     return type === "g" || type === "m" || elementGroupHaber.includes(group)
       ? amount

@@ -27,6 +27,7 @@ export async function getSupportDocumentToReportData(
     .andWhere(`profile.id= :profileId`, { profileId })
     .andWhere(`document.type_document= :type`, { type })
     .andWhere(`EXTRACT(year FROM document.date)= :year`, { year })
+    .andWhere(`element.group != 'emty      '`)
     .andWhere(conditionMonth, { month })
     .orderBy(`document.date`, `ASC`)
     .addOrderBy(`element.id`, `ASC`)
