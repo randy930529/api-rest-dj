@@ -368,7 +368,7 @@ export class ProfileHiredPersonController extends EntityControllerBase<ProfileHi
       const { profileActivity, annual_cost } =
         profileHiredPersonActivityClean[i];
 
-      const code = profileActivity?.activity.code.padEnd(3);
+      const code = profileActivity?.activity.code.padEnd(4);
       const fullName = `${first_name} ${last_name}`;
       const from = [date_start.getDate(), date_start.getMonth() + 1];
       const to = [date_end.getDate(), date_end.getMonth() + 1];
