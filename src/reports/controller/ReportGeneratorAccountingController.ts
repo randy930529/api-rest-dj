@@ -573,6 +573,8 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         lendsShortTerm: 0,
         longTerm: 0,
         lendsLongTerm: 0,
+        subsidy: 0,
+        others: 0,
         total: 0,
       },
       patrimony: { initSaldo: 0, patrimonio: [], total: 0 },
@@ -629,6 +631,16 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         } else {
           data.passive.lendsLongTerm += saldo;
           data.passive.longTerm += saldo;
+        }
+        data.passive.total += saldo;
+        break;
+      case "500":
+      case "564":
+        if (code === "500") {
+          data.passive.subsidy += saldo;
+          data.passive.pasivo += saldo;
+        } else {
+          data.passive.others += saldo;
         }
         data.passive.total += saldo;
         break;
@@ -730,6 +742,8 @@ export default class ReportGeneratorAccountingController extends ReportGenerator
         lendsShortTerm: parse2Float(Math.abs(passive.lendsShortTerm)),
         pasivo: parse2Float(Math.abs(passive.pasivo)),
         longTerm: parse2Float(Math.abs(passive.longTerm)),
+        subsidy: parse2Float(Math.abs(passive.subsidy)),
+        others: parse2Float(Math.abs(passive.others)),
         total: parse2Float(Math.abs(passive.total)),
       },
       patrimony: {

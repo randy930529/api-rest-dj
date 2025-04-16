@@ -229,6 +229,8 @@ interface PassiveType {
   lendsShortTerm: number;
   longTerm: number;
   lendsLongTerm: number;
+  subsidy: number;
+  others: number;
   total: number;
 }
 
