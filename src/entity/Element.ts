@@ -35,9 +35,19 @@ export class Element extends Model {
   @JoinColumn()
   profile: Profile;
 
+  @Column({ default: true })
+  debitar_account_element: boolean;
+
+  @Column({ default: true })
+  use_box_bank: boolean;
+
   @ManyToOne(() => Account)
   @JoinColumn()
   account: Account;
+
+  @ManyToOne(() => Account, { nullable: true })
+  @JoinColumn()
+  othor_account: Account;
 
   @OneToMany(
     () => SupportDocument,
